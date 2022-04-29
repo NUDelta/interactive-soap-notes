@@ -9,13 +9,14 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
   const [message, setMessage] = useState("");
 
   const [form, setForm] = useState({
-    S: SOAPNoteForm.S,
-    O: SOAPNoteForm.O,
-    A: SOAPNoteForm.A,
-    P: SOAPNoteForm.P,
+    S: SOAPNoteForm.S.entries,
+    O: SOAPNoteForm.O.entries,
+    A: SOAPNoteForm.A.entries,
+    P: SOAPNoteForm.P.entries,
   });
 
   /* The PUT method edits an existing entry in the mongodb database. */
+  // form must be structured in the same way 
   const putData = async (form) => {
     const { id } = router.query;
 
@@ -26,7 +27,7 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
           Accept: contentType,
           "Content-Type": contentType,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({S: {name: 'S', entries: form.S}, O: {name: 'O', entries: form.O}, A: {name: 'A', entries: form.A}, P: {name: 'P', entries: form.P}}),
       });
 
       // Throw error with status code in case Fetch API req failed
@@ -53,7 +54,7 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
           Accept: contentType,
           "Content-Type": contentType,
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({S: {name: 'S', entries: form.S}, O: {name: 'O', entries: form.O}, A: {name: 'A', entries: form.A}, P: {name: 'P', entries: form.P}}),
       });
 
       // Throw error with status code in case Fetch API req failed
@@ -72,6 +73,7 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
     const value = target.value;
     const name = target.name;
 
+    // want to set only 
     setForm({
       ...form,
       [name]: value,
@@ -98,7 +100,7 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
 
   return (
     <>
-      <form id={formId} onSubmit={handleSubmit}>
+      <form id={noteId} onSubmit={handleSubmit}>
         <label htmlFor="subjective">S</label>
         <input
           type="text"
