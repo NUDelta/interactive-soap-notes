@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { Hashtag } from "./Hashtag.js";
 
 const SnippetSchema = new mongoose.Schema({
     text: {
@@ -14,9 +13,8 @@ const SnippetSchema = new mongoose.Schema({
     },
     hashtags: {
         /* Hashtag(s) associated with a snippet */
-        type: [Hashtag],
+        type: [{type: mongoose.Schema.Types.ObjectId, ref: 'Hashtag'}],
       },
   });
-  
-  // what is the second part of this last line doing?
+
   export default mongoose.models.SnippetSchema || mongoose.model("Snippet", SnippetSchema);
