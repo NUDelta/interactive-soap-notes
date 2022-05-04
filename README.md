@@ -6,7 +6,7 @@ discussed during a coaching meeting in venues throughout the week.
 
 ## Setup
 
-1. Make sure you have [Node.js](https://nodejs.org/en/) and [yarn](https://classic.yarnpkg.com/en/docs/install#mac-stable) installed.
+1. Make sure you have [Node.js](https://nodejs.org/en/), [yarn](https://classic.yarnpkg.com/en/docs/install#mac-stable), and [MongoDB](https://www.mongodb.com/docs/guides/server/install/) installed.
 2. Clone the repository, and create a `.env` file with the following:
 
    ```env
