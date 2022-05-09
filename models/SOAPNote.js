@@ -5,17 +5,19 @@ import mongoose from "mongoose";
 // or should there be some kind of user model where the SIG
 // information there is used to label the note?
 
+// NOTE: I had to comment out the "required" for both S and O
+
 const SOAPNoteSchema = new mongoose.Schema({
     S: {
       /* Subjective section */
   
       type: {type: mongoose.Schema.Types.ObjectId, ref: 'Section'},
-      required: [true, "Subjective section cannot be empty."],
+      // required: [true, "Subjective section cannot be empty."],
     },
     O: {
         /* Objective section */
         type: {type: mongoose.Schema.Types.ObjectId, ref: 'Section'},
-        required: [true, "Objective section cannot be empty."],
+        // required: [true, "Objective section cannot be empty."],
     },
     A: {
         /* Assessment section */

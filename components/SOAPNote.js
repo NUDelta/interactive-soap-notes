@@ -58,7 +58,7 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
           "Content-Type": contentType,
         },
         body: JSON.stringify({S: {name: 'S', entries: form.S}, O: {name: 'O', entries: form.O}, A: {name: 'A', entries: form.A}, P: {name: 'P', entries: form.P}}),
-      });
+      }); // no issues here... got a 500 error
 
       // Throw error with status code in case Fetch API req failed
       if (!res.ok) {
