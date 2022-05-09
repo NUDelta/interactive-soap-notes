@@ -23,34 +23,45 @@ const SOAPNotePage = ({ note }) => {
     }
   };
 
-  // change this a lot
+  // commented out delete for now
+  // should be no reason to allow delete
   return (
     <div key={note._id}>
-      <div className="card">
-        <h5 className="pet-name">{pet.name}</h5>
-        <div className="main-content">
-
-          {/* Extra Pet Info: Likes and Dislikes */}
-          <div className="likes info">
-            <p className="label">Likes</p>
-            <ul>
-              {pet.likes.map((data, index) => (
-                <li key={index}>{data} </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="btn-container">
-            <Link href="/[id]/edit" as={`/${note._id}/edit`}>
-              <button className="btn edit">Edit</button>
-            </Link>
-            <button className="btn delete" onClick={handleDelete}>
-              Delete
-            </button>
-          </div>
+      <div className="btn-container">
+        <Link href="/[id]/edit" as={`/${note._id}/edit`}>
+          <button className="btn edit">Edit Note</button>
+        </Link>
+        {/* <button className="btn delete" onClick={handleDelete}>
+          Delete
+        </button> */}
+      </div>
+      <div class="grid grid-cols-20 grid-rows-10 items-center note-yellow">
+        <div class="border-2 border-black col-start-2 col-span-4 row-start-1 row-span-1">
+          <p>{note.S.name}</p>
+        </div>
+        <div class="col-start-2 col-span-4 row-start-2 row-span-7">
+          <p>{note.S.entries}</p>
+        </div>
+        <div class="border-2 border-black col-start-5 col-span-4 row-start-1 row-span-1">
+          <p>{note.O.name}</p>
+        </div>
+        <div class="col-start-5 col-span-4 row-start-2 row-span-7">
+          <p>{note.O.entries}</p>
+        </div>
+        <div class="border-2 border-black col-start-2 col-span-7 row-start-9 row-span-1">
+          <p>{note.A.name}</p>
+        </div>
+        <div class="col-start-2 col-span-7 row-start-10 row-span-5">
+          <p>{note.A.entries}</p>
+        </div>
+        <div class="border-2 border-black col-start-2 col-span-7 row-start-15 row-span-1">
+          <p>{note.P.name}</p>
+        </div>
+        <div class="col-start-2 col-span-7 row-start-16 row-span-5">
+          <p>{note.P.entries}</p>
         </div>
       </div>
-      {message && <p>{message}</p>}
+    {message && <p>{message}</p>}
     </div>
   );
 };

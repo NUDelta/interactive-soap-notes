@@ -8,33 +8,19 @@ import SOAPNote from "../models/SOAPNote";
 
 // BIG THING TO CHANGE
 
+// currently a dummy... 
 const Index = ({ notes }) => (
   <>
     {notes.map((note) => (
       <div key={note._id}>
-        <div className="card">
-          <h5 className="pet-name">{note.name}</h5>
-          <div className="main-content">
-
-            {/* Extra Pet Info: Likes and Dislikes */}
-            <div className="likes info">
-              <p className="label">Likes</p>
-              <ul>
-                {note.likes.map((data, index) => (
-                  <li key={index}>{data} </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="btn-container">
-              <Link href="/[id]/edit" as={`/${note._id}/edit`}>
-                <button className="btn edit">Edit</button>
-              </Link>
-              <Link href="/[id]" as={`/${note._id}`}>
-                <button className="btn view">View</button>
-              </Link>
-            </div>
-          </div>
+        <h5 className="note-name">{note.S.name}</h5>
+        <div className="btn-container">
+          <Link href="/[id]/edit" as={`/${note._id}/edit`}>
+            <button className="btn edit">Edit Note</button>
+          </Link>
+          <Link href="/[id]" as={`/${note._id}`}>
+            <button className="btn view">View Note</button>
+          </Link>
         </div>
       </div>
     ))}

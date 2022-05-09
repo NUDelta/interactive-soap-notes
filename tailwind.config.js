@@ -5,6 +5,9 @@ module.exports = {
   ],
   theme: {
     extend: {},
+    colors: {
+      'note-yellow': '#ecdca4',
+    }
   },
   plugins: [require("@tailwindcss/typography")],
 };
