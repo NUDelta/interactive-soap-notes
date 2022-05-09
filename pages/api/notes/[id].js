@@ -1,6 +1,8 @@
 import dbConnect from "../../../lib/dbConnect";
 import SOAPNote from "../../../models/SOAPNote";
 
+// routes for fetching a single note
+
 export default async function handler(req, res) {
     const {
         query: { id },
@@ -36,7 +38,7 @@ export default async function handler(req, res) {
                 res.status(400).json({ success: false });
             }
             break;
-            
+
         case "DELETE": // should this actually be possible?
             try {
                 const deletedPet = await Pet.deleteOne({ _id: id});

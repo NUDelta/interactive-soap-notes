@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
-import { Snippet } from "./Snippet.js" // I don't think this works
+import { Snippet } from "./Snippet.js"
+
+// a section (S, O, A, or P) of a SOAP note, named accordingly
+// for now entries is just a single String, but it should be 
+// changed to an array of snippets later
 
 const SectionSchema = new mongoose.Schema({
     name: {
@@ -10,8 +14,8 @@ const SectionSchema = new mongoose.Schema({
     },
     entries: {
       /* Collection of note snippets for each section */
-      type: String, // does this work
-    }, // change back to [Hashtag] later
+      type: String,
+    },
   });
   
   export default mongoose.models.SectionSchema || mongoose.model("Section", SectionSchema);

@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { mutate } from "swr";
 
+// form to add a new SOAP note
+// although maybe it shouldn't be a form for long
+
 const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
   const router = useRouter();
   const contentType = "application/json";

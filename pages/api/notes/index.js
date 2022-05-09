@@ -1,8 +1,7 @@
 import dbConnect from "../../../lib/dbConnect";
 import SOAPNote from "../../../models/SOAPNote";
 
-// should be a page that holds all of the SOAP notes in mini form
-// can click to open a single SOAP notes
+// fetches all SOAP notes
 
 export default async function handler(req, res) {
     const { method } = req;

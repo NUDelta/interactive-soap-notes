@@ -6,9 +6,10 @@ import SOAPNote from "../models/SOAPNote";
 // should be so that if you click on the mini version of one, it brings you 
 // to that page... I guess it can be in editing mode
 
+// BIG THING TO CHANGE
+
 const Index = ({ notes }) => (
   <>
-    {/* Create a card for each pet */}
     {notes.map((note) => (
       <div key={note._id}>
         <div className="card">

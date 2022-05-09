@@ -2,6 +2,9 @@ import { useRouter } from "next/router";
 import useSWR from "swr";
 import SOAPNote from "../../components/SOAPNote";
 
+// route?? to edit a particular SOAP note 
+// fetches data from a particular route and populates the note form with it
+
 const fetcher = (url) =>
   fetch(url)
     .then((res) => res.json())

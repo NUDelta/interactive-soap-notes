@@ -4,6 +4,8 @@ import Link from "next/link";
 import dbConnect from "../../lib/dbConnect";
 import SOAPNote from "../../models/SOAPNote";
 
+// BIG THING TO CHANGE
+
 // page that displays a single note. CSS should be here
 const SOAPNotePage = ({ note }) => {
   const router = useRouter();

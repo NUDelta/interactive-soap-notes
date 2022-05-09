@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { mutate } from "swr";
 
+// deprecated. form to add a new pet
+
 const Form = ({ formId, petForm, forNewPet = true }) => {
   const router = useRouter();
   const contentType = "application/json";

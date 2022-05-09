@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+// not in use for now. Represents a hashtag to be attached to a note snippet.
+
 const HashtagSchema = new mongoose.Schema({
     name: {
       /* S, O, A, or P (maybe something else later?) */

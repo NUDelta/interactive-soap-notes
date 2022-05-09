@@ -5,6 +5,8 @@ import "../styles/globals.css"; // important
 // EDIT THIS LATER: should probably be landing page for SOAP notes
 // or have button that takes you to index
 
+// note: what should Home do? Maybe something like "view notes" instead
+
 function MyApp({ Component, pageProps }) {
   return (
     <>
@@ -18,7 +20,7 @@ function MyApp({ Component, pageProps }) {
             <a>Home</a>
           </Link>
           <Link href="/new">
-            <a>Add Note</a>
+            <a>Write SOAP Note</a>
           </Link>
         </div>
 
@@ -29,7 +31,8 @@ function MyApp({ Component, pageProps }) {
         ></img>
       </div>
       <div className="grid wrapper">
-        <Component {...pageProps} />
+        <Component {...pageProps} /> 
+        {/* what does this ^^ do */}
       </div>
     </>
   );
