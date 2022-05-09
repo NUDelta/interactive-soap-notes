@@ -29,4 +29,4 @@ const SOAPNoteSchema = new mongoose.Schema({
       },
   });
   
-  export default mongoose.models.SOAPNoteSchema || mongoose.model("SOAPNote", SOAPNoteSchema);
+  export default mongoose.models.SOAPNote || mongoose.model("SOAPNote", SOAPNoteSchema);

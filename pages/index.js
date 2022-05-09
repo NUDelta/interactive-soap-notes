@@ -9,11 +9,14 @@ import SOAPNote from "../models/SOAPNote";
 // BIG THING TO CHANGE
 
 // currently a dummy... 
-const Index = ({ notes }) => (
+const Index = ({ notes }) => {
+  console.log(notes); // should be note.S.name
+  // there is no S or name apparently
+  return (
   <>
     {notes.map((note) => (
       <div key={note._id}>
-        <h5 className="note-name">{note.S.name}</h5>
+        <h5 className="note-name">{note.S}</h5>
         <div className="btn-container">
           <Link href="/[id]/edit" as={`/${note._id}/edit`}>
             <button className="btn edit">Edit Note</button>
@@ -24,8 +27,8 @@ const Index = ({ notes }) => (
         </div>
       </div>
     ))}
-  </>
-);
+  </>)
+};
 
 // const Index = ({ pets }) => (
 //   <>

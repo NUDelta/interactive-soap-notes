@@ -48,7 +48,6 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
   };
 
   /* The POST method adds a new entry in the mongodb database. */
-  // I think this would fail because of the need for "name"
   const postData = async (form) => {
     try { // make an api/notes
       const res = await fetch("/api/notes", {
@@ -58,14 +57,16 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
           "Content-Type": contentType,
         },
         body: JSON.stringify({S: {name: 'S', entries: form.S}, O: {name: 'O', entries: form.O}, A: {name: 'A', entries: form.A}, P: {name: 'P', entries: form.P}}),
-      }); // no issues here... got a 500 error
+      });
 
       // Throw error with status code in case Fetch API req failed
       if (!res.ok) {
         throw new Error(res.status);
       }
 
-      router.push("/");
+      const { data } = await res.json(); // this only has an id
+      console.log(data); // body is ReadableStream, bodyUsed: false
+      router.push("/"); 
     } catch (error) {
       setMessage("Failed to add note");
     }

@@ -18,4 +18,4 @@ const SectionSchema = new mongoose.Schema({
     },
   });
   
-  export default mongoose.models.SectionSchema || mongoose.model("Section", SectionSchema);
+  export default mongoose.models.Section || mongoose.model("Section", SectionSchema);
