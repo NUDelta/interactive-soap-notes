@@ -47,7 +47,7 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
   /* The POST method adds a new entry in the mongodb database. */
   // I think this would fail because of the need for "name"
   const postData = async (form) => {
-    try {
+    try { // make an api/notes
       const res = await fetch("/api/notes", {
         method: "POST",
         headers: {
