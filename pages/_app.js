@@ -1,13 +1,15 @@
 import Head from "next/head";
 import Link from "next/link";
 
-import "../styles/globals.css";
+import "../styles/globals.css"; // important
+// EDIT THIS LATER: should probably be landing page for SOAP notes
+// or have button that takes you to index
 
 function MyApp({ Component, pageProps }) {
   return (
     <>
       <Head>
-        <title>Pet Care App</title>
+        <title>Interactive SOAP Notes</title>
       </Head>
 
       <div className="top-bar">
@@ -16,7 +18,7 @@ function MyApp({ Component, pageProps }) {
             <a>Home</a>
           </Link>
           <Link href="/new">
-            <a>Add Pet</a>
+            <a>Add Note</a>
           </Link>
         </div>
 
