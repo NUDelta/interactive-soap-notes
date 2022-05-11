@@ -64,8 +64,8 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
         throw new Error(res.status);
       }
 
-      const { data } = await res.json(); // this only has an id
-      console.log(data); // body is ReadableStream, bodyUsed: false
+      // const { data } = await res.json(); // this only has an id
+      // console.log(data); // body is ReadableStream, bodyUsed: false
       router.push("/"); 
     } catch (error) {
       setMessage("Failed to add note");

@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-const Section = require("./Section.js");
+// const Section = require("./Section.js");
 
 // Mongoose model of a SOAP note, with four sections
 // consider whether to add a SIG to a SOAP note later
