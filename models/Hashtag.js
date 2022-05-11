@@ -15,4 +15,4 @@ const HashtagSchema = new mongoose.Schema({
       },
   });
   
-  export default mongoose.models.HashtagSchema || mongoose.model("Hashtag", HashtagSchema);
+  export default mongoose.models.Hashtag || mongoose.model("Hashtag", HashtagSchema);

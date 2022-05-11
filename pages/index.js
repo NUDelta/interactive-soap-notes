@@ -76,11 +76,15 @@ const Index = ({ notes }) => {
 // );
 
 /* Retrieves pet(s) data from mongodb database */
+// called when page is requested
+// runs on terminal on computer
 export async function getServerSideProps() {
   await dbConnect();
+  console.log("running")
 
   /* find all the data in our database */
   const result = await SOAPNote.find({});
+  console.log(result)
   const notes = result.map((doc) => {
     const note = doc.toObject();
     note._id = note._id.toString();

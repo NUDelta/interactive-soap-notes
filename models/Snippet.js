@@ -13,7 +13,7 @@ const SnippetSchema = new mongoose.Schema({
     },
     script: {
       /* Script (if any) associated with a snippet */
-      type: Script, // Script schema
+      type: String, //Script, // Script schema
     },
     hashtags: {
         /* Hashtag(s) associated with a snippet */
@@ -21,4 +21,4 @@ const SnippetSchema = new mongoose.Schema({
       },
   });
 
-  export default mongoose.models.SnippetSchema || mongoose.model("Snippet", SnippetSchema);
+  export default mongoose.models.Snippet || mongoose.model("Snippet", SnippetSchema);

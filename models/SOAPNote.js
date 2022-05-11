@@ -1,4 +1,5 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
+const Section = require("./Section.js");
 
 // Mongoose model of a SOAP note, with four sections
 // consider whether to add a SIG to a SOAP note later
@@ -10,23 +11,36 @@ import mongoose from "mongoose";
 const SOAPNoteSchema = new mongoose.Schema({
     S: {
       /* Subjective section */
-  
-      type: {type: mongoose.Schema.Types.ObjectId, ref: 'Section'},
-      // required: [true, "Subjective section cannot be empty."],
+      type: Schema.Types.ObjectId, 
+      ref: 'Section',
+      default: {name: 'S', entries: 'Subjective content'},
+      required: [true, "Subjective section cannot be empty"],
     },
+      /* Objective section */
     O: {
-        /* Objective section */
-        type: {type: mongoose.Schema.Types.ObjectId, ref: 'Section'},
-        // required: [true, "Objective section cannot be empty."],
+      type: Schema.Types.ObjectId, 
+      ref: 'Section',
+      default: {name: 'O', entries: 'Objective content'},
+      required: [true, "Objective section cannot be empty."],
     },
+    /* Assessment section */
     A: {
-        /* Assessment section */
-        type: {type: mongoose.Schema.Types.ObjectId, ref: 'Section'},
-      },
+      type: Schema.Types.ObjectId, 
+      ref: 'Section',
+      default: {name: 'A', entries: 'Assessment content'},
+      required: [true, "Objective section cannot be empty."],
+    },
+    /* Plan section */
     P: {
-        /* Hashtag(s) associated with a snippet */
-        type: {type: mongoose.Schema.Types.ObjectId, ref: 'Section'},
+        type: Schema.Types.ObjectId, 
+        ref: 'Section',
+        default: {name: 'P', entries: 'Plan content'},
+        required: [true, "Objective section cannot be empty."],
       },
   });
+
+  const SOAPNote = SOAPNoteSchema.discriminator('section', Section)
   
-  export default mongoose.models.SOAPNote || mongoose.model("SOAPNote", SOAPNoteSchema);
+  export default SOAPNote
+
+  // export default mongoose.models.SOAPNote || mongoose.model("SOAPNote", SOAPNoteSchema);

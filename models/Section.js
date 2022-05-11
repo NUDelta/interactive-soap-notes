@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { Snippet } from "./Snippet.js"
+//import { Snippet } from "./Snippet.js"
 
 // a section (S, O, A, or P) of a SOAP note, named accordingly
 // for now entries is just a single String, but it should be 
