@@ -40,8 +40,4 @@ const SOAPNoteSchema = new mongoose.Schema({
       },
   });
 
-  // const SOAPNote = SOAPNoteSchema.discriminator('section', Section)
-  
-  // export default SOAPNote
-
   export default mongoose.models.SOAPNote || mongoose.model("SOAPNote", SOAPNoteSchema);

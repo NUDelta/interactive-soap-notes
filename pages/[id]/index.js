@@ -35,29 +35,29 @@ const SOAPNotePage = ({ note }) => {
           Delete
         </button> */}
       </div>
-      <div class="grid grid-cols-20 grid-rows-10 items-center note-yellow">
+      <div class="grid grid-cols-20 grid-rows-10 bg-note-yellow indent-2">
         <div class="border-2 border-black col-start-2 col-span-4 row-start-1 row-span-1">
           <p>S</p>
         </div>
-        <div class="col-start-2 col-span-4 row-start-2 row-span-7">
+        <div class="border-2 border-black col-start-2 col-span-4 row-start-2 row-span-7">
           <p>{note.S}</p>
         </div>
-        <div class="border-2 border-black col-start-5 col-span-4 row-start-1 row-span-1">
+        <div class="border-2 border-black col-start-6 col-span-4 row-start-1 row-span-1">
           <p>O</p>
         </div>
-        <div class="col-start-5 col-span-4 row-start-2 row-span-7">
+        <div class="border-2 border-black col-start-6 col-span-4 row-start-2 row-span-7">
           <p>{note.O}</p>
         </div>
-        <div class="border-2 border-black col-start-2 col-span-7 row-start-9 row-span-1">
+        <div class="border-2 border-black col-start-2 col-span-8 row-start-9 row-span-1">
           <p>A</p>
         </div>
-        <div class="col-start-2 col-span-7 row-start-10 row-span-5">
+        <div class="border-2 border-black col-start-2 col-span-8 row-start-10 row-span-5">
           <p>{note.A}</p>
         </div>
-        <div class="border-2 border-black col-start-2 col-span-7 row-start-15 row-span-1">
+        <div class="border-2 border-black col-start-2 col-span-8 row-start-15 row-span-1">
           <p>P</p>
         </div>
-        <div class="col-start-2 col-span-7 row-start-16 row-span-5">
+        <div class="border-2 border-black col-start-2 col-span-8 row-start-16 row-span-5">
           <p>{note.P}</p>
         </div>
       </div>
@@ -140,14 +140,3 @@ export default SOAPNotePage;
 //     </div>
 //   );
 // };
-
-// export async function getServerSideProps({ params }) {
-//   await dbConnect();
-
-//   const pet = await Pet.findById(params.id).lean();
-//   pet._id = pet._id.toString();
-
-//   return { props: { pet } };
-// }
-
-// export default PetPage;

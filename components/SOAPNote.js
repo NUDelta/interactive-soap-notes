@@ -105,18 +105,23 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
 
   return (
     <>
-      <form id={noteId} onSubmit={handleSubmit}>
-        <label htmlFor="subjective">S</label>
+      <form id={noteId} onSubmit={handleSubmit} class="grid grid-cols-20 grid-rows-10 bg-note-yellow indent-2">
+        <label htmlFor="subjective" class="border-2 border-black col-start-2 col-span-4 row-start-1 row-span-1">
+          S
+          </label>
         <input
-          type="text"
+          class="border-2 border-black col-start-2 col-span-4 row-start-2 row-span-7"
           name="S"
           value={form.S}
           onChange={handleChange}
           required
         />
 
-        <label htmlFor="objective">O</label>
+        <label htmlFor="objective" class="border-2 border-black col-start-6 col-span-4 row-start-1 row-span-1">
+          O
+          </label>
         <input
+          class="border-2 border-black col-start-6 col-span-4 row-start-2 row-span-7"
           type="text"
           name="O"
           value={form.O}
@@ -124,8 +129,11 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
           required
         />
 
-        <label htmlFor="assessment">A</label>
+        <label htmlFor="assessment" class="border-2 border-black col-start-2 col-span-8 row-start-9 row-span-1">
+          A
+          </label>
         <input
+          class="border-2 border-black col-start-2 col-span-8 row-start-10 row-span-5"
           type="text"
           name="A"
           value={form.A}
@@ -133,8 +141,11 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
           required
         />
 
-        <label htmlFor="plan">P</label>
+        <label htmlFor="plan" class="border-2 border-black col-start-2 col-span-8 row-start-15 row-span-1">
+          P
+          </label>
         <input
+          class="border-2 border-black col-start-2 col-span-8 row-start-16 row-span-5"
           type="text"
           name="P"
           value={form.P}
@@ -142,7 +153,7 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
           required
         />
 
-        <button type="submit" className="btn">
+        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
           Submit
         </button>
       </form>
