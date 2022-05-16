@@ -2,22 +2,10 @@ import SOAPNote from "../components/SOAPNote.js";
 
 const NewNote = () => {
   const noteForm = {
-    S: {
-      name: 'S',
-      entries: "",
-    },
-    O: {
-      name: 'O',
-      entries: "",
-    },
-    A: {
-      name: 'A',
-      entries: "",
-    },
-    P: {
-      name: 'P',
-      entries: "",
-    },
+    S: "",
+    O: "",
+    A: "",
+    P: "",
   };
 
   return <SOAPNote noteId="add-note-form" SOAPNoteForm={noteForm} />;

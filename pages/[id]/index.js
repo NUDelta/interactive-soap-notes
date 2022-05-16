@@ -37,28 +37,28 @@ const SOAPNotePage = ({ note }) => {
       </div>
       <div class="grid grid-cols-20 grid-rows-10 items-center note-yellow">
         <div class="border-2 border-black col-start-2 col-span-4 row-start-1 row-span-1">
-          <p>{note.S.name}</p>
+          <p>S</p>
         </div>
         <div class="col-start-2 col-span-4 row-start-2 row-span-7">
-          <p>{note.S.entries}</p>
+          <p>{note.S}</p>
         </div>
         <div class="border-2 border-black col-start-5 col-span-4 row-start-1 row-span-1">
-          <p>{note.O.name}</p>
+          <p>O</p>
         </div>
         <div class="col-start-5 col-span-4 row-start-2 row-span-7">
-          <p>{note.O.entries}</p>
+          <p>{note.O}</p>
         </div>
         <div class="border-2 border-black col-start-2 col-span-7 row-start-9 row-span-1">
-          <p>{note.A.name}</p>
+          <p>A</p>
         </div>
         <div class="col-start-2 col-span-7 row-start-10 row-span-5">
-          <p>{note.A.entries}</p>
+          <p>{note.A}</p>
         </div>
         <div class="border-2 border-black col-start-2 col-span-7 row-start-15 row-span-1">
-          <p>{note.P.name}</p>
+          <p>P</p>
         </div>
         <div class="col-start-2 col-span-7 row-start-16 row-span-5">
-          <p>{note.P.entries}</p>
+          <p>{note.P}</p>
         </div>
       </div>
     {message && <p>{message}</p>}
@@ -71,6 +71,10 @@ export async function getServerSideProps({ params }) {
 
   const note = await SOAPNote.findById(params.id).lean();
   note._id = note._id.toString();
+  note.S = note.S.toString();
+  note.O = note.O.toString();
+  note.A = note.A.toString();
+  note.P = note.P.toString();
 
   return { props: { note } };
 }

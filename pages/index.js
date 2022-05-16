@@ -9,14 +9,12 @@ import SOAPNote from "../models/SOAPNote";
 // BIG THING TO CHANGE
 
 // currently a dummy... 
-const Index = ({ notes }) => {
-  console.log(notes); // should be note.S.name
-  // there is no S or name apparently
+const Index = ({ notes }) => { // should make the ID something more useful, like mentor name + date
   return (
   <>
     {notes.map((note) => (
       <div key={note._id}>
-        <h5 className="note-name">{note.S}</h5>
+        <h5 className="note-name">{note._id}</h5>
         <div className="btn-container">
           <Link href="/[id]/edit" as={`/${note._id}/edit`}>
             <button className="btn edit">Edit Note</button>
@@ -75,7 +73,7 @@ const Index = ({ notes }) => {
 //   </>
 // );
 
-/* Retrieves pet(s) data from mongodb database */
+/* Retrieves SOAP note data from mongodb database */
 // called when page is requested
 // runs on terminal on computer
 export async function getServerSideProps() {
@@ -84,10 +82,13 @@ export async function getServerSideProps() {
 
   /* find all the data in our database */
   const result = await SOAPNote.find({});
-  console.log(result)
   const notes = result.map((doc) => {
     const note = doc.toObject();
     note._id = note._id.toString();
+    note.S = note.S.toString();
+    note.O = note.O.toString();
+    note.A = note.A.toString();
+    note.P = note.P.toString();
     return note;
   });
 

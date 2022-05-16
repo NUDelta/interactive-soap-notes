@@ -10,32 +10,33 @@ import mongoose, { Schema } from "mongoose";
 
 const SOAPNoteSchema = new mongoose.Schema({
     S: {
-      /* Subjective section */
+      /* Subjective section
       type: Schema.Types.ObjectId, 
       ref: 'Section',
       default: {name: 'S', entries: 'Subjective content'},
       required: [true, "Subjective section cannot be empty"],
+      */
+     type: String,
+     default: 'Subjective content',
+     required: true,
     },
       /* Objective section */
     O: {
-      type: Schema.Types.ObjectId, 
-      ref: 'Section',
-      default: {name: 'O', entries: 'Objective content'},
-      required: [true, "Objective section cannot be empty."],
+      type: String,
+      default: 'Subjective content',
+      required: true,
     },
     /* Assessment section */
     A: {
-      type: Schema.Types.ObjectId, 
-      ref: 'Section',
-      default: {name: 'A', entries: 'Assessment content'},
-      required: [true, "Objective section cannot be empty."],
+      type: String,
+      default: 'Subjective content',
+      required: true,
     },
     /* Plan section */
     P: {
-        type: Schema.Types.ObjectId, 
-        ref: 'Section',
-        default: {name: 'P', entries: 'Plan content'},
-        required: [true, "Objective section cannot be empty."],
+      type: String,
+      default: 'Subjective content',
+      required: true,
       },
   });
 

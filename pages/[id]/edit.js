@@ -19,10 +19,10 @@ const EditNote = () => {
   if (!note) return <p>Loading...</p>;
 
   const SOAPNoteForm = {
-    S: note.S.entries,
-    O: note.O.entries,
-    A: note.A.entries,
-    P: note.P.entries,
+    S: note.S,
+    O: note.O,
+    A: note.A,
+    P: note.P,
   };
 
   return <SOAPNote noteId="edit-note-form" SOAPNoteForm={SOAPNoteForm} editing={true} />;

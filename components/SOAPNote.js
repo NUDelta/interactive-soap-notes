@@ -11,12 +11,11 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
 
-  const [form, setForm] = useState({
-    S: SOAPNoteForm.S.entries,
-    O: SOAPNoteForm.O.entries,
-    A: SOAPNoteForm.A.entries,
-    P: SOAPNoteForm.P.entries,
-  });
+  const [form, setForm] =  useState(
+    {S: SOAPNoteForm.S,
+    O: SOAPNoteForm.O,
+    A: SOAPNoteForm.A,
+    P: SOAPNoteForm.P,});
 
   /* The PUT method edits an existing entry in the mongodb database. */
   // form must be structured in the same way 
@@ -30,7 +29,8 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
           Accept: contentType,
           "Content-Type": contentType,
         },
-        body: JSON.stringify({S: {name: 'S', entries: form.S}, O: {name: 'O', entries: form.O}, A: {name: 'A', entries: form.A}, P: {name: 'P', entries: form.P}}),
+        body: JSON.stringify(form)
+        //body: JSON.stringify({S: {name: 'S', entries: form.S}, O: {name: 'O', entries: form.O}, A: {name: 'A', entries: form.A}, P: {name: 'P', entries: form.P}}),
       });
 
       // Throw error with status code in case Fetch API req failed
@@ -50,13 +50,14 @@ const SOAPNote = ({ noteId, SOAPNoteForm, editing = false }) => {
   /* The POST method adds a new entry in the mongodb database. */
   const postData = async (form) => {
     try { // make an api/notes
+      console.log(JSON.stringify(form))
       const res = await fetch("/api/notes", {
         method: "POST",
         headers: {
           Accept: contentType,
           "Content-Type": contentType,
         },
-        body: JSON.stringify({S: {name: 'S', entries: form.S}, O: {name: 'O', entries: form.O}, A: {name: 'A', entries: form.A}, P: {name: 'P', entries: form.P}}),
+        body: JSON.stringify(form),
       });
 
       // Throw error with status code in case Fetch API req failed
