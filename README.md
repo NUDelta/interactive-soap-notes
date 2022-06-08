@@ -17,6 +17,8 @@ discussed during a coaching meeting in venues throughout the week.
 
 ## Running Code Locally
 
+Look at [this link](https://www.mongodb.com/docs/v4.4/mongo/#start-the-mongo-shell-and-connect-to-mongodb) to find the commands to run the Mongo shell and a local server.
+
 ### Local Development
 
 1. [Start MongoDB](https://www.mongodb.com/docs/manual/tutorial/manage-mongodb-processes/) in a separate shell.
