@@ -10,7 +10,7 @@ discussed during a coaching meeting in venues throughout the week.
 2. Clone the repository, and create a `.env` file with the following:
 
    ```env
-   MONGODB_URI=mongodb://localhost/interactive-soap-notes
+   MONGODB_URI=mongodb://127.0.0.1/interactive-soap-notes
    ```
 
 3. Run `yarn install` to install packages.
