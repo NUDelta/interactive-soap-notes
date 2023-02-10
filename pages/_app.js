@@ -18,16 +18,16 @@ function MyApp({ Component, pageProps }) {
       <div className="top-bar">
         <div className="nav">
           <Link href="/">
-            <a class="link-primary">Home</a>
+            <a className="link-primary">Home</a>
           </Link>
           <Link href="/new">
-            <a class="link-primary">Write SOAP Note</a>
+            <a className="link-primary">Write SOAP Note</a>
           </Link>
         </div>
 
       </div>
       <div className="grid wrapper">
-        <Component {...pageProps} /> 
+        <Component {...pageProps} />
         {/* what does this ^^ do */}
       </div>
     </>
