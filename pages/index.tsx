@@ -19,13 +19,18 @@ export default function Home({
   // hold data from the current soap notes
   const [soapData, setSoapData] = useState(data);
 
+  // let user know that we are saving
+  const [isSaving, setIsSaving] = useState(false);
+
   // listen for changes in state and do debounced saves to database
   useEffect(() => {
     // TODO: debounce the save
     const timeout = setTimeout(() => {
       // make request to save the data to the database
       // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
+      setIsSaving(true);
       console.log("saving to database", soapData);
+      setIsSaving(false);
     }, 1000);
   }, [soapData]);
 
