@@ -1,6 +1,6 @@
-import React, { memo, useEffect, useRef } from "react";
-import EditorJS, { OutputData } from "@editorjs/editorjs";
-import { EDITOR_TOOLS } from "./EditorTools";
+import React, { memo, useEffect, useRef } from 'react';
+import EditorJS, { OutputData } from '@editorjs/editorjs';
+import { EDITOR_TOOLS } from './EditorTools';
 
 //props
 type Props = {
@@ -29,7 +29,7 @@ const Editor = ({ data, onChange, holder }: Props) => {
         },
         hideToolbar: false,
         inlineToolbar: true,
-        placeholder: "Start typing here..."
+        placeholder: 'Start typing here...',
       });
       ref.current = editor;
     }

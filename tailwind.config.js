@@ -9,7 +9,7 @@ module.exports = {
     extend: {},
     colors: {
       'note-yellow': '#ecdca4',
-    }
+    },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [require('@tailwindcss/typography')],
 };

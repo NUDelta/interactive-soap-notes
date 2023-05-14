@@ -1,5 +1,5 @@
-import TextInput from "react-autocomplete-input";
-import "react-autocomplete-input/dist/bundle.css";
+import TextInput from 'react-autocomplete-input';
+import 'react-autocomplete-input/dist/bundle.css';
 
 export default function TextBox({
   value,

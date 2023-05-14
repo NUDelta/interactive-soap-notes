@@ -1,10 +1,10 @@
 //index.tsx
-import { OutputData } from "@editorjs/editorjs";
-import type { NextPage } from "next";
-import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { OutputData } from '@editorjs/editorjs';
+import type { NextPage } from 'next';
+import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 
-import TextBox from "../components/TextBox";
+import TextBox from '../components/TextBox';
 
 // important that we use dynamic loading here
 // editorjs should only be rendered on the client side.
@@ -24,12 +24,12 @@ export default function Home({
 
   // listen for changes in state and do debounced saves to database
   useEffect(() => {
+    setIsSaving(true);
     // TODO: debounce the save
     const timeout = setTimeout(() => {
       // make request to save the data to the database
       // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
-      setIsSaving(true);
-      console.log("saving to database", soapData);
+      console.log('saving to database', soapData);
       setIsSaving(false);
     }, 1000);
   }, [soapData]);
@@ -37,20 +37,20 @@ export default function Home({
   // sections of the soap notes
   const sections = [
     {
-      name: "subjective",
-      title: "S - Subjective observations from student report",
+      name: 'subjective',
+      title: 'S - Subjective observations from student report',
     },
     {
-      name: "objective",
-      title: "O - Objective data corresponding with students assessment",
+      name: 'objective',
+      title: 'O - Objective data corresponding with students assessment',
     },
     {
-      name: "assessment",
-      title: "A - Assessment of root causes or practices",
+      name: 'assessment',
+      title: 'A - Assessment of root causes or practices',
     },
     {
-      name: "plan",
-      title: "P - Plan for Follow-Ups",
+      name: 'plan',
+      title: 'P - Plan for Follow-Ups',
     },
   ];
 
@@ -72,7 +72,12 @@ export default function Home({
         {/* Create a section for each component of the SOAP notes */}
         {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
         {sections.map((section) => (
-          <div className="w-full" key={section.name}>
+          <div
+            className={`w-full ${
+              ['assessment', 'plan'].includes(section.name) ? 'col-span-2' : ''
+            }`}
+            key={section.name}
+          >
             <h1 className="font-bold text-xl">{section.title}</h1>
 
             <div className="">
@@ -107,10 +112,10 @@ export const getServerSideProps = async () => {
   // - Subjective: student self-reflections on how the week went
   // - Objective: orchestration scripts that monitor for work practices
   const data = {
-    subjective: "test content for subjective",
-    objective: "test content for objective",
-    assessment: "test content for assessment",
-    plan: "test content for plan",
+    subjective: 'test content for subjective',
+    objective: 'test content for objective',
+    assessment: 'test content for assessment',
+    plan: 'test content for plan',
   };
 
   // setup triggers and options for each section's text boxes
@@ -119,19 +124,19 @@ export const getServerSideProps = async () => {
     subjective: {},
     objective: {},
     assessment: {
-      "#": [
-        "planning/risk-assessment",
-        "planning/stories",
-        "planning/deliverables",
-        "planning/tasks",
+      '#': [
+        'planning/risk-assessment',
+        'planning/stories',
+        'planning/deliverables',
+        'planning/tasks',
       ],
     },
     plan: {
-      "[script]": [
-        " script tempalate for project",
-        " script template for people",
+      '[script]': [
+        ' script tempalate for project',
+        ' script template for people',
       ],
-      "[follow-up]": [" follow-up template at next SIG meeting"],
+      '[follow-up]': [' follow-up template at next SIG meeting'],
     },
   };
 
