@@ -1,7 +1,7 @@
 import dbConnect from '../../lib/dbConnect';
 import SOAPModel from '../SOAPModel';
 
-// TODO: these should be for PROJECTS not SIGs (sigs are composed of projects for which there each has a set of SOAP notes)
+// TODO: these should be for PROJECTS not SIGs (sigs are composed of projects for which there each has a set of SOAP
 const soapNotesForSigs = [
   {
     name: 'Networked Orchestration Technologies',
@@ -108,8 +108,9 @@ export const createSoapNoteFixtures = async () => {
           objective: soapNote.objective,
           assessment: soapNote.assessment,
           plan: soapNote.plan,
-          priorContext: {},
-          followUpContext: {},
+          priorContext: [],
+          notedAssessments: [],
+          followUpContext: [],
         });
       });
     });

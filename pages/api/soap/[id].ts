@@ -1,3 +1,4 @@
+import { updateSOAPNote } from '../../../controllers/soapNotes/updateSoapNote';
 import dbConnect from '../../../lib/dbConnect';
 import SOAPModel from '../../../models/SOAPModel';
 
@@ -8,7 +9,7 @@ export default async function handler(req, res) {
   } = req;
 
   console.log('id', id);
-  console.log('method', method);
+  console.log('body', req.body);
 
   await dbConnect();
 
@@ -26,14 +27,18 @@ export default async function handler(req, res) {
       break;
     case 'PUT':
       try {
-        // TODO: run middleware to parse out parts of soap notes
-        // update timestamp
-        req.body.lastUpdated = new Date();
+        const soapNote = await updateSOAPNote(id, req.body);
 
-        const soapNote = await SOAPModel.findByIdAndUpdate(id, req.body, {
-          new: true,
-          runValidators: true,
-        });
+        // // TODO: run middleware to parse out parts of soap notes
+        // // update timestamp
+        // req.body.lastUpdated = new Date();
+
+        // const soapNote = await SOAPModel.findByIdAndUpdate(id, req.body, {
+        //   new: true,
+        //   runValidators: true,
+        // });
+        console.log(soapNote);
+
         if (!soapNote) {
           return res.status(400).json({ success: false });
         }

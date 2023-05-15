@@ -10,6 +10,7 @@ export interface SOAP {
   assessment: string;
   plan: string;
   priorContext: object;
+  notedAssessments: object;
   followUpContext: object;
 }
 
@@ -47,6 +48,10 @@ const SOAPSchema = new mongoose.Schema<SOAP>({
     required: true,
   },
   priorContext: {
+    type: Object,
+    required: true,
+  },
+  notedAssessments: {
     type: Object,
     required: true,
   },

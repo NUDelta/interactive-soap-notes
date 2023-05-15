@@ -57,7 +57,7 @@ export default function Home({ sigs }): JSX.Element {
 // use serverside rendering to generate this page
 export const getServerSideProps = async () => {
   // TODO: only create fixtures on devlopment server
-  await createSoapNoteFixtures();
+  //   await createSoapNoteFixtures();
 
   // fetch all SOAP notes
   const soapNotes = await fetchAllSoapNotes();

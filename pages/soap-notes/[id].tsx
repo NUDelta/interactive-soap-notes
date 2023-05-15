@@ -5,6 +5,7 @@ import TextBox from '../../components/TextBox';
 import Link from 'next/link';
 import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
 import { mutate } from 'swr';
+import { SOAP } from '../../models/SOAPModel';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -25,10 +26,27 @@ export default function SOAPNote({
         // make request to save the data to the database
         // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
         console.log('saving to database', soapData);
+
+        let dataToSave = {
+          date: soapNoteInfo.sigDate,
+          sigName: soapNoteInfo.sigName,
+          sigAbbreviation: soapNoteInfo.sigAbbreviation,
+          subjective: soapData.subjective,
+          objective: soapData.objective,
+          assessment: soapData.assessment,
+          plan: soapData.plan,
+          priorContext: soapData.priorContext,
+          notedAssessments: [],
+          followUpContext: [],
+        };
+
+        console.log('data to save', dataToSave);
+        console.log('data to save', JSON.stringify(dataToSave));
+
         try {
           const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
             method: 'PUT',
-            body: JSON.stringify(soapData),
+            body: JSON.stringify(dataToSave),
             headers: {
               'Content-Type': 'application/json',
             },
@@ -156,6 +174,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
 
   // fetch SOAP note for the given sig and date
   const currentSoapNote = await fetchSoapNote(sigAbbrev, date);
+  console.log(currentSoapNote);
 
   // fetch data for this specific soap note
   const longDate = (date) => {
@@ -172,6 +191,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   const soapNoteInfo = {
     id: currentSoapNote.id,
     sigName: currentSoapNote.sigName,
+    sigAbbreviation: currentSoapNote.sigAbbreviation,
     sigDate: longDate(currentSoapNote.date),
     lastUpdated: longDate(currentSoapNote.lastUpdated),
   };
@@ -183,6 +203,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // - Subjective: student self-reflections on how the week went
   // - Objective: orchestration scripts that monitor for work practices
   const data = {
+    priorContext: currentSoapNote.priorContext,
     subjective: currentSoapNote.subjective,
     objective: currentSoapNote.objective,
     assessment: currentSoapNote.assessment,
@@ -204,8 +225,10 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     },
     plan: {
       '[script]': [
-        ' script tempalate for project',
-        ' script template for people',
+        ' at office hours, ________',
+        ' at studio, ________',
+        ' morning of office hours, ________',
+        ' morning of studio, ________',
       ],
       '[follow-up]': [' follow-up template at next SIG meeting'],
     },
