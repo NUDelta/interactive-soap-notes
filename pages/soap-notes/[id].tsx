@@ -40,9 +40,6 @@ export default function SOAPNote({
           followUpContext: [],
         };
 
-        console.log('data to save', dataToSave);
-        console.log('data to save', JSON.stringify(dataToSave));
-
         try {
           const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
             method: 'PUT',
@@ -112,56 +109,70 @@ export default function SOAPNote({
           <div></div>
         </div>
 
-        {/* Context for SOAP Note
+        {/* Context for SOAP note */}
         <div className="w-full col-span-2">
           <h1 className="font-bold text-2xl border-b  border-black mb-3">
-            Tracked Context for this SIG
+            Tracked Context from last SIG
           </h1>
           <div className="grid grid-cols-2">
             <div className="col-span-1">
-              <h2 className="font-bold text-xl">Orchestration Scripts</h2>
-              <p>Scripts</p>
+              <h2 className="font-bold text-xl">Noted Assessments</h2>
+              <p>
+                {soapData.priorContext.notedAssessments === undefined
+                  ? 'none'
+                  : soapData.priorContext.notedAssessments}
+              </p>
             </div>
             <div className="col-span-1">
-              <h2 className="font-bold text-xl">Previous SIG Meeting</h2>
-              <p>Prior notes</p>
+              <h2 className="font-bold text-xl">Follow-up plans</h2>
+              <p>
+                {soapData.priorContext.followUpPlans === undefined
+                  ? 'none'
+                  : soapData.priorContext.followUpPlans
+                      .split('\n')
+                      .map((str, i) => <p key={i}>{str}</p>)}
+              </p>
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* Notes during SIG */}
-
         {/* Create a section for each component of the SOAP notes */}
         {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
-        {sections.map((section) => (
-          <div
-            className={`w-full ${
-              ['assessment', 'plan'].includes(section.name)
-                ? 'col-span-2'
-                : 'col-span-1'
-            }`}
-            key={section.name}
-          >
-            <h1 className="font-bold text-xl">{section.title}</h1>
+        <div className="w-full col-span-2">
+          <h1 className="font-bold text-2xl border-b  border-black mb-3">
+            This week&apos;s notes
+          </h1>
+          {sections.map((section) => (
+            <div
+              className={`w-full ${
+                ['assessment', 'plan'].includes(section.name)
+                  ? 'col-span-2'
+                  : 'col-span-1'
+              }`}
+              key={section.name}
+            >
+              <h1 className="font-bold text-xl">{section.title}</h1>
 
-            <div className="">
-              <TextBox
-                value={soapData[section.name]}
-                triggers={Object.keys(
-                  autocompleteTriggersOptions[section.name]
-                )}
-                options={autocompleteTriggersOptions[section.name]}
-                onChange={(edits) => {
-                  setSoapData((prevSoapData) => {
-                    let newSoapData = { ...prevSoapData };
-                    newSoapData[section.name] = edits;
-                    return newSoapData;
-                  });
-                }}
-              />
+              <div className="">
+                <TextBox
+                  value={soapData[section.name]}
+                  triggers={Object.keys(
+                    autocompleteTriggersOptions[section.name]
+                  )}
+                  options={autocompleteTriggersOptions[section.name]}
+                  onChange={(edits) => {
+                    setSoapData((prevSoapData) => {
+                      let newSoapData = { ...prevSoapData };
+                      newSoapData[section.name] = edits;
+                      return newSoapData;
+                    });
+                  }}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </>
   );

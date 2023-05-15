@@ -18,12 +18,31 @@ export const fetchAllSoapNotes = async () => {
  */
 export const fetchSoapNote = async (sigName: string, date: string) => {
   await dbConnect();
+
+  // get current soap note
   const startDate = new Date(date);
   const endDate = new Date(date);
   endDate.setDate(endDate.getDate() + 1);
 
-  return await SOAPModel.findOne({
+  let currentSoapNote = await SOAPModel.findOne({
     sigAbbreviation: sigName.toUpperCase(),
     date: { $gte: startDate, $lte: endDate },
   });
+
+  // get previous SOAP note for context
+  // TODO: this is jank
+  let priorSoapNote = await SOAPModel.findOne({
+    sigAbbreviation: sigName.toUpperCase(),
+    date: { $lt: startDate },
+  });
+
+  if (priorSoapNote) {
+    currentSoapNote.priorContext = {
+      notedAssessments: priorSoapNote.notedAssessments,
+      followUpPlans: priorSoapNote.plan,
+    };
+    await currentSoapNote.save();
+  }
+
+  return currentSoapNote;
 };
