@@ -1,17 +1,9 @@
-//index.tsx
-import { OutputData } from '@editorjs/editorjs';
 import type { GetServerSideProps, NextPage } from 'next';
-import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
 import TextBox from '../../components/TextBox';
 import Link from 'next/link';
-
-// important that we use dynamic loading here
-// editorjs should only be rendered on the client side.
-// const EditorBlock = dynamic(() => import("../components/Editor"), {
-//   ssr: false,
-// });
+import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -69,11 +61,14 @@ export default function SOAPNote({
           </Link>
         </div>
         <div className="col-span-2">
-          <h1 className="font-bold text-4xl">
-            {soapNoteInfo.sigName} SIG | {soapNoteInfo.sigDate} SOAP Notes
+          <h1 className="font-bold text-3xl">
+            {soapNoteInfo.sigName} SIG | {soapNoteInfo.sigDate}
           </h1>
-          <h2 className="font-bold text-xl">
+          <h2 className="font-bold text-lg">
             Last Updated: {soapNoteInfo.lastUpdated}
+            <span className="italic text-blue-400">
+              {isSaving ? ' Saving...' : ''}
+            </span>
           </h2>
           <div></div>
         </div>
@@ -138,11 +133,26 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // get the sig name and date from the query
   let [sigAbbrev, date] = (query.params?.id as string).split('_');
 
+  // fetch SOAP note for the given sig and date
+  const currentSoapNote = await fetchSoapNote(sigAbbrev, date);
+
   // fetch data for this specific soap note
+  const longDate = (date) => {
+    return date.toLocaleDateString('en-us', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
+  };
+
   const soapNoteInfo = {
-    sigName: sigAbbrev.toUpperCase(),
-    sigDate: date,
-    lastUpdated: '05-08-2023 18:00:00',
+    id: currentSoapNote.id,
+    sigName: currentSoapNote.sigName,
+    sigDate: longDate(currentSoapNote.date),
+    lastUpdated: longDate(currentSoapNote.date),
   };
 
   // setup the page with the data from the database
@@ -152,10 +162,10 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // - Subjective: student self-reflections on how the week went
   // - Objective: orchestration scripts that monitor for work practices
   const data = {
-    subjective: 'test content for subjective',
-    objective: 'test content for objective',
-    assessment: 'test content for assessment',
-    plan: 'test content for plan',
+    subjective: currentSoapNote.subjective,
+    objective: currentSoapNote.objective,
+    assessment: currentSoapNote.assessment,
+    plan: currentSoapNote.plan,
   };
 
   // setup triggers and options for each section's text boxes

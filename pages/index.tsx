@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { createSoapNoteFixtures } from '../models/fixtures/soapNotes';
+import { fetchAllSoapNotes } from '../controllers/soapNotes/fetchSoapNotes';
 
 export default function Home({ sigs }): JSX.Element {
   return (
@@ -54,79 +56,62 @@ export default function Home({ sigs }): JSX.Element {
 
 // use serverside rendering to generate this page
 export const getServerSideProps = async () => {
-  // get a list of all SIGs and their SOAP notes for each week
-  const sigs = [
-    {
-      name: 'Networked Orchestration Technologies',
-      abbreviation: 'NOT',
-      soapNotes: [
-        {
-          date: '2023-05-08',
-          lastUpdated: '2023-05-08 18:00:00',
-        },
-        {
-          date: '2023-05-01',
-          lastUpdated: '2023-05-01 18:30:00',
-        },
-      ],
-    },
-    {
-      name: 'Opportunistic Collective Experiences',
-      abbreviation: 'OCE',
-      soapNotes: [
-        {
-          date: '2023-05-10',
-          lastUpdated: '2023-05-10 15:00:00',
-        },
-        {
-          date: '2023-05-03',
-          lastUpdated: '2023-05-10 15:15:00',
-        },
-      ],
-    },
-    {
-      name: 'Readily Available Learning Environments',
-      abbreviation: 'RALE',
-      soapNotes: [
-        {
-          date: '2023-05-08',
-          lastUpdated: '2023-05-08 16:00:00',
-        },
-        {
-          date: '2023-05-01',
-          lastUpdated: '2023-05-01 16:30:00',
-        },
-      ],
-    },
-    {
-      name: 'Context-Aware Metacognitive Practices',
-      abbreviation: 'CAMP',
-      soapNotes: [
-        {
-          date: '2023-05-12',
-          lastUpdated: '2023-05-12 11:45:00',
-        },
-        {
-          date: '2023-05-05',
-          lastUpdated: '2023-05-12 11:45:00',
-        },
-      ],
-    },
-    {
-      name: 'Human-AI Tools',
-      abbreviation: 'HAT',
-      soapNotes: [
-        {
-          date: '2023-05-10',
-          lastUpdated: '2023-05-10 16:00:00',
-        },
-        {
-          date: '2023-05-03',
-          lastUpdated: '2023-05-10 16:15:00',
-        },
-      ],
-    },
-  ];
+  // TODO: only create fixtures on devlopment server
+  await createSoapNoteFixtures();
+
+  // fetch all SOAP notes
+  const soapNotes = await fetchAllSoapNotes();
+
+  // get a list of SIGs from all SOAP notes
+  const sigs = soapNotes.reduce((acc, soapNote) => {
+    // setup a date function
+    const shortDate = (date) => {
+      return date
+        .toLocaleDateString('en-us', {
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+        })
+        .replace(/\//g, '-');
+    };
+
+    const longDate = (date) => {
+      return date.toLocaleDateString('en-us', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      });
+    };
+
+    // check if the SIG is already in the list
+    const sigIndex = acc.findIndex(
+      (sig) => sig.abbreviation === soapNote.sigAbbreviation
+    );
+    if (sigIndex === -1) {
+      // add the SIG to the list
+      acc.push({
+        name: soapNote.sigName,
+        abbreviation: soapNote.sigAbbreviation,
+        soapNotes: [
+          {
+            date: shortDate(soapNote.date),
+            lastUpdated: longDate(soapNote.lastUpdated),
+          },
+        ],
+      });
+    } else {
+      // add the SOAP note to the SIG's list of SOAP notes
+      acc[sigIndex].soapNotes.push({
+        date: shortDate(soapNote.date),
+        lastUpdated: longDate(soapNote.lastUpdated),
+      });
+    }
+
+    return acc;
+  }, []);
 
   return {
     props: { sigs },
