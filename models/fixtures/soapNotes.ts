@@ -1,6 +1,7 @@
 import dbConnect from '../../lib/dbConnect';
 import SOAPModel from '../SOAPModel';
 
+// TODO: these should be for PROJECTS not SIGs (sigs are composed of projects for which there each has a set of SOAP notes)
 const soapNotesForSigs = [
   {
     name: 'Networked Orchestration Technologies',
