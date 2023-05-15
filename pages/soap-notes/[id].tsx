@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import TextBox from '../../components/TextBox';
 import Link from 'next/link';
 import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
+import { mutate } from 'swr';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -18,15 +19,35 @@ export default function SOAPNote({
 
   // listen for changes in state and do debounced saves to database
   useEffect(() => {
-    setIsSaving(true);
-    // TODO: debounce the save
-    const timeout = setTimeout(() => {
-      // make request to save the data to the database
-      // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
-      console.log('saving to database', soapData);
-      setIsSaving(false);
-    }, 1000);
-  }, [soapData]);
+    async function saveToDatabase() {
+      setIsSaving(true);
+      setTimeout(async () => {
+        // make request to save the data to the database
+        // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
+        console.log('saving to database', soapData);
+        try {
+          const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
+            method: 'PUT',
+            body: JSON.stringify(soapData),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          // TODO: last update date isn't working
+          // Update the local data without a revalidation
+          const { data } = await res.json();
+          mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
+        } catch (err) {
+          console.log(err);
+        }
+
+        setIsSaving(false);
+      }, 1000);
+    }
+
+    saveToDatabase();
+  }, [soapData, soapNoteInfo]);
 
   // sections of the soap notes
   const sections = [
@@ -152,7 +173,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     id: currentSoapNote.id,
     sigName: currentSoapNote.sigName,
     sigDate: longDate(currentSoapNote.date),
-    lastUpdated: longDate(currentSoapNote.date),
+    lastUpdated: longDate(currentSoapNote.lastUpdated),
   };
 
   // setup the page with the data from the database
