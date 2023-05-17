@@ -30,7 +30,8 @@ export const fetchSoapNote = async (sigName: string, date: string) => {
   });
 
   // get previous SOAP note for context
-  // TODO: this is jank
+  // TODO: this is jank -- setup a field with a ref to the previous SOAP note
+  // TODO: think about a compact and "full" representation of the sections that a user can switch between
   let priorSoapNote = await SOAPModel.findOne({
     sigAbbreviation: sigName.toUpperCase(),
     date: { $lt: startDate },
