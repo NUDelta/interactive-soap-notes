@@ -117,11 +117,20 @@ export default function SOAPNote({
           </h1>
           <div className="grid grid-cols-2">
             <div className="col-span-1">
-              <h2 className="font-bold text-xl">Noted Assessments</h2>
+              <h2 className="font-bold text-xl">Practices and Scripts</h2>
               <p>
-                {soapData.priorContext.notedAssessments === undefined
-                  ? 'none'
-                  : soapData.priorContext.notedAssessments}
+                {soapData.priorContext.tracked === undefined
+                  ? 'no context from tools'
+                  : soapData.priorContext.tracked.map((str, i) => (
+                      <p key={i}>{str}</p>
+                    ))}
+              </p>
+              <p>
+                {soapData.priorContext.triggeredScripts === undefined
+                  ? 'no triggered scripts'
+                  : soapData.priorContext.triggeredScripts.map((str, i) => (
+                      <p key={i}>{str}</p>
+                    ))}
               </p>
             </div>
             <div className="col-span-1">
@@ -188,6 +197,46 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   const currentSoapNote = await fetchSoapNote(sigAbbrev, date);
   console.log(currentSoapNote);
 
+  // fetch contextual data from OS
+  let contextualData;
+  try {
+    const res = await fetch(
+      'http://localhost:5001/organizationalObjects/getComputedOrganizationalObjectsForProject',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projectName: currentSoapNote.project }),
+      }
+    );
+
+    contextualData = await res.json();
+  } catch (err) {
+    console.log(err);
+  }
+
+  // TODO: get active scripts from OS
+  let activeScripts;
+  try {
+    const res = await fetch(
+      'http://localhost:5001/activeIssues/fetchActiveIssuesForProject?' +
+        new URLSearchParams({
+          projectName: currentSoapNote.project,
+        })
+    );
+    activeScripts = await res.json();
+  } catch (err) {
+    console.log(err);
+  }
+
+  const triggeredScripts = activeScripts.map((script) => {
+    return {
+      name: script.name,
+      strategies: script.computed_strategies[0].outlet_args.message,
+    };
+  });
+
   // fetch data for this specific soap note
   const longDate = (date) => {
     return date.toLocaleDateString('en-us', {
@@ -216,7 +265,15 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // - Subjective: student self-reflections on how the week went
   // - Objective: orchestration scripts that monitor for work practices
   const data = {
-    priorContext: currentSoapNote.priorContext,
+    priorContext: {
+      tracked: contextualData.project.tools.sprintLog.stories.map((story) => {
+        return `[planned stories] ${story.description}`;
+      }),
+      triggeredScripts: triggeredScripts.map((script) => {
+        return `[triggered script] ${script.name} - ${script.strategies}`;
+      }),
+      followUpPlans: 'none',
+    },
     subjective: currentSoapNote.subjective,
     objective: currentSoapNote.objective,
     assessment: currentSoapNote.assessment,
