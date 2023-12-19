@@ -8,8 +8,9 @@ const soapNotesForSigs = [
     abbreviation: 'NOT',
     soapNotes: [
       {
-        date: new Date('2023-05-08T00:00:00'),
-        lastUpdated: new Date('2023-05-08T18:00:00'),
+        project: 'Orchestration Scripting Environments',
+        date: new Date('2023-10-24T00:00:00'),
+        lastUpdated: new Date('2023-10-24T00:00:00'),
         subjective: 'Subjective 1',
         objective: 'Objective 2',
         assessment: 'Assessment 3',
@@ -18,8 +19,9 @@ const soapNotesForSigs = [
         followUpContext: {},
       },
       {
-        date: new Date('2023-05-01T00:00:00'),
-        lastUpdated: new Date('2023-05-01T18:30:00'),
+        project: 'Situated Reflection Systems',
+        date: new Date('2023-10-24T00:00:00'),
+        lastUpdated: new Date('2023-10-24T00:00:00'),
         subjective: 'Subjective',
         objective: 'Objective',
         assessment: 'Assessment',
@@ -102,6 +104,7 @@ export const createSoapNoteFixtures = async () => {
         soapNotes.push({
           sigName: sig.name,
           sigAbbreviation: sig.abbreviation,
+          project: soapNote.project,
           date: soapNote.date,
           lastUpdated: soapNote.lastUpdated,
           subjective: soapNote.subjective,

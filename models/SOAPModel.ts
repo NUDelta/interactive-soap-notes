@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 export interface SOAP {
+  project: string;
   date: Date;
   lastUpdated: Date;
   sigName: string;
@@ -15,6 +16,10 @@ export interface SOAP {
 }
 
 const SOAPSchema = new mongoose.Schema<SOAP>({
+  project: {
+    type: String,
+    required: true,
+  },
   date: {
     type: Date,
     required: true,

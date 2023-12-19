@@ -28,6 +28,7 @@ export default function SOAPNote({
         console.log('saving to database', soapData);
 
         let dataToSave = {
+          project: soapNoteInfo.project,
           date: soapNoteInfo.sigDate,
           sigName: soapNoteInfo.sigName,
           sigAbbreviation: soapNoteInfo.sigAbbreviation,
@@ -98,7 +99,7 @@ export default function SOAPNote({
         </div>
         <div className="col-span-2">
           <h1 className="font-bold text-3xl">
-            {soapNoteInfo.sigName} SIG | {soapNoteInfo.sigDate}
+            {soapNoteInfo.project} | {soapNoteInfo.sigDate}
           </h1>
           <h2 className="font-bold text-lg">
             Last Updated: {soapNoteInfo.lastUpdated}
@@ -201,6 +202,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
 
   const soapNoteInfo = {
     id: currentSoapNote.id,
+    project: currentSoapNote.project,
     sigName: currentSoapNote.sigName,
     sigAbbreviation: currentSoapNote.sigAbbreviation,
     sigDate: longDate(currentSoapNote.date),

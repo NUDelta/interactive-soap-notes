@@ -35,7 +35,7 @@ export default function Home({ sigs }): JSX.Element {
                       >
                         <a>
                           <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
-                            SOAP Notes for {soapNote.date}
+                            SOAP Notes for {soapNote.project} -- {soapNote.date}
                           </h3>
                         </a>
                       </Link>
@@ -57,10 +57,11 @@ export default function Home({ sigs }): JSX.Element {
 // use serverside rendering to generate this page
 export const getServerSideProps = async () => {
   // TODO: only create fixtures on devlopment server
-  //   await createSoapNoteFixtures();
+  await createSoapNoteFixtures();
 
   // fetch all SOAP notes
   const soapNotes = await fetchAllSoapNotes();
+  console.log(soapNotes);
 
   // get a list of SIGs from all SOAP notes
   const sigs = soapNotes.reduce((acc, soapNote) => {
@@ -97,6 +98,7 @@ export const getServerSideProps = async () => {
         abbreviation: soapNote.sigAbbreviation,
         soapNotes: [
           {
+            project: soapNote.project,
             date: shortDate(soapNote.date),
             lastUpdated: longDate(soapNote.lastUpdated),
           },
@@ -105,6 +107,7 @@ export const getServerSideProps = async () => {
     } else {
       // add the SOAP note to the SIG's list of SOAP notes
       acc[sigIndex].soapNotes.push({
+        project: soapNote.project,
         date: shortDate(soapNote.date),
         lastUpdated: longDate(soapNote.lastUpdated),
       });
@@ -112,7 +115,6 @@ export const getServerSideProps = async () => {
 
     return acc;
   }, []);
-
   return {
     props: { sigs },
   };
