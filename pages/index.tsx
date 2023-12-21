@@ -30,8 +30,8 @@ export default function Home({ sigs }): JSX.Element {
                     <div className="col-span-1">
                       <Link
                         href={`/soap-notes/${sig.abbreviation.toLowerCase()}_${
-                          soapNote.date
-                        }`}
+                          soapNote.project
+                        }_${soapNote.date}`}
                       >
                         <a>
                           <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">

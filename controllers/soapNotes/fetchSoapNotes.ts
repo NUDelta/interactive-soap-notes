@@ -14,9 +14,14 @@ export const fetchAllSoapNotes = async () => {
  * Fetches a soap note by sig name and date.
  * @param sigName Sig name (e.g., RALE)
  * @param date Date in YYYY-MM-DD format (e.g., 2023-05-08)
+ * @param project Project name
  * @returns {Object} Soap note object or null
  */
-export const fetchSoapNote = async (sigName: string, date: string) => {
+export const fetchSoapNote = async (
+  sigName: string,
+  project: string,
+  date: string
+) => {
   await dbConnect();
 
   // get current soap note
@@ -26,6 +31,7 @@ export const fetchSoapNote = async (sigName: string, date: string) => {
 
   let currentSoapNote = await SOAPModel.findOne({
     sigAbbreviation: sigName.toUpperCase(),
+    project: project,
     date: { $gte: startDate, $lte: endDate },
   });
 

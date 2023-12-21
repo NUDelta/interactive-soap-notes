@@ -25,7 +25,24 @@ export default function SOAPNote({
       setTimeout(async () => {
         // make request to save the data to the database
         // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
-        console.log('saving to database', soapData);
+        // console.log('saving to database', soapData);
+
+        // TODO: parse the follow-up scripts into a request
+        // TODO: check if active issue is already in Orchestration Scripts before recreating
+        // split into lines
+        let lines = soapData.plan.split('\n');
+
+        // check if any lines have a [script] tag
+        let scripts = lines.filter((line) => line.includes('[script]'));
+
+        // create objects for each script
+        let output = scripts.map((script) => {
+          let [venue, strategy] = script.split('[script]')[1].split(',');
+          return {
+            venue: venue.trim(),
+            strategy: strategy.trim(),
+          };
+        });
 
         let dataToSave = {
           project: soapNoteInfo.project,
@@ -38,7 +55,7 @@ export default function SOAPNote({
           plan: soapData.plan,
           priorContext: soapData.priorContext,
           notedAssessments: [],
-          followUpContext: [],
+          followUpContext: output,
         };
 
         try {
@@ -69,19 +86,19 @@ export default function SOAPNote({
   const sections = [
     {
       name: 'subjective',
-      title: 'S - Subjective observations from student report',
+      title: 'Additional Context from Mentor',
     },
-    {
-      name: 'objective',
-      title: 'O - Objective data corresponding with students assessment',
-    },
+    // {
+    //   name: 'objective',
+    //   title: 'O - Objective data corresponding with students assessment',
+    // },
     {
       name: 'assessment',
-      title: 'A - Assessment of root causes or practices',
+      title: 'Assessment of root causes or practices',
     },
     {
       name: 'plan',
-      title: 'P - Plan for Follow-Ups',
+      title: 'Plan for Follow-Ups',
     },
   ];
 
@@ -113,11 +130,11 @@ export default function SOAPNote({
         {/* Context for SOAP note */}
         <div className="w-full col-span-2">
           <h1 className="font-bold text-2xl border-b  border-black mb-3">
-            Tracked Context from last SIG
+            Tracked Context During the Week
           </h1>
           <div className="grid grid-cols-2">
             <div className="col-span-1">
-              <h2 className="font-bold text-xl">Practices and Scripts</h2>
+              <h2 className="font-bold text-xl">Tool data</h2>
               <p>
                 {soapData.priorContext.tracked === undefined
                   ? 'no context from tools'
@@ -125,6 +142,10 @@ export default function SOAPNote({
                       <p key={i}>{str}</p>
                     ))}
               </p>
+            </div>
+
+            <div className="col-span-1">
+              <h2 className="font-bold text-xl">Scripts</h2>
               <p>
                 {soapData.priorContext.triggeredScripts === undefined
                   ? 'no triggered scripts'
@@ -133,7 +154,7 @@ export default function SOAPNote({
                     ))}
               </p>
             </div>
-            <div className="col-span-1">
+            {/* <div className="col-span-1">
               <h2 className="font-bold text-xl">Follow-up plans</h2>
               <p>
                 {soapData.priorContext.followUpPlans === undefined
@@ -142,7 +163,7 @@ export default function SOAPNote({
                       .split('\n')
                       .map((str, i) => <p key={i}>{str}</p>)}
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -182,6 +203,17 @@ export default function SOAPNote({
               </div>
             </div>
           ))}
+
+          {/* Define actionable follow-ups a mentor can input
+          <div>
+            <h2 className="font-bold text-xl">Actionable follow-ups</h2>
+            <select name="cars" id="cars">
+              <option value="volvo">Volvo</option>
+              <option value="saab">Saab</option>
+              <option value="mercedes">Mercedes</option>
+              <option value="audi">Audi</option>
+            </select>
+          </div> */}
         </div>
       </div>
     </>
@@ -191,11 +223,10 @@ export default function SOAPNote({
 // use serverside rendering to generate this page
 export const getServerSideProps: GetServerSideProps = async (query) => {
   // get the sig name and date from the query
-  let [sigAbbrev, date] = (query.params?.id as string).split('_');
+  let [sigAbbrev, project, date] = (query.params?.id as string).split('_');
 
   // fetch SOAP note for the given sig and date
-  const currentSoapNote = await fetchSoapNote(sigAbbrev, date);
-  console.log(currentSoapNote);
+  const currentSoapNote = await fetchSoapNote(sigAbbrev, project, date);
 
   // fetch contextual data from OS
   let contextualData;
