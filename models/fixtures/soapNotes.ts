@@ -9,84 +9,102 @@ const soapNotesForSigs = [
     soapNotes: [
       {
         project: 'Orchestration Scripting Environments',
-        date: new Date('2023-10-24T00:00:00'),
-        lastUpdated: new Date('2023-10-24T00:00:00'),
-        subjective: 'Subjective 1',
+        date: new Date('2024-02-05T00:00:00'),
+        lastUpdated: new Date('2024-02-05T00:00:00'),
+        subjective: 'Note additional context or points from discussion here',
         objective: 'Objective 2',
-        assessment: 'Assessment 3',
-        plan: 'Plan 4',
-        priorContext: {},
-        followUpContext: {},
-      },
-      {
-        project: 'Situated Reflection Systems',
-        date: new Date('2023-10-24T00:00:00'),
-        lastUpdated: new Date('2023-10-24T00:00:00'),
-        subjective: 'Subjective',
-        objective: 'Objective',
-        assessment: 'Assessment',
-        plan: 'Plan',
+        assessment: 'Note observed practices, obstacles, and root causes here',
+        plan: 'Note planned deliverables and actions here, including follow-up scripts for OS to track',
         priorContext: {},
         followUpContext: {},
       },
     ],
   },
-  //   {
-  //     name: 'Opportunistic Collective Experiences',
-  //     abbreviation: 'OCE',
-  //     soapNotes: [
-  //       {
-  //         date: '2023-05-10',
-  //         lastUpdated: '2023-05-10 15:00:00',
-  //       },
-  //       {
-  //         date: '2023-05-03',
-  //         lastUpdated: '2023-05-10 15:15:00',
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     name: 'Readily Available Learning Environments',
-  //     abbreviation: 'RALE',
-  //     soapNotes: [
-  //       {
-  //         date: '2023-05-08',
-  //         lastUpdated: '2023-05-08 16:00:00',
-  //       },
-  //       {
-  //         date: '2023-05-01',
-  //         lastUpdated: '2023-05-01 16:30:00',
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     name: 'Context-Aware Metacognitive Practices',
-  //     abbreviation: 'CAMP',
-  //     soapNotes: [
-  //       {
-  //         date: '2023-05-12',
-  //         lastUpdated: '2023-05-12 11:45:00',
-  //       },
-  //       {
-  //         date: '2023-05-05',
-  //         lastUpdated: '2023-05-12 11:45:00',
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     name: 'Human-AI Tools',
-  //     abbreviation: 'HAT',
-  //     soapNotes: [
-  //       {
-  //         date: '2023-05-10',
-  //         lastUpdated: '2023-05-10 16:00:00',
-  //       },
-  //       {
-  //         date: '2023-05-03',
-  //         lastUpdated: '2023-05-10 16:15:00',
-  //       },
-  //     ],
-  //   },
+  {
+    name: 'Human-AI Tools (Difference)',
+    abbreviation: 'HAT-D',
+    soapNotes: [
+      {
+        project: 'Human-AI Tools for Accounting for Differences',
+        date: new Date('2024-02-05T00:00:00'),
+        lastUpdated: new Date('2024-02-05T00:00:00'),
+        subjective: 'Note additional context or points from discussion here',
+        objective: 'Objective',
+        assessment: 'Note observed practices, obstacles, and root causes here',
+        plan: 'Note planned deliverables and actions here, including follow-up scripts for OS to track',
+        priorContext: {},
+        followUpContext: {},
+      },
+      {
+        project: 'Reference Systems',
+        date: new Date('2024-02-05T00:00:00'),
+        lastUpdated: new Date('2024-02-05T00:00:00'),
+        subjective: 'Note additional context or points from discussion here',
+        objective: 'Objective',
+        assessment: 'Note observed practices, obstacles, and root causes here',
+        plan: 'Note planned deliverables and actions here, including follow-up scripts for OS to track',
+        priorContext: {},
+        followUpContext: {},
+      },
+    ],
+  },
+  {
+    name: 'Human-AI Tools (Expression)',
+    abbreviation: 'HAT-X',
+    soapNotes: [
+      {
+        project: 'Human-AI Tools for Concept Expression',
+        date: new Date('2024-02-05T00:00:00'),
+        lastUpdated: new Date('2024-02-05T00:00:00'),
+        subjective: 'Note additional context or points from discussion here',
+        objective: 'Objective',
+        assessment: 'Note observed practices, obstacles, and root causes here',
+        plan: 'Note planned deliverables and actions here, including follow-up scripts for OS to track',
+        priorContext: {},
+        followUpContext: {},
+      },
+      {
+        project:
+          'Human-AI Tools for Aligning to Machine Representations and Execution',
+        date: new Date('2024-02-05T00:00:00'),
+        lastUpdated: new Date('2024-02-05T00:00:00'),
+        subjective: 'Note additional context or points from discussion here',
+        objective: 'Objective',
+        assessment: 'Note observed practices, obstacles, and root causes here',
+        plan: 'Note planned deliverables and actions here, including follow-up scripts for OS to track',
+        priorContext: {},
+        followUpContext: {},
+      },
+    ],
+  },
+  {
+    name: 'Breaking Boundaries',
+    abbreviation: 'BB',
+    soapNotes: [
+      {
+        project: 'How Can Computers Support Dialectical Activities?',
+        date: new Date('2024-02-05T00:00:00'),
+        lastUpdated: new Date('2024-02-05T00:00:00'),
+        subjective: 'Note additional context or points from discussion here',
+        objective: 'Objective',
+        assessment: 'Note observed practices, obstacles, and root causes here',
+        plan: 'Note planned deliverables and actions here, including follow-up scripts for OS to track',
+        priorContext: {},
+        followUpContext: {},
+      },
+      {
+        project: 'Prototyping with LLMs',
+        date: new Date('2024-02-05T00:00:00'),
+        lastUpdated: new Date('2024-02-05T00:00:00'),
+        subjective: 'Note additional context or points from discussion here',
+        objective: 'Objective',
+        assessment: 'Note observed practices, obstacles, and root causes here',
+        plan: 'Note planned deliverables and actions here, including follow-up scripts for OS to track',
+        priorContext: {},
+        followUpContext: {},
+      },
+    ],
+  },
 ];
 
 export const createSoapNoteFixtures = async () => {
