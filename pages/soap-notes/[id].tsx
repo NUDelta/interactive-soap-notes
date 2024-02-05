@@ -30,19 +30,30 @@ export default function SOAPNote({
         // TODO: parse the follow-up scripts into a request
         // TODO: check if active issue is already in Orchestration Scripts before recreating
         // split into lines
+        // TODO: make sure OS rejects poorly formed scripts
         let lines = soapData.plan.split('\n');
 
         // check if any lines have a [script] tag
         let scripts = lines.filter((line) => line.includes('[script]'));
 
         // create objects for each script
-        let output = scripts.map((script) => {
-          let [venue, strategy] = script.split('[script]')[1].split(',');
-          return {
-            venue: venue.trim(),
-            strategy: strategy.trim(),
-          };
-        });
+        let output = [];
+        for (let script of scripts) {
+          // check if the script is fully written before adding it to output
+          let splitFollowUp = script.split('[script]')[1].split(':');
+          if (
+            splitFollowUp.length < 2 ||
+            splitFollowUp[1].trim() === '[follow-up to send]'
+          ) {
+            continue;
+          } else {
+            let [venue, strategy] = splitFollowUp;
+            output.push({
+              venue: venue.trim(),
+              strategy: strategy.trim(),
+            });
+          }
+        }
 
         let dataToSave = {
           project: soapNoteInfo.project,
@@ -135,6 +146,7 @@ export default function SOAPNote({
           <div className="grid grid-cols-2">
             <div className="col-span-1">
               <h2 className="font-bold text-xl">Tool data</h2>
+              <h3 className="font-bold text-lg">Sprint Log</h3>
               <p>
                 {soapData.priorContext.tracked === undefined
                   ? 'no context from tools'
@@ -145,10 +157,12 @@ export default function SOAPNote({
             </div>
 
             <div className="col-span-1">
-              <h2 className="font-bold text-xl">Scripts</h2>
+              <h2 className="font-bold text-xl">
+                Detected Issues from Orchestration Engine
+              </h2>
               <p>
                 {soapData.priorContext.triggeredScripts === undefined
-                  ? 'no triggered scripts'
+                  ? 'no detected issuess'
                   : soapData.priorContext.triggeredScripts.map((str, i) => (
                       <p key={i}>{str}</p>
                     ))}
@@ -184,6 +198,12 @@ export default function SOAPNote({
               key={section.name}
             >
               <h1 className="font-bold text-xl">{section.title}</h1>
+              {section.name === 'plan' && (
+                <h2 className="text-sm color-grey">
+                  Add plans for Orchestration Engine to follow-up on by typing,
+                  &quot;[script]&quot;
+                </h2>
+              )}
 
               <div className="">
                 <TextBox
@@ -260,6 +280,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   } catch (err) {
     console.log(err);
   }
+  console.log(activeScripts);
 
   const triggeredScripts = activeScripts.map((script) => {
     return {
@@ -289,6 +310,27 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     lastUpdated: longDate(currentSoapNote.lastUpdated),
   };
 
+  // setup tracked data
+  let sprintStories = contextualData.project.tools.sprintLog.stories.map(
+    (story) => {
+      return `[planned story] ${story.description}`;
+    }
+  );
+
+  let sprintPoints = contextualData.project.tools.sprintLog.points.map(
+    (pointsForPerson) => {
+      return `[points summary] ${pointsForPerson.name}: ${pointsForPerson.pointsCommitted.total} committed of ${pointsForPerson.pointsAvailable} available`;
+    }
+  );
+
+  // setup tracked scripts
+  let trackedScripts = triggeredScripts.map((script) => {
+    return `[detected issue] ${script.name} - ${script.strategies}`;
+  });
+  if (trackedScripts.length === 0) {
+    trackedScripts = ['no detected issues'];
+  }
+
   // setup the page with the data from the database
   // TODO: populate view with the following
   // - list of tracked practices and when they last occurred
@@ -297,12 +339,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // - Objective: orchestration scripts that monitor for work practices
   const data = {
     priorContext: {
-      tracked: contextualData.project.tools.sprintLog.stories.map((story) => {
-        return `[planned stories] ${story.description}`;
-      }),
-      triggeredScripts: triggeredScripts.map((script) => {
-        return `[triggered script] ${script.name} - ${script.strategies}`;
-      }),
+      tracked: [].concat(sprintPoints, sprintStories),
+      triggeredScripts: trackedScripts,
       followUpPlans: 'none',
     },
     subjective: currentSoapNote.subjective,
@@ -326,10 +364,11 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     },
     plan: {
       '[script]': [
-        ' at office hours, ________',
-        ' at studio, ________',
-        ' morning of office hours, ________',
-        ' morning of studio, ________',
+        ' at office hours: [follow-up to send]',
+        ' at studio: [follow-up to send]',
+        ' morning of office hours: [follow-up to send]',
+        ' morning of studio: [follow-up to send]',
+        ' day after SIG: [follow-up to send]',
       ],
       '[follow-up]': [' follow-up template at next SIG meeting'],
     },
