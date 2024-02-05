@@ -40,13 +40,13 @@ const parseSoapNotes = (soapNote: object) => {
     return followup.includes('[script]');
   });
   newSoapNote.followUpContext = followUpContext.map((followup) => {
-    return parseScriptFollowups(followup);
+    return parseScriptFollowups(followup, soapNote.project);
   });
 
   return newSoapNote;
 };
 
-const parseScriptFollowups = (scriptText: string) => {
+const parseScriptFollowups = (scriptText: string, projectName: string) => {
   // remove the [script] tag
   let cleanedScriptText = scriptText.replace('[script]', '').trim();
   console.log(cleanedScriptText);
@@ -62,26 +62,32 @@ const parseScriptFollowups = (scriptText: string) => {
   };
   let scriptMessage = '';
   if (cleanedScriptText.includes('at office hours')) {
-    outputScript.opportunity = "this.venues.find('Office Hours')";
-    scriptMessage = cleanedScriptText.replace('at office hours,', '');
+    outputScript.opportunity =
+      "this.venues.find(this.where('kind', 'OfficeHours'))";
+    scriptMessage = cleanedScriptText.replace('at office hours:', '');
   } else if (cleanedScriptText.includes('at studio')) {
-    outputScript.opportunity = "this.venues.find('Studio')";
-    scriptMessage = cleanedScriptText.replace('at studio,', '');
+    outputScript.opportunity = "this.venues.find(this.where('kind', 'Studio'))";
+    scriptMessage = cleanedScriptText.replace('at studio:', '');
   } else if (cleanedScriptText.includes('morning of office hours')) {
     outputScript.opportunity =
-      "this.morningOf(this.venues.find('Office Hours'))";
-    scriptMessage = cleanedScriptText.replace('morning of office hours,', '');
+      "this.morningOf(this.venues.find(this.where('kind', 'OfficeHours')))";
+    scriptMessage = cleanedScriptText.replace('morning of office hours:', '');
   } else if (cleanedScriptText.includes('morning of studio')) {
-    outputScript.opportunity = "this.morningOf(this.venues.find('Studio'))";
-    scriptMessage = cleanedScriptText.replace('morning of studio,', '');
+    outputScript.opportunity =
+      "this.morningOf(this.venues.find(this.where('kind', 'Studio')))";
+    scriptMessage = cleanedScriptText.replace('morning of studio:', '');
+  } else if (cleanedScriptText.includes('day after SIG')) {
+    outputScript.opportunity = 'this.daysAfter(new Date(), 1)';
+    scriptMessage = cleanedScriptText.replace('day after SIG:', '');
   }
 
   // TOOD: populate properly
   outputScript.target = {
     type: 'project',
-    value: 'Orchestration Scripting Environments',
+    value: projectName,
   };
   outputScript.message = scriptMessage.trim();
 
+  console.log(outputScript);
   return outputScript;
 };

@@ -57,7 +57,8 @@ export default function SOAPNote({
         let splitFollowUp = script.split('[script]')[1].split(':');
         if (
           splitFollowUp.length < 2 ||
-          splitFollowUp[1].trim() === '[follow-up to send]'
+          splitFollowUp[1].trim() === '[follow-up to send]' ||
+          splitFollowUp[1].trim() === ''
         ) {
           continue;
         } else {

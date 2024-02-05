@@ -15,7 +15,8 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     scriptId: crypto
       .createHash('md5')
       .update(`${soapId}-${strategy}`)
-      .digest('hex'),
+      .digest('hex')
+      .slice(0, 24),
     scriptName: `actionable follow-up for ${projName} in ${venue}`,
     dateTriggered: currDate,
     expiryTime: weekFromCurrDate,
@@ -34,22 +35,49 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
   // compute strategy function
   let venueOrgObj = '';
   if (venue.includes('studio')) {
-    venueOrgObj = 'Studio Meeting';
+    venueOrgObj = 'StudioMeeting';
   } else if (venue.includes('office hours')) {
-    venueOrgObj = 'Office Hours';
+    venueOrgObj = 'OfficeHours';
   }
 
-  let strategyFunction = async function () {
-    return await this.messageChannel({
-      message: strategyFromScript,
-      projectName: this.project.name,
-      opportunity: async function () {
-        return await this.startOfVenue(
-          await this.venues.find(this.where('name', venueOrgObj))
-        );
-      }.toString(),
-    });
-  }.toString();
+  let strategyFunction = '';
+  if (venue.includes('at studio') || venue.includes('at office hours')) {
+    strategyFunction = async function () {
+      return await this.messageChannel({
+        message: strategyFromScript,
+        projectName: this.project.name,
+        opportunity: async function () {
+          return await this.startOfVenue(
+            await this.venues.find(this.where('kind', venueOrgObj))
+          );
+        }.toString(),
+      });
+    }.toString();
+  } else if (venue.includes('morning')) {
+    strategyFunction = async function () {
+      return await this.messageChannel({
+        message: strategyFromScript,
+        projectName: this.project.name,
+        opportunity: async function () {
+          return await this.morningOfVenue(
+            await this.venues.find(this.where('kind', venueOrgObj))
+          );
+        }.toString(),
+      });
+    }.toString();
+  } else if (venue.includes('day after SIG')) {
+    strategyFunction = async function () {
+      return await this.messageChannel({
+        message: strategyFromScript,
+        projectName: this.project.name,
+        opportunity: async function () {
+          let today = new Date();
+          today.setMinutes(0, 0, 0);
+          return await this.daysAfter(today, 1);
+        }.toString(),
+      });
+    }.toString();
+  }
 
   strategyFunction = strategyFunction.replace(
     'venueOrgObj',
@@ -100,6 +128,7 @@ export default async function handler(req, res) {
         // });
         // console.log(soapNote);
 
+        // TODO: updateSOAPNote is already parsing the code; so parseFollowUpPlans is redundant
         // parse actionable followups
         let actionableFollowUps = req.body.followUpContext;
         for (let i = 0; i < actionableFollowUps.length; i++) {
@@ -109,6 +138,8 @@ export default async function handler(req, res) {
             actionableFollowUps[i].venue,
             actionableFollowUps[i].strategy
           );
+
+          console.log(parsedFollowup.scriptId);
 
           const res = await fetch(
             'http://localhost:5001/activeissues/createActiveIssue',
