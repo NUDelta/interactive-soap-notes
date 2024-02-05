@@ -320,17 +320,27 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   };
 
   // setup tracked data
-  let sprintStories = contextualData.project.tools.sprintLog.stories.map(
-    (story) => {
-      return `[planned story] ${story.description}`;
-    }
-  );
+  let sprintStories;
+  try {
+    sprintStories = contextualData.project.tools.sprintLog.stories.map(
+      (story) => {
+        return `[planned story] ${story.description}`;
+      }
+    );
+  } catch (err) {
+    sprintStories = ['unable to fetch sprint stories'];
+  }
 
-  let sprintPoints = contextualData.project.tools.sprintLog.points.map(
-    (pointsForPerson) => {
-      return `[points summary] ${pointsForPerson.name}: ${pointsForPerson.pointsCommitted.total} committed of ${pointsForPerson.pointsAvailable} available`;
-    }
-  );
+  let sprintPoints;
+  try {
+    sprintPoints = contextualData.project.tools.sprintLog.points.map(
+      (pointsForPerson) => {
+        return `[points summary] ${pointsForPerson.name}: ${pointsForPerson.pointsCommitted.total} committed of ${pointsForPerson.pointsAvailable} available`;
+      }
+    );
+  } catch (err) {
+    sprintPoints = ['unable to fetch sprint points'];
+  }
 
   // setup tracked scripts
   let trackedScripts = triggeredScripts.map((script) => {
