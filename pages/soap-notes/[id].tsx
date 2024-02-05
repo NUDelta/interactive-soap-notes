@@ -271,7 +271,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   let contextualData;
   try {
     const res = await fetch(
-      'http://localhost:5001/organizationalObjects/getComputedOrganizationalObjectsForProject',
+      `${process.env.ORCH_ENGINE}/organizationalObjects/getComputedOrganizationalObjectsForProject`,
       {
         method: 'POST',
         headers: {
@@ -290,10 +290,11 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   let activeScripts;
   try {
     const res = await fetch(
-      'http://localhost:5001/activeIssues/fetchActiveIssuesForProject?' +
-        new URLSearchParams({
-          projectName: currentSoapNote.project,
-        })
+      `${
+        process.env.ORCH_ENGINE
+      }/activeIssues/fetchActiveIssuesForProject?${new URLSearchParams({
+        projectName: currentSoapNote.project,
+      })}`
     );
     activeScripts = await res.json();
   } catch (err) {

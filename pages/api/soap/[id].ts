@@ -142,7 +142,7 @@ export default async function handler(req, res) {
           console.log(parsedFollowup.scriptId);
 
           const res = await fetch(
-            'http://localhost:5001/activeissues/createActiveIssue',
+            `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
             {
               method: 'POST',
               headers: {
