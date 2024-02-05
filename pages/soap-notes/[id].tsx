@@ -7,11 +7,26 @@ import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
 import { mutate } from 'swr';
 import { SOAP } from '../../models/SOAPModel';
 
+const longDate = (date) => {
+  return date.toLocaleDateString('en-us', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+  });
+};
+
 export default function SOAPNote({
   soapNoteInfo,
   data,
   autocompleteTriggersOptions,
 }): JSX.Element {
+  // have state for soap note data
+  const [noteInfo, setNoteInfo] = useState(soapNoteInfo);
+
   // hold data from the current soap notes
   const [soapData, setSoapData] = useState(data);
 
@@ -20,77 +35,80 @@ export default function SOAPNote({
 
   // listen for changes in state and do debounced saves to database
   useEffect(() => {
-    async function saveToDatabase() {
-      setIsSaving(true);
-      setTimeout(async () => {
-        // make request to save the data to the database
-        // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
-        // console.log('saving to database', soapData);
+    setIsSaving(true);
+    const timeOutId = setTimeout(async () => {
+      // make request to save the data to the database
+      // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
+      // console.log('saving to database', soapData);
 
-        // TODO: parse the follow-up scripts into a request
-        // TODO: check if active issue is already in Orchestration Scripts before recreating
-        // split into lines
-        // TODO: make sure OS rejects poorly formed scripts
-        let lines = soapData.plan.split('\n');
+      // TODO: parse the follow-up scripts into a request
+      // TODO: check if active issue is already in Orchestration Scripts before recreating
+      // split into lines
+      // TODO: make sure OS rejects poorly formed scripts
+      let lines = soapData.plan.split('\n');
 
-        // check if any lines have a [script] tag
-        let scripts = lines.filter((line) => line.includes('[script]'));
+      // check if any lines have a [script] tag
+      let scripts = lines.filter((line) => line.includes('[script]'));
 
-        // create objects for each script
-        let output = [];
-        for (let script of scripts) {
-          // check if the script is fully written before adding it to output
-          let splitFollowUp = script.split('[script]')[1].split(':');
-          if (
-            splitFollowUp.length < 2 ||
-            splitFollowUp[1].trim() === '[follow-up to send]'
-          ) {
-            continue;
-          } else {
-            let [venue, strategy] = splitFollowUp;
-            output.push({
-              venue: venue.trim(),
-              strategy: strategy.trim(),
-            });
-          }
-        }
-
-        let dataToSave = {
-          project: soapNoteInfo.project,
-          date: soapNoteInfo.sigDate,
-          sigName: soapNoteInfo.sigName,
-          sigAbbreviation: soapNoteInfo.sigAbbreviation,
-          subjective: soapData.subjective,
-          objective: soapData.objective,
-          assessment: soapData.assessment,
-          plan: soapData.plan,
-          priorContext: soapData.priorContext,
-          notedAssessments: [],
-          followUpContext: output,
-        };
-
-        try {
-          const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
-            method: 'PUT',
-            body: JSON.stringify(dataToSave),
-            headers: {
-              'Content-Type': 'application/json',
-            },
+      // create objects for each script
+      let output = [];
+      for (let script of scripts) {
+        // check if the script is fully written before adding it to output
+        let splitFollowUp = script.split('[script]')[1].split(':');
+        if (
+          splitFollowUp.length < 2 ||
+          splitFollowUp[1].trim() === '[follow-up to send]'
+        ) {
+          continue;
+        } else {
+          let [venue, strategy] = splitFollowUp;
+          output.push({
+            venue: venue.trim(),
+            strategy: strategy.trim(),
           });
-
-          // TODO: last update date isn't working
-          // Update the local data without a revalidation
-          const { data } = await res.json();
-          mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
-        } catch (err) {
-          console.log(err);
         }
+      }
 
-        setIsSaving(false);
-      }, 1000);
-    }
+      let dataToSave = {
+        project: soapNoteInfo.project,
+        date: soapNoteInfo.sigDate,
+        sigName: soapNoteInfo.sigName,
+        sigAbbreviation: soapNoteInfo.sigAbbreviation,
+        subjective: soapData.subjective,
+        objective: soapData.objective,
+        assessment: soapData.assessment,
+        plan: soapData.plan,
+        priorContext: soapData.priorContext,
+        notedAssessments: [],
+        followUpContext: output,
+      };
 
-    saveToDatabase();
+      try {
+        const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(dataToSave),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        // TODO: last update date isn't working
+        // Update the local data without a revalidation
+        const { data } = await res.json();
+        mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
+      } catch (err) {
+        console.log(err);
+      }
+
+      setNoteInfo((prevNoteInfo) => ({
+        ...prevNoteInfo,
+        lastUpdated: longDate(new Date()),
+      }));
+
+      setIsSaving(false);
+    }, 5000);
+
+    return () => clearTimeout(timeOutId);
   }, [soapData, soapNoteInfo]);
 
   // sections of the soap notes
@@ -127,10 +145,10 @@ export default function SOAPNote({
         </div>
         <div className="col-span-2">
           <h1 className="font-bold text-3xl">
-            {soapNoteInfo.project} | {soapNoteInfo.sigDate}
+            {noteInfo.project} | {noteInfo.sigDate}
           </h1>
           <h2 className="font-bold text-lg">
-            Last Updated: {soapNoteInfo.lastUpdated}
+            Last Updated: {noteInfo.lastUpdated}
             <span className="italic text-blue-400">
               {isSaving ? ' Saving...' : ''}
             </span>
@@ -290,17 +308,6 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   });
 
   // fetch data for this specific soap note
-  const longDate = (date) => {
-    return date.toLocaleDateString('en-us', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
-  };
-
   const soapNoteInfo = {
     id: currentSoapNote.id,
     project: currentSoapNote.project,
