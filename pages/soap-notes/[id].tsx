@@ -1,5 +1,5 @@
 import type { GetServerSideProps, NextPage } from 'next';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 import TextBox from '../../components/TextBox';
 import Link from 'next/link';
@@ -33,8 +33,18 @@ export default function SOAPNote({
   // let user know that we are saving
   const [isSaving, setIsSaving] = useState(false);
 
+  // hold a ref that checks if first load
+  const firstLoad = useRef(true);
+
   // listen for changes in state and do debounced saves to database
   useEffect(() => {
+    // don't save on first load
+    if (firstLoad.current) {
+      console.log('first load');
+      firstLoad.current = false;
+      return;
+    }
+
     setIsSaving(true);
     const timeOutId = setTimeout(async () => {
       // make request to save the data to the database
@@ -44,7 +54,8 @@ export default function SOAPNote({
       // TODO: parse the follow-up scripts into a request
       // TODO: check if active issue is already in Orchestration Scripts before recreating
       // split into lines
-      // TODO: make sure OS rejects poorly formed scripts
+      // TODO: make sure OS rejects poorly formed scripts -- doing this already, but make sure the user knows the script was rejected
+      // TODO: show when the script would execute
       let lines = soapData.plan.split('\n');
 
       // check if any lines have a [script] tag
@@ -94,6 +105,7 @@ export default function SOAPNote({
         });
 
         // TODO: last update date isn't working
+        // TODO: why am i doing this lol?
         // Update the local data without a revalidation
         const { data } = await res.json();
         mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
