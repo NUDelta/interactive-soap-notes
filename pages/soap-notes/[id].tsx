@@ -182,7 +182,10 @@ export default function SOAPNote({
                 {soapData.priorContext.tracked === undefined
                   ? 'no context from tools'
                   : soapData.priorContext.tracked.map((str, i) => (
-                      <p key={i}>{str}</p>
+                      <p key={i}>
+                        {str}
+                        <br></br>
+                      </p>
                     ))}
               </p>
             </div>
@@ -195,7 +198,10 @@ export default function SOAPNote({
                 {soapData.priorContext.triggeredScripts === undefined
                   ? 'no detected issuess'
                   : soapData.priorContext.triggeredScripts.map((str, i) => (
-                      <p key={i}>{str}</p>
+                      <p key={i}>
+                        {str}
+                        <br></br>
+                      </p>
                     ))}
               </p>
             </div>
@@ -336,7 +342,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   try {
     sprintStories = contextualData.project.tools.sprintLog.stories.map(
       (story) => {
-        return `[planned story] ${story.description}`;
+        return `- ${story.description}`;
       }
     );
   } catch (err) {
@@ -347,7 +353,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   try {
     sprintPoints = contextualData.project.tools.sprintLog.points.map(
       (pointsForPerson) => {
-        return `[points summary] ${pointsForPerson.name}: ${pointsForPerson.pointsCommitted.total} committed of ${pointsForPerson.pointsAvailable} available`;
+        return `- ${pointsForPerson.name}: ${pointsForPerson.pointsCommitted.total} committed of ${pointsForPerson.pointsAvailable} available`;
       }
     );
   } catch (err) {
@@ -370,7 +376,12 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // - Objective: orchestration scripts that monitor for work practices
   const data = {
     priorContext: {
-      tracked: [].concat(sprintPoints, sprintStories),
+      tracked: [].concat(
+        ['Point Summary'],
+        sprintPoints,
+        ['Sprint Stories'],
+        sprintStories
+      ),
       triggeredScripts: trackedScripts,
       followUpPlans: 'none',
     },

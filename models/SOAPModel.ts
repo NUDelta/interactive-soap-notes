@@ -15,6 +15,7 @@ export interface SOAP {
   followUpContext: object;
 }
 
+// TODO: make the SOAP strings required, but allow 0-length strings (https://stackoverflow.com/questions/44320745/in-mongoose-how-do-i-require-a-string-field-to-not-be-null-or-undefined-permitt)
 const SOAPSchema = new mongoose.Schema<SOAP>({
   project: {
     type: String,
