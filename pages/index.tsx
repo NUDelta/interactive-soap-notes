@@ -13,6 +13,7 @@ export default function Home({ sigs }): JSX.Element {
         </div>
 
         {/* Section for each SIG */}
+        {/* TODO: make into a filterable table */}
         <div className="w-full col-span-2">
           {/* List of SIGs */}
           {sigs.map((sig, i) => (
@@ -24,10 +25,10 @@ export default function Home({ sigs }): JSX.Element {
                 {/* List of SOAP Notes for a SIG */}
                 {sig.soapNotes.map((soapNote) => (
                   <div
-                    className="grid grid-cols-2 gap-y-5 auto-rows-auto w-full"
+                    className="grid grid-cols-4 gap-y-5 auto-rows-auto w-full"
                     key={`${sig.name}-${soapNote.date}`}
                   >
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       <Link
                         href={`/soap-notes/${sig.abbreviation.toLowerCase()}_${encodeURIComponent(
                           soapNote.project
@@ -35,11 +36,13 @@ export default function Home({ sigs }): JSX.Element {
                       >
                         <a>
                           <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
-                            SOAP Notes for {soapNote.project} -- {soapNote.date}
+                            {/* {soapNote.project} -- {soapNote.date} */}
+                            {soapNote.project}
                           </h3>
                         </a>
                       </Link>
                     </div>
+                    <div className="col-span-1">{soapNote.date}</div>
                     <div className="col-span-1">
                       Last Updated: {soapNote.lastUpdated}
                     </div>
@@ -78,7 +81,7 @@ export const getServerSideProps = async () => {
 
     const longDate = (date) => {
       return date.toLocaleDateString('en-us', {
-        weekday: 'long',
+        weekday: 'short',
         year: 'numeric',
         month: 'short',
         day: 'numeric',
