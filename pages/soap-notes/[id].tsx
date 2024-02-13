@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
 import { mutate } from 'swr';
 import { SOAP } from '../../models/SOAPModel';
+import Head from 'next/head';
 
 const longDate = (date) => {
   return date.toLocaleDateString('en-us', {
@@ -146,6 +147,12 @@ export default function SOAPNote({
 
   return (
     <>
+      {/* Set title of the page to be project name */}
+      <Head>
+        <title>{noteInfo.project}</title>
+      </Head>
+
+      {/* Header info for SOAP note */}
       <div className="container m-auto grid grid-cols-2 gap-x-5 gap-y-5 auto-rows-auto w-3/4">
         <div className="col-span-2">
           <Link href="/">

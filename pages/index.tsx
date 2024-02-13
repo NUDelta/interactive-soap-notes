@@ -1,10 +1,14 @@
 import Link from 'next/link';
 import { createSoapNoteFixtures } from '../models/fixtures/soapNotes';
 import { fetchAllSoapNotes } from '../controllers/soapNotes/fetchSoapNotes';
+import Head from 'next/head';
 
 export default function Home({ sigs }): JSX.Element {
   return (
     <>
+      <Head>
+        <title>Home</title>
+      </Head>
       <div className="container m-auto w-3/4">
         <div className="mb-5">
           <h1 className="font-bold text-4xl">
