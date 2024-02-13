@@ -7,6 +7,11 @@ type Data = {
   success: boolean;
 };
 
+/**
+ * Request handler for /api/data
+ * @param req
+ * @param res
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>
@@ -17,7 +22,7 @@ export default async function handler(
   } = req;
 
   switch (method) {
-    case 'POST':
+    case 'POST': // creates soap notes from fixtures
       await createSoapNoteFixtures();
       res.status(200).json({ msg: 'Soap notes created', success: true });
       break;

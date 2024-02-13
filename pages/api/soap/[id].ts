@@ -5,11 +5,9 @@ import crypto from 'crypto';
 
 function parseFollowUpPlans(soapId, projName, venue, strategy) {
   // create object to sent to OS
+  // TODO: see if I can get OS to compute the expiration date of the issue to be the day after it's sent
   let currDate = new Date();
   let weekFromCurrDate = currDate.setDate(currDate.getDate() + 7);
-
-  console.log(currDate);
-  console.log(weekFromCurrDate);
 
   let newActiveIssue = {
     scriptId: crypto
@@ -40,6 +38,8 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     venueOrgObj = 'OfficeHours';
   }
 
+  // TODO: DRY
+  // TODO: add a morning of (next) SIG, after SIG
   let strategyFunction = '';
   if (venue.includes('at studio') || venue.includes('at office hours')) {
     strategyFunction = async function () {
@@ -91,6 +91,12 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
   return newActiveIssue;
 }
 
+/**
+ * Request handler for /api/soap/[id]
+ * @param req
+ * @param res
+ * @returns
+ */
 export default async function handler(req, res) {
   const {
     query: { id },
@@ -103,7 +109,7 @@ export default async function handler(req, res) {
   await dbConnect();
 
   switch (method) {
-    case 'GET':
+    case 'GET': // fetch a SOAP note by [id]
       try {
         const soapNote = await SOAPModel.findById(id);
         if (!soapNote) {
@@ -114,7 +120,7 @@ export default async function handler(req, res) {
         res.status(400).json({ success: false });
       }
       break;
-    case 'PUT':
+    case 'PUT': // update SOAP note of [id] with edits
       try {
         const soapNote = await updateSOAPNote(id, req.body);
 
