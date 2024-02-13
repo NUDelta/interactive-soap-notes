@@ -48,7 +48,7 @@ const parseSoapNotes = (soapNote: object) => {
 
 const parseScriptFollowups = (scriptText: string, projectName: string) => {
   // remove the [script] tag
-  let cleanedScriptText = scriptText.replace('[script]', '').trim();
+  let cleanedScriptText = scriptText.replace('- [script]', '').trim();
   console.log(cleanedScriptText);
 
   // match script text to existing scripts

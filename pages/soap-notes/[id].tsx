@@ -250,6 +250,12 @@ export default function SOAPNote({
                   )}
                   options={autocompleteTriggersOptions[section.name]}
                   onChange={(edits) => {
+                    // if the edit is a newline, automatically add a "-" without initiating a save
+                    if (edits[edits.length - 1] === '\n') {
+                      edits = edits + '- ';
+                    }
+
+                    // update the state with the new data
                     setSoapData((prevSoapData) => {
                       let newSoapData = { ...prevSoapData };
                       newSoapData[section.name] = edits;

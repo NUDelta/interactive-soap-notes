@@ -147,7 +147,7 @@ export default async function handler(req, res) {
 
           console.log(parsedFollowup.scriptId);
 
-          const res = await fetch(
+          const osRes = await fetch(
             `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
             {
               method: 'POST',
@@ -157,7 +157,7 @@ export default async function handler(req, res) {
               body: JSON.stringify(parsedFollowup),
             }
           );
-          console.log(res);
+          console.log('Response from OS on /createActiveIssue: ', osRes);
         }
 
         if (!soapNote) {
