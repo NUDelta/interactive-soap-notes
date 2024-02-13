@@ -170,6 +170,7 @@ export default function SOAPNote({
         </div>
 
         {/* Context for SOAP note */}
+        {/* TODO: make this generate from an object instead of pre-defining sections (tool data, sprint) */}
         <div className="w-full col-span-2">
           <h1 className="font-bold text-2xl border-b  border-black mb-3">
             Tracked Context During the Week
@@ -178,32 +179,32 @@ export default function SOAPNote({
             <div className="col-span-1">
               <h2 className="font-bold text-xl">Tool data</h2>
               <h3 className="font-bold text-lg">Sprint Log</h3>
-              <p>
-                {soapData.priorContext.tracked === undefined
-                  ? 'no context from tools'
-                  : soapData.priorContext.tracked.map((str, i) => (
-                      <p key={i}>
-                        {str}
-                        <br></br>
-                      </p>
-                    ))}
-              </p>
+              {soapData.priorContext.tracked === undefined ? (
+                <p>no context from tools</p>
+              ) : (
+                soapData.priorContext.tracked.map((str, i) => (
+                  <p key={i}>
+                    {str}
+                    <br></br>
+                  </p>
+                ))
+              )}
             </div>
 
             <div className="col-span-1">
               <h2 className="font-bold text-xl">
                 Detected Issues from Orchestration Engine
               </h2>
-              <p>
-                {soapData.priorContext.triggeredScripts === undefined
-                  ? 'no detected issuess'
-                  : soapData.priorContext.triggeredScripts.map((str, i) => (
-                      <p key={i}>
-                        {str}
-                        <br></br>
-                      </p>
-                    ))}
-              </p>
+              {soapData.priorContext.triggeredScripts === undefined ? (
+                <p>no detected issues</p>
+              ) : (
+                soapData.priorContext.triggeredScripts.map((str, i) => (
+                  <p key={i}>
+                    {str}
+                    <br></br>
+                  </p>
+                ))
+              )}
             </div>
             {/* <div className="col-span-1">
               <h2 className="font-bold text-xl">Follow-up plans</h2>

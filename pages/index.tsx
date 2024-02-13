@@ -31,7 +31,7 @@ export default function Home({ sigs }): JSX.Element {
                 {sig.soapNotes.map((soapNote) => (
                   <div
                     className="grid grid-cols-4 gap-y-5 auto-rows-auto w-full"
-                    key={`${sig.name}-${soapNote.date}`}
+                    key={`${soapNote.project}-${soapNote.date}`}
                   >
                     <div className="col-span-2">
                       <Link
