@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { createSoapNoteFixtures } from '../models/fixtures/soapNotes';
 import { fetchAllSoapNotes } from '../controllers/soapNotes/fetchSoapNotes';
 import Head from 'next/head';
+import { longDate } from '../lib/helperFns';
 
 export default function Home({ sigs }): JSX.Element {
   return (
@@ -68,7 +69,6 @@ export const getServerSideProps = async () => {
 
   // fetch all SOAP notes
   const soapNotes = await fetchAllSoapNotes();
-  console.log(soapNotes);
 
   // get a list of SIGs from all SOAP notes
   const sigs = soapNotes.reduce((acc, soapNote) => {
@@ -81,17 +81,6 @@ export const getServerSideProps = async () => {
           day: 'numeric',
         })
         .replace(/\//g, '-');
-    };
-
-    const longDate = (date) => {
-      return date.toLocaleDateString('en-us', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-      });
     };
 
     // check if the SIG is already in the list
@@ -122,6 +111,7 @@ export const getServerSideProps = async () => {
 
     return acc;
   }, []);
+
   return {
     props: { sigs },
   };

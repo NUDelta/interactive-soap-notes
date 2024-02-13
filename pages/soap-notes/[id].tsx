@@ -7,18 +7,7 @@ import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
 import { mutate } from 'swr';
 import { SOAP } from '../../models/SOAPModel';
 import Head from 'next/head';
-
-const longDate = (date) => {
-  return date.toLocaleDateString('en-us', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
-  });
-};
+import { longDate } from '../../lib/helperFns';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -120,7 +109,7 @@ export default function SOAPNote({
 
       setNoteInfo((prevNoteInfo) => ({
         ...prevNoteInfo,
-        lastUpdated: longDate(lastUpdated),
+        lastUpdated: longDate(lastUpdated, true),
       }));
 
       setIsSaving(false);
@@ -345,7 +334,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     sigName: currentSoapNote.sigName,
     sigAbbreviation: currentSoapNote.sigAbbreviation,
     sigDate: longDate(currentSoapNote.date),
-    lastUpdated: longDate(currentSoapNote.lastUpdated),
+    lastUpdated: longDate(currentSoapNote.lastUpdated, true),
   };
 
   // setup tracked data
