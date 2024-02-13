@@ -13,9 +13,9 @@ export const updateSOAPNote = async (id: string, soapNote: object) => {
 
 const parseSoapNotes = (soapNote: object) => {
   // create a new soap note object to hold everything
-  let newSoapNote: SOAP = {
+  let updatedSoapNote: SOAP = {
     date: soapNote['date'],
-    lastUpdated: new Date(),
+    lastUpdated: soapNote['lastUpdated'],
     sigName: soapNote['sigName'],
     sigAbbreviation: soapNote['sigAbbreviation'],
     subjective: soapNote['subjective'],
@@ -32,18 +32,18 @@ const parseSoapNotes = (soapNote: object) => {
   let notedAssessments = currAssessments.filter((assessment) => {
     return assessment.includes('#');
   });
-  newSoapNote.notedAssessments = notedAssessments;
+  updatedSoapNote.notedAssessments = notedAssessments;
 
   // parse out follow up context
   let currFollowups = soapNote['plan'].split('\n');
   let followUpContext = currFollowups.filter((followup) => {
     return followup.includes('[script]');
   });
-  newSoapNote.followUpContext = followUpContext.map((followup) => {
+  updatedSoapNote.followUpContext = followUpContext.map((followup) => {
     return parseScriptFollowups(followup, soapNote.project);
   });
 
-  return newSoapNote;
+  return updatedSoapNote;
 };
 
 const parseScriptFollowups = (scriptText: string, projectName: string) => {

@@ -57,9 +57,12 @@ export default function SOAPNote({
       // split into lines
       // TODO: make sure OS rejects poorly formed scripts -- doing this already, but make sure the user knows the script was rejected
       // TODO: show when the script would execute
-      let lines = soapData.plan.split('\n');
+
+      // hold a last updated timestamp
+      const lastUpdated = new Date();
 
       // check if any lines have a [script] tag
+      let lines = soapData.plan.split('\n');
       let scripts = lines.filter((line) => line.includes('[script]'));
 
       // create objects for each script
@@ -85,6 +88,7 @@ export default function SOAPNote({
       let dataToSave = {
         project: soapNoteInfo.project,
         date: soapNoteInfo.sigDate,
+        lastUpdated: lastUpdated,
         sigName: soapNoteInfo.sigName,
         sigAbbreviation: soapNoteInfo.sigAbbreviation,
         subjective: soapData.subjective,
@@ -116,7 +120,7 @@ export default function SOAPNote({
 
       setNoteInfo((prevNoteInfo) => ({
         ...prevNoteInfo,
-        lastUpdated: longDate(new Date()),
+        lastUpdated: longDate(lastUpdated),
       }));
 
       setIsSaving(false);
