@@ -5,7 +5,10 @@ export default function TextBox({
   value,
   triggers,
   options,
+  onFocus,
+  onBlur,
   onChange,
+  onKeyUp,
 }): JSX.Element {
   return (
     <div className="">
@@ -14,7 +17,10 @@ export default function TextBox({
         options={options}
         placeholder="Type here..."
         value={value}
+        onFocus={onFocus}
+        onBlur={onBlur}
         onChange={onChange}
+        onKeyUp={onKeyUp}
       />
     </div>
   );

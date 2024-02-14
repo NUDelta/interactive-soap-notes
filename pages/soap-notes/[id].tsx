@@ -244,18 +244,44 @@ export default function SOAPNote({
               )}
 
               <div className="">
+                {/* TODO: abstract out the update code */}
                 <TextBox
                   value={soapData[section.name]}
                   triggers={Object.keys(
                     autocompleteTriggersOptions[section.name]
                   )}
                   options={autocompleteTriggersOptions[section.name]}
-                  onChange={(edits) => {
-                    // if the edit is a newline, automatically add a "-" without initiating a save
-                    if (edits[edits.length - 1] === '\n') {
-                      edits = edits + '- ';
+                  onFocus={(e) => {
+                    // add a "- " if the text box is empty
+                    if (e.target.value === '') {
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = '- ';
+                        return newSoapData;
+                      });
                     }
-
+                  }}
+                  onBlur={(e) => {
+                    // remove the dash if the text box is empty
+                    if (e.target.value.trim() === '-') {
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = '';
+                        return newSoapData;
+                      });
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    // add a new line to the text box with a dash when the user presses enter
+                    if (e.key === 'Enter') {
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = `${e.target.value}- `;
+                        return newSoapData;
+                      });
+                    }
+                  }}
+                  onChange={(edits) => {
                     // update the state with the new data
                     setSoapData((prevSoapData) => {
                       let newSoapData = { ...prevSoapData };
