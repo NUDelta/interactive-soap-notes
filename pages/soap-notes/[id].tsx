@@ -178,8 +178,7 @@ export default function SOAPNote({
           </h1>
           <div className="grid grid-cols-2">
             <div className="col-span-1">
-              <h2 className="font-bold text-xl">Tool data</h2>
-              <h3 className="font-bold text-lg">Sprint Log</h3>
+              <h2 className="font-bold text-xl">Sprint Log</h2>
               {soapData.priorContext.tracked === undefined ? (
                 <p>no context from tools</p>
               ) : (
@@ -192,7 +191,7 @@ export default function SOAPNote({
               )}
             </div>
 
-            <div className="col-span-1">
+            {/* <div className="col-span-1">
               <h2 className="font-bold text-xl">
                 Detected Issues from Orchestration Engine
               </h2>
@@ -206,7 +205,7 @@ export default function SOAPNote({
                   </p>
                 ))
               )}
-            </div>
+            </div> */}
             {/* <div className="col-span-1">
               <h2 className="font-bold text-xl">Follow-up plans</h2>
               <p>
@@ -388,7 +387,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   try {
     sprintPoints = contextualData.project.tools.sprintLog.points.map(
       (pointsForPerson) => {
-        return `- ${pointsForPerson.name}: ${pointsForPerson.pointsCommitted.total} committed of ${pointsForPerson.pointsAvailable} available`;
+        return `- ${pointsForPerson.name}: ${pointsForPerson.pointsCommitted.total} points out of ${pointsForPerson.pointsAvailable} committed; ${pointsForPerson.hoursSpent.total} hours spent`;
       }
     );
   } catch (err) {
@@ -397,11 +396,22 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
 
   // setup tracked scripts
   let trackedScripts = triggeredScripts.map((script) => {
-    return `[detected issue] ${script.name} - ${script.strategies}`;
+    return `- [detected issue] ${script.name} - ${script.strategies}`;
   });
-  if (trackedScripts.length === 0) {
-    trackedScripts = ['no detected issues'];
-  }
+  // if (trackedScripts.length === 0) {
+  //   trackedScripts = ['no detected issues'];
+  // }
+
+  // create a text object with scripts added before objective
+  let objectiveTextList = currentSoapNote.objective.split('\n');
+  let filteredObjectiveTextList = objectiveTextList.filter(
+    (line) => !line.includes('[detected issue]')
+  );
+  let objectiveText = trackedScripts
+    .concat(filteredObjectiveTextList)
+    .join('\n')
+    .trim();
+  console.log(objectiveText);
 
   // setup the page with the data from the database
   // TODO: populate view with the following
@@ -421,7 +431,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       followUpPlans: 'none',
     },
     subjective: currentSoapNote.subjective,
-    objective: currentSoapNote.objective,
+    objective: objectiveText,
     assessment: currentSoapNote.assessment,
     plan: currentSoapNote.plan,
   };
