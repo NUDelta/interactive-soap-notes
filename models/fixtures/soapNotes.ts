@@ -9,8 +9,8 @@ const soapNotesForSigs = [
     soapNotes: [
       {
         project: 'Orchestration Scripting Environments',
-        date: new Date('2024-02-05T06:00:00'),
-        lastUpdated: new Date('2024-02-05T06:00:00'),
+        date: new Date('2024-02-12T06:00:00'),
+        lastUpdated: new Date('2024-02-12T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
@@ -26,8 +26,8 @@ const soapNotesForSigs = [
     soapNotes: [
       {
         project: 'Human-AI Tools for Accounting for Differences',
-        date: new Date('2024-02-05T06:00:00'),
-        lastUpdated: new Date('2024-02-05T06:00:00'),
+        date: new Date('2024-02-12T06:00:00'),
+        lastUpdated: new Date('2024-02-12T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
@@ -37,8 +37,8 @@ const soapNotesForSigs = [
       },
       {
         project: 'Reference Systems',
-        date: new Date('2024-02-05T06:00:00'),
-        lastUpdated: new Date('2024-02-05T06:00:00'),
+        date: new Date('2024-02-12T06:00:00'),
+        lastUpdated: new Date('2024-02-12T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
@@ -54,8 +54,8 @@ const soapNotesForSigs = [
     soapNotes: [
       {
         project: 'Human-AI Tools for Concept Expression',
-        date: new Date('2024-02-05T06:00:00'),
-        lastUpdated: new Date('2024-02-05T06:00:00'),
+        date: new Date('2024-02-12T06:00:00'),
+        lastUpdated: new Date('2024-02-12T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
@@ -66,8 +66,8 @@ const soapNotesForSigs = [
       {
         project:
           'Human-AI Tools for Aligning to Machine Representations and Execution',
-        date: new Date('2024-02-05T06:00:00'),
-        lastUpdated: new Date('2024-02-05T06:00:00'),
+        date: new Date('2024-02-12T06:00:00'),
+        lastUpdated: new Date('2024-02-12T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
@@ -83,8 +83,8 @@ const soapNotesForSigs = [
     soapNotes: [
       {
         project: 'How Can Computers Support Dialectical Activities?',
-        date: new Date('2024-02-05T06:00:00'),
-        lastUpdated: new Date('2024-02-05T06:00:00'),
+        date: new Date('2024-02-12T06:00:00'),
+        lastUpdated: new Date('2024-02-12T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
@@ -94,8 +94,8 @@ const soapNotesForSigs = [
       },
       {
         project: 'Prototyping with LLMs',
-        date: new Date('2024-02-05T06:00:00'),
-        lastUpdated: new Date('2024-02-05T06:00:00'),
+        date: new Date('2024-02-12T06:00:00'),
+        lastUpdated: new Date('2024-02-12T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
@@ -111,8 +111,8 @@ const soapNotesForSigs = [
     soapNotes: [
       {
         project: 'Q&A Buddy',
-        date: new Date('2024-02-07T06:00:00'),
-        lastUpdated: new Date('2024-02-07T06:00:00'),
+        date: new Date('2024-02-14T06:00:00'),
+        lastUpdated: new Date('2024-02-14T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
@@ -122,8 +122,8 @@ const soapNotesForSigs = [
       },
       {
         project: 'PATH',
-        date: new Date('2024-02-07T06:00:00'),
-        lastUpdated: new Date('2024-02-07T06:00:00'),
+        date: new Date('2024-02-14T06:00:00'),
+        lastUpdated: new Date('2024-02-14T06:00:00'),
         subjective: '',
         objective: '',
         assessment: '',
