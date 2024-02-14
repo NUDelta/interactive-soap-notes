@@ -46,6 +46,7 @@ const parseSoapNotes = (soapNote: object) => {
   return updatedSoapNote;
 };
 
+// TODO: this is never used since the parsing is happening in pages/api/soap[id].ts
 const parseScriptFollowups = (scriptText: string, projectName: string) => {
   // remove the [script] tag
   let cleanedScriptText = scriptText.replace('- [script]', '').trim();

@@ -77,6 +77,30 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
         }.toString(),
       });
     }.toString();
+  } else if (venue.includes('after SIG')) {
+    strategyFunction = async function () {
+      return await this.messageChannel({
+        message: strategyFromScript,
+        projectName: this.project.name,
+        opportunity: async function () {
+          return this.endOfVenue(
+            this.venues.find(this.where('kind', 'SigMeeting'))
+          );
+        }.toString(),
+      });
+    }.toString();
+  } else if (venue.includes('after studio')) {
+    strategyFunction = async function () {
+      return await this.messageChannel({
+        message: strategyFromScript,
+        projectName: this.project.name,
+        opportunity: async function () {
+          return this.endOfVenue(
+            this.venues.find(this.where('kind', 'StudioMeeting'))
+          );
+        }.toString(),
+      });
+    }.toString();
   }
 
   strategyFunction = strategyFunction.replace(

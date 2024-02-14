@@ -275,6 +275,15 @@ export default function SOAPNote({
                   onKeyUp={(e) => {
                     // add a new line to the text box with a dash when the user presses enter
                     if (e.key === 'Enter') {
+                      // check if it's not a script line
+                      let lines = e.target.value.split('\n');
+                      if (
+                        lines.length >= 1 &&
+                        lines[lines.length - 1].includes('[script]')
+                      ) {
+                        return;
+                      }
+
                       setSoapData((prevSoapData) => {
                         let newSoapData = { ...prevSoapData };
                         newSoapData[section.name] = `${e.target.value}- `;
@@ -451,11 +460,13 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     },
     plan: {
       '[script]': [
-        ' at office hours: [follow-up to send]',
-        ' at studio: [follow-up to send]',
-        ' morning of office hours: [follow-up to send]',
-        ' morning of studio: [follow-up to send]',
-        ' day after SIG: [follow-up to send]',
+        // ' morning of office hours: [follow-up to send]', TODO: detect this properly
+        // ' at office hours: [follow-up to send]',
+        ' after SIG: ',
+        ' day after SIG: ',
+        ' morning of studio: ',
+        ' at studio: ',
+        ' after studio: ',
       ],
       '[follow-up]': [' follow-up template at next SIG meeting'],
     },
