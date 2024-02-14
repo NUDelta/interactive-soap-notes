@@ -165,6 +165,10 @@ export default async function handler(req, res) {
         }
         res.status(200).json({ success: true, data: soapNote });
       } catch (error) {
+        console.error(
+          `Error in PUT for /api/soap/[id] for "${req.body.project}"`,
+          error
+        );
         res.status(400).json({ success: false });
       }
       break;
