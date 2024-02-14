@@ -21,3 +21,17 @@ export const longDate = (
     timeZone: timezone,
   });
 };
+
+/**
+ * Short-form date formatter that includes only the day of the week, year, month, and day.
+ * @param date JavaScript date object.
+ * @returns string formatted date.
+ */
+export const shortDate = (date: Date) => {
+  return date.toLocaleDateString('en-us', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};

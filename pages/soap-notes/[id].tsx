@@ -7,7 +7,7 @@ import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
 import { mutate } from 'swr';
 import { SOAP } from '../../models/SOAPModel';
 import Head from 'next/head';
-import { longDate } from '../../lib/helperFns';
+import { longDate, shortDate } from '../../lib/helperFns';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -340,7 +340,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     project: currentSoapNote.project,
     sigName: currentSoapNote.sigName,
     sigAbbreviation: currentSoapNote.sigAbbreviation,
-    sigDate: longDate(currentSoapNote.date),
+    sigDate: shortDate(currentSoapNote.date),
     lastUpdated: longDate(currentSoapNote.lastUpdated, true),
   };
 
