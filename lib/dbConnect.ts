@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI;
+//configure mongoose to allow for empty strings
+mongoose.Schema.Types.String.checkRequired((v) => typeof v === 'string');
 
+// get the env variable for mongodb
+const MONGODB_URI = process.env.MONGODB_URI;
 if (!MONGODB_URI) {
   throw new Error(
     'Please define the MONGODB_URI environment variable inside .env.local'
