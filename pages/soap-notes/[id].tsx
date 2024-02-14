@@ -122,19 +122,20 @@ export default function SOAPNote({
   const sections = [
     {
       name: 'subjective',
-      title: 'Additional Context from Mentor',
+      title: 'Subjective information from student(s)',
     },
-    // {
-    //   name: 'objective',
-    //   title: 'O - Objective data corresponding with students assessment',
-    // },
+    {
+      name: 'objective',
+      title: 'Objective information matching student(s) summary',
+    },
     {
       name: 'assessment',
-      title: 'Assessment of root causes or practices',
+      title:
+        'Assessment of situation (e.g., obstacles to practice; metacogntive blockers)',
     },
     {
       name: 'plan',
-      title: 'Plan for Follow-Ups',
+      title: 'Plan for follow-up and check-ins',
     },
   ];
 
@@ -173,7 +174,7 @@ export default function SOAPNote({
         {/* TODO: make this generate from an object instead of pre-defining sections (tool data, sprint) */}
         <div className="w-full col-span-2">
           <h1 className="font-bold text-2xl border-b  border-black mb-3">
-            Tracked Context During the Week
+            Tracked Context
           </h1>
           <div className="grid grid-cols-2">
             <div className="col-span-1">
@@ -239,7 +240,8 @@ export default function SOAPNote({
               {section.name === 'plan' && (
                 <h2 className="text-sm color-grey">
                   Add plans for Orchestration Engine to follow-up on by typing,
-                  &quot;[script]&quot;
+                  &quot;[script]&quot;. These will be sent to the students&apos;
+                  project channel.
                 </h2>
               )}
 
