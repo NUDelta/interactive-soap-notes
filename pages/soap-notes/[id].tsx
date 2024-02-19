@@ -147,7 +147,7 @@ export default function SOAPNote({
       </Head>
 
       {/* Header info for SOAP note */}
-      <div className="container m-auto grid grid-cols-2 gap-x-5 gap-y-5 auto-rows-auto w-3/4">
+      <div className="container m-auto grid grid-cols-2 gap-x-5 gap-y-5 auto-rows-auto w-3/4 mt-3">
         <div className="col-span-2">
           <Link href="/">
             <h3 className="text-md text-blue-600 hover:text-blue-800 visited:text-purple-600">
