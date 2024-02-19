@@ -39,12 +39,10 @@ export default function Home({ sigs }): JSX.Element {
                           soapNote.project
                         )}_${soapNote.date}`}
                       >
-                        <a>
-                          <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
-                            {/* {soapNote.project} -- {soapNote.date} */}
-                            {soapNote.project}
-                          </h3>
-                        </a>
+                        <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                          {/* {soapNote.project} -- {soapNote.date} */}
+                          {soapNote.project}
+                        </h3>
                       </Link>
                     </div>
                     <div className="col-span-1">{soapNote.date}</div>
@@ -78,7 +76,7 @@ export const getServerSideProps = async () => {
         .toLocaleDateString('en-us', {
           year: 'numeric',
           month: 'numeric',
-          day: 'numeric',
+          day: 'numeric'
         })
         .replace(/\//g, '-');
     };
@@ -96,16 +94,16 @@ export const getServerSideProps = async () => {
           {
             project: soapNote.project,
             date: shortDate(soapNote.date),
-            lastUpdated: longDate(soapNote.lastUpdated),
-          },
-        ],
+            lastUpdated: longDate(soapNote.lastUpdated)
+          }
+        ]
       });
     } else {
       // add the SOAP note to the SIG's list of SOAP notes
       acc[sigIndex].soapNotes.push({
         project: soapNote.project,
         date: shortDate(soapNote.date),
-        lastUpdated: longDate(soapNote.lastUpdated),
+        lastUpdated: longDate(soapNote.lastUpdated)
       });
     }
 
@@ -113,6 +111,6 @@ export const getServerSideProps = async () => {
   }, []);
 
   return {
-    props: { sigs },
+    props: { sigs }
   };
 };

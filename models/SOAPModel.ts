@@ -19,52 +19,52 @@ export interface SOAP {
 const SOAPSchema = new mongoose.Schema<SOAP>({
   project: {
     type: String,
-    required: true,
+    required: true
   },
   date: {
     type: Date,
-    required: true,
+    required: true
   },
   lastUpdated: {
     type: Date,
-    required: true,
+    required: true
   },
   sigName: {
     type: String,
-    required: true,
+    required: true
   },
   sigAbbreviation: {
     type: String,
-    required: true,
+    required: true
   },
   subjective: {
     type: String,
-    required: true,
+    required: true
   },
   objective: {
     type: String,
-    required: true,
+    required: true
   },
   assessment: {
     type: String,
-    required: true,
+    required: true
   },
   plan: {
     type: String,
-    required: true,
+    required: true
   },
   priorContext: {
     type: Object,
-    required: true,
+    required: true
   },
   notedAssessments: {
     type: Object,
-    required: true,
+    required: true
   },
   followUpContext: {
     type: Object,
-    required: true,
-  },
+    required: true
+  }
 });
 
 export default (mongoose.models.SOAPNote as mongoose.Model<SOAP>) ||

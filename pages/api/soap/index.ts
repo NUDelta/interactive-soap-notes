@@ -20,7 +20,7 @@ export default async function handler(
 ) {
   const {
     query: { id },
-    method,
+    method
   } = req;
   switch (method) {
     case 'POST': // creates soap notes from input
@@ -33,7 +33,7 @@ export default async function handler(
         res.status(200).json({
           msg: 'Soap note created',
           success: true,
-          data: createdSOAPNote,
+          data: createdSOAPNote
         });
       } catch (error) {
         console.error(
@@ -43,7 +43,7 @@ export default async function handler(
         res.status(400).json({
           msg: 'Soap note not created',
           success: false,
-          error: error,
+          error: error
         });
       }
 

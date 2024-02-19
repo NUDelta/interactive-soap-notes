@@ -4,5 +4,5 @@ export const taskModel = [
   'planning/risk-assessment',
   'planning/stories',
   'planning/deliverables',
-  'planning/tasks',
+  'planning/tasks'
 ];

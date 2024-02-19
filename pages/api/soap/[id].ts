@@ -21,13 +21,13 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     shouldRepeat: false,
     issueTarget: {
       targetType: 'project',
-      name: projName,
+      name: projName
     },
     strategyToEnact: {
       name: `actionable follow-up for ${projName} in ${venue}`,
       description: strategy,
-      strategy_function: '',
-    },
+      strategy_function: ''
+    }
   };
 
   // compute strategy function
@@ -50,7 +50,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
           return await this.startOfVenue(
             await this.venues.find(this.where('kind', venueOrgObj))
           );
-        }.toString(),
+        }.toString()
       });
     }.toString();
   } else if (venue.includes('morning')) {
@@ -62,7 +62,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
           return await this.morningOfVenue(
             await this.venues.find(this.where('kind', venueOrgObj))
           );
-        }.toString(),
+        }.toString()
       });
     }.toString();
   } else if (venue.includes('day after SIG')) {
@@ -74,7 +74,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
           let today = new Date();
           today.setMinutes(0, 0, 0);
           return await this.daysAfter(today, 1);
-        }.toString(),
+        }.toString()
       });
     }.toString();
   } else if (venue.includes('after SIG')) {
@@ -86,7 +86,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
           return this.endOfVenue(
             this.venues.find(this.where('kind', 'SigMeeting'))
           );
-        }.toString(),
+        }.toString()
       });
     }.toString();
   } else if (venue.includes('after studio')) {
@@ -98,7 +98,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
           return this.endOfVenue(
             this.venues.find(this.where('kind', 'StudioMeeting'))
           );
-        }.toString(),
+        }.toString()
       });
     }.toString();
   }
@@ -124,7 +124,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
 export default async function handler(req, res) {
   const {
     query: { id },
-    method,
+    method
   } = req;
 
   console.log('id', id);
@@ -176,9 +176,9 @@ export default async function handler(req, res) {
             {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json'
               },
-              body: JSON.stringify(parsedFollowup),
+              body: JSON.stringify(parsedFollowup)
             }
           );
           console.log('Response from OS on /createActiveIssue: ', osRes);

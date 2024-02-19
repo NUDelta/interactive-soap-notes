@@ -32,7 +32,7 @@ export const fetchSoapNote = async (
   let currentSoapNote = await SOAPModel.findOne({
     sigAbbreviation: sigName.toUpperCase(),
     project: project,
-    date: { $gte: startDate, $lte: endDate },
+    date: { $gte: startDate, $lte: endDate }
   });
 
   // get previous SOAP note for context
@@ -40,13 +40,13 @@ export const fetchSoapNote = async (
   // TODO: think about a compact and "full" representation of the sections that a user can switch between
   let priorSoapNote = await SOAPModel.findOne({
     sigAbbreviation: sigName.toUpperCase(),
-    date: { $lt: startDate },
+    date: { $lt: startDate }
   });
 
   if (priorSoapNote) {
     currentSoapNote.priorContext = {
       notedAssessments: priorSoapNote.notedAssessments,
-      followUpPlans: priorSoapNote.plan,
+      followUpPlans: priorSoapNote.plan
     };
     await currentSoapNote.save();
   }

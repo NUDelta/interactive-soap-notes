@@ -12,7 +12,7 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
     const projInfoRes = await fetch(
       `${process.env.STUDIO_API}/projects/byName?${new URLSearchParams({
         populateTools: 'false',
-        projectName: projectName,
+        projectName: projectName
       })}`
     );
     let projInfo = await projInfoRes.json();
@@ -44,7 +44,7 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
       plan: '',
       priorContext: [],
       notedAssessments: [],
-      followUpContext: [],
+      followUpContext: []
     });
   } catch (err) {
     console.log(err);

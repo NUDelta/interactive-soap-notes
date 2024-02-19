@@ -7,7 +7,7 @@ export const updateSOAPNote = async (id: string, soapNote: object) => {
   await dbConnect();
   return await SOAPModel.findByIdAndUpdate(id, soapNoteUpdatedContent, {
     new: true,
-    runValidators: true,
+    runValidators: true
   });
 };
 
@@ -24,7 +24,7 @@ const parseSoapNotes = (soapNote: object) => {
     plan: soapNote['plan'],
     priorContext: [],
     notedAssessments: [],
-    followUpContext: [],
+    followUpContext: []
   };
 
   // parse out noted assessments
@@ -56,10 +56,10 @@ const parseScriptFollowups = (scriptText: string, projectName: string) => {
   let outputScript = {
     target: {
       type: '',
-      value: '',
+      value: ''
     },
     opportunity: '',
-    message: '',
+    message: ''
   };
   let scriptMessage = '';
   if (cleanedScriptText.includes('at office hours')) {
@@ -85,7 +85,7 @@ const parseScriptFollowups = (scriptText: string, projectName: string) => {
   // TOOD: populate properly
   outputScript.target = {
     type: 'project',
-    value: projectName,
+    value: projectName
   };
   outputScript.message = scriptMessage.trim();
 

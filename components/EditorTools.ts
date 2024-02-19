@@ -9,5 +9,5 @@ export const EDITOR_TOOLS = {
   list: List,
   image: SimpleImage,
   table: Table,
-  code: Code,
+  code: Code
 };

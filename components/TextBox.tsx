@@ -8,7 +8,7 @@ export default function TextBox({
   onFocus,
   onBlur,
   onChange,
-  onKeyUp,
+  onKeyUp
 }): JSX.Element {
   return (
     <div className="">
