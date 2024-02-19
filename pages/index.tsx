@@ -39,12 +39,10 @@ export default function Home({ sigs }): JSX.Element {
                           soapNote.project
                         )}_${soapNote.date}`}
                       >
-                        <a>
-                          <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
-                            {/* {soapNote.project} -- {soapNote.date} */}
-                            {soapNote.project}
-                          </h3>
-                        </a>
+                        <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                          {/* {soapNote.project} -- {soapNote.date} */}
+                          {soapNote.project}
+                        </h3>
                       </Link>
                     </div>
                     <div className="col-span-1">{soapNote.date}</div>

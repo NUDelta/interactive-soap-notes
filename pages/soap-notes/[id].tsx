@@ -150,11 +150,9 @@ export default function SOAPNote({
       <div className="container m-auto grid grid-cols-2 gap-x-5 gap-y-5 auto-rows-auto w-3/4">
         <div className="col-span-2">
           <Link href="/">
-            <a>
-              <h3 className="text-md text-blue-600 hover:text-blue-800 visited:text-purple-600">
-                &#8592; Back
-              </h3>
-            </a>
+            <h3 className="text-md text-blue-600 hover:text-blue-800 visited:text-purple-600">
+              &#8592; Back
+            </h3>
           </Link>
         </div>
         <div className="col-span-2">
@@ -192,30 +190,30 @@ export default function SOAPNote({
             </div>
 
             {/* <div className="col-span-1">
-              <h2 className="font-bold text-xl">
-                Detected Issues from Orchestration Engine
-              </h2>
-              {soapData.priorContext.triggeredScripts === undefined ? (
-                <p>no detected issues</p>
-              ) : (
-                soapData.priorContext.triggeredScripts.map((str, i) => (
-                  <p key={i}>
-                    {str}
-                    <br></br>
-                  </p>
-                ))
-              )}
-            </div> */}
+            <h2 className="font-bold text-xl">
+              Detected Issues from Orchestration Engine
+            </h2>
+            {soapData.priorContext.triggeredScripts === undefined ? (
+              <p>no detected issues</p>
+            ) : (
+              soapData.priorContext.triggeredScripts.map((str, i) => (
+                <p key={i}>
+                  {str}
+                  <br></br>
+                </p>
+              ))
+            )}
+          </div> */}
             {/* <div className="col-span-1">
-              <h2 className="font-bold text-xl">Follow-up plans</h2>
-              <p>
-                {soapData.priorContext.followUpPlans === undefined
-                  ? 'none'
-                  : soapData.priorContext.followUpPlans
-                      .split('\n')
-                      .map((str, i) => <p key={i}>{str}</p>)}
-              </p>
-            </div> */}
+            <h2 className="font-bold text-xl">Follow-up plans</h2>
+            <p>
+              {soapData.priorContext.followUpPlans === undefined
+                ? 'none'
+                : soapData.priorContext.followUpPlans
+                    .split('\n')
+                    .map((str, i) => <p key={i}>{str}</p>)}
+            </p>
+          </div> */}
           </div>
         </div>
 
@@ -305,15 +303,15 @@ export default function SOAPNote({
           ))}
 
           {/* Define actionable follow-ups a mentor can input
-          <div>
-            <h2 className="font-bold text-xl">Actionable follow-ups</h2>
-            <select name="cars" id="cars">
-              <option value="volvo">Volvo</option>
-              <option value="saab">Saab</option>
-              <option value="mercedes">Mercedes</option>
-              <option value="audi">Audi</option>
-            </select>
-          </div> */}
+        <div>
+          <h2 className="font-bold text-xl">Actionable follow-ups</h2>
+          <select name="cars" id="cars">
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="mercedes">Mercedes</option>
+            <option value="audi">Audi</option>
+          </select>
+        </div> */}
         </div>
       </div>
     </>
