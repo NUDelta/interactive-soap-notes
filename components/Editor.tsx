@@ -29,7 +29,7 @@ const Editor = ({ data, onChange, holder }: Props) => {
         },
         hideToolbar: false,
         inlineToolbar: true,
-        placeholder: 'Start typing here...',
+        placeholder: 'Start typing here...'
       });
       ref.current = editor;
     }

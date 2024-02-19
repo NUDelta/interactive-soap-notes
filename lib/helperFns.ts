@@ -18,7 +18,7 @@ export const longDate = (
     hour: 'numeric',
     minute: 'numeric',
     second: includeSeconds ? 'numeric' : undefined,
-    timeZone: timezone,
+    timeZone: timezone
   });
 };
 
@@ -32,6 +32,6 @@ export const shortDate = (date: Date) => {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
+    day: 'numeric'
   });
 };

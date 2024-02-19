@@ -76,7 +76,7 @@ export const getServerSideProps = async () => {
         .toLocaleDateString('en-us', {
           year: 'numeric',
           month: 'numeric',
-          day: 'numeric',
+          day: 'numeric'
         })
         .replace(/\//g, '-');
     };
@@ -94,16 +94,16 @@ export const getServerSideProps = async () => {
           {
             project: soapNote.project,
             date: shortDate(soapNote.date),
-            lastUpdated: longDate(soapNote.lastUpdated),
-          },
-        ],
+            lastUpdated: longDate(soapNote.lastUpdated)
+          }
+        ]
       });
     } else {
       // add the SOAP note to the SIG's list of SOAP notes
       acc[sigIndex].soapNotes.push({
         project: soapNote.project,
         date: shortDate(soapNote.date),
-        lastUpdated: longDate(soapNote.lastUpdated),
+        lastUpdated: longDate(soapNote.lastUpdated)
       });
     }
 
@@ -111,6 +111,6 @@ export const getServerSideProps = async () => {
   }, []);
 
   return {
-    props: { sigs },
+    props: { sigs }
   };
 };

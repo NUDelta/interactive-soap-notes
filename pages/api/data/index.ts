@@ -18,7 +18,7 @@ export default async function handler(
 ) {
   const {
     query: { id },
-    method,
+    method
   } = req;
 
   switch (method) {

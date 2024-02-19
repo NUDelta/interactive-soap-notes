@@ -12,7 +12,7 @@ import { longDate, shortDate } from '../../lib/helperFns';
 export default function SOAPNote({
   soapNoteInfo,
   data,
-  autocompleteTriggersOptions,
+  autocompleteTriggersOptions
 }): JSX.Element {
   // have state for soap note data
   const [noteInfo, setNoteInfo] = useState(soapNoteInfo);
@@ -69,7 +69,7 @@ export default function SOAPNote({
           let [venue, strategy] = splitFollowUp;
           output.push({
             venue: venue.trim(),
-            strategy: strategy.trim(),
+            strategy: strategy.trim()
           });
         }
       }
@@ -86,7 +86,7 @@ export default function SOAPNote({
         plan: soapData.plan,
         priorContext: soapData.priorContext,
         notedAssessments: [],
-        followUpContext: output,
+        followUpContext: output
       };
 
       try {
@@ -94,8 +94,8 @@ export default function SOAPNote({
           method: 'PUT',
           body: JSON.stringify(dataToSave),
           headers: {
-            'Content-Type': 'application/json',
-          },
+            'Content-Type': 'application/json'
+          }
         });
 
         // TODO: last update date isn't working
@@ -109,7 +109,7 @@ export default function SOAPNote({
 
       setNoteInfo((prevNoteInfo) => ({
         ...prevNoteInfo,
-        lastUpdated: longDate(lastUpdated, true),
+        lastUpdated: longDate(lastUpdated, true)
       }));
 
       setIsSaving(false);
@@ -122,21 +122,21 @@ export default function SOAPNote({
   const sections = [
     {
       name: 'subjective',
-      title: 'Subjective information from student(s)',
+      title: 'Subjective information from student(s)'
     },
     {
       name: 'objective',
-      title: 'Objective information matching student(s) summary',
+      title: 'Objective information matching student(s) summary'
     },
     {
       name: 'assessment',
       title:
-        'Assessment of situation (e.g., obstacles to practice; metacogntive blockers)',
+        'Assessment of situation (e.g., obstacles to practice; metacogntive blockers)'
     },
     {
       name: 'plan',
-      title: 'Plan for follow-up and check-ins',
-    },
+      title: 'Plan for follow-up and check-ins'
+    }
   ];
 
   return (
@@ -334,9 +334,9 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ projectName: currentSoapNote.project }),
+        body: JSON.stringify({ projectName: currentSoapNote.project })
       }
     );
 
@@ -352,7 +352,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       `${
         process.env.ORCH_ENGINE
       }/activeIssues/fetchActiveIssuesForProject?${new URLSearchParams({
-        projectName: currentSoapNote.project,
+        projectName: currentSoapNote.project
       })}`
     );
     activeScripts = await res.json();
@@ -364,7 +364,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   const triggeredScripts = activeScripts.map((script) => {
     return {
       name: script.name,
-      strategies: script.computed_strategies[0].outlet_args.message,
+      strategies: script.computed_strategies[0].outlet_args.message
     };
   });
 
@@ -375,7 +375,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     sigName: currentSoapNote.sigName,
     sigAbbreviation: currentSoapNote.sigAbbreviation,
     sigDate: shortDate(currentSoapNote.date),
-    lastUpdated: longDate(currentSoapNote.lastUpdated, true),
+    lastUpdated: longDate(currentSoapNote.lastUpdated, true)
   };
 
   // setup tracked data
@@ -435,12 +435,12 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
         sprintStories
       ),
       triggeredScripts: trackedScripts,
-      followUpPlans: 'none',
+      followUpPlans: 'none'
     },
     subjective: currentSoapNote.subjective,
     objective: objectiveText,
     assessment: currentSoapNote.assessment,
-    plan: currentSoapNote.plan,
+    plan: currentSoapNote.plan
   };
 
   // setup triggers and options for each section's text boxes
@@ -453,8 +453,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
         'planning/risk-assessment',
         'planning/stories',
         'planning/deliverables',
-        'planning/tasks',
-      ],
+        'planning/tasks'
+      ]
     },
     plan: {
       '[script]': [
@@ -464,13 +464,13 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
         ' day after SIG: ',
         ' morning of studio: ',
         ' at studio: ',
-        ' after studio: ',
+        ' after studio: '
       ],
-      '[follow-up]': [' follow-up template at next SIG meeting'],
-    },
+      '[follow-up]': [' follow-up template at next SIG meeting']
+    }
   };
 
   return {
-    props: { soapNoteInfo, data, autocompleteTriggersOptions },
+    props: { soapNoteInfo, data, autocompleteTriggersOptions }
   };
 };
