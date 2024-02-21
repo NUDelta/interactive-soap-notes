@@ -11,17 +11,14 @@ import TextBox from './TextBox';
 export default function Issue({
   issueIndex,
   title,
-  summary,
   diagSections,
   summarySections,
   autocompleteTriggersOptions,
-  soapData, // TODO: have pieces passsed individually
-  setSoapData, // TODO: have a save function that takes which issue is being edited and which section was updated, and send that back to the main view
-  detectedIssues,
-  followUpPlans
+  soapData,
+  setSoapData
 }): JSX.Element {
   const [isDiagMode, setDiagMode] = useState(true);
-  const [shouldHideContent, setShouldHideContent] = useState(false);
+  const [shouldHideContent, setShouldHideContent] = useState(true);
 
   return (
     <div className="border p-2 mb-5">

@@ -31,7 +31,6 @@ export default function SOAPNote({
   useEffect(() => {
     // don't save on first load
     if (firstLoad.current) {
-      console.log('first load');
       firstLoad.current = false;
       return;
     }
@@ -54,6 +53,7 @@ export default function SOAPNote({
       // check if any lines have a [script] tag
       // TODO: need to repeat this on every issue
       for (let issue of soapData.issues) {
+        // parse individual lines of the plan for the current issue
         let lines = issue.plan.split('\n');
         let scripts = lines.filter((line) => line.includes('[script]'));
 
@@ -92,23 +92,23 @@ export default function SOAPNote({
         followUpContext: {}
       };
 
-      // try {
-      //   const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
-      //     method: 'PUT',
-      //     body: JSON.stringify(dataToSave),
-      //     headers: {
-      //       'Content-Type': 'application/json'
-      //     }
-      //   });
+      try {
+        const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(dataToSave),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-      //   // TODO: last update date isn't working
-      //   // TODO: why am i doing this lol?
-      //   // Update the local data without a revalidation
-      //   const { data } = await res.json();
-      //   mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
-      // } catch (err) {
-      //   console.log(err);
-      // }
+        // TODO: last update date isn't working
+        // TODO: why am i doing this lol?
+        // Update the local data without a revalidation
+        const { data } = await res.json();
+        mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
+      } catch (err) {
+        console.error(err);
+      }
 
       setNoteInfo((prevNoteInfo) => ({
         ...prevNoteInfo,
@@ -243,7 +243,6 @@ export default function SOAPNote({
               key={`issue-index-${i}`}
               issueIndex={i}
               title={issue.title}
-              summary={issue.summary}
               diagSections={diagnosisSections}
               summarySections={summarySections}
               autocompleteTriggersOptions={autocompleteTriggersOptions}
@@ -256,8 +255,6 @@ export default function SOAPNote({
                 followUpPlans: issue.followUpPlans
               }}
               setSoapData={setSoapData} // TODO: this needs to be per issue
-              detectedIssues=""
-              followUpPlans=""
             />
           ))}
           <button
@@ -313,7 +310,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
 
     contextualData = await res.json();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 
   // TODO: get active scripts from OS
@@ -328,9 +325,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     );
     activeScripts = await res.json();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
-  console.log(activeScripts);
 
   const triggeredScripts = activeScripts.map((script) => {
     return {
@@ -375,23 +371,32 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // setup tracked scripts
   // check if title doesn't match any existing issue titles
   // TODO: should have the context from what triggered the script injected into the issue object
-  // TODO: sort by detected issues first
+  // TODO: having to recurisvely strip obj id's for some reason...
   let noteIssues = currentSoapNote.toObject().issues;
+  noteIssues = noteIssues.map((issue) => {
+    return {
+      title: issue.title,
+      subjective: issue.subjective,
+      objective: issue.objective,
+      assessment: issue.assessment,
+      plan: issue.plan,
+      summary: issue.summary,
+      followUpPlans: issue.followUpPlans.map((followup) => {
+        return {
+          venue: followup.venue,
+          strategy: followup.strategy
+        };
+      })
+    };
+  });
+
   for (let script of triggeredScripts) {
-    let title = script.name;
+    let title = `[detected issue] ${script.name} - ${script.strategies}`;
     let titleIndex = noteIssues.findIndex((issue) => issue.title === title);
+
     if (titleIndex === -1) {
-      console.log('new issue to add', {
-        title: `[detected issue] ${title} - ${script.strategies}`,
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
-        summary: '',
-        followUpPlans: []
-      });
       noteIssues.push({
-        title: `[detected issue] ${title} - ${script.strategies}`,
+        title: title,
         subjective: '',
         objective: '',
         assessment: '',
@@ -401,6 +406,15 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       });
     }
   }
+
+  // sort noteIssues by [detected issues] first
+  noteIssues.sort((a, b) => {
+    if (a.title.includes('[detected issue]')) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
 
   // setup the page with the data from the database
   // TODO: populate view with the following
@@ -421,8 +435,6 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     },
     issues: noteIssues
   };
-
-  console.log('note data', data);
 
   // setup triggers and options for each section's text boxes
   // TODO: have controllers that abstract this

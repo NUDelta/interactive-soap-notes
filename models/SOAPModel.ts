@@ -19,7 +19,12 @@ export interface IssueStruct {
   assessment: string;
   plan: string;
   summary: string;
-  followUpPlans: string[];
+  followUpPlans: ScriptObj[];
+}
+
+interface ScriptObj {
+  venue: string;
+  strategy: string;
 }
 
 const SOAPSchema = new mongoose.Schema<SOAPStruct>({
@@ -52,7 +57,12 @@ const SOAPSchema = new mongoose.Schema<SOAPStruct>({
         assessment: String,
         plan: String,
         summary: String,
-        followUpPlans: [String]
+        followUpPlans: [
+          {
+            venue: String,
+            strategy: String
+          }
+        ]
       }
     ],
     required: true,

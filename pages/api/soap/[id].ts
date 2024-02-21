@@ -126,10 +126,6 @@ export default async function handler(req, res) {
     query: { id },
     method
   } = req;
-
-  console.log('id', id);
-  console.log('body', req.body);
-
   await dbConnect();
 
   switch (method) {
@@ -148,19 +144,13 @@ export default async function handler(req, res) {
       try {
         const soapNote = await updateSOAPNote(id, req.body);
 
-        // // TODO: run middleware to parse out parts of soap notes
-        // // update timestamp
-        // req.body.lastUpdated = new Date();
-
-        // const soapNote = await SOAPModel.findByIdAndUpdate(id, req.body, {
-        //   new: true,
-        //   runValidators: true,
-        // });
-        // console.log(soapNote);
-
         // TODO: updateSOAPNote is already parsing the code; so parseFollowUpPlans is redundant
         // parse actionable followups
-        let actionableFollowUps = req.body.followUpContext;
+        let actionableFollowUps = req.body['issues']
+          .map((issue) => {
+            return issue['followUpPlans'];
+          })
+          .flat();
         for (let i = 0; i < actionableFollowUps.length; i++) {
           let parsedFollowup = parseFollowUpPlans(
             id,
@@ -168,8 +158,6 @@ export default async function handler(req, res) {
             actionableFollowUps[i].venue,
             actionableFollowUps[i].strategy
           );
-
-          console.log(parsedFollowup.scriptId);
 
           const osRes = await fetch(
             `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
