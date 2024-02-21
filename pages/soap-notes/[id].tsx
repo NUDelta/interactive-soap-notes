@@ -2,10 +2,11 @@ import type { GetServerSideProps, NextPage } from 'next';
 import { useEffect, useState, useRef } from 'react';
 
 import TextBox from '../../components/TextBox';
+import Issue from '../../components/Issue';
 import Link from 'next/link';
 import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
 import { mutate } from 'swr';
-import { SOAP } from '../../models/SOAPModel';
+import { SOAPStruct, IssueStruct } from '../../models/SOAPModel';
 import Head from 'next/head';
 import { longDate, shortDate } from '../../lib/helperFns';
 
@@ -30,7 +31,6 @@ export default function SOAPNote({
   useEffect(() => {
     // don't save on first load
     if (firstLoad.current) {
-      console.log('first load');
       firstLoad.current = false;
       return;
     }
@@ -51,27 +51,33 @@ export default function SOAPNote({
       const lastUpdated = new Date();
 
       // check if any lines have a [script] tag
-      let lines = soapData.plan.split('\n');
-      let scripts = lines.filter((line) => line.includes('[script]'));
+      // TODO: need to repeat this on every issue
+      for (let issue of soapData.issues) {
+        // parse individual lines of the plan for the current issue
+        let lines = issue.plan.split('\n');
+        let scripts = lines.filter((line) => line.includes('[script]'));
 
-      // create objects for each script
-      let output = [];
-      for (let script of scripts) {
-        // check if the script is fully written before adding it to output
-        let splitFollowUp = script.split('[script]')[1].split(':');
-        if (
-          splitFollowUp.length < 2 ||
-          splitFollowUp[1].trim() === '[follow-up to send]' ||
-          splitFollowUp[1].trim() === ''
-        ) {
-          continue;
-        } else {
-          let [venue, strategy] = splitFollowUp;
-          output.push({
-            venue: venue.trim(),
-            strategy: strategy.trim()
-          });
+        // create objects for each script
+        let output = [];
+        for (let script of scripts) {
+          // check if the script is fully written before adding it to output
+          let splitFollowUp = script.split('[script]')[1].split(':');
+          if (
+            splitFollowUp.length < 2 ||
+            splitFollowUp[1].trim() === '[follow-up to send]' ||
+            splitFollowUp[1].trim() === ''
+          ) {
+            continue;
+          } else {
+            let [venue, strategy] = splitFollowUp;
+            output.push({
+              venue: venue.trim(),
+              strategy: strategy.trim()
+            });
+          }
         }
+
+        issue.followUpPlans = output;
       }
 
       let dataToSave = {
@@ -80,13 +86,10 @@ export default function SOAPNote({
         lastUpdated: lastUpdated,
         sigName: soapNoteInfo.sigName,
         sigAbbreviation: soapNoteInfo.sigAbbreviation,
-        subjective: soapData.subjective,
-        objective: soapData.objective,
-        assessment: soapData.assessment,
-        plan: soapData.plan,
+        issues: soapData.issues,
         priorContext: soapData.priorContext,
         notedAssessments: [],
-        followUpContext: output
+        followUpContext: {}
       };
 
       try {
@@ -104,7 +107,7 @@ export default function SOAPNote({
         const { data } = await res.json();
         mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
 
       setNoteInfo((prevNoteInfo) => ({
@@ -119,7 +122,7 @@ export default function SOAPNote({
   }, [soapData, soapNoteInfo]);
 
   // sections of the soap notes
-  const sections = [
+  const diagnosisSections = [
     {
       name: 'subjective',
       title: 'Subjective information from student(s)'
@@ -132,6 +135,17 @@ export default function SOAPNote({
       name: 'assessment',
       title:
         'Assessment of situation (e.g., obstacles to practice; metacogntive blockers)'
+    },
+    {
+      name: 'plan',
+      title: 'Plan for follow-up and check-ins'
+    }
+  ];
+
+  const summarySections = [
+    {
+      name: 'summary',
+      title: 'Summary of issue'
     },
     {
       name: 'plan',
@@ -221,97 +235,50 @@ export default function SOAPNote({
         {/* Create a section for each component of the SOAP notes */}
         {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
         <div className="w-full col-span-2">
-          <h1 className="font-bold text-2xl border-b  border-black mb-3">
+          <h1 className="font-bold text-2xl border-b border-black mb-3">
             This week&apos;s notes
           </h1>
-          {sections.map((section) => (
-            <div
-              className={`w-full ${
-                ['assessment', 'plan'].includes(section.name)
-                  ? 'col-span-2'
-                  : 'col-span-1'
-              }`}
-              key={section.name}
-            >
-              <h1 className="font-bold text-xl">{section.title}</h1>
-              {section.name === 'plan' && (
-                <h2 className="text-sm color-grey">
-                  Add plans for Orchestration Engine to follow-up on by typing,
-                  &quot;[script]&quot;. These will be sent to the students&apos;
-                  project channel.
-                </h2>
-              )}
-
-              <div className="">
-                {/* TODO: abstract out the update code */}
-                <TextBox
-                  value={soapData[section.name]}
-                  triggers={Object.keys(
-                    autocompleteTriggersOptions[section.name]
-                  )}
-                  options={autocompleteTriggersOptions[section.name]}
-                  onFocus={(e) => {
-                    // add a "- " if the text box is empty
-                    if (e.target.value === '') {
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = '- ';
-                        return newSoapData;
-                      });
-                    }
-                  }}
-                  onBlur={(e) => {
-                    // remove the dash if the text box is empty
-                    if (e.target.value.trim() === '-') {
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = '';
-                        return newSoapData;
-                      });
-                    }
-                  }}
-                  onKeyUp={(e) => {
-                    // add a new line to the text box with a dash when the user presses enter
-                    if (e.key === 'Enter') {
-                      // check if it's not a script line
-                      let lines = e.target.value.split('\n');
-                      if (
-                        lines.length >= 1 &&
-                        lines[lines.length - 1].includes('[script]')
-                      ) {
-                        return;
-                      }
-
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = `${e.target.value}- `;
-                        return newSoapData;
-                      });
-                    }
-                  }}
-                  onChange={(edits) => {
-                    // update the state with the new data
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = edits;
-                      return newSoapData;
-                    });
-                  }}
-                />
-              </div>
-            </div>
+          {soapData.issues.map((issue, i) => (
+            <Issue
+              key={`issue-index-${i}`}
+              issueIndex={i}
+              title={issue.title}
+              diagSections={diagnosisSections}
+              summarySections={summarySections}
+              autocompleteTriggersOptions={autocompleteTriggersOptions}
+              soapData={{
+                subjective: issue.subjective,
+                objective: issue.objective,
+                assessment: issue.assessment,
+                plan: issue.plan,
+                summary: issue.summary,
+                followUpPlans: issue.followUpPlans
+              }}
+              setSoapData={setSoapData} // TODO: this needs to be per issue
+            />
           ))}
-
-          {/* Define actionable follow-ups a mentor can input
-        <div>
-          <h2 className="font-bold text-xl">Actionable follow-ups</h2>
-          <select name="cars" id="cars">
-            <option value="volvo">Volvo</option>
-            <option value="saab">Saab</option>
-            <option value="mercedes">Mercedes</option>
-            <option value="audi">Audi</option>
-          </select>
-        </div> */}
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full mr-3"
+            onClick={() => {
+              setSoapData((prevSoapData) => ({
+                ...prevSoapData,
+                issues: [
+                  ...prevSoapData.issues,
+                  {
+                    title: '',
+                    subjective: '',
+                    objective: '',
+                    assessment: '',
+                    plan: '',
+                    summary: '',
+                    followUpPlans: []
+                  }
+                ]
+              }));
+            }}
+          >
+            Add Issue
+          </button>
         </div>
       </div>
     </>
@@ -324,6 +291,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   let [sigAbbrev, project, date] = (query.params?.id as string).split('_');
 
   // fetch SOAP note for the given sig and date
+  // TODO: see how I can add type checking to this
   const currentSoapNote = await fetchSoapNote(sigAbbrev, project, date);
 
   // fetch contextual data from OS
@@ -342,7 +310,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
 
     contextualData = await res.json();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 
   // TODO: get active scripts from OS
@@ -357,9 +325,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     );
     activeScripts = await res.json();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
-  console.log(activeScripts);
 
   const triggeredScripts = activeScripts.map((script) => {
     return {
@@ -402,23 +369,52 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   }
 
   // setup tracked scripts
-  let trackedScripts = triggeredScripts.map((script) => {
-    return `- [detected issue] ${script.name} - ${script.strategies}`;
+  // check if title doesn't match any existing issue titles
+  // TODO: should have the context from what triggered the script injected into the issue object
+  // TODO: having to recurisvely strip obj id's for some reason...
+  let noteIssues = currentSoapNote.toObject().issues;
+  noteIssues = noteIssues.map((issue) => {
+    return {
+      title: issue.title,
+      subjective: issue.subjective,
+      objective: issue.objective,
+      assessment: issue.assessment,
+      plan: issue.plan,
+      summary: issue.summary,
+      followUpPlans: issue.followUpPlans.map((followup) => {
+        return {
+          venue: followup.venue,
+          strategy: followup.strategy
+        };
+      })
+    };
   });
-  // if (trackedScripts.length === 0) {
-  //   trackedScripts = ['no detected issues'];
-  // }
 
-  // create a text object with scripts added before objective
-  let objectiveTextList = currentSoapNote.objective.split('\n');
-  let filteredObjectiveTextList = objectiveTextList.filter(
-    (line) => !line.includes('[detected issue]')
-  );
-  let objectiveText = trackedScripts
-    .concat(filteredObjectiveTextList)
-    .join('\n')
-    .trim();
-  console.log(objectiveText);
+  for (let script of triggeredScripts) {
+    let title = `[detected issue] ${script.name} - ${script.strategies}`;
+    let titleIndex = noteIssues.findIndex((issue) => issue.title === title);
+
+    if (titleIndex === -1) {
+      noteIssues.push({
+        title: title,
+        subjective: '',
+        objective: '',
+        assessment: '',
+        plan: '',
+        summary: '',
+        followUpPlans: []
+      });
+    }
+  }
+
+  // sort noteIssues by [detected issues] first
+  noteIssues.sort((a, b) => {
+    if (a.title.includes('[detected issue]')) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
 
   // setup the page with the data from the database
   // TODO: populate view with the following
@@ -434,18 +430,16 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
         ['Sprint Stories'],
         sprintStories
       ),
-      triggeredScripts: trackedScripts,
+      triggeredScripts: [],
       followUpPlans: 'none'
     },
-    subjective: currentSoapNote.subjective,
-    objective: objectiveText,
-    assessment: currentSoapNote.assessment,
-    plan: currentSoapNote.plan
+    issues: noteIssues
   };
 
   // setup triggers and options for each section's text boxes
   // TODO: have controllers that abstract this
   const autocompleteTriggersOptions = {
+    summary: {},
     subjective: {},
     objective: {},
     assessment: {

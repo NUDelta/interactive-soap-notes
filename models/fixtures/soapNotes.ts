@@ -11,14 +11,11 @@ const soapNotesForSigs = [
         project: 'Orchestration Scripting Environments',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
+        issues: [],
         priorContext: {},
-        followUpContext: {},
-      },
-    ],
+        followUpContext: {}
+      }
+    ]
   },
   {
     name: 'Human-AI Tools (Difference)',
@@ -28,25 +25,19 @@ const soapNotesForSigs = [
         project: 'Human-AI Tools for Accounting for Differences',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
+        issues: [],
         priorContext: {},
-        followUpContext: {},
+        followUpContext: {}
       },
       {
         project: 'Reference Systems',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
+        issues: [],
         priorContext: {},
-        followUpContext: {},
-      },
-    ],
+        followUpContext: {}
+      }
+    ]
   },
   {
     name: 'Human-AI Tools (Expression)',
@@ -56,26 +47,20 @@ const soapNotesForSigs = [
         project: 'Human-AI Tools for Concept Expression',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
+        issues: [],
         priorContext: {},
-        followUpContext: {},
+        followUpContext: {}
       },
       {
         project:
           'Human-AI Tools for Aligning to Machine Representations and Execution',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
+        issues: [],
         priorContext: {},
-        followUpContext: {},
-      },
-    ],
+        followUpContext: {}
+      }
+    ]
   },
   {
     name: 'Breaking Boundaries',
@@ -85,25 +70,19 @@ const soapNotesForSigs = [
         project: 'How Can Computers Support Dialectical Activities?',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
+        issues: [],
         priorContext: {},
-        followUpContext: {},
+        followUpContext: {}
       },
       {
         project: 'Prototyping with LLMs',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
+        issues: [],
         priorContext: {},
-        followUpContext: {},
-      },
-    ],
+        followUpContext: {}
+      }
+    ]
   },
   {
     name: 'Contextually-Aware Metacognitive Practice',
@@ -113,12 +92,9 @@ const soapNotesForSigs = [
         project: 'Q&A Buddy',
         date: new Date('2024-02-14T06:00:00'),
         lastUpdated: new Date('2024-02-14T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
+        issues: [],
         priorContext: {},
-        followUpContext: {},
+        followUpContext: {}
       },
       {
         project: 'PATH',
@@ -129,10 +105,10 @@ const soapNotesForSigs = [
         assessment: '',
         plan: '',
         priorContext: {},
-        followUpContext: {},
-      },
-    ],
-  },
+        followUpContext: {}
+      }
+    ]
+  }
 ];
 
 export const createSoapNoteFixtures = async () => {
@@ -153,13 +129,10 @@ export const createSoapNoteFixtures = async () => {
           project: soapNote.project,
           date: soapNote.date,
           lastUpdated: soapNote.lastUpdated,
-          subjective: soapNote.subjective,
-          objective: soapNote.objective,
-          assessment: soapNote.assessment,
-          plan: soapNote.plan,
+          issues: soapNote.issues,
           priorContext: [],
           notedAssessments: [],
-          followUpContext: [],
+          followUpContext: []
         });
       });
     });

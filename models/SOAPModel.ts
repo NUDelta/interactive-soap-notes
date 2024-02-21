@@ -1,22 +1,33 @@
 import mongoose from 'mongoose';
 
-export interface SOAP {
+export interface SOAPStruct {
   project: string;
   date: Date;
   lastUpdated: Date;
   sigName: string;
   sigAbbreviation: string;
-  subjective: string;
-  objective: string;
-  assessment: string;
-  plan: string;
+  issues: IssueStruct[];
   priorContext: object;
   notedAssessments: object;
   followUpContext: object;
 }
 
-// TODO: make the SOAP strings required, but allow 0-length strings (https://stackoverflow.com/questions/44320745/in-mongoose-how-do-i-require-a-string-field-to-not-be-null-or-undefined-permitt)
-const SOAPSchema = new mongoose.Schema<SOAP>({
+export interface IssueStruct {
+  title: string;
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
+  summary: string;
+  followUpPlans: ScriptObj[];
+}
+
+interface ScriptObj {
+  venue: string;
+  strategy: string;
+}
+
+const SOAPSchema = new mongoose.Schema<SOAPStruct>({
   project: {
     type: String,
     required: true
@@ -37,21 +48,25 @@ const SOAPSchema = new mongoose.Schema<SOAP>({
     type: String,
     required: true
   },
-  subjective: {
-    type: String,
-    required: true
-  },
-  objective: {
-    type: String,
-    required: true
-  },
-  assessment: {
-    type: String,
-    required: true
-  },
-  plan: {
-    type: String,
-    required: true
+  issues: {
+    type: [
+      {
+        title: String,
+        subjective: String,
+        objective: String,
+        assessment: String,
+        plan: String,
+        summary: String,
+        followUpPlans: [
+          {
+            venue: String,
+            strategy: String
+          }
+        ]
+      }
+    ],
+    required: true,
+    default: []
   },
   priorContext: {
     type: Object,
@@ -67,5 +82,5 @@ const SOAPSchema = new mongoose.Schema<SOAP>({
   }
 });
 
-export default (mongoose.models.SOAPNote as mongoose.Model<SOAP>) ||
+export default (mongoose.models.SOAPNote as mongoose.Model<SOAPStruct>) ||
   mongoose.model('SOAPNote', SOAPSchema);

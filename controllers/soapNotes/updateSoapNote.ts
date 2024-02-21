@@ -1,5 +1,5 @@
 import dbConnect from '../../lib/dbConnect';
-import SOAPModel, { SOAP } from '../../models/SOAPModel';
+import SOAPModel, { SOAPStruct } from '../../models/SOAPModel';
 
 export const updateSOAPNote = async (id: string, soapNote: object) => {
   let soapNoteUpdatedContent = parseSoapNotes(soapNote);
@@ -13,33 +13,38 @@ export const updateSOAPNote = async (id: string, soapNote: object) => {
 
 const parseSoapNotes = (soapNote: object) => {
   // create a new soap note object to hold everything
-  let updatedSoapNote: SOAP = {
+  let updatedSoapNote: SOAPStruct = {
+    project: soapNote['project'],
     date: soapNote['date'],
     lastUpdated: soapNote['lastUpdated'],
     sigName: soapNote['sigName'],
     sigAbbreviation: soapNote['sigAbbreviation'],
-    subjective: soapNote['subjective'],
-    objective: soapNote['objective'],
-    assessment: soapNote['assessment'],
-    plan: soapNote['plan'],
+    issues: soapNote['issues'],
     priorContext: [],
     notedAssessments: [],
     followUpContext: []
   };
 
   // parse out noted assessments
-  let currAssessments = soapNote['assessment'].split('\n');
-  let notedAssessments = currAssessments.filter((assessment) => {
-    return assessment.includes('#');
-  });
+  let notedAssessments = soapNote['issues']
+    .map((issue) => {
+      let currAssessments = issue['assessment'].split('\n');
+      let notedAssessments = currAssessments.filter((assessment) => {
+        return assessment.includes('#');
+      });
+      return notedAssessments;
+    })
+    .flat();
   updatedSoapNote.notedAssessments = notedAssessments;
 
-  // parse out follow up context
-  let currFollowups = soapNote['plan'].split('\n');
-  let followUpContext = currFollowups.filter((followup) => {
-    return followup.includes('[script]');
-  });
-  updatedSoapNote.followUpContext = followUpContext.map((followup) => {
+  // parse out follow up context from issues
+  let currFollowups = soapNote['issues']
+    .map((issue) => {
+      return issue['followUpPlans'];
+    })
+    .flat();
+
+  updatedSoapNote.followUpContext = currFollowups.map((followup) => {
     return parseScriptFollowups(followup, soapNote.project);
   });
 
@@ -47,11 +52,13 @@ const parseSoapNotes = (soapNote: object) => {
 };
 
 // TODO: this is never used since the parsing is happening in pages/api/soap[id].ts
-const parseScriptFollowups = (scriptText: string, projectName: string) => {
-  // remove the [script] tag
-  let cleanedScriptText = scriptText.replace('- [script]', '').trim();
-  console.log(cleanedScriptText);
+// create an interface
+interface ScriptObj {
+  venue: string;
+  strategy: string;
+}
 
+const parseScriptFollowups = (scriptObj: ScriptObj, projectName: string) => {
   // match script text to existing scripts
   let outputScript = {
     target: {
@@ -62,24 +69,24 @@ const parseScriptFollowups = (scriptText: string, projectName: string) => {
     message: ''
   };
   let scriptMessage = '';
-  if (cleanedScriptText.includes('at office hours')) {
+  if (scriptObj.venue.includes('at office hours')) {
     outputScript.opportunity =
       "this.venues.find(this.where('kind', 'OfficeHours'))";
-    scriptMessage = cleanedScriptText.replace('at office hours:', '');
-  } else if (cleanedScriptText.includes('at studio')) {
+    scriptMessage = scriptObj.venue.replace('at office hours:', '');
+  } else if (scriptObj.venue.includes('at studio')) {
     outputScript.opportunity = "this.venues.find(this.where('kind', 'Studio'))";
-    scriptMessage = cleanedScriptText.replace('at studio:', '');
-  } else if (cleanedScriptText.includes('morning of office hours')) {
+    scriptMessage = scriptObj.venue.replace('at studio:', '');
+  } else if (scriptObj.venue.includes('morning of office hours')) {
     outputScript.opportunity =
       "this.morningOf(this.venues.find(this.where('kind', 'OfficeHours')))";
-    scriptMessage = cleanedScriptText.replace('morning of office hours:', '');
-  } else if (cleanedScriptText.includes('morning of studio')) {
+    scriptMessage = scriptObj.venue.replace('morning of office hours:', '');
+  } else if (scriptObj.venue.includes('morning of studio')) {
     outputScript.opportunity =
       "this.morningOf(this.venues.find(this.where('kind', 'Studio')))";
-    scriptMessage = cleanedScriptText.replace('morning of studio:', '');
-  } else if (cleanedScriptText.includes('day after SIG')) {
+    scriptMessage = scriptObj.venue.replace('morning of studio:', '');
+  } else if (scriptObj.venue.includes('day after SIG')) {
     outputScript.opportunity = 'this.daysAfter(new Date(), 1)';
-    scriptMessage = cleanedScriptText.replace('day after SIG:', '');
+    scriptMessage = scriptObj.venue.replace('day after SIG:', '');
   }
 
   // TOOD: populate properly

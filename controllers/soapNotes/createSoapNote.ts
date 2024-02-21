@@ -38,10 +38,7 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
       lastUpdated: noteDate,
       sigName: sigName,
       sigAbbreviation: sigAbbreviation,
-      subjective: '',
-      objective: '',
-      assessment: '',
-      plan: '',
+      issues: [],
       priorContext: [],
       notedAssessments: [],
       followUpContext: []

@@ -7,21 +7,20 @@ export default function TextBox({
   options,
   onFocus,
   onBlur,
-  onChange,
-  onKeyUp
+  onKeyUp,
+  onChange
 }): JSX.Element {
   return (
-    <div className="">
-      <TextInput
-        trigger={triggers}
-        options={options}
-        placeholder="Type here..."
-        value={value}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        onChange={onChange}
-        onKeyUp={onKeyUp}
-      />
-    </div>
+    <TextInput
+      trigger={triggers}
+      options={options}
+      placeholder="Type here..."
+      value={value}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      onKeyUp={onKeyUp}
+      onChange={onChange}
+      className="h-20"
+    />
   );
 }

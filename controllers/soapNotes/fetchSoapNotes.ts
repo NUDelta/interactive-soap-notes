@@ -43,13 +43,13 @@ export const fetchSoapNote = async (
     date: { $lt: startDate }
   });
 
-  if (priorSoapNote) {
-    currentSoapNote.priorContext = {
-      notedAssessments: priorSoapNote.notedAssessments,
-      followUpPlans: priorSoapNote.plan
-    };
-    await currentSoapNote.save();
-  }
+  // if (priorSoapNote) {
+  //   currentSoapNote.priorContext = {
+  //     notedAssessments: priorSoapNote.notedAssessments,
+  //     followUpPlans: priorSoapNote.plan
+  //   };
+  //   await currentSoapNote.save();
+  // }
 
   return currentSoapNote;
 };
