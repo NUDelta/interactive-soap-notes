@@ -1,8 +1,15 @@
 import { Switch } from '@headlessui/react';
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  TrashIcon,
+  ExclamationTriangleIcon
+} from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import TextBox from './TextBox';
 
 export default function Issue({
+  issueIndex,
   title,
   summary,
   diagSections,
@@ -11,137 +18,101 @@ export default function Issue({
   soapData, // TODO: have pieces passsed individually
   setSoapData, // TODO: have a save function that takes which issue is being edited and which section was updated, and send that back to the main view
   detectedIssues,
-  followUpPlans,
-  onChange
+  followUpPlans
 }): JSX.Element {
   const [isDiagMode, setDiagMode] = useState(true);
   const [shouldHideContent, setShouldHideContent] = useState(false);
-  const [issueTitle, setIssueTitle] = useState(title); // TODO: the state management for changes should be done in the parent component
 
   return (
     <div className="border p-2 mb-5">
       {/* Issue title */}
-      <div className="mb-3 w-full">
-        <label className="w-full m:w-200 font-bold text-xl mr-3 h-8">
-          {/* Issue:{' '} */}
-          <input
-            type="text"
-            value={issueTitle}
-            onChange={(e) => setIssueTitle(e.target.value)}
-            className="w-full text-lg font-normal border px-1"
-          />
-        </label>
-      </div>
-
-      <div>
+      <div className="flex flex-wrap mb-1 w-full">
+        <textarea
+          value={title}
+          onChange={(e) =>
+            setSoapData((prevData) => ({
+              ...prevData,
+              issues: prevData.issues.map((issue, i) => {
+                if (i === issueIndex) {
+                  return {
+                    ...issue,
+                    ['title']: e.target.value
+                  };
+                } else {
+                  return issue;
+                }
+              })
+            }))
+          }
+          placeholder="Describe the issue..."
+          className="w-2/3 text-md font-bold mr-3 h-14"
+        />
         {/* Show or hide note details */}
         <button
-          className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full mr-3"
+          className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1 h-8 rounded-full mr-3"
           onClick={() => setShouldHideContent(!shouldHideContent)}
         >
-          {shouldHideContent ? 'Show Issue Notes' : 'Hide Issue Notes'}
+          {shouldHideContent ? 'Show Notes' : 'Hide Notes'}
         </button>
-
         {/* Switch between diagnosis mode and summary mode */}
         {!shouldHideContent && (
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold py-1 px-4 h-8 rounded-full"
+            className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1 h-8 rounded-full  mr-3"
             onClick={() => setDiagMode(!isDiagMode)}
           >
             {isDiagMode ? 'Switch to Summary Mode' : 'Switch to Diagnosis Mode'}
           </button>
         )}
+
+        {/* Buttons to rearrange issues and delete */}
+        {/* TODO: allor for rearranging */}
+        {/* <ArrowUpIcon
+          className={`h-6 w-6 mr-3 ${issueIndex === 0 ? 'opacity-25' : 'opacity-100'}`}
+        />
+        <ArrowDownIcon className="h-6 w-6 mr-3" /> */}
+        {/* TODO: move icons to right side */}
+        <TrashIcon
+          className="h-6 w-6 mr-3 hover:text-red-600"
+          onClick={(e) => {
+            // confirm deletion using an alert
+            if (
+              window.confirm(
+                `Are you sure you want to delete the issue "${title}"? It cannot be undone.`
+              )
+            ) {
+              setSoapData((prevData) => ({
+                ...prevData,
+                issues: prevData.issues.filter((issue, i) => i !== issueIndex)
+              }));
+            }
+          }}
+        />
+
+        {/* Warning messages for incomplete follow-ups */}
+        <div
+          className={`flex flex-wrap text-md text-orange-500 py-1 ${soapData.plan.trim() === '' || soapData.plan.trim() === '-' ? '' : 'opacity-0'}`}
+        >
+          <ExclamationTriangleIcon className="h-6" />
+          <span>Warning: issue does not have any suggested follow-ups.</span>
+        </div>
       </div>
 
-      {/* Diagnosis mode */}
-      {isDiagMode && !shouldHideContent && (
-        <div>
-          {diagSections.map((section) => (
-            <div className={`w-full`} key={section.name}>
-              <h1 className="font-bold text-xl">{section.title}</h1>
-              {section.name === 'plan' && (
-                <h2 className="text-sm color-grey">
-                  Add plans for Orchestration Engine to follow-up on by typing,
-                  &quot;[script]&quot;. These will be sent to the students&apos;
-                  project channel.
-                </h2>
-              )}
-
-              {/* TODO: abstract out the update code */}
-              {/* TODO: this won't update until the state updating logic is fixed */}
-              <TextBox
-                value={soapData[section.name]}
-                triggers={Object.keys(
-                  autocompleteTriggersOptions[section.name]
+      {/* Issues */}
+      {!shouldHideContent && (
+        <div className="">
+          <div>
+            {/* Switch between Diagnosis mode and summary mode */}
+            {(isDiagMode ? diagSections : summarySections).map((section) => (
+              <div className={`w-full`} key={section.name}>
+                <h1 className="font-bold text-xl">{section.title}</h1>
+                {section.name === 'plan' && (
+                  <h2 className="text-sm color-grey">
+                    Add plans for Orchestration Engine to follow-up on by
+                    typing, &quot;[script]&quot;. These will be sent to the
+                    students&apos; project channel.
+                  </h2>
                 )}
-                options={autocompleteTriggersOptions[section.name]}
-                onFocus={(e) => {
-                  // add a "- " if the text box is empty
-                  if (e.target.value === '') {
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = '- ';
-                      return newSoapData;
-                    });
-                  }
-                }}
-                onBlur={(e) => {
-                  // remove the dash if the text box is empty
-                  if (e.target.value.trim() === '-') {
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = '';
-                      return newSoapData;
-                    });
-                  }
-                }}
-                onKeyUp={(e) => {
-                  // add a new line to the text box with a dash when the user presses enter
-                  if (e.key === 'Enter') {
-                    // check if it's not a script line
-                    let lines = e.target.value.split('\n');
-                    if (
-                      lines.length >= 1 &&
-                      lines[lines.length - 1].includes('[script]')
-                    ) {
-                      return;
-                    }
 
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = `${e.target.value}- `;
-                      return newSoapData;
-                    });
-                  }
-                }}
-                onChange={(edits) => {
-                  // update the state with the new data
-                  setSoapData((prevSoapData) => {
-                    let newSoapData = { ...prevSoapData };
-                    newSoapData[section.name] = edits;
-                    return newSoapData;
-                  });
-                }}
-              />
-            </div>
-          ))}
-        </div>
-      )}
-      {/* Summary mode */}
-      {!isDiagMode && !shouldHideContent && (
-        <div>
-          {summarySections.map((section) => (
-            <div className={`w-full`} key={section.name}>
-              <h1 className="font-bold text-xl">{section.title}</h1>
-              {section.name === 'plan' && (
-                <h2 className="text-sm color-grey">
-                  Add plans for Orchestration Engine to follow-up on by typing,
-                  &quot;[script]&quot;. These will be sent to the students&apos;
-                  project channel.
-                </h2>
-              )}
-
-              <div className="">
                 {/* TODO: abstract out the update code */}
                 <TextBox
                   value={soapData[section.name]}
@@ -152,21 +123,37 @@ export default function Issue({
                   onFocus={(e) => {
                     // add a "- " if the text box is empty
                     if (e.target.value === '') {
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = '- ';
-                        return newSoapData;
-                      });
+                      setSoapData((prevData) => ({
+                        ...prevData,
+                        issues: prevData.issues.map((issue, i) => {
+                          if (i === issueIndex) {
+                            return {
+                              ...issue,
+                              [section.name]: '- '
+                            };
+                          } else {
+                            return issue;
+                          }
+                        })
+                      }));
                     }
                   }}
                   onBlur={(e) => {
                     // remove the dash if the text box is empty
                     if (e.target.value.trim() === '-') {
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = '';
-                        return newSoapData;
-                      });
+                      setSoapData((prevData) => ({
+                        ...prevData,
+                        issues: prevData.issues.map((issue, i) => {
+                          if (i === issueIndex) {
+                            return {
+                              ...issue,
+                              [section.name]: ''
+                            };
+                          } else {
+                            return issue;
+                          }
+                        })
+                      }));
                     }
                   }}
                   onKeyUp={(e) => {
@@ -181,25 +168,40 @@ export default function Issue({
                         return;
                       }
 
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = `${e.target.value}- `;
-                        return newSoapData;
-                      });
+                      setSoapData((prevData) => ({
+                        ...prevData,
+                        issues: prevData.issues.map((issue, i) => {
+                          if (i === issueIndex) {
+                            return {
+                              ...issue,
+                              [section.name]: `${e.target.value}- `
+                            };
+                          } else {
+                            return issue;
+                          }
+                        })
+                      }));
                     }
                   }}
-                  onChange={(edits) => {
-                    // update the state with the new data
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = edits;
-                      return newSoapData;
-                    });
-                  }}
+                  onChange={(edits) =>
+                    setSoapData((prevData) => ({
+                      ...prevData,
+                      issues: prevData.issues.map((issue, i) => {
+                        if (i === issueIndex) {
+                          return {
+                            ...issue,
+                            [section.name]: edits
+                          };
+                        } else {
+                          return issue;
+                        }
+                      })
+                    }))
+                  }
                 />
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

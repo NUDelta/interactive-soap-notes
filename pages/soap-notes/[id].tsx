@@ -241,6 +241,7 @@ export default function SOAPNote({
           {soapData.issues.map((issue, i) => (
             <Issue
               key={`issue-index-${i}`}
+              issueIndex={i}
               title={issue.title}
               summary={issue.summary}
               diagSections={diagnosisSections}
@@ -257,14 +258,27 @@ export default function SOAPNote({
               setSoapData={setSoapData} // TODO: this needs to be per issue
               detectedIssues=""
               followUpPlans=""
-              onChange={(edits) => {
-                console.log(edits);
-              }}
             />
           ))}
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full mr-3"
-            onClick={() => {}}
+            onClick={() => {
+              setSoapData((prevSoapData) => ({
+                ...prevSoapData,
+                issues: [
+                  ...prevSoapData.issues,
+                  {
+                    title: '',
+                    subjective: '',
+                    objective: '',
+                    assessment: '',
+                    plan: '',
+                    summary: '',
+                    followUpPlans: []
+                  }
+                ]
+              }));
+            }}
           >
             Add Issue
           </button>
