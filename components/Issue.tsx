@@ -90,7 +90,10 @@ export default function Issue({
           className={`flex flex-wrap text-md text-orange-500 py-1 ${soapData.plan.trim() === '' || soapData.plan.trim() === '-' ? '' : 'opacity-0'}`}
         >
           <ExclamationTriangleIcon className="h-6" />
-          <span>Warning: issue does not have any suggested follow-ups.</span>
+          <span>
+            Issue does not have any follow-up plans written or actionable
+            check-ins encoded
+          </span>
         </div>
       </div>
 
