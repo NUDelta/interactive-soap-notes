@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createSOAPNote } from '../../../controllers/soapNotes/createSoapNote';
-import { SOAP } from '../../../models/SOAPModel';
+import { SOAPStruct } from '../../../models/SOAPModel';
 
 type Data = {
   msg: string;
   success: boolean;
-  data?: SOAP;
+  data?: SOAPStruct;
   error?: any;
 };
 
@@ -29,7 +29,10 @@ export default async function handler(
       try {
         projectName = req.body.projectName;
         noteDate = new Date(req.body.noteDate);
-        let createdSOAPNote: SOAP = await createSOAPNote(projectName, noteDate);
+        let createdSOAPNote: SOAPStruct = await createSOAPNote(
+          projectName,
+          noteDate
+        );
         res.status(200).json({
           msg: 'Soap note created',
           success: true,
