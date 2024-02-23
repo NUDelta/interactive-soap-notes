@@ -115,6 +115,11 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     }.toString();
   }
 
+  console.log(
+    'In parseFollowUpPlans, strategyFunction before replacement: ',
+    strategyFunction
+  );
+
   strategyFunction = strategyFunction.replace(
     'venueOrgObj',
     `"${venueOrgObj}"`
