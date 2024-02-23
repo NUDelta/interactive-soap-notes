@@ -38,8 +38,20 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     venueOrgObj = 'OfficeHours';
   }
 
+  console.log(
+    'In parseFollowUpPlans, inputs are: ',
+    soapId,
+    projName,
+    venue,
+    strategy
+  );
+
+  console.log('In parseFollowUpPlans, venueOrgObj: ', venueOrgObj);
+
   // TODO: DRY
   // TODO: add a morning of (next) SIG, after SIG
+  // TODO: something about the await this.venues.find(this.where('kind', venueOrgObj)) and replace later on is not working
+
   let strategyFunction = '';
   if (venue.includes('at studio') || venue.includes('at office hours')) {
     strategyFunction = async function () {
@@ -112,6 +124,8 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     `"${strategy}"`
   );
   newActiveIssue.strategyToEnact.strategy_function = strategyFunction;
+
+  console.log('In parseFollowUpPlans, newActiveIssue: ', newActiveIssue);
   return newActiveIssue;
 }
 
