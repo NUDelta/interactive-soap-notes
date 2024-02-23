@@ -159,6 +159,8 @@ export default async function handler(req, res) {
             actionableFollowUps[i].strategy
           );
 
+          console.log('parsedFollowup: ', parsedFollowup);
+
           const osRes = await fetch(
             `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
             {
