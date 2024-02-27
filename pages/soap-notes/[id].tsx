@@ -9,6 +9,7 @@ import { mutate } from 'swr';
 import { SOAPStruct, IssueStruct } from '../../models/SOAPModel';
 import Head from 'next/head';
 import { longDate, shortDate } from '../../lib/helperFns';
+import IssueCard from '../../components/IssueCard';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -20,6 +21,9 @@ export default function SOAPNote({
 
   // hold data from the current soap notes
   const [soapData, setSoapData] = useState(data);
+
+  // hold a state for which issue is selected
+  const [selectedIssue, setSelectedIssue] = useState(null);
 
   // let user know that we are saving
   const [isSaving, setIsSaving] = useState(false);
@@ -184,7 +188,7 @@ export default function SOAPNote({
 
         {/* Context for SOAP note */}
         {/* TODO: make this generate from an object instead of pre-defining sections (tool data, sprint) */}
-        <div className="w-full col-span-2">
+        {/* <div className="w-full col-span-2">
           <h1 className="font-bold text-2xl border-b  border-black mb-3">
             Tracked Context
           </h1>
@@ -202,32 +206,26 @@ export default function SOAPNote({
                 ))
               )}
             </div>
+          </div>
+        </div> */}
 
-            {/* <div className="col-span-1">
-            <h2 className="font-bold text-xl">
-              Detected Issues from Orchestration Engine
-            </h2>
-            {soapData.priorContext.triggeredScripts === undefined ? (
-              <p>no detected issues</p>
-            ) : (
-              soapData.priorContext.triggeredScripts.map((str, i) => (
-                <p key={i}>
-                  {str}
-                  <br></br>
-                </p>
-              ))
-            )}
-          </div> */}
-            {/* <div className="col-span-1">
-            <h2 className="font-bold text-xl">Follow-up plans</h2>
-            <p>
-              {soapData.priorContext.followUpPlans === undefined
-                ? 'none'
-                : soapData.priorContext.followUpPlans
-                    .split('\n')
-                    .map((str, i) => <p key={i}>{str}</p>)}
-            </p>
-          </div> */}
+        {/* Issue Cards */}
+        <div className="w-full col-span-2">
+          <h1 className="font-bold text-2xl border-b border-black mb-3">
+            Tracked Issues
+          </h1>
+          <div className="flex flex-wrap">
+            {soapData.issues.map((issue, i) => (
+              <IssueCard
+                key={`issue-card-index-${i}`}
+                issueId={i}
+                title={issue.title}
+                lastUpdated={noteInfo.lastUpdated}
+                followUpPlans={issue.followUpPlans}
+                selectedIssue={selectedIssue}
+                setSelectedIssue={setSelectedIssue}
+              />
+            ))}
           </div>
         </div>
 
