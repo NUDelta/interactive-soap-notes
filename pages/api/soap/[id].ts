@@ -31,13 +31,6 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
   };
 
   // compute strategy function
-  let venueOrgObj = '';
-  if (venue.includes('studio')) {
-    venueOrgObj = 'StudioMeeting';
-  } else if (venue.includes('office hours')) {
-    venueOrgObj = 'OfficeHours';
-  }
-
   console.log(
     'In parseFollowUpPlans, inputs are: ',
     soapId,
@@ -46,87 +39,117 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     strategy
   );
 
-  console.log('In parseFollowUpPlans, venueOrgObj: ', venueOrgObj);
-
   // TODO: DRY
-  // TODO: add a morning of (next) SIG, after SIG
-  // TODO: something about the await this.venues.find(this.where('kind', venueOrgObj)) and replace later on is not working
-
   let strategyFunction = '';
-  if (venue.includes('at studio') || venue.includes('at office hours')) {
-    strategyFunction = async function () {
-      return await this.messageChannel({
-        message: strategyFromScript,
-        projectName: this.project.name,
-        opportunity: async function () {
-          return await this.startOfVenue(
-            await this.venues.find(this.where('kind', venueOrgObj))
-          );
-        }.toString()
-      });
-    }.toString();
-  } else if (venue.includes('morning')) {
-    strategyFunction = async function () {
-      return await this.messageChannel({
-        message: strategyFromScript,
-        projectName: this.project.name,
-        opportunity: async function () {
-          return await this.morningOfVenue(
-            await this.venues.find(this.where('kind', venueOrgObj))
-          );
-        }.toString()
-      });
-    }.toString();
-  } else if (venue.includes('day after SIG')) {
-    strategyFunction = async function () {
-      return await this.messageChannel({
-        message: strategyFromScript,
-        projectName: this.project.name,
-        opportunity: async function () {
-          let today = new Date();
-          today.setMinutes(0, 0, 0);
-          return await this.daysAfter(today, 1);
-        }.toString()
-      });
-    }.toString();
-  } else if (venue.includes('after SIG')) {
-    strategyFunction = async function () {
-      return await this.messageChannel({
-        message: strategyFromScript,
-        projectName: this.project.name,
-        opportunity: async function () {
-          return this.endOfVenue(
-            this.venues.find(this.where('kind', 'SigMeeting'))
-          );
-        }.toString()
-      });
-    }.toString();
-  } else if (venue.includes('after studio')) {
-    strategyFunction = async function () {
-      return await this.messageChannel({
-        message: strategyFromScript,
-        projectName: this.project.name,
-        opportunity: async function () {
-          return this.endOfVenue(
-            this.venues.find(this.where('kind', 'StudioMeeting'))
-          );
-        }.toString()
-      });
-    }.toString();
+  switch (venue.toLowerCase()) {
+    case 'morning of office hours':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: strategy,
+          projectName: this.project.name,
+          opportunity: async function () {
+            return await this.morningOfVenue(
+              await this.venues.find(this.where('kind', 'OfficeHours'))
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
+    case 'at office hours':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: strategy,
+          projectName: this.project.name,
+          opportunity: async function () {
+            return await this.startOfVenue(
+              await this.venues.find(this.where('kind', 'OfficeHours'))
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
+    case 'morning of next sig':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: strategy,
+          projectName: this.project.name,
+          opportunity: async function () {
+            return await this.morningOfVenue(
+              await this.venues.find(this.where('kind', 'SigMeeting'))
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
+    case 'after sig':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: strategy,
+          projectName: this.project.name,
+          opportunity: async function () {
+            return this.endOfVenue(
+              this.venues.find(this.where('kind', 'SigMeeting'))
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
+    case 'morning of studio':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: strategy,
+          projectName: this.project.name,
+          opportunity: async function () {
+            return await this.morningOfVenue(
+              await this.venues.find(this.where('kind', 'StudioMeeting'))
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
+    case 'at studio':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: strategy,
+          projectName: this.project.name,
+          opportunity: async function () {
+            return await this.startOfVenue(
+              await this.venues.find(this.where('kind', 'StudioMeeting'))
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
+    case 'after studio':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: strategy,
+          projectName: this.project.name,
+          opportunity: async function () {
+            return this.endOfVenue(
+              this.venues.find(this.where('kind', 'StudioMeeting'))
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
+    default:
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: strategy,
+          projectName: this.project.name,
+          opportunity: async function () {
+            return await this.startOfVenue(
+              await this.venues.find(this.where('kind', 'no venue found'))
+            );
+          }.toString()
+        });
+      }.toString();
   }
 
   console.log(
     'In parseFollowUpPlans, strategyFunction before replacement: ',
     strategyFunction
-  );
-
-  strategyFunction = strategyFunction.replace(
-    'venueOrgObj',
-    `"${venueOrgObj}"`
-  );
-  strategyFunction = strategyFunction.replace(
-    'strategyFromScript',
-    `"${strategy}"`
   );
   newActiveIssue.strategyToEnact.strategy_function = strategyFunction;
 
@@ -190,7 +213,10 @@ export default async function handler(req, res) {
               body: JSON.stringify(parsedFollowup)
             }
           );
-          console.log('Response from OS on /createActiveIssue: ', osRes);
+          console.log(
+            'Response from OS on /createActiveIssue: ',
+            await osRes.json()
+          );
         }
 
         if (!soapNote) {

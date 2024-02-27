@@ -452,10 +452,11 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     },
     plan: {
       '[script]': [
-        // ' morning of office hours: [follow-up to send]', TODO: detect this properly
-        // ' at office hours: [follow-up to send]',
+        ' morning of office hours: ', // TODO: detect this properly
+        ' at office hours: ',
         ' after SIG: ',
         ' day after SIG: ',
+        ' morning of next SIG: ',
         ' morning of studio: ',
         ' at studio: ',
         ' after studio: '
