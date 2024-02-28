@@ -337,6 +337,17 @@ export default function SOAPNote({
                       return newSoapData;
                     });
                   }}
+                  onMouseUp={(e) => {
+                    // get the section of text that was highlighted
+                    let selection = window.getSelection();
+                    let selectedText = selection.toString();
+                    let range = selection.getRangeAt(0);
+                    let soapSection = section.name;
+
+                    // TODO: create a component and set the left, top, visibility, and data using state https://stackoverflow.com/questions/63738841/how-to-show-popup-on-text-highlight-at-the-middle-of-the-selection
+
+                    console.log(soapSection, selectedText, range);
+                  }}
                 />
               </div>
             ))}

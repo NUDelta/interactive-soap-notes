@@ -8,7 +8,8 @@ export default function TextBox({
   onFocus,
   onBlur,
   onKeyUp,
-  onChange
+  onChange,
+  onMouseUp
 }): JSX.Element {
   return (
     <TextInput
@@ -20,6 +21,7 @@ export default function TextBox({
       onBlur={onBlur}
       onKeyUp={onKeyUp}
       onChange={onChange}
+      onMouseUp={onMouseUp}
       className="h-20"
     />
   );
