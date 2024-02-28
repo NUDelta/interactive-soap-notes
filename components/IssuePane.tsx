@@ -8,7 +8,7 @@ import {
 import { useState } from 'react';
 import TextBox from './TextBox';
 
-export default function Issue({
+export default function IssuePane({
   issueIndex,
   title,
   diagSections,

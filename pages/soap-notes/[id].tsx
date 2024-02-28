@@ -2,7 +2,7 @@ import type { GetServerSideProps, NextPage } from 'next';
 import { useEffect, useState, useRef } from 'react';
 
 import TextBox from '../../components/TextBox';
-import Issue from '../../components/Issue';
+import IssuePane from '../../components/IssuePane';
 import Link from 'next/link';
 import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
 import { mutate } from 'swr';
@@ -389,7 +389,7 @@ export default function SOAPNote({
                 <h1 className="font-bold text-2xl border-b border-black mb-3">
                   Selected Issue
                 </h1>
-                <Issue
+                <IssuePane
                   issueIndex={selectedIssue}
                   title={soapData.issues[selectedIssue].title}
                   diagSections={diagnosisSections}
