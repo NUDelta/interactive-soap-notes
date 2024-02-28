@@ -10,6 +10,7 @@ import { SOAPStruct, IssueStruct } from '../../models/SOAPModel';
 import Head from 'next/head';
 import { longDate, shortDate } from '../../lib/helperFns';
 import IssueCard from '../../components/IssueCard';
+import IssueFromHighlight from '../../components/IssueFromHighlight';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -24,6 +25,13 @@ export default function SOAPNote({
 
   // hold a state for which issue is selected
   const [selectedIssue, setSelectedIssue] = useState(null);
+
+  // hold a state for highlighted text
+  const [highlightedText, setHighlightedText] = useState({
+    visibility: 'hidden',
+    section: '',
+    highlightedContent: ''
+  });
 
   // let user know that we are saving
   const [isSaving, setIsSaving] = useState(false);
@@ -235,29 +243,6 @@ export default function SOAPNote({
                   setSelectedIssue={setSelectedIssue}
                 />
               ))}
-
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full mr-3"
-                onClick={() => {
-                  setSoapData((prevSoapData) => ({
-                    ...prevSoapData,
-                    issues: [
-                      ...prevSoapData.issues,
-                      {
-                        title: '',
-                        subjective: '',
-                        objective: '',
-                        assessment: '',
-                        plan: '',
-                        summary: '',
-                        followUpPlans: []
-                      }
-                    ]
-                  }));
-                }}
-              >
-                Add Issue
-              </button>
             </div>
           </div>
 
@@ -269,10 +254,33 @@ export default function SOAPNote({
               This week&apos;s notes
             </h1>
             <p className="italic">
-              Write notes from the SIG meeting below. To create issues from your
-              notes for SOAP to track, highlight the text you&apos;ve written
-              and click the + popup.
+              Write notes from the SIG meeting below. To track issues from your
+              notes, highlight the text and click the button that pops up below.
             </p>
+            <IssueFromHighlight
+              visibility={highlightedText.visibility}
+              section={highlightedText.section}
+              highlightedContent={highlightedText.highlightedContent}
+              onClick={(section, highlightedContent) => {
+                setSoapData((prevSoapData) => {
+                  let newSoapData = { ...prevSoapData };
+                  newSoapData.issues.push({
+                    title: section.includes('assessment')
+                      ? highlightedContent
+                      : '',
+                    subjective: '',
+                    objective: '',
+                    assessment: '',
+                    plan: '',
+                    summary: !section.includes('assessment')
+                      ? highlightedContent
+                      : '',
+                    followUpPlans: []
+                  });
+                  return newSoapData;
+                });
+              }}
+            />
             {diagnosisSections.map((section) => (
               <div className={`w-full`} key={section.name}>
                 <h1 className="font-bold text-xl">{section.title}</h1>
@@ -342,7 +350,26 @@ export default function SOAPNote({
                     let selection = window.getSelection();
                     let selectedText = selection.toString();
                     let range = selection.getRangeAt(0);
+                    let boundingRect = range.getBoundingClientRect();
                     let soapSection = section.name;
+
+                    // check if nothing is highlighted
+                    if (selectedText === '') {
+                      setHighlightedText((prevHighlightedText) => ({
+                        ...prevHighlightedText,
+                        visibility: 'hidden',
+                        section: '',
+                        highlightedContent: ''
+                      }));
+                      return;
+                    } else {
+                      // set state variable for highlighted text
+                      setHighlightedText({
+                        visibility: 'visible',
+                        section: soapSection,
+                        highlightedContent: selectedText
+                      });
+                    }
 
                     // TODO: create a component and set the left, top, visibility, and data using state https://stackoverflow.com/questions/63738841/how-to-show-popup-on-text-highlight-at-the-middle-of-the-selection
 
