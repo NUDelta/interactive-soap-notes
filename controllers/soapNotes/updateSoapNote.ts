@@ -19,6 +19,10 @@ const parseSoapNotes = (soapNote: object) => {
     lastUpdated: soapNote['lastUpdated'],
     sigName: soapNote['sigName'],
     sigAbbreviation: soapNote['sigAbbreviation'],
+    subjective: soapNote['subjective'],
+    objective: soapNote['objective'],
+    assessment: soapNote['assessment'],
+    plan: soapNote['plan'],
     issues: soapNote['issues'],
     priorContext: [],
     notedAssessments: [],
@@ -45,7 +49,7 @@ const parseSoapNotes = (soapNote: object) => {
     .flat();
 
   updatedSoapNote.followUpContext = currFollowups.map((followup) => {
-    return parseScriptFollowups(followup, soapNote.project);
+    return parseScriptFollowups(followup, soapNote['project']);
   });
 
   return updatedSoapNote;

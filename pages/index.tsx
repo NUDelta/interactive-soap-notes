@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { createSoapNoteFixtures } from '../models/fixtures/soapNotes';
 import { fetchAllSoapNotes } from '../controllers/soapNotes/fetchSoapNotes';
 import Head from 'next/head';
 import { longDate } from '../lib/helperFns';
@@ -62,9 +61,6 @@ export default function Home({ sigs }): JSX.Element {
 
 // use serverside rendering to generate this page
 export const getServerSideProps = async () => {
-  // TODO: only create fixtures on devlopment server
-  // await createSoapNoteFixtures();
-
   // fetch all SOAP notes
   const soapNotes = await fetchAllSoapNotes();
 

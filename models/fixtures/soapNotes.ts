@@ -126,6 +126,10 @@ export const createSoapNoteFixtures = async () => {
         soapNotes.push({
           sigName: sig.name,
           sigAbbreviation: sig.abbreviation,
+          subjective: '',
+          objective: '',
+          assessment: '',
+          plan: '',
           project: soapNote.project,
           date: soapNote.date,
           lastUpdated: soapNote.lastUpdated,

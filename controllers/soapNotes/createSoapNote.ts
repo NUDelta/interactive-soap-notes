@@ -38,13 +38,17 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
       lastUpdated: noteDate,
       sigName: sigName,
       sigAbbreviation: sigAbbreviation,
+      subjective: '',
+      objective: '',
+      assessment: '',
+      plan: '',
       issues: [],
       priorContext: [],
       notedAssessments: [],
       followUpContext: []
     });
   } catch (err) {
-    console.log(err);
+    console.error('Error in creating SOAP note: ', err, err.stack);
     return null;
   }
 };
