@@ -165,7 +165,7 @@ export default function SOAPNote({
       </Head>
 
       {/* Header info for SOAP note */}
-      <div className="container m-auto grid grid-cols-2 gap-x-5 gap-y-5 auto-rows-auto w-3/4 mt-3">
+      <div className="container m-auto grid grid-cols-3 gap-x-5 gap-y-5 auto-rows-auto w-2/3 mt-3">
         <div className="col-span-2">
           <Link href="/">
             <h3 className="text-md text-blue-600 hover:text-blue-800 visited:text-purple-600">
@@ -209,74 +209,114 @@ export default function SOAPNote({
           </div>
         </div> */}
 
-        {/* Issue Cards */}
+        {/* Issue Cards and SOAP Notes*/}
         <div className="w-full col-span-2">
-          <h1 className="font-bold text-2xl border-b border-black mb-3">
-            Tracked Issues
-          </h1>
-          <div className="flex flex-wrap">
+          <div>
+            <h1 className="font-bold text-2xl border-b border-black mb-3">
+              Tracked Issues
+            </h1>
+            <p className="italic">
+              Click on an issue to view its details and write follow-up
+              practices.
+            </p>
+            <div className="flex flex-wrap">
+              {soapData.issues.map((issue, i) => (
+                <IssueCard
+                  key={`issue-card-index-${i}`}
+                  issueId={i} // TODO: make this an id
+                  title={issue.title}
+                  lastUpdated={noteInfo.lastUpdated}
+                  followUpPlans={issue.followUpPlans}
+                  selectedIssue={selectedIssue}
+                  setSelectedIssue={setSelectedIssue}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Notes during SIG */}
+          {/* Create a section for each component of the SOAP notes */}
+          {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
+          <div>
+            <h1 className="font-bold text-2xl border-b border-black mb-3">
+              This week&apos;s notes
+            </h1>
+            <p className="italic">
+              Write notes from the SIG meeting below. To create issues from your
+              notes for SOAP to track, highlight the text you've written and
+              click the + popup.
+            </p>
             {soapData.issues.map((issue, i) => (
-              <IssueCard
-                key={`issue-card-index-${i}`}
-                issueId={i}
+              <Issue
+                key={`issue-index-${i}`}
+                issueIndex={i}
                 title={issue.title}
-                lastUpdated={noteInfo.lastUpdated}
-                followUpPlans={issue.followUpPlans}
-                selectedIssue={selectedIssue}
-                setSelectedIssue={setSelectedIssue}
+                diagSections={diagnosisSections}
+                summarySections={summarySections}
+                autocompleteTriggersOptions={autocompleteTriggersOptions}
+                soapData={{
+                  subjective: issue.subjective,
+                  objective: issue.objective,
+                  assessment: issue.assessment,
+                  plan: issue.plan,
+                  summary: issue.summary,
+                  followUpPlans: issue.followUpPlans
+                }}
+                setSoapData={setSoapData} // TODO: this needs to be per issue
               />
             ))}
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full mr-3"
+              onClick={() => {
+                setSoapData((prevSoapData) => ({
+                  ...prevSoapData,
+                  issues: [
+                    ...prevSoapData.issues,
+                    {
+                      title: '',
+                      subjective: '',
+                      objective: '',
+                      assessment: '',
+                      plan: '',
+                      summary: '',
+                      followUpPlans: []
+                    }
+                  ]
+                }));
+              }}
+            >
+              Add Issue
+            </button>
           </div>
         </div>
 
-        {/* Notes during SIG */}
-        {/* Create a section for each component of the SOAP notes */}
-        {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
-        <div className="w-full col-span-2">
-          <h1 className="font-bold text-2xl border-b border-black mb-3">
-            This week&apos;s notes
-          </h1>
-          {soapData.issues.map((issue, i) => (
-            <Issue
-              key={`issue-index-${i}`}
-              issueIndex={i}
-              title={issue.title}
-              diagSections={diagnosisSections}
-              summarySections={summarySections}
-              autocompleteTriggersOptions={autocompleteTriggersOptions}
-              soapData={{
-                subjective: issue.subjective,
-                objective: issue.objective,
-                assessment: issue.assessment,
-                plan: issue.plan,
-                summary: issue.summary,
-                followUpPlans: issue.followUpPlans
-              }}
-              setSoapData={setSoapData} // TODO: this needs to be per issue
-            />
-          ))}
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full mr-3"
-            onClick={() => {
-              setSoapData((prevSoapData) => ({
-                ...prevSoapData,
-                issues: [
-                  ...prevSoapData.issues,
-                  {
-                    title: '',
-                    subjective: '',
-                    objective: '',
-                    assessment: '',
-                    plan: '',
-                    summary: '',
-                    followUpPlans: []
-                  }
-                ]
-              }));
-            }}
-          >
-            Add Issue
-          </button>
+        {/* Issue Pane */}
+        <div className="w-full col-span-1">
+          <div>
+            {selectedIssue !== null && (
+              <>
+                <h1 className="font-bold text-2xl border-b border-black mb-3">
+                  Selected Issue
+                </h1>
+                <Issue
+                  issueIndex={selectedIssue}
+                  title={soapData.issues[selectedIssue].title}
+                  diagSections={diagnosisSections}
+                  summarySections={summarySections}
+                  autocompleteTriggersOptions={autocompleteTriggersOptions}
+                  soapData={{
+                    subjective: soapData.issues[selectedIssue].subjective,
+                    objective: soapData.issues[selectedIssue].objective,
+                    assessment: soapData.issues[selectedIssue].assessment,
+                    plan: soapData.issues[selectedIssue].plan,
+                    summary: soapData.issues[selectedIssue].summary,
+                    followUpPlans: soapData.issues[selectedIssue].followUpPlans
+                  }}
+                  setSoapData={setSoapData} // TODO: this needs to be per issue
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </>

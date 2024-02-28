@@ -17,8 +17,8 @@ export default function Issue({
   soapData,
   setSoapData
 }): JSX.Element {
-  const [isDiagMode, setDiagMode] = useState(true);
-  const [shouldHideContent, setShouldHideContent] = useState(true);
+  const [isDiagMode, setDiagMode] = useState(false);
+  const [shouldHideContent, setShouldHideContent] = useState(false);
 
   return (
     <div className="border p-2 mb-5">

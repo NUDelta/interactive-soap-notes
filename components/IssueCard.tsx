@@ -18,7 +18,7 @@ export default function IssueCard({
 
   return (
     <div
-      className={`w-3/12 mb-1 p-1 ${selectedIssue === issueId ? 'bg-blue-100' : 'bg-white'}`}
+      className={`w-3/12 mb-1 p-1 hover:bg-blue-100 ${selectedIssue === issueId ? 'bg-blue-200' : 'bg-white'}`}
       onClick={() => {
         setIsSelected(!isSelected);
         if (issueId === selectedIssue) {
@@ -37,7 +37,7 @@ export default function IssueCard({
           </h3>
 
           <div
-            className={`flex flex-wrap text-md text-orange-500 py-1 ${followUpPlans.length > 0 ? '' : 'opacity-0'}`}
+            className={`flex flex-wrap text-md text-orange-500 py-1 ${followUpPlans.length > 0 ? 'opacity-0' : ''}`}
           >
             <ExclamationTriangleIcon className="h-4" />
             <span className="text-s font-bold mt-2">
@@ -45,6 +45,8 @@ export default function IssueCard({
               check-ins encoded
             </span>
           </div>
+
+          {/* TODO: add trash can and resolved button */}
         </div>
       </div>
     </div>
