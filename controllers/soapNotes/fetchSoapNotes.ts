@@ -50,6 +50,5 @@ export const fetchSoapNote = async (
   //   };
   //   await currentSoapNote.save();
   // }
-
   return currentSoapNote;
 };

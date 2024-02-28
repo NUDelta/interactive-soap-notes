@@ -6,6 +6,10 @@ export interface SOAPStruct {
   lastUpdated: Date;
   sigName: string;
   sigAbbreviation: string;
+  subjective: string;
+  objective: string;
+  assessment: string;
+  plan: string;
   issues: IssueStruct[];
   priorContext: object;
   notedAssessments: object;
@@ -48,6 +52,10 @@ const SOAPSchema = new mongoose.Schema<SOAPStruct>({
     type: String,
     required: true
   },
+  subjective: { type: String, required: true },
+  objective: { type: String, required: true },
+  assessment: { type: String, required: true },
+  plan: { type: String, required: true },
   issues: {
     type: [
       {

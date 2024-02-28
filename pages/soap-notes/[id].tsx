@@ -90,6 +90,10 @@ export default function SOAPNote({
         lastUpdated: lastUpdated,
         sigName: soapNoteInfo.sigName,
         sigAbbreviation: soapNoteInfo.sigAbbreviation,
+        subjective: soapData.subjective ?? '',
+        objective: soapData.objective ?? '',
+        assessment: soapData.assessment ?? '',
+        plan: soapData.plan ?? '',
         issues: soapData.issues,
         priorContext: soapData.priorContext,
         notedAssessments: [],
@@ -111,7 +115,7 @@ export default function SOAPNote({
         const { data } = await res.json();
         mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
       } catch (err) {
-        console.error(err);
+        console.error('Error in saving SOAP note: ', err);
       }
 
       setNoteInfo((prevNoteInfo) => ({
@@ -231,6 +235,29 @@ export default function SOAPNote({
                   setSelectedIssue={setSelectedIssue}
                 />
               ))}
+
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full mr-3"
+                onClick={() => {
+                  setSoapData((prevSoapData) => ({
+                    ...prevSoapData,
+                    issues: [
+                      ...prevSoapData.issues,
+                      {
+                        title: '',
+                        subjective: '',
+                        objective: '',
+                        assessment: '',
+                        plan: '',
+                        summary: '',
+                        followUpPlans: []
+                      }
+                    ]
+                  }));
+                }}
+              >
+                Add Issue
+              </button>
             </div>
           </div>
 
@@ -243,50 +270,76 @@ export default function SOAPNote({
             </h1>
             <p className="italic">
               Write notes from the SIG meeting below. To create issues from your
-              notes for SOAP to track, highlight the text you've written and
-              click the + popup.
+              notes for SOAP to track, highlight the text you&apos;ve written
+              and click the + popup.
             </p>
-            {soapData.issues.map((issue, i) => (
-              <Issue
-                key={`issue-index-${i}`}
-                issueIndex={i}
-                title={issue.title}
-                diagSections={diagnosisSections}
-                summarySections={summarySections}
-                autocompleteTriggersOptions={autocompleteTriggersOptions}
-                soapData={{
-                  subjective: issue.subjective,
-                  objective: issue.objective,
-                  assessment: issue.assessment,
-                  plan: issue.plan,
-                  summary: issue.summary,
-                  followUpPlans: issue.followUpPlans
-                }}
-                setSoapData={setSoapData} // TODO: this needs to be per issue
-              />
-            ))}
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full mr-3"
-              onClick={() => {
-                setSoapData((prevSoapData) => ({
-                  ...prevSoapData,
-                  issues: [
-                    ...prevSoapData.issues,
-                    {
-                      title: '',
-                      subjective: '',
-                      objective: '',
-                      assessment: '',
-                      plan: '',
-                      summary: '',
-                      followUpPlans: []
+            {diagnosisSections.map((section) => (
+              <div className={`w-full`} key={section.name}>
+                <h1 className="font-bold text-xl">{section.title}</h1>
+                {section.name === 'plan' && (
+                  <h2 className="text-sm color-grey">
+                    Add plans for Orchestration Engine to follow-up on by
+                    typing, &quot;[script]&quot;. These will be sent to the
+                    students&apos; project channel.
+                  </h2>
+                )}
+
+                {/* TODO: abstract out the update code */}
+                <TextBox
+                  value={soapData[section.name]}
+                  triggers={Object.keys(
+                    autocompleteTriggersOptions[section.name]
+                  )}
+                  options={autocompleteTriggersOptions[section.name]}
+                  onFocus={(e) => {
+                    // add a "- " if the text box is empty
+                    if (e.target.value === '') {
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = '- ';
+                        return newSoapData;
+                      });
                     }
-                  ]
-                }));
-              }}
-            >
-              Add Issue
-            </button>
+                  }}
+                  onBlur={(e) => {
+                    // remove the dash if the text box is empty
+                    if (e.target.value.trim() === '-') {
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = '';
+                        return newSoapData;
+                      });
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    // add a new line to the text box with a dash when the user presses enter
+                    if (e.key === 'Enter') {
+                      // check if it's not a script line
+                      let lines = e.target.value.split('\n');
+                      if (
+                        lines.length >= 1 &&
+                        lines[lines.length - 1].includes('[script]')
+                      ) {
+                        return;
+                      }
+
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = `${e.target.value}- `;
+                        return newSoapData;
+                      });
+                    }
+                  }}
+                  onChange={(edits) => {
+                    setSoapData((prevSoapData) => {
+                      let newSoapData = { ...prevSoapData };
+                      newSoapData[section.name] = edits;
+                      return newSoapData;
+                    });
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
 
@@ -379,6 +432,10 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     project: currentSoapNote.project,
     sigName: currentSoapNote.sigName,
     sigAbbreviation: currentSoapNote.sigAbbreviation,
+    subjective: currentSoapNote.subjective,
+    objective: currentSoapNote.objective,
+    assessment: currentSoapNote.assessment,
+    plan: currentSoapNote.plan,
     sigDate: shortDate(currentSoapNote.date),
     lastUpdated: longDate(currentSoapNote.lastUpdated, true)
   };
@@ -471,7 +528,11 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       triggeredScripts: [],
       followUpPlans: 'none'
     },
-    issues: noteIssues
+    issues: noteIssues,
+    subjective: soapNoteInfo.subjective,
+    objective: soapNoteInfo.objective,
+    assessment: soapNoteInfo.assessment,
+    plan: soapNoteInfo.plan
   };
 
   // setup triggers and options for each section's text boxes
