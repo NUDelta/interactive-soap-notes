@@ -45,21 +45,21 @@ export default function IssuePane({
           className="w-2/3 text-md font-bold mr-3 h-14"
         />
         {/* Show or hide note details */}
-        <button
+        {/* <button
           className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1 h-8 rounded-full mr-3"
           onClick={() => setShouldHideContent(!shouldHideContent)}
         >
           {shouldHideContent ? 'Show Notes' : 'Hide Notes'}
-        </button>
+        </button> */}
         {/* Switch between diagnosis mode and summary mode */}
-        {!shouldHideContent && (
+        {/* {!shouldHideContent && (
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1 h-8 rounded-full  mr-3"
             onClick={() => setDiagMode(!isDiagMode)}
           >
             {isDiagMode ? 'Switch to Summary Mode' : 'Switch to Diagnosis Mode'}
           </button>
-        )}
+        )} */}
 
         {/* Buttons to rearrange issues and delete */}
         {/* TODO: allor for rearranging */}
@@ -68,7 +68,8 @@ export default function IssuePane({
         />
         <ArrowDownIcon className="h-6 w-6 mr-3" /> */}
         {/* TODO: move icons to right side */}
-        <TrashIcon
+        {/* TODO: trash doens't work right now */}
+        {/* <TrashIcon
           className="h-6 w-6 mr-3 hover:text-red-600"
           onClick={(e) => {
             // confirm deletion using an alert
@@ -83,7 +84,7 @@ export default function IssuePane({
               }));
             }
           }}
-        />
+        /> */}
 
         {/* Warning messages for incomplete follow-ups */}
         <div
