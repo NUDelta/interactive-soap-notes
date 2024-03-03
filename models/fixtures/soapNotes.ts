@@ -49,12 +49,17 @@ const soapNotesForSigs = [
           {
             title: 'burning out',
             description:
-              "studnet has been working really hard, and I'm worried they'll burn out",
-            currentInstance: null,
+              "students have been working really hard, and I'm worried they'll burn out",
+            currentInstance: {
+              date: new Date('2024-02-12T06:00:00'),
+              context: 'studnets worked 30 points this week',
+              summary:
+                'students are continually overworking, and I am worried they will burn out'
+            },
             priorInstances: [
               {
                 date: new Date('2024-02-05T06:00:00'),
-                context: 'I feel tired',
+                context: 'studnet reflection: I feel tired',
                 summary: 'student is worn out'
               }
             ],
@@ -63,15 +68,44 @@ const soapNotesForSigs = [
             issueArchived: false
           },
           {
-            title: 'making progress',
-            description: 'student is making progress on the project',
+            title: 'prototyping slices',
+            description:
+              'when prototyping, have students think about the smallest slices to make prototypes',
             currentInstance: null,
             priorInstances: [],
             lastEdited: new Date('2024-02-12T06:00:00'),
             issueInactive: false,
             issueArchived: false
+          },
+          {
+            title: 'not thinking deeply about risks',
+            description:
+              'students dont take time to do risk assessment before planning',
+            currentInstance: null,
+            priorInstances: [
+              {
+                date: new Date('2024-01-29T06:00:00'),
+                context:
+                  'plan doesnt have deliverables that address study risk',
+                summary:
+                  'students are trying to plan a study but havent thought about where the study is risky'
+              }
+            ],
+            lastEdited: new Date('2024-01-29T06:00:00'),
+            issueInactive: false,
+            issueArchived: false
           }
         ]
+      },
+      {
+        project: 'Orchestration Scripting Environments',
+        date: new Date('2024-02-05T06:00:00'),
+        lastUpdated: new Date('2024-02-05T06:00:00'),
+        subjective: [],
+        objective: [],
+        assessment: [],
+        plan: [],
+        issues: []
       }
     ]
   },

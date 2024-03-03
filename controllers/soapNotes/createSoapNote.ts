@@ -7,7 +7,6 @@ import SOAPModel from '../../models/SOAPModel';
  * @param noteDate
  */
 export const createSOAPNote = async (projectName: string, noteDate: Date) => {
-  // TODO: 03-03-24 -- when creating SOAP note, use accumulation to get the list of issues from prior weeks. check to see if the prior week exists before adding it to the list
   try {
     // get proj and sig info
     const projInfoRes = await fetch(
@@ -31,6 +30,29 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
         socialStructure.kind === 'SigStructure'
     ).abbreviation;
 
+    // get the previous SOAP note for the project
+    await dbConnect();
+    const previousSoapNotes = await SOAPModel.find({
+      project: projectName,
+      sigName: sigName
+    }).sort({ date: -1 });
+    const previousSoapNote = previousSoapNotes[0];
+
+    // get issues from the prior soap note
+    let issues = [];
+    if (previousSoapNote) {
+      issues = previousSoapNote.issues;
+
+      // for each issue, add the currentInstance to the top of the priorInstances list (if not null) and set currentInstance to null
+      issues = issues.map((issue) => {
+        if (issue.currentInstance) {
+          issue.priorInstances.unshift(issue.currentInstance);
+          issue.currentInstance = null;
+        }
+        return issue;
+      });
+    }
+
     // save the new SOAP note to the database
     await dbConnect();
     return await SOAPModel.create({
@@ -43,7 +65,7 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
       objective: [],
       assessment: [],
       plan: [],
-      issues: []
+      issues: issues
     });
   } catch (err) {
     console.error('Error in creating SOAP note: ', err, err.stack);
