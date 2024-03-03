@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { TextEntrySchema, TextEntryStruct } from './TextEntryModel';
+import { ConceptualIssueSchema, ConceptualIssueStruct } from './IssueModel';
 
 export interface SOAPStruct {
   project: string;
@@ -6,29 +8,14 @@ export interface SOAPStruct {
   lastUpdated: Date;
   sigName: string;
   sigAbbreviation: string;
-  subjective: string;
-  objective: string;
-  assessment: string;
-  plan: string;
-  issues: IssueStruct[];
-  priorContext: object;
-  notedAssessments: object;
-  followUpContext: object;
-}
-
-export interface IssueStruct {
-  title: string;
-  subjective: string;
-  objective: string;
-  assessment: string;
-  plan: string;
-  summary: string;
-  followUpPlans: ScriptObj[];
-}
-
-interface ScriptObj {
-  venue: string;
-  strategy: string;
+  subjective: TextEntryStruct[];
+  objective: TextEntryStruct[];
+  assessment: TextEntryStruct[];
+  plan: TextEntryStruct[];
+  issues: ConceptualIssueStruct[];
+  // priorContext: object;
+  // notedAssessments: object;
+  // followUpContext: object;
 }
 
 const SOAPSchema = new mongoose.Schema<SOAPStruct>({
@@ -52,42 +39,23 @@ const SOAPSchema = new mongoose.Schema<SOAPStruct>({
     type: String,
     required: true
   },
-  subjective: { type: String, required: true },
-  objective: { type: String, required: true },
-  assessment: { type: String, required: true },
-  plan: { type: String, required: true },
-  issues: {
-    type: [
-      {
-        title: String,
-        subjective: String,
-        objective: String,
-        assessment: String,
-        plan: String,
-        summary: String,
-        followUpPlans: [
-          {
-            venue: String,
-            strategy: String
-          }
-        ]
-      }
-    ],
-    required: true,
-    default: []
-  },
-  priorContext: {
-    type: Object,
-    required: true
-  },
-  notedAssessments: {
-    type: Object,
-    required: true
-  },
-  followUpContext: {
-    type: Object,
-    required: true
-  }
+  subjective: [TextEntrySchema],
+  objective: [TextEntrySchema],
+  assessment: [TextEntrySchema],
+  plan: [TextEntrySchema],
+  issues: [ConceptualIssueSchema]
+  // priorContext: {
+  //   type: Object,
+  //   required: true
+  // },
+  // notedAssessments: {
+  //   type: Object,
+  //   required: true
+  // },
+  // followUpContext: {
+  //   type: Object,
+  //   required: true
+  // }
 });
 
 export default (mongoose.models.SOAPNote as mongoose.Model<SOAPStruct>) ||

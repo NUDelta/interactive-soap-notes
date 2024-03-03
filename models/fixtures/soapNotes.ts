@@ -1,7 +1,6 @@
 import dbConnect from '../../lib/dbConnect';
 import SOAPModel from '../SOAPModel';
 
-// TODO: 03-03-24 -- create fixtures such that createSOAPNote can be used
 const soapNotesForSigs = [
   {
     name: 'Networked Orchestration Technologies',
@@ -11,9 +10,68 @@ const soapNotesForSigs = [
         project: 'Orchestration Scripting Environments',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        issues: [],
-        priorContext: {},
-        followUpContext: {}
+        subjective: [
+          {
+            isChecked: false,
+            isInIssue: false,
+            type: 'note',
+            context: [],
+            value: 'I feel like I am making progress on the project.'
+          },
+          {
+            isChecked: false,
+            isInIssue: false,
+            type: 'note',
+            context: [],
+            value: 'I am tired'
+          }
+        ],
+        objective: [
+          {
+            isChecked: false,
+            isInIssue: false,
+            type: 'note',
+            context: [],
+            value: 'I am making progress on the project.'
+          }
+        ],
+        assessment: [
+          {
+            isChecked: false,
+            isInIssue: false,
+            type: 'note',
+            context: [],
+            value: 'I feel like I am making progress on the project.'
+          }
+        ],
+        plan: [],
+        issues: [
+          {
+            title: 'burning out',
+            description:
+              "studnet has been working really hard, and I'm worried they'll burn out",
+            currentInstance: null,
+            priorInstances: [
+              {
+                date: new Date('2024-02-05T06:00:00'),
+                context: 'I feel tired',
+                summary: 'student is worn out'
+              }
+            ],
+            lastEdited: new Date('2024-02-05T06:00:00'),
+            issueInactive: false,
+            issueArchived: false
+          },
+          {
+            title: 'making progress',
+            description: 'student is making progress on the project',
+            currentInstance: null,
+            priorInstances: [],
+            lastEdited: new Date('2024-02-12T06:00:00'),
+            issueInactive: false,
+            issueArchived: false
+          }
+        ]
       }
     ]
   },
@@ -25,17 +83,13 @@ const soapNotesForSigs = [
         project: 'Human-AI Tools for Accounting for Differences',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        issues: [],
-        priorContext: {},
-        followUpContext: {}
+        issues: []
       },
       {
         project: 'Reference Systems',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        issues: [],
-        priorContext: {},
-        followUpContext: {}
+        issues: []
       }
     ]
   },
@@ -47,18 +101,14 @@ const soapNotesForSigs = [
         project: 'Human-AI Tools for Concept Expression',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        issues: [],
-        priorContext: {},
-        followUpContext: {}
+        issues: []
       },
       {
         project:
           'Human-AI Tools for Aligning to Machine Representations and Execution',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        issues: [],
-        priorContext: {},
-        followUpContext: {}
+        issues: []
       }
     ]
   },
@@ -70,17 +120,13 @@ const soapNotesForSigs = [
         project: 'How Can Computers Support Dialectical Activities?',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        issues: [],
-        priorContext: {},
-        followUpContext: {}
+        issues: []
       },
       {
         project: 'Prototyping with LLMs',
         date: new Date('2024-02-12T06:00:00'),
         lastUpdated: new Date('2024-02-12T06:00:00'),
-        issues: [],
-        priorContext: {},
-        followUpContext: {}
+        issues: []
       }
     ]
   },
@@ -92,20 +138,13 @@ const soapNotesForSigs = [
         project: 'Q&A Buddy',
         date: new Date('2024-02-14T06:00:00'),
         lastUpdated: new Date('2024-02-14T06:00:00'),
-        issues: [],
-        priorContext: {},
-        followUpContext: {}
+        issues: []
       },
       {
         project: 'PATH',
         date: new Date('2024-02-14T06:00:00'),
         lastUpdated: new Date('2024-02-14T06:00:00'),
-        subjective: '',
-        objective: '',
-        assessment: '',
-        plan: '',
-        priorContext: {},
-        followUpContext: {}
+        issues: []
       }
     ]
   }
@@ -120,24 +159,20 @@ export const createSoapNoteFixtures = async () => {
     await SOAPModel.deleteMany({});
 
     // Create a soap note object for each sig in the fixtures
-    // TODO: 03-03-24 -- use createSOAPNote to create the soap notes
     let soapNotes = [];
     soapNotesForSigs.map((sig) => {
       sig.soapNotes.map((soapNote) => {
         soapNotes.push({
-          sigName: sig.name,
-          sigAbbreviation: sig.abbreviation,
-          subjective: '',
-          objective: '',
-          assessment: '',
-          plan: '',
           project: soapNote.project,
           date: soapNote.date,
           lastUpdated: soapNote.lastUpdated,
-          issues: soapNote.issues,
-          priorContext: [],
-          notedAssessments: [],
-          followUpContext: []
+          sigName: sig.name,
+          sigAbbreviation: sig.abbreviation,
+          subjective: soapNote.subjective ?? [],
+          objective: soapNote.objective ?? [],
+          assessment: soapNote.assessment ?? [],
+          plan: soapNote.plan ?? [],
+          issues: soapNote.issues ?? []
         });
       });
     });
