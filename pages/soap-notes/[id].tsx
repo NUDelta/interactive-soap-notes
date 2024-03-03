@@ -39,6 +39,38 @@ export default function SOAPNote({
   // hold a ref that checks if first load
   const firstLoad = useRef(true);
 
+  // sections of the soap notes
+  const diagnosisSections = [
+    {
+      name: 'subjective',
+      title: 'Subjective information from student(s)'
+    },
+    {
+      name: 'objective',
+      title: 'Objective information matching student(s) summary'
+    },
+    {
+      name: 'assessment',
+      title:
+        'Assessment of situation (e.g., obstacles to practice; metacogntive blockers)'
+    },
+    {
+      name: 'plan',
+      title: 'Plan for follow-up and check-ins'
+    }
+  ];
+
+  const summarySections = [
+    {
+      name: 'summary',
+      title: 'Summary of issue'
+    },
+    {
+      name: 'plan',
+      title: 'Plan for follow-up and check-ins'
+    }
+  ];
+
   // listen for changes in state and do debounced saves to database
   useEffect(() => {
     // don't save on first load
@@ -63,7 +95,7 @@ export default function SOAPNote({
       const lastUpdated = new Date();
 
       // check if any lines have a [script] tag
-      // TODO: need to repeat this on every issue
+      // TODO: 03-03-24: apply this logic to the current issue instance (though might not be needed if follow-ups become clickable components)
       for (let issue of soapData.issues) {
         // parse individual lines of the plan for the current issue
         let lines = issue.plan.split('\n');
@@ -137,38 +169,7 @@ export default function SOAPNote({
     return () => clearTimeout(timeOutId);
   }, [soapData, soapNoteInfo]);
 
-  // sections of the soap notes
-  const diagnosisSections = [
-    {
-      name: 'subjective',
-      title: 'Subjective information from student(s)'
-    },
-    {
-      name: 'objective',
-      title: 'Objective information matching student(s) summary'
-    },
-    {
-      name: 'assessment',
-      title:
-        'Assessment of situation (e.g., obstacles to practice; metacogntive blockers)'
-    },
-    {
-      name: 'plan',
-      title: 'Plan for follow-up and check-ins'
-    }
-  ];
-
-  const summarySections = [
-    {
-      name: 'summary',
-      title: 'Summary of issue'
-    },
-    {
-      name: 'plan',
-      title: 'Plan for follow-up and check-ins'
-    }
-  ];
-
+  // return the page
   return (
     <>
       {/* Set title of the page to be project name */}
@@ -501,8 +502,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     sprintPoints = ['unable to fetch sprint points'];
   }
 
-  // setup tracked scripts
-  // check if title doesn't match any existing issue titles
+  // setup issues for issue cards and pane
   // TODO: should have the context from what triggered the script injected into the issue object
   // TODO: having to recurisvely strip obj id's for some reason...
   let noteIssues = currentSoapNote.toObject().issues;
@@ -523,6 +523,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     };
   });
 
+  // add new OS ActiveIssues if title doesn't match any existing issue titles
+  // TODO: 03-03-24: don't need to create issues from OS -- just show them in the SOAP notes
   for (let script of triggeredScripts) {
     let title = `[detected issue] ${script.name} - ${script.strategies}`;
     let titleIndex = noteIssues.findIndex((issue) => issue.title === title);
@@ -550,7 +552,6 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   });
 
   // setup the page with the data from the database
-  // TODO: populate view with the following
   // - list of tracked practices and when they last occurred
   // - new work needs to address this week
   // - Subjective: student self-reflections on how the week went
@@ -579,17 +580,11 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     summary: {},
     subjective: {},
     objective: {},
-    assessment: {
-      '#': [
-        'planning/risk-assessment',
-        'planning/stories',
-        'planning/deliverables',
-        'planning/tasks'
-      ]
-    },
+    assessment: {},
     plan: {
+      // TODO: 03-03-24 -- add a "next SIG" venue
       '[script]': [
-        ' morning of office hours: ', // TODO: detect this properly
+        ' morning of office hours: ',
         ' at office hours: ',
         ' after SIG: ',
         ' day after SIG: ',
@@ -602,6 +597,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     }
   };
 
+  // TODO: 03-03-24 -- data might be redundant with the soapNoteInfo
   return {
     props: { soapNoteInfo, data, autocompleteTriggersOptions }
   };

@@ -1,7 +1,7 @@
 import dbConnect from '../../lib/dbConnect';
 import SOAPModel from '../SOAPModel';
 
-// TODO: these should be for PROJECTS not SIGs (sigs are composed of projects for which there each has a set of SOAP
+// TODO: 03-03-24 -- create fixtures such that createSOAPNote can be used
 const soapNotesForSigs = [
   {
     name: 'Networked Orchestration Technologies',
@@ -120,6 +120,7 @@ export const createSoapNoteFixtures = async () => {
     await SOAPModel.deleteMany({});
 
     // Create a soap note object for each sig in the fixtures
+    // TODO: 03-03-24 -- use createSOAPNote to create the soap notes
     let soapNotes = [];
     soapNotesForSigs.map((sig) => {
       sig.soapNotes.map((soapNote) => {

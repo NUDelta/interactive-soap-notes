@@ -3,6 +3,101 @@ import dbConnect from '../../../lib/dbConnect';
 import SOAPModel from '../../../models/SOAPModel';
 import crypto from 'crypto';
 
+/**
+ * Request handler for /api/soap/[id]
+ * @param req
+ * @param res
+ * @returns
+ */
+export default async function handler(req, res) {
+  const {
+    query: { id },
+    method
+  } = req;
+  await dbConnect();
+
+  switch (method) {
+    case 'GET': // fetch a SOAP note by [id]
+      try {
+        const soapNote = await SOAPModel.findById(id);
+        if (!soapNote) {
+          return res
+            .status(400)
+            .json({ success: false, error: 'No SOAP note found for ID ${id}' });
+        }
+        res.status(200).json({ success: true, data: soapNote });
+      } catch (error) {
+        res.status(400).json({
+          success: false,
+          error: `Error in fetching SOAP note: ${error}`
+        });
+      }
+      break;
+    case 'PUT': // update SOAP note of [id] with edits
+      try {
+        const soapNote = await updateSOAPNote(id, req.body);
+
+        // TODO: updateSOAPNote is already parsing the code; so parseFollowUpPlans is redundant
+        // parse actionable followups
+        let actionableFollowUps = req.body['issues']
+          .map((issue) => {
+            return issue['followUpPlans'];
+          })
+          .flat();
+        for (let i = 0; i < actionableFollowUps.length; i++) {
+          let parsedFollowup = parseFollowUpPlans(
+            id,
+            req.body.project,
+            actionableFollowUps[i].venue,
+            actionableFollowUps[i].strategy
+          );
+
+          console.log('parsedFollowup: ', parsedFollowup);
+
+          const osRes = await fetch(
+            `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(parsedFollowup)
+            }
+          );
+          console.log(
+            'Response from OS on /createActiveIssue: ',
+            await osRes.json()
+          );
+        }
+
+        if (!soapNote) {
+          return res.status(400).json({ success: false });
+        }
+        res.status(200).json({ success: true, data: soapNote });
+      } catch (error) {
+        console.error(
+          `Error in PUT for /api/soap/[id] for "${req.body.project}"`,
+          error
+        );
+        res.status(400).json({ success: false });
+      }
+      break;
+
+    default:
+      res.status(400).json({ success: false });
+      break;
+  }
+}
+
+/**
+ * Parses follow-up plans into actionable issues for OS.
+ * TODO: this code is redundant with the code in updateSOAPNote
+ * @param soapId
+ * @param projName
+ * @param venue
+ * @param strategy
+ * @returns
+ */
 function parseFollowUpPlans(soapId, projName, venue, strategy) {
   // create object to sent to OS
   // TODO: see if I can get OS to compute the expiration date of the issue to be the day after it's sent
@@ -40,6 +135,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
   );
 
   // TODO: DRY
+  // TODO: 03-03-24 -- add a "next SIG" venue
   let strategyFunction = '';
   switch (venue.toLowerCase()) {
     case 'morning of office hours':
@@ -155,85 +251,4 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
 
   console.log('In parseFollowUpPlans, newActiveIssue: ', newActiveIssue);
   return newActiveIssue;
-}
-
-/**
- * Request handler for /api/soap/[id]
- * @param req
- * @param res
- * @returns
- */
-export default async function handler(req, res) {
-  const {
-    query: { id },
-    method
-  } = req;
-  await dbConnect();
-
-  switch (method) {
-    case 'GET': // fetch a SOAP note by [id]
-      try {
-        const soapNote = await SOAPModel.findById(id);
-        if (!soapNote) {
-          return res.status(400).json({ success: false });
-        }
-        res.status(200).json({ success: true, data: soapNote });
-      } catch (error) {
-        res.status(400).json({ success: false });
-      }
-      break;
-    case 'PUT': // update SOAP note of [id] with edits
-      try {
-        const soapNote = await updateSOAPNote(id, req.body);
-
-        // TODO: updateSOAPNote is already parsing the code; so parseFollowUpPlans is redundant
-        // parse actionable followups
-        let actionableFollowUps = req.body['issues']
-          .map((issue) => {
-            return issue['followUpPlans'];
-          })
-          .flat();
-        for (let i = 0; i < actionableFollowUps.length; i++) {
-          let parsedFollowup = parseFollowUpPlans(
-            id,
-            req.body.project,
-            actionableFollowUps[i].venue,
-            actionableFollowUps[i].strategy
-          );
-
-          console.log('parsedFollowup: ', parsedFollowup);
-
-          const osRes = await fetch(
-            `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(parsedFollowup)
-            }
-          );
-          console.log(
-            'Response from OS on /createActiveIssue: ',
-            await osRes.json()
-          );
-        }
-
-        if (!soapNote) {
-          return res.status(400).json({ success: false });
-        }
-        res.status(200).json({ success: true, data: soapNote });
-      } catch (error) {
-        console.error(
-          `Error in PUT for /api/soap/[id] for "${req.body.project}"`,
-          error
-        );
-        res.status(400).json({ success: false });
-      }
-      break;
-
-    default:
-      res.status(400).json({ success: false });
-      break;
-  }
 }

@@ -7,6 +7,7 @@ import SOAPModel from '../../models/SOAPModel';
  * @param noteDate
  */
 export const createSOAPNote = async (projectName: string, noteDate: Date) => {
+  // TODO: 03-03-24 -- when creating SOAP note, use accumulation to get the list of issues from prior weeks. check to see if the prior week exists before adding it to the list
   try {
     // get proj and sig info
     const projInfoRes = await fetch(
