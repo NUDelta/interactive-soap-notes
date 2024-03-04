@@ -399,11 +399,13 @@ export default function SOAPNote({
                   let contextAddition = selectedItems.subjective
                     .map((line) => line.value)
                     .concat(selectedItems.objective.map((line) => line.value))
-                    .join('\n');
+                    .join('\n')
+                    .trim();
 
                   let summaryAddition = selectedItems.assessment
                     .map((line) => line.value)
-                    .join('\n');
+                    .join('\n')
+                    .trim();
 
                   // get the selected option and either create a new issue or add to the existing issue
                   if (selectedOption.hasOwnProperty('__isNew__')) {
@@ -440,7 +442,9 @@ export default function SOAPNote({
                     );
                     let issueInstance =
                       soapData.issues[issueIndex].currentInstance;
+
                     if (issueInstance === null) {
+                      // if the current instance doesn't exist, intialize it with the additions from the notetaking space
                       issueInstance = {
                         id: new mongoose.Types.ObjectId().toString(),
                         date: longDate(new Date()),
@@ -450,6 +454,7 @@ export default function SOAPNote({
                         practices: []
                       };
                     } else {
+                      // otherwise, add the additions to the current instance
                       issueInstance.context =
                         issueInstance.context.trim() === ''
                           ? contextAddition
