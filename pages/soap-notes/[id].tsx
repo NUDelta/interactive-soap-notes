@@ -99,7 +99,6 @@ export default function SOAPNote({
       const lastUpdated = new Date();
 
       // check if any lines have a [practice] tag
-      // TODO: 03-03-24: apply this logic to the current issue instance (though might not be needed if follow-ups become clickable components)
       for (let issue of soapData.issues) {
         // check if current instance is not null
         if (issue.currentInstance === null) {
@@ -185,10 +184,9 @@ export default function SOAPNote({
       </Head>
 
       {/* Header info for SOAP note */}
-      {/* TODO: 03-03-24 -- have side pane continue downwards past this week's notes. one way to do it would be have a separate grid for just the issue pane instead of it being embdedded here */}
-      <div className="container m-auto grid grid-cols-3 gap-x-5 gap-y-5 auto-rows-auto w-2/3 mt-3">
+      <div className="container mx-auto grid grid-cols-3 gap-x-5 gap-y-5 auto-rows-auto w-3/4 mt-3">
         {/* Back button */}
-        <div className="col-span-2">
+        <div className="col-span-3">
           <Link href="/">
             <h3 className="text-md text-blue-600 hover:text-blue-800 visited:text-purple-600">
               &#8592; Back
@@ -233,8 +231,9 @@ export default function SOAPNote({
           </div>
         </div> */}
 
-        {/* Issue Cards and SOAP Notes*/}
-        <div className="w-full col-span-2">
+        {/* Issue Cards and SOAP Notes */}
+        <div className="col-span-2">
+          {/* Issue Cards */}
           <div>
             <h1 className="font-bold text-2xl border-b border-black mb-3">
               Tracked Issues
@@ -244,7 +243,6 @@ export default function SOAPNote({
               practices.
             </p>
             <div className="flex flex-wrap">
-              {/* TODO: 03-03-24 -- get lastUpdated working */}
               {soapData.issues.map((issue) => (
                 <IssueCard
                   key={`issue-card-${issue.id}`}
@@ -257,6 +255,159 @@ export default function SOAPNote({
                 />
               ))}
             </div>
+          </div>
+
+          {/* Notes during SIG */}
+          {/* Create a section for each component of the SOAP notes */}
+          {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
+          <div>
+            <h1 className="font-bold text-2xl border-b border-black mb-3">
+              This week&apos;s notes
+            </h1>
+            <p className="italic">
+              Write notes from the SIG meeting below. To track issues from your
+              notes, highlight the text and click the button that pops up below.
+            </p>
+
+            {/* TODO: replace this with buttons for selected lines */}
+            <IssueFromHighlight
+              visibility={highlightedText.visibility}
+              section={highlightedText.section}
+              highlightedContent={highlightedText.highlightedContent}
+              onClick={(section, highlightedContent) => {
+                setSoapData((prevSoapData) => {
+                  let newSoapData = { ...prevSoapData };
+                  newSoapData.issues.push({
+                    title: section.includes('assessment')
+                      ? highlightedContent
+                      : '',
+                    subjective: '',
+                    objective: '',
+                    assessment: '',
+                    plan: '',
+                    summary: !section.includes('assessment')
+                      ? highlightedContent
+                      : '',
+                    followUpPlans: []
+                  });
+                  return newSoapData;
+                });
+              }}
+            />
+
+            {/* Create a text box for each section of the SOAP note */}
+            {diagnosisSections.map((section) => (
+              <div className={`w-full`} key={section.name}>
+                <h1 className="font-bold text-xl">{section.title}</h1>
+                {section.name === 'plan' && (
+                  <h2 className="text-sm color-grey">
+                    Add practices for Orchestration Engine to follow-up on by
+                    typing, &quot;[practice]&quot;. These will be sent to the
+                    students&apos; project channel.
+                  </h2>
+                )}
+
+                {/* TODO: abstract out the update code */}
+                <TextBox
+                  value={soapData[section.name]
+                    .map((line) => `${line.value}`)
+                    .join('\n')}
+                  triggers={Object.keys(
+                    autocompleteTriggersOptions[section.name]
+                  )}
+                  options={autocompleteTriggersOptions[section.name]}
+                  onFocus={(e) => {
+                    // add a "- " if the text box is empty
+                    if (e.target.value === '') {
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = [
+                          ...newSoapData[section.name],
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            isChecked: false,
+                            isInIssue: false,
+                            type: 'note',
+                            context: [],
+                            value: '- '
+                          }
+                        ];
+                        return newSoapData;
+                      });
+                    }
+                  }}
+                  onBlur={(e) => {
+                    // remove the dash if the text box is empty
+                    if (e.target.value.trim() === '-') {
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = [
+                          ...newSoapData[section.name].slice(0, -1)
+                        ];
+                        return newSoapData;
+                      });
+                    }
+                  }}
+                  onKeyUp={(e) => {
+                    // add a new line to the text box with a dash when the user presses enter
+                    if (e.key === 'Enter') {
+                      // check if it's not a script line
+                      let lines = e.target.value.split('\n');
+                      if (
+                        lines.length >= 1 &&
+                        lines[lines.length - 1].includes('[practice]')
+                      ) {
+                        return;
+                      }
+
+                      setSoapData((prevSoapData) => {
+                        let newSoapData = { ...prevSoapData };
+                        newSoapData[section.name] = [
+                          ...newSoapData[section.name],
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            isChecked: false,
+                            isInIssue: false,
+                            type: 'note',
+                            context: [],
+                            value: '- '
+                          }
+                        ];
+                        return newSoapData;
+                      });
+                    }
+                  }}
+                  onChange={(edits) => {
+                    let lines = edits.split('\n');
+                    // TODO: 03-03-24 -- this overwrites all the other info about isChecked and stuff -- need to fix update command once using div
+                    let updatedLines = lines.map((line) => {
+                      return {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        isChecked: false,
+                        isInIssue: false,
+                        type: line.includes('[practice]') ? 'script' : 'note',
+                        context: [],
+                        value: line
+                      };
+                    });
+
+                    // don't do an update if the last line is blank (onKeyUp handles that
+                    if (lines[lines.length - 1] === '') {
+                      return;
+                    }
+
+                    setSoapData((prevSoapData) => {
+                      let newSoapData = { ...prevSoapData };
+                      newSoapData[section.name] = updatedLines;
+                      return newSoapData;
+                    });
+                  }}
+                  onMouseUp={(e) => {
+                    return;
+                  }}
+                />
+              </div>
+            ))}
           </div>
         </div>
 
@@ -278,189 +429,6 @@ export default function SOAPNote({
               </>
             )}
           </div>
-        </div>
-
-        {/* Notes during SIG */}
-        {/* Create a section for each component of the SOAP notes */}
-        {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
-        <div className="w-full col-span-2">
-          <h1 className="font-bold text-2xl border-b border-black mb-3">
-            This week&apos;s notes
-          </h1>
-          <p className="italic">
-            Write notes from the SIG meeting below. To track issues from your
-            notes, highlight the text and click the button that pops up below.
-          </p>
-
-          {/* TODO: replace this with buttons for selected lines */}
-          <IssueFromHighlight
-            visibility={highlightedText.visibility}
-            section={highlightedText.section}
-            highlightedContent={highlightedText.highlightedContent}
-            onClick={(section, highlightedContent) => {
-              setSoapData((prevSoapData) => {
-                let newSoapData = { ...prevSoapData };
-                newSoapData.issues.push({
-                  title: section.includes('assessment')
-                    ? highlightedContent
-                    : '',
-                  subjective: '',
-                  objective: '',
-                  assessment: '',
-                  plan: '',
-                  summary: !section.includes('assessment')
-                    ? highlightedContent
-                    : '',
-                  followUpPlans: []
-                });
-                return newSoapData;
-              });
-            }}
-          />
-
-          {/* Create a text box for each section of the SOAP note */}
-          {diagnosisSections.map((section) => (
-            <div className={`w-full`} key={section.name}>
-              <h1 className="font-bold text-xl">{section.title}</h1>
-              {section.name === 'plan' && (
-                <h2 className="text-sm color-grey">
-                  Add practices for Orchestration Engine to follow-up on by
-                  typing, &quot;[practice]&quot;. These will be sent to the
-                  students&apos; project channel.
-                </h2>
-              )}
-
-              {/* TODO: abstract out the update code */}
-              <TextBox
-                value={soapData[section.name]
-                  .map((line) => `${line.value}`)
-                  .join('\n')}
-                triggers={Object.keys(
-                  autocompleteTriggersOptions[section.name]
-                )}
-                options={autocompleteTriggersOptions[section.name]}
-                onFocus={(e) => {
-                  // add a "- " if the text box is empty
-                  if (e.target.value === '') {
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = [
-                        ...newSoapData[section.name],
-                        {
-                          id: new mongoose.Types.ObjectId().toString(),
-                          isChecked: false,
-                          isInIssue: false,
-                          type: 'note',
-                          context: [],
-                          value: '- '
-                        }
-                      ];
-                      return newSoapData;
-                    });
-                  }
-                }}
-                onBlur={(e) => {
-                  // remove the dash if the text box is empty
-                  if (e.target.value.trim() === '-') {
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = [
-                        ...newSoapData[section.name].slice(0, -1)
-                      ];
-                      return newSoapData;
-                    });
-                  }
-                }}
-                onKeyUp={(e) => {
-                  // add a new line to the text box with a dash when the user presses enter
-                  if (e.key === 'Enter') {
-                    // check if it's not a script line
-                    let lines = e.target.value.split('\n');
-                    if (
-                      lines.length >= 1 &&
-                      lines[lines.length - 1].includes('[practice]')
-                    ) {
-                      return;
-                    }
-
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = [
-                        ...newSoapData[section.name],
-                        {
-                          id: new mongoose.Types.ObjectId().toString(),
-                          isChecked: false,
-                          isInIssue: false,
-                          type: 'note',
-                          context: [],
-                          value: '- '
-                        }
-                      ];
-                      return newSoapData;
-                    });
-                  }
-                }}
-                onChange={(edits) => {
-                  let lines = edits.split('\n');
-                  // TODO: 03-03-24 -- this overwrites all the other info about isChecked and stuff -- need to fix update command once using div
-                  let updatedLines = lines.map((line) => {
-                    return {
-                      id: new mongoose.Types.ObjectId().toString(),
-                      isChecked: false,
-                      isInIssue: false,
-                      type: line.includes('[practice]') ? 'script' : 'note',
-                      context: [],
-                      value: line
-                    };
-                  });
-
-                  // don't do an update if the last line is blank (onKeyUp handles that
-                  if (lines[lines.length - 1] === '') {
-                    return;
-                  }
-
-                  setSoapData((prevSoapData) => {
-                    let newSoapData = { ...prevSoapData };
-                    newSoapData[section.name] = updatedLines;
-                    return newSoapData;
-                  });
-                }}
-                onMouseUp={(e) => {
-                  return;
-                }}
-                // onMouseUp={(e) => {
-                //   // get the section of text that was highlighted
-                //   let selection = window.getSelection();
-                //   let selectedText = selection.toString();
-                //   let range = selection.getRangeAt(0);
-                //   let boundingRect = range.getBoundingClientRect();
-                //   let soapSection = section.name;
-
-                //   // check if nothing is highlighted
-                //   if (selectedText === '') {
-                //     setHighlightedText((prevHighlightedText) => ({
-                //       ...prevHighlightedText,
-                //       visibility: 'hidden',
-                //       section: '',
-                //       highlightedContent: ''
-                //     }));
-                //     return;
-                //   } else {
-                //     // set state variable for highlighted text
-                //     setHighlightedText({
-                //       visibility: 'visible',
-                //       section: soapSection,
-                //       highlightedContent: selectedText
-                //     });
-                //   }
-
-                //   // TODO: create a component and set the left, top, visibility, and data using state https://stackoverflow.com/questions/63738841/how-to-show-popup-on-text-highlight-at-the-middle-of-the-selection
-
-                //   console.log(soapSection, selectedText, range);
-                // }}
-              />
-            </div>
-          ))}
         </div>
       </div>
     </>
