@@ -27,9 +27,11 @@
     "nextjs-progressbar": "^0.0.16",
     "react": "^18.2.0",
     "react-autocomplete-input": "^1.0.30",
+    "react-contenteditable": "^3.3.7",
     "react-dom": "^18.2.0",
     "react-editor-js": "^2.1.0",
     "react-markdown": "^9.0.1",
+    "react-select": "^5.8.0",
     "sharp": "^0.33.2",
     "swr": "^2.2.5",
     "yarn": "^1.22.21"

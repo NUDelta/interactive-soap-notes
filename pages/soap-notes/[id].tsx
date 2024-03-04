@@ -26,13 +26,6 @@ export default function SOAPNote({
   // hold a state for which issue is selected
   const [selectedIssue, setSelectedIssue] = useState(null);
 
-  // hold a state for highlighted text
-  const [highlightedText, setHighlightedText] = useState({
-    visibility: 'hidden',
-    section: '',
-    highlightedContent: ''
-  });
-
   // let user know that we are saving
   const [isSaving, setIsSaving] = useState(false);
 
@@ -265,35 +258,142 @@ export default function SOAPNote({
               This week&apos;s notes
             </h1>
             <p className="italic">
-              Write notes from the SIG meeting below. To track issues from your
-              notes, highlight the text and click the button that pops up below.
+              Write notes during SIG meeting below. To create issues to track or
+              to add your notes to existing issues, use the checkboxes next to
+              your typed notes to select the relvant notes. Then, use the
+              dropdown below. Notes added to issues will have a green box to
+              their left; notes can be added to multiple issues.
             </p>
 
-            {/* TODO: replace this with buttons for selected lines */}
-            <IssueFromHighlight
-              visibility={highlightedText.visibility}
-              section={highlightedText.section}
-              highlightedContent={highlightedText.highlightedContent}
-              onClick={(section, highlightedContent) => {
-                setSoapData((prevSoapData) => {
-                  let newSoapData = { ...prevSoapData };
-                  newSoapData.issues.push({
-                    title: section.includes('assessment')
-                      ? highlightedContent
-                      : '',
-                    subjective: '',
-                    objective: '',
-                    assessment: '',
-                    plan: '',
-                    summary: !section.includes('assessment')
-                      ? highlightedContent
-                      : '',
-                    followUpPlans: []
+            <div className="my-2">
+              {/* TODO: replace this with buttons for selected lines */}
+              <IssueFromHighlight
+                selectOptions={soapData.issues.map((issue) => {
+                  return { label: issue.title, value: issue.id };
+                })}
+                onClick={(event, selectedOption) => {
+                  // get all lines of SOAP that were selected
+                  let selectedItems = {
+                    subjective: [],
+                    objective: [],
+                    assessment: []
+                  };
+                  for (let section of Object.keys(selectedItems)) {
+                    selectedItems[section] = soapData[section].filter(
+                      (line) => line.isChecked
+                    );
+                  }
+
+                  // create the context and summary additions from the selected item
+                  let contextAddition = selectedItems.subjective
+                    .map((line) => line.value)
+                    .concat(selectedItems.objective.map((line) => line.value))
+                    .join('\n');
+
+                  let summaryAddition = selectedItems.assessment
+                    .map((line) => line.value)
+                    .join('\n');
+
+                  // get the selected option and either create a new issue or add to the existing issue
+                  if (selectedOption.hasOwnProperty('__isNew__')) {
+                    // create a new issue
+                    let newIssue = {
+                      id: new mongoose.Types.ObjectId().toString(),
+                      title: selectedOption.label,
+                      description: '',
+                      currentInstance: {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        date: longDate(new Date()),
+                        context: contextAddition,
+                        summary: summaryAddition,
+                        plan: '',
+                        practices: []
+                      },
+                      priorInstances: [],
+                      lastUpdated: longDate(new Date()),
+                      issueInactive: false,
+                      issueArchived: false
+                    };
+                    setSoapData((prevSoapData) => {
+                      let newSoapData = { ...prevSoapData };
+                      newSoapData.issues.push(newIssue);
+                      return newSoapData;
+                    });
+                  } else {
+                    // get the objectid for the selected issue
+                    let selectedIssue = selectedOption.value;
+
+                    // find the issue
+                    let issueIndex = soapData.issues.findIndex(
+                      (issue) => issue.id === selectedIssue
+                    );
+                    let issueInstance =
+                      soapData.issues[issueIndex].currentInstance;
+                    if (issueInstance === null) {
+                      issueInstance = {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        date: longDate(new Date()),
+                        context: contextAddition,
+                        summary: summaryAddition,
+                        plan: '',
+                        practices: []
+                      };
+                    } else {
+                      issueInstance.context =
+                        issueInstance.context.trim() === ''
+                          ? contextAddition
+                          : issueInstance.context.trim() +
+                            '\n' +
+                            contextAddition;
+                      issueInstance.summary =
+                        issueInstance.summary.trim() === ''
+                          ? summaryAddition
+                          : issueInstance.summary.trim() +
+                            +'\n' +
+                            summaryAddition;
+                      issueInstance.date = longDate(new Date());
+                    }
+
+                    setSoapData((prevSoapData) => {
+                      let newSoapData = { ...prevSoapData };
+                      newSoapData.issues[issueIndex].currentInstance =
+                        issueInstance;
+                      newSoapData.issues[issueIndex].lastUpdated = longDate(
+                        new Date()
+                      );
+                      return newSoapData;
+                    });
+                  }
+
+                  // clear all the selected items in the SOAP note and mark lines that have been added to issues
+                  let selectedItemsSets = {};
+                  for (let section of Object.keys(selectedItems)) {
+                    selectedItemsSets[section] = new Set(
+                      selectedItems[section].map((line) => line.id)
+                    );
+                  }
+                  setSoapData((prevSoapData) => {
+                    let newSoapData = { ...prevSoapData };
+                    for (let section of Object.keys(selectedItemsSets)) {
+                      newSoapData[section] = newSoapData[section].map(
+                        (line) => {
+                          if (selectedItemsSets[section].has(line.id)) {
+                            return {
+                              ...line,
+                              isInIssue: true,
+                              isChecked: false
+                            };
+                          } else {
+                            return line;
+                          }
+                        }
+                      );
+                    }
+                    return newSoapData;
                   });
-                  return newSoapData;
-                });
-              }}
-            />
+                }}
+              />
+            </div>
 
             {/* Create a text box for each section of the SOAP note */}
             {diagnosisSections.map((section) => (
@@ -307,105 +407,154 @@ export default function SOAPNote({
                   </h2>
                 )}
 
-                {/* TODO: abstract out the update code */}
-                <TextBox
-                  value={soapData[section.name]
-                    .map((line) => `${line.value}`)
-                    .join('\n')}
-                  triggers={Object.keys(
-                    autocompleteTriggersOptions[section.name]
-                  )}
-                  options={autocompleteTriggersOptions[section.name]}
-                  onFocus={(e) => {
-                    // add a "- " if the text box is empty
-                    if (e.target.value === '') {
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = [
-                          ...newSoapData[section.name],
-                          {
+                <div className="flex">
+                  {/* Add check-boxes so that notes can be added to issues */}
+                  <div className="flex-initial w-5">
+                    {soapData[section.name].map((line) => (
+                      <div
+                        key={line.id}
+                        className={`px-0.5 p-0.4 border border-white ${line.isInIssue ? 'bg-lime-400' : ''}`}
+                      >
+                        <input
+                          checked={line.isChecked}
+                          type="checkbox"
+                          onChange={(e) => {
+                            setSoapData((prevSoapData) => {
+                              let newSoapData = { ...prevSoapData };
+                              let lineIndex = newSoapData[
+                                section.name
+                              ].findIndex((l) => l.id === line.id);
+                              newSoapData[section.name][lineIndex].isChecked =
+                                e.target.checked;
+                              return newSoapData;
+                            });
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Notetaking area */}
+                  <div className="flex-auto">
+                    {/* TODO: abstract out the update code */}
+                    <TextBox
+                      value={soapData[section.name]
+                        .map((line) => `${line.value}`)
+                        .join('\n')}
+                      triggers={Object.keys(
+                        autocompleteTriggersOptions[section.name]
+                      )}
+                      options={autocompleteTriggersOptions[section.name]}
+                      onFocus={(e) => {
+                        // add a "- " if the text box is empty
+                        if (e.target.value === '') {
+                          setSoapData((prevSoapData) => {
+                            let newSoapData = { ...prevSoapData };
+                            newSoapData[section.name] = [
+                              ...newSoapData[section.name],
+                              {
+                                id: new mongoose.Types.ObjectId().toString(),
+                                isChecked: false,
+                                isInIssue: false,
+                                type: 'note',
+                                context: [],
+                                value: '- '
+                              }
+                            ];
+                            return newSoapData;
+                          });
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // remove the dash if the text box is empty
+                        if (e.target.value.trim() === '-') {
+                          setSoapData((prevSoapData) => {
+                            let newSoapData = { ...prevSoapData };
+                            newSoapData[section.name] = [
+                              ...newSoapData[section.name].slice(0, -1)
+                            ];
+                            return newSoapData;
+                          });
+                        }
+                      }}
+                      onKeyUp={(e) => {
+                        // add a new line to the text box with a dash when the user presses enter
+                        if (e.key === 'Enter') {
+                          // check if it's not a script line
+                          let lines = e.target.value.split('\n');
+                          if (
+                            lines.length >= 1 &&
+                            lines[lines.length - 1].includes('[practice]')
+                          ) {
+                            return;
+                          }
+
+                          setSoapData((prevSoapData) => {
+                            let newSoapData = { ...prevSoapData };
+                            newSoapData[section.name] = [
+                              ...newSoapData[section.name],
+                              {
+                                id: new mongoose.Types.ObjectId().toString(),
+                                isChecked: false,
+                                isInIssue: false,
+                                type: 'note',
+                                context: [],
+                                value: '- '
+                              }
+                            ];
+                            return newSoapData;
+                          });
+                        }
+
+                        // TODO: get whole line deleting working
+                        // check if backspace key
+                        if (e.key === 'Backspace') {
+                          let lines = e.target.value.split('\n');
+                          if (lines[lines.length - 1].trim() === '-') {
+                            setSoapData((prevSoapData) => {
+                              let newSoapData = { ...prevSoapData };
+                              newSoapData[section.name] = [
+                                ...newSoapData[section.name].slice(0, -1)
+                              ];
+                              return newSoapData;
+                            });
+                          }
+                        }
+                      }}
+                      onChange={(edits) => {
+                        let lines = edits.split('\n');
+                        // TODO: 03-03-24 -- this overwrites all the other info about isChecked and stuff -- need to fix update command once using div
+                        let updatedLines = lines.map((line) => {
+                          return {
                             id: new mongoose.Types.ObjectId().toString(),
                             isChecked: false,
                             isInIssue: false,
-                            type: 'note',
+                            type: line.includes('[practice]')
+                              ? 'script'
+                              : 'note',
                             context: [],
-                            value: '- '
-                          }
-                        ];
-                        return newSoapData;
-                      });
-                    }
-                  }}
-                  onBlur={(e) => {
-                    // remove the dash if the text box is empty
-                    if (e.target.value.trim() === '-') {
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = [
-                          ...newSoapData[section.name].slice(0, -1)
-                        ];
-                        return newSoapData;
-                      });
-                    }
-                  }}
-                  onKeyUp={(e) => {
-                    // add a new line to the text box with a dash when the user presses enter
-                    if (e.key === 'Enter') {
-                      // check if it's not a script line
-                      let lines = e.target.value.split('\n');
-                      if (
-                        lines.length >= 1 &&
-                        lines[lines.length - 1].includes('[practice]')
-                      ) {
+                            value: line
+                          };
+                        });
+
+                        // don't do an update if the last line is blank (onKeyUp handles that
+                        if (lines[lines.length - 1] === '') {
+                          return;
+                        }
+
+                        setSoapData((prevSoapData) => {
+                          let newSoapData = { ...prevSoapData };
+                          newSoapData[section.name] = updatedLines;
+                          return newSoapData;
+                        });
+                      }}
+                      onMouseUp={(e) => {
                         return;
-                      }
-
-                      setSoapData((prevSoapData) => {
-                        let newSoapData = { ...prevSoapData };
-                        newSoapData[section.name] = [
-                          ...newSoapData[section.name],
-                          {
-                            id: new mongoose.Types.ObjectId().toString(),
-                            isChecked: false,
-                            isInIssue: false,
-                            type: 'note',
-                            context: [],
-                            value: '- '
-                          }
-                        ];
-                        return newSoapData;
-                      });
-                    }
-                  }}
-                  onChange={(edits) => {
-                    let lines = edits.split('\n');
-                    // TODO: 03-03-24 -- this overwrites all the other info about isChecked and stuff -- need to fix update command once using div
-                    let updatedLines = lines.map((line) => {
-                      return {
-                        id: new mongoose.Types.ObjectId().toString(),
-                        isChecked: false,
-                        isInIssue: false,
-                        type: line.includes('[practice]') ? 'script' : 'note',
-                        context: [],
-                        value: line
-                      };
-                    });
-
-                    // don't do an update if the last line is blank (onKeyUp handles that
-                    if (lines[lines.length - 1] === '') {
-                      return;
-                    }
-
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData[section.name] = updatedLines;
-                      return newSoapData;
-                    });
-                  }}
-                  onMouseUp={(e) => {
-                    return;
-                  }}
-                />
+                      }}
+                      className="h-40 px-1"
+                    />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
