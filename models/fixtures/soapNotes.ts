@@ -63,7 +63,7 @@ const soapNotesForSigs = [
                 summary: 'student is worn out'
               }
             ],
-            lastEdited: new Date('2024-02-05T06:00:00'),
+            lastUpdated: new Date('2024-02-05T06:00:00'),
             issueInactive: false,
             issueArchived: false
           },
@@ -73,7 +73,7 @@ const soapNotesForSigs = [
               'when prototyping, have students think about the smallest slices to make prototypes',
             currentInstance: null,
             priorInstances: [],
-            lastEdited: new Date('2024-02-12T06:00:00'),
+            lastUpdated: new Date('2024-02-12T06:00:00'),
             issueInactive: false,
             issueArchived: false
           },
@@ -91,7 +91,7 @@ const soapNotesForSigs = [
                   'students are trying to plan a study but havent thought about where the study is risky'
               }
             ],
-            lastEdited: new Date('2024-01-29T06:00:00'),
+            lastUpdated: new Date('2024-01-29T06:00:00'),
             issueInactive: false,
             issueArchived: false
           }
@@ -213,6 +213,6 @@ export const createSoapNoteFixtures = async () => {
 
     return await SOAPModel.insertMany(soapNotes);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };

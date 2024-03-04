@@ -5,118 +5,121 @@ import {
   TrashIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
-import { useState } from 'react';
 import TextBox from './TextBox';
+import { longDate } from '../lib/helperFns';
 
 export default function IssuePane({
-  issueIndex,
-  title,
-  diagSections,
-  summarySections,
-  autocompleteTriggersOptions,
+  issueId,
   soapData,
-  setSoapData
+  setSoapData,
+  summarySections,
+  autocompleteTriggersOptions
 }): JSX.Element {
-  const [isDiagMode, setDiagMode] = useState(false);
-  const [shouldHideContent, setShouldHideContent] = useState(false);
+  // get the issue from soapData with the given issueId
+  const issueIndex = soapData.issues.findIndex((issue) => issue.id === issueId);
+  const currIssue = soapData.issues[issueIndex];
+  const currInstance = currIssue.currentInstance;
+  const priorInstances = currIssue.priorInstances;
 
   return (
     <div className="border p-2 mb-5">
       {/* Issue title */}
       <div className="flex flex-wrap mb-1 w-full">
+        <h2 className="text-lg font-bold">Issue Title:</h2>
         <textarea
-          value={title}
-          onChange={(e) =>
+          value={currIssue.title}
+          onChange={(e) => {
+            let updatedIssues = soapData.issues;
+            updatedIssues[issueIndex].title = e.target.value;
+            updatedIssues[issueIndex].lastUpdated = longDate(new Date());
+
             setSoapData((prevData) => ({
               ...prevData,
-              issues: prevData.issues.map((issue, i) => {
-                if (i === issueIndex) {
-                  return {
-                    ...issue,
-                    ['title']: e.target.value
-                  };
-                } else {
-                  return issue;
-                }
-              })
-            }))
-          }
-          placeholder="Describe the issue..."
-          className="w-2/3 text-md font-bold mr-3 h-14"
-        />
-        {/* Show or hide note details */}
-        {/* <button
-          className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1 h-8 rounded-full mr-3"
-          onClick={() => setShouldHideContent(!shouldHideContent)}
-        >
-          {shouldHideContent ? 'Show Notes' : 'Hide Notes'}
-        </button> */}
-        {/* Switch between diagnosis mode and summary mode */}
-        {/* {!shouldHideContent && (
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1 h-8 rounded-full  mr-3"
-            onClick={() => setDiagMode(!isDiagMode)}
-          >
-            {isDiagMode ? 'Switch to Summary Mode' : 'Switch to Diagnosis Mode'}
-          </button>
-        )} */}
-
-        {/* Buttons to rearrange issues and delete */}
-        {/* TODO: allor for rearranging */}
-        {/* <ArrowUpIcon
-          className={`h-6 w-6 mr-3 ${issueIndex === 0 ? 'opacity-25' : 'opacity-100'}`}
-        />
-        <ArrowDownIcon className="h-6 w-6 mr-3" /> */}
-        {/* TODO: move icons to right side */}
-        {/* TODO: trash doens't work right now */}
-        {/* <TrashIcon
-          className="h-6 w-6 mr-3 hover:text-red-600"
-          onClick={(e) => {
-            // confirm deletion using an alert
-            if (
-              window.confirm(
-                `Are you sure you want to delete the issue "${title}"? It cannot be undone.`
-              )
-            ) {
-              setSoapData((prevData) => ({
-                ...prevData,
-                issues: prevData.issues.filter((issue, i) => i !== issueIndex)
-              }));
-            }
+              issues: updatedIssues
+            }));
           }}
-        /> */}
+          placeholder="Describe the issue..."
+          className="w-full text-md mb-3 h-10"
+        />
 
-        {/* Warning messages for incomplete follow-ups */}
-        <div
-          className={`flex flex-wrap text-md text-orange-500 py-1 ${soapData.plan.trim() === '' || soapData.plan.trim() === '-' ? '' : 'opacity-0'}`}
-        >
-          <ExclamationTriangleIcon className="h-6" />
-          <span>
-            Issue does not have any follow-up plans written or actionable
-            check-ins encoded
-          </span>
-        </div>
-      </div>
+        <h2 className="text-lg font-bold">Issue Description:</h2>
+        <textarea
+          value={currIssue.description}
+          onChange={(e) => {
+            let updatedIssues = soapData.issues;
+            updatedIssues[issueIndex].description = e.target.value;
+            updatedIssues[issueIndex].lastUpdated = longDate(new Date());
 
-      {/* Issues */}
-      {!shouldHideContent && (
-        <div className="">
-          <div>
-            {/* Switch between Diagnosis mode and summary mode */}
-            {(isDiagMode ? diagSections : summarySections).map((section) => (
+            setSoapData((prevData) => ({
+              ...prevData,
+              issues: updatedIssues
+            }));
+          }}
+          placeholder="Describe the issue..."
+          className="w-full text-md mb-6 h-14"
+        />
+
+        {/* Current Issue Instance */}
+        <div className="w-full">
+          <h1 className="font-bold text-xl border-b border-black">
+            Current Issue Instance
+          </h1>
+          {/* show if no current instance is there already */}
+          {currInstance === null && (
+            <>
+              <h2 className="text-sm color-grey">
+                Add a new instance to the issue by clicking the button below.
+              </h2>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1 h-8 rounded-full mt-2"
+                onClick={() => {
+                  let updatedIssues = soapData.issues;
+                  updatedIssues[issueIndex].currentInstance = {
+                    date: new Date(),
+                    context: '',
+                    summary: '',
+                    plan: '',
+                    practices: []
+                  };
+                  updatedIssues[issueIndex].lastUpdated = longDate(new Date());
+
+                  setSoapData((prevData) => ({
+                    ...prevData,
+                    issues: updatedIssues
+                  }));
+                }}
+              >
+                Add Issue Instance
+              </button>
+            </>
+          )}
+
+          {/* Warning messages for incomplete follow-ups on current instance*/}
+          <div
+            className={`flex flex-wrap w-full text-md text-orange-500 py-1 ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
+          >
+            <span className="inline-flex items-baseline text-s">
+              <ExclamationTriangleIcon className="h-4" /> Current issue is
+              missing follow-up plans
+            </span>
+          </div>
+
+          {/* show if there is a current instance */}
+          {currInstance !== null &&
+            summarySections.map((section) => (
               <div className={`w-full`} key={section.name}>
-                <h1 className="font-bold text-xl">{section.title}</h1>
+                <h1 className="font-bold text-lg">{section.title}</h1>
                 {section.name === 'plan' && (
                   <h2 className="text-sm color-grey">
-                    Add plans for Orchestration Engine to follow-up on by
-                    typing, &quot;[script]&quot;. These will be sent to the
+                    Add practices for Orchestration Engine to follow-up on by
+                    typing, &quot;[practice]&quot;. These will be sent to the
                     students&apos; project channel.
                   </h2>
                 )}
 
                 {/* TODO: abstract out the update code */}
                 <TextBox
-                  value={soapData[section.name]}
+                  value={currInstance[section.name]}
                   triggers={Object.keys(
                     autocompleteTriggersOptions[section.name]
                   )}
@@ -124,36 +127,32 @@ export default function IssuePane({
                   onFocus={(e) => {
                     // add a "- " if the text box is empty
                     if (e.target.value === '') {
+                      let updatedIssues = soapData.issues;
+                      updatedIssues[issueIndex].currentInstance[section.name] =
+                        '- ';
+                      updatedIssues[issueIndex].lastUpdated = longDate(
+                        new Date()
+                      );
+
                       setSoapData((prevData) => ({
                         ...prevData,
-                        issues: prevData.issues.map((issue, i) => {
-                          if (i === issueIndex) {
-                            return {
-                              ...issue,
-                              [section.name]: '- '
-                            };
-                          } else {
-                            return issue;
-                          }
-                        })
+                        issues: updatedIssues
                       }));
                     }
                   }}
                   onBlur={(e) => {
                     // remove the dash if the text box is empty
                     if (e.target.value.trim() === '-') {
+                      let updatedIssues = soapData.issues;
+                      updatedIssues[issueIndex].currentInstance[section.name] =
+                        '';
+                      updatedIssues[issueIndex].lastUpdated = longDate(
+                        new Date()
+                      );
+
                       setSoapData((prevData) => ({
                         ...prevData,
-                        issues: prevData.issues.map((issue, i) => {
-                          if (i === issueIndex) {
-                            return {
-                              ...issue,
-                              [section.name]: ''
-                            };
-                          } else {
-                            return issue;
-                          }
-                        })
+                        issues: updatedIssues
                       }));
                     }
                   }}
@@ -164,47 +163,107 @@ export default function IssuePane({
                       let lines = e.target.value.split('\n');
                       if (
                         lines.length >= 1 &&
-                        lines[lines.length - 1].includes('[script]')
+                        lines[lines.length - 1].includes('[practice]')
                       ) {
                         return;
                       }
 
+                      let updatedIssues = soapData.issues;
+                      updatedIssues[issueIndex].currentInstance[section.name] =
+                        e.target.value + '- ';
+                      updatedIssues[issueIndex].lastUpdated = longDate(
+                        new Date()
+                      );
+
                       setSoapData((prevData) => ({
                         ...prevData,
-                        issues: prevData.issues.map((issue, i) => {
-                          if (i === issueIndex) {
-                            return {
-                              ...issue,
-                              [section.name]: `${e.target.value}- `
-                            };
-                          } else {
-                            return issue;
-                          }
-                        })
+                        issues: updatedIssues
                       }));
                     }
                   }}
-                  onChange={(edits) =>
+                  onChange={(edits) => {
+                    let updatedIssues = soapData.issues;
+                    updatedIssues[issueIndex].currentInstance[section.name] =
+                      edits;
+                    updatedIssues[issueIndex].lastUpdated = longDate(
+                      new Date()
+                    );
+
                     setSoapData((prevData) => ({
                       ...prevData,
-                      issues: prevData.issues.map((issue, i) => {
-                        if (i === issueIndex) {
-                          return {
-                            ...issue,
-                            [section.name]: edits
-                          };
-                        } else {
-                          return issue;
-                        }
-                      })
-                    }))
-                  }
+                      issues: updatedIssues
+                    }));
+                  }}
+                  onMouseUp={(e) => {
+                    return;
+                  }}
                 />
               </div>
             ))}
-          </div>
+          {currInstance !== null && (
+            <button
+              className="bg-red-500 hover:bg-red-700 text-white text-xs font-bold px-4 py-1 h-8 rounded-full mt-2 mb-2"
+              onClick={() => {
+                // confirm with user before removing
+                if (
+                  !confirm(
+                    'Are you sure you want to remove the current issue instance?'
+                  )
+                ) {
+                  return;
+                }
+
+                // remove the current instance
+                let updatedIssues = soapData.issues;
+                updatedIssues[issueIndex].currentInstance = null;
+                updatedIssues[issueIndex].lastUpdated = longDate(new Date());
+
+                setSoapData((prevData) => ({
+                  ...prevData,
+                  issues: updatedIssues
+                }));
+              }}
+            >
+              Remove Current Issue Instance
+            </button>
+          )}
         </div>
-      )}
+
+        {/* Prior Issue Instances */}
+        <div className="w-full">
+          <h1 className="font-bold text-xl border-b border-black">
+            Prior Issue Instances
+          </h1>
+          {priorInstances.length === 0 && (
+            <h2 className="text-sm color-grey">
+              There are no prior instances of this issue.
+            </h2>
+          )}
+          {priorInstances.map((instance, i) => (
+            <div className="w-full border border-gray mt-2" key={i}>
+              <h2 className="text-sm font-bold">{instance.date}</h2>
+              <h3 className="text-sm color-grey">
+                <span className="font-bold">Summary:</span> {instance.summary}
+              </h3>
+              <h3 className="text-sm color-grey mt-2">
+                <span className="font-bold">Practices:</span>{' '}
+                {instance.practices &&
+                  instance.practices.length > 0 &&
+                  instance.practices.map((practice) => (
+                    <div className="w-full mt-1" key={practice.practice}>
+                      <h4>{practice.practice}</h4>
+                      <h4>{practice.opportunity}</h4>
+                      <h4>{practice.person}</h4>
+                    </div>
+                  ))}
+                {instance.practices && instance.practices.length === 0 && (
+                  <span>No follow-up practices for this issue instance.</span>
+                )}
+              </h3>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -13,7 +13,7 @@ export const updateSOAPNote = async (id: string, soapNote: object) => {
 
 const parseSoapNotes = (soapNote: object) => {
   // create a new soap note object to hold everything
-  let updatedSoapNote: SOAPStruct = {
+  let updatedSoapNote = {
     project: soapNote['project'],
     date: soapNote['date'],
     lastUpdated: soapNote['lastUpdated'],
@@ -23,34 +23,31 @@ const parseSoapNotes = (soapNote: object) => {
     objective: soapNote['objective'],
     assessment: soapNote['assessment'],
     plan: soapNote['plan'],
-    issues: soapNote['issues'],
-    priorContext: [],
-    notedAssessments: [],
-    followUpContext: []
+    issues: soapNote['issues']
   };
 
-  // parse out noted assessments
-  let notedAssessments = soapNote['issues']
-    .map((issue) => {
-      let currAssessments = issue['assessment'].split('\n');
-      let notedAssessments = currAssessments.filter((assessment) => {
-        return assessment.includes('#');
-      });
-      return notedAssessments;
-    })
-    .flat();
-  updatedSoapNote.notedAssessments = notedAssessments;
+  // // parse out noted assessments
+  // let notedAssessments = soapNote['issues']
+  //   .map((issue) => {
+  //     let currAssessments = issue['assessment'].split('\n');
+  //     let notedAssessments = currAssessments.filter((assessment) => {
+  //       return assessment.includes('#');
+  //     });
+  //     return notedAssessments;
+  //   })
+  //   .flat();
+  // updatedSoapNote.notedAssessments = notedAssessments;
 
   // parse out follow up context from issues
-  let currFollowups = soapNote['issues']
-    .map((issue) => {
-      return issue['followUpPlans'];
-    })
-    .flat();
+  // let currFollowups = soapNote['issues']
+  //   .map((issue) => {
+  //     return issue['followUpPlans'];
+  //   })
+  //   .flat();
 
-  updatedSoapNote.followUpContext = currFollowups.map((followup) => {
-    return parseScriptFollowups(followup, soapNote['project']);
-  });
+  // updatedSoapNote.followUpContext = currFollowups.map((followup) => {
+  //   return parseScriptFollowups(followup, soapNote['project']);
+  // });
 
   return updatedSoapNote;
 };

@@ -9,7 +9,7 @@ export default function IssueCard({
   issueId,
   title,
   lastUpdated,
-  followUpPlans,
+  currentIssueInstance,
   selectedIssue,
   setSelectedIssue
 }): JSX.Element {
@@ -37,12 +37,11 @@ export default function IssueCard({
           </h3>
 
           <div
-            className={`flex flex-wrap text-md text-orange-500 py-1 ${followUpPlans.length > 0 ? 'opacity-0' : ''}`}
+            className={`flex flex-wrap text-md text-orange-500 py-1 ${currentIssueInstance !== null && currentIssueInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
           >
-            <ExclamationTriangleIcon className="h-4" />
-            <span className="text-s font-bold mt-2">
-              Issue does not have any follow-up plans written or actionable
-              check-ins encoded
+            <span className="inline-flex items-baseline text-s">
+              <ExclamationTriangleIcon className="h-3" />
+              &nbsp; Missing practices
             </span>
           </div>
 

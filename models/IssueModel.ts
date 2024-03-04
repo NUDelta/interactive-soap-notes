@@ -5,7 +5,7 @@ export interface ConceptualIssueStruct {
   description: string;
   currentInstance: IssueInstanceStruct;
   priorInstances: IssueInstanceStruct[];
-  lastEdited: Date; // indicator of when issue was last discussed
+  lastUpdated: Date; // indicator of when issue was last discussed
   issueInactive: boolean; // whether the issue has temporarily been resolved
   issueArchived: boolean; // whether issue should be permanently archived
 }
@@ -14,6 +14,7 @@ export interface IssueInstanceStruct {
   date: Date;
   context: string;
   summary: string;
+  plan: string;
   practices: PracticeStruct[];
 }
 
@@ -57,6 +58,11 @@ const IssueInstanceSchema = new mongoose.Schema<IssueInstanceStruct>({
     type: String,
     required: true
   },
+  plan: {
+    type: String,
+    required: true,
+    default: ''
+  },
   practices: [PracticeSchema]
 });
 
@@ -78,7 +84,7 @@ export const ConceptualIssueSchema = new mongoose.Schema<ConceptualIssueStruct>(
       type: [IssueInstanceSchema],
       default: []
     },
-    lastEdited: {
+    lastUpdated: {
       type: Date,
       required: true
     },

@@ -39,36 +39,51 @@ export default async function handler(req, res) {
 
         // TODO: updateSOAPNote is already parsing the code; so parseFollowUpPlans is redundant
         // parse actionable followups
-        let actionableFollowUps = req.body['issues']
-          .map((issue) => {
-            return issue['followUpPlans'];
-          })
-          .flat();
-        for (let i = 0; i < actionableFollowUps.length; i++) {
-          let parsedFollowup = parseFollowUpPlans(
-            id,
-            req.body.project,
-            actionableFollowUps[i].venue,
-            actionableFollowUps[i].strategy
-          );
+        for (let issueIndex in soapNote.issues) {
+          let issue = soapNote.issues[issueIndex];
+          // get practices for current instance if not null
+          if (issue.currentInstance !== null) {
+            let currentInstance = issue.currentInstance;
+            for (let practiceIndex in currentInstance.practices) {
+              let practice = currentInstance.practices[practiceIndex];
+              let parsedFollowup = parseFollowUpPlans(
+                id,
+                req.body.project,
+                practice.opportunity,
+                practice.practice
+              );
 
-          console.log('parsedFollowup: ', parsedFollowup);
+              // TODO: handle case where activeIssueId is already present and an update is needed
+              // attempt to create an active issue in OS
+              const osRes = await fetch(
+                `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(parsedFollowup)
+                }
+              );
 
-          const osRes = await fetch(
-            `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(parsedFollowup)
+              // TODO: if there's an error, we should let the user know on the front end
+              // if successful, update the activeIssueId in the practice
+              if (osRes.status === 200) {
+                const osResJson = await osRes.json();
+                soapNote['issues'][issueIndex]['currentInstance']['practices'][
+                  practiceIndex
+                ]['activeIssueId'] = osResJson.activeIssue.script_id;
+              } else {
+                console.error(
+                  `Error in creating active issue for ${parsedFollowup.scriptName} in OS:`,
+                  await osRes.json()
+                );
+              }
             }
-          );
-          console.log(
-            'Response from OS on /createActiveIssue: ',
-            await osRes.json()
-          );
+          }
         }
+        // resave with updated activeIssueIds
+        await soapNote.save();
 
         if (!soapNote) {
           return res.status(400).json({ success: false });
@@ -141,7 +156,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     case 'morning of office hours':
       strategyFunction = async function () {
         return await this.messageChannel({
-          message: strategy,
+          message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
             return await this.morningOfVenue(
@@ -154,7 +169,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     case 'at office hours':
       strategyFunction = async function () {
         return await this.messageChannel({
-          message: strategy,
+          message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
             return await this.startOfVenue(
@@ -167,7 +182,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     case 'morning of next sig':
       strategyFunction = async function () {
         return await this.messageChannel({
-          message: strategy,
+          message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
             return await this.morningOfVenue(
@@ -177,13 +192,16 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
         });
       }.toString();
       break;
+    // TODO: add at next sig venue (like 1 hour before)
+    // TODO: add a day after SIG venue
     case 'after sig':
       strategyFunction = async function () {
         return await this.messageChannel({
-          message: strategy,
+          message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
             return this.endOfVenue(
+              // make this 1 hour after
               this.venues.find(this.where('kind', 'SigMeeting'))
             );
           }.toString()
@@ -193,7 +211,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     case 'morning of studio':
       strategyFunction = async function () {
         return await this.messageChannel({
-          message: strategy,
+          message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
             return await this.morningOfVenue(
@@ -206,7 +224,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     case 'at studio':
       strategyFunction = async function () {
         return await this.messageChannel({
-          message: strategy,
+          message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
             return await this.startOfVenue(
@@ -219,7 +237,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     case 'after studio':
       strategyFunction = async function () {
         return await this.messageChannel({
-          message: strategy,
+          message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
             return this.endOfVenue(
@@ -232,7 +250,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
     default:
       strategyFunction = async function () {
         return await this.messageChannel({
-          message: strategy,
+          message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
             return await this.startOfVenue(
@@ -242,6 +260,10 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
         });
       }.toString();
   }
+  strategyFunction = strategyFunction.replace(
+    'strategyTextToReplace',
+    strategy
+  );
 
   console.log(
     'In parseFollowUpPlans, strategyFunction before replacement: ',
