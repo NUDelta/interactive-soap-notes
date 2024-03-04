@@ -101,6 +101,9 @@ export default function SOAPNote({
           continue;
         }
 
+        // parse the date for the current instance
+        issue.currentInstance.date = new Date(issue.currentInstance.date);
+
         // parse follow-ups plans for each current issue instance
         let lines = issue.currentInstance.plan.split('\n');
         let scripts = lines.filter((line) => line.includes('[practice]'));
@@ -427,6 +430,7 @@ export default function SOAPNote({
                       issueInactive: false,
                       issueArchived: false
                     };
+
                     setSoapData((prevSoapData) => {
                       let newSoapData = { ...prevSoapData };
                       newSoapData.issues.push(newIssue);
