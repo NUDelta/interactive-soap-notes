@@ -2,7 +2,7 @@ import type { GetServerSideProps, NextPage } from 'next';
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
-import mongoose from 'mongoose';
+import mongoose, { set } from 'mongoose';
 import { mutate } from 'swr';
 
 import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
@@ -25,6 +25,9 @@ export default function SOAPNote({
 
   // hold a state for which issue is selected
   const [selectedIssue, setSelectedIssue] = useState(null);
+
+  // hold a state for showing resolved issues
+  const [showResolvedIssues, setShowResolvedIssues] = useState(false);
 
   // let user know that we are saving
   const [isSaving, setIsSaving] = useState(false);
@@ -227,26 +230,132 @@ export default function SOAPNote({
         {/* Issue Cards and SOAP Notes */}
         <div className="col-span-2">
           {/* Issue Cards */}
-          <div>
+          <div className="mb-5">
             <h1 className="font-bold text-2xl border-b border-black mb-3">
               Tracked Issues
             </h1>
-            <p className="italic">
+            <p className="italic mb-2">
               Click on an issue to view its details and write follow-up
-              practices.
+              practices. Click the checkmark to resolve an issue, which means
+              the issue is not of current focus but can still be added to from
+              notes if needed. Click the archive icon to remove the issue from
+              the list.
             </p>
-            <div className="flex flex-wrap">
-              {soapData.issues.map((issue) => (
-                <IssueCard
-                  key={`issue-card-${issue.id}`}
-                  issueId={issue.id}
-                  title={issue.title}
-                  lastUpdated={issue.lastUpdated}
-                  currentIssueInstance={issue.currentInstance}
-                  selectedIssue={selectedIssue}
-                  setSelectedIssue={setSelectedIssue}
-                />
-              ))}
+
+            {/* Active, non-archived issues */}
+            <div className="grid grid-cols-4 gap-4 grid-flow-row row-auto">
+              {soapData.issues
+                .filter((issue) => !issue.issueInactive && !issue.issueArchived)
+                .map((issue) => (
+                  <IssueCard
+                    key={`issue-card-${issue.id}`}
+                    issueId={issue.id}
+                    title={issue.title}
+                    description={issue.description}
+                    lastUpdated={issue.lastUpdated}
+                    selectedIssue={selectedIssue}
+                    setSelectedIssue={setSelectedIssue}
+                    issueIsResolved={issue.issueInactive}
+                    onResolved={(e) => {
+                      // confirm if the user wants to resolve the issue
+                      if (
+                        !confirm(
+                          `Are you sure you want mark, "${issue.title}", as resolved?`
+                        )
+                      ) {
+                        return;
+                      }
+
+                      // resolve the issue
+                      let updatedIssues = soapData.issues;
+                      let issueIndex = updatedIssues.findIndex(
+                        (i) => i.id === issue.id
+                      );
+                      updatedIssues[issueIndex].issueInactive = true;
+                      updatedIssues[issueIndex].lastUpdated = longDate(
+                        new Date()
+                      );
+                      setSoapData((prevData) => ({
+                        ...prevData,
+                        issues: updatedIssues
+                      }));
+                    }}
+                    onArchive={(e) => {
+                      // confirm if the user wants to archive the issue
+                      if (
+                        !confirm(
+                          `Are you sure you want to archive, "${issue.title}"? This cannot be undone.`
+                        )
+                      ) {
+                        return;
+                      }
+
+                      // archive the issue
+                      let updatedIssues = soapData.issues;
+                      let issueIndex = updatedIssues.findIndex(
+                        (i) => i.id === issue.id
+                      );
+                      updatedIssues[issueIndex].issueArchived = true;
+                      updatedIssues[issueIndex].lastUpdated = longDate(
+                        new Date()
+                      );
+                      setSoapData((prevData) => ({
+                        ...prevData,
+                        issues: updatedIssues
+                      }));
+                    }}
+                  />
+                ))}
+            </div>
+
+            {/* Inactive issues */}
+            <div className="grid grid-cols-4 gap-4 grid-flow-row row-auto">
+              <h2 className="col-span-4 text-lg font-bold mt-3">
+                <button
+                  className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full"
+                  onClick={(e) => {
+                    setShowResolvedIssues(!showResolvedIssues);
+                  }}
+                >
+                  {showResolvedIssues
+                    ? 'Hide  currently resolved issues'
+                    : 'Show currently resolved issues'}
+                </button>
+              </h2>
+              {showResolvedIssues &&
+                soapData.issues
+                  .filter((issue) => issue.issueInactive)
+                  .map((issue) => (
+                    <IssueCard
+                      key={`issue-card-${issue.id}`}
+                      issueId={issue.id}
+                      title={issue.title}
+                      description={issue.description}
+                      lastUpdated={issue.lastUpdated}
+                      selectedIssue={selectedIssue}
+                      setSelectedIssue={setSelectedIssue}
+                      issueIsResolved={issue.issueInactive}
+                      onResolved={() => {
+                        // re-open the issue
+                        let updatedIssues = soapData.issues;
+                        let issueIndex = updatedIssues.findIndex(
+                          (i) => i.id === issue.id
+                        );
+                        updatedIssues[issueIndex].issueInactive = false;
+                        updatedIssues[issueIndex].issueArchived = false;
+                        updatedIssues[issueIndex].lastUpdated = longDate(
+                          new Date()
+                        );
+                        setSoapData((prevData) => ({
+                          ...prevData,
+                          issues: updatedIssues
+                        }));
+                      }}
+                      onArchive={(e) => {
+                        return;
+                      }}
+                    />
+                  ))}
             </div>
           </div>
 
@@ -258,11 +367,11 @@ export default function SOAPNote({
               This week&apos;s notes
             </h1>
             <p className="italic">
-              Write notes during SIG meeting below. To create issues to track or
-              to add your notes to existing issues, use the checkboxes next to
-              your typed notes to select the relvant notes. Then, use the
-              dropdown below. Notes added to issues will have a green box to
-              their left; notes can be added to multiple issues.
+              Write notes during SIG meeting below. To attach notes to existing
+              issues or create new ones, use the checkboxes to select relevant
+              notes, and select the issue using the dropdown. Notes added to
+              issues will have a green box to their left; notes can be added to
+              multiple issues.
             </p>
 
             <div className="my-2">
@@ -361,6 +470,10 @@ export default function SOAPNote({
                       newSoapData.issues[issueIndex].lastUpdated = longDate(
                         new Date()
                       );
+
+                      // re-open the issue if new notes are added
+                      newSoapData.issues[issueIndex].issueInactive = false;
+                      newSoapData.issues[issueIndex].issueArchived = false;
                       return newSoapData;
                     });
                   }
