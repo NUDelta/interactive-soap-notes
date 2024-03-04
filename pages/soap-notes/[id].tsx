@@ -425,6 +425,9 @@ export default function SOAPNote({
                     return newSoapData;
                   });
                 }}
+                onMouseUp={(e) => {
+                  return;
+                }}
                 // onMouseUp={(e) => {
                 //   // get the section of text that was highlighted
                 //   let selection = window.getSelection();
