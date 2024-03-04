@@ -40,9 +40,6 @@ export default function IssueCard({
         <div className="mb-1 w-full">
           <div className="flex">
             <h2 className="text-base font-bold flex-auto">{title}</h2>
-            <ExclamationTriangleIcon
-              className={`ml-2 h-6 text-orange-600 justify-end ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
-            />
           </div>
 
           <div className="text-xs">
@@ -61,24 +58,35 @@ export default function IssueCard({
       </div>
 
       {/* Resolve and archive buttons */}
-      <div className="flex justify-end place-items-end">
+      <div className="w-full flex flex-row">
         {!issueIsResolved ? (
           <>
-            <CheckBadgeIcon
-              onClick={(e) => onResolved(e)}
-              className="ml-2 h-8 text-gray-600 hover:text-green-600"
-            />
-            <ArchiveBoxIcon
-              onClick={(e) => onArchive(e)}
-              className="ml-2 h-8 text-gray-600 hover:text-red-600"
-            />
+            <div>
+              <CheckBadgeIcon
+                onClick={(e) => onResolved(e)}
+                className="ml-2 h-8 text-gray-600 hover:text-green-600"
+              />
+            </div>
+            <div>
+              <ArchiveBoxIcon
+                onClick={(e) => onArchive(e)}
+                className="ml-2 h-8 text-gray-600 hover:text-red-600"
+              />
+            </div>
           </>
         ) : (
-          <LockOpenIcon
-            onClick={(e) => onResolved(e)}
-            className="ml-2 h-8 text-gray-600"
-          />
+          <div>
+            <LockOpenIcon
+              onClick={(e) => onResolved(e)}
+              className="ml-2 h-8 text-gray-600"
+            />
+          </div>
         )}
+        <div className="">
+          <ExclamationTriangleIcon
+            className={`ml-2 h-8 text-orange-600 ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
+          />
+        </div>
       </div>
     </div>
   );
