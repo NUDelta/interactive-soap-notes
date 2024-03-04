@@ -231,7 +231,7 @@ export default function IssuePane({
 
         {/* Prior Issue Instances */}
         <div className="w-full">
-          <h1 className="font-bold text-xl border-b border-black">
+          <h1 className="font-bold text-xl border-b border-black mb-2">
             Prior Issue Instances
           </h1>
           {priorInstances.length === 0 && (
@@ -240,26 +240,23 @@ export default function IssuePane({
             </h2>
           )}
           {priorInstances.map((instance, i) => (
-            <div className="w-full border border-gray mt-2" key={i}>
+            <div
+              className="w-full border border-gray-300 rounded-lg mb-3 p-1"
+              key={i}
+            >
               <h2 className="text-sm font-bold">{instance.date}</h2>
-              <h3 className="text-sm color-grey">
-                <span className="font-bold">Summary:</span> {instance.summary}
-              </h3>
-              <h3 className="text-sm color-grey mt-2">
-                <span className="font-bold">Practices:</span>{' '}
-                {instance.practices &&
-                  instance.practices.length > 0 &&
-                  instance.practices.map((practice) => (
-                    <div className="w-full mt-1" key={practice.practice}>
-                      <h4>{practice.practice}</h4>
-                      <h4>{practice.opportunity}</h4>
-                      <h4>{practice.person}</h4>
-                    </div>
-                  ))}
-                {instance.practices && instance.practices.length === 0 && (
-                  <span>No follow-up practices for this issue instance.</span>
+              <h3 className="text-sm font-bold mt-2">Summary:</h3>
+              <p className="text-sm">{instance.summary}</p>
+              <h3 className="text-sm font-bold mt-2">Practices:</h3>
+              <p className="text-sm">
+                {instance.plan && instance.plan.length ? (
+                  <>{instance.plan}</>
+                ) : (
+                  <span className="italic">
+                    No follow-up practices for this issue instance.
+                  </span>
                 )}
-              </h3>
+              </p>
             </div>
           ))}
         </div>
