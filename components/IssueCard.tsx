@@ -1,53 +1,84 @@
 /**
  * This component provides an issue card that summarizes the issue, when it was last updated, and the follow-up plans.
  */
-
 import ExclamationTriangleIcon from '@heroicons/react/24/outline/ExclamationTriangleIcon';
+import ArchiveBoxIcon from '@heroicons/react/24/outline/ArchiveBoxIcon';
+import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
+import LockOpenIcon from '@heroicons/react/24/outline/LockOpenIcon';
+
 import React, { useState, useEffect } from 'react';
 
 export default function IssueCard({
   issueId,
   title,
+  description,
   lastUpdated,
-  followUpPlans,
   selectedIssue,
-  setSelectedIssue
+  setSelectedIssue,
+  currInstance,
+  issueIsResolved,
+  onResolved,
+  onArchive
 }): JSX.Element {
   // store selected state for card
   const [isSelected, setIsSelected] = useState(false);
 
   return (
-    <div
-      className={`w-3/12 mb-1 p-1 hover:bg-blue-100 ${selectedIssue === issueId ? 'bg-blue-200' : 'bg-white'}`}
-      onClick={() => {
-        setIsSelected(!isSelected);
-        if (issueId === selectedIssue) {
-          setSelectedIssue(null);
-        } else {
-          setSelectedIssue(issueId);
-        }
-      }}
-    >
-      <div className="aspect-square border p-2">
+    <div className="flex flex-wrap aspect-square border p-1">
+      <div
+        className={`p-2 hover:bg-blue-100 ${selectedIssue === issueId ? 'bg-blue-200' : 'bg-white'}`}
+        onClick={() => {
+          setIsSelected(!isSelected);
+          if (issueId === selectedIssue) {
+            setSelectedIssue(null);
+          } else {
+            setSelectedIssue(issueId);
+          }
+        }}
+      >
         {/* Issue title */}
-        <div className="grid grid-cols-1 mb-1 w-full">
-          <h2 className="text-md font-bold">{title}</h2>
-          <h3 className="text-xs font-bold mt-1">
-            Last updated: {lastUpdated}
-          </h3>
-
-          <div
-            className={`flex flex-wrap text-md text-orange-500 py-1 ${followUpPlans.length > 0 ? 'opacity-0' : ''}`}
-          >
-            <ExclamationTriangleIcon className="h-4" />
-            <span className="text-s font-bold mt-2">
-              Issue does not have any follow-up plans written or actionable
-              check-ins encoded
-            </span>
+        <div className="mb-1 w-full">
+          <div className="flex">
+            <h2 className="text-base font-bold flex-auto">{title}</h2>
+            <ExclamationTriangleIcon
+              className={`ml-2 h-6 text-orange-600 justify-end ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
+            />
           </div>
 
-          {/* TODO: add trash can and resolved button */}
+          <div className="text-xs">
+            <h3 className="mt-1 font-medium">Updated: {lastUpdated}</h3>
+          </div>
+
+          {/* Issue description */}
+          <div className="mt-1">
+            {description.trim() === '' ? (
+              <p className="text-base italic">No description available</p>
+            ) : (
+              <p className="text-base">{description}</p>
+            )}
+          </div>
         </div>
+      </div>
+
+      {/* Resolve and archive buttons */}
+      <div className="flex justify-end place-items-end">
+        {!issueIsResolved ? (
+          <>
+            <CheckBadgeIcon
+              onClick={(e) => onResolved(e)}
+              className="ml-2 h-8 text-gray-600 hover:text-green-600"
+            />
+            <ArchiveBoxIcon
+              onClick={(e) => onArchive(e)}
+              className="ml-2 h-8 text-gray-600 hover:text-red-600"
+            />
+          </>
+        ) : (
+          <LockOpenIcon
+            onClick={(e) => onResolved(e)}
+            className="ml-2 h-8 text-gray-600"
+          />
+        )}
       </div>
     </div>
   );

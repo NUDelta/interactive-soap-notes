@@ -7,7 +7,7 @@ import SOAPModel from '../../models/SOAPModel';
  */
 export const fetchAllSoapNotes = async () => {
   await dbConnect();
-  return await SOAPModel.find({});
+  return await SOAPModel.find({}).sort({ sigName: 1, date: 1 });
 };
 
 /**
@@ -35,20 +35,5 @@ export const fetchSoapNote = async (
     date: { $gte: startDate, $lte: endDate }
   });
 
-  // get previous SOAP note for context
-  // TODO: this is jank -- setup a field with a ref to the previous SOAP note
-  // TODO: think about a compact and "full" representation of the sections that a user can switch between
-  let priorSoapNote = await SOAPModel.findOne({
-    sigAbbreviation: sigName.toUpperCase(),
-    date: { $lt: startDate }
-  });
-
-  // if (priorSoapNote) {
-  //   currentSoapNote.priorContext = {
-  //     notedAssessments: priorSoapNote.notedAssessments,
-  //     followUpPlans: priorSoapNote.plan
-  //   };
-  //   await currentSoapNote.save();
-  // }
   return currentSoapNote;
 };

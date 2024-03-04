@@ -9,7 +9,8 @@ export default function TextBox({
   onBlur,
   onKeyUp,
   onChange,
-  onMouseUp
+  onMouseUp,
+  className = 'h-20 px-1'
 }): JSX.Element {
   return (
     <TextInput
@@ -22,7 +23,8 @@ export default function TextBox({
       onKeyUp={onKeyUp}
       onChange={onChange}
       onMouseUp={onMouseUp}
-      className="h-20"
+      className={className}
+      maxOptions={0}
     />
   );
 }

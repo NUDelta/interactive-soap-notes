@@ -30,6 +30,29 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
         socialStructure.kind === 'SigStructure'
     ).abbreviation;
 
+    // get the previous SOAP note for the project
+    await dbConnect();
+    const previousSoapNotes = await SOAPModel.find({
+      project: projectName,
+      sigName: sigName
+    }).sort({ date: -1 });
+    const previousSoapNote = previousSoapNotes[0];
+
+    // get issues from the prior soap note
+    let issues = [];
+    if (previousSoapNote) {
+      issues = previousSoapNote.issues;
+
+      // for each issue, add the currentInstance to the top of the priorInstances list (if not null) and set currentInstance to null
+      issues = issues.map((issue) => {
+        if (issue.currentInstance) {
+          issue.priorInstances.unshift(issue.currentInstance);
+          issue.currentInstance = null;
+        }
+        return issue;
+      });
+    }
+
     // save the new SOAP note to the database
     await dbConnect();
     return await SOAPModel.create({
@@ -38,14 +61,11 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
       lastUpdated: noteDate,
       sigName: sigName,
       sigAbbreviation: sigAbbreviation,
-      subjective: '',
-      objective: '',
-      assessment: '',
-      plan: '',
-      issues: [],
-      priorContext: [],
-      notedAssessments: [],
-      followUpContext: []
+      subjective: [],
+      objective: [],
+      assessment: [],
+      plan: [],
+      issues: issues
     });
   } catch (err) {
     console.error('Error in creating SOAP note: ', err, err.stack);
