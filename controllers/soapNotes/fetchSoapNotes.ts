@@ -7,7 +7,7 @@ import SOAPModel from '../../models/SOAPModel';
  */
 export const fetchAllSoapNotes = async () => {
   await dbConnect();
-  return await SOAPModel.find({});
+  return await SOAPModel.find({}).sort({ sigName: 1, date: 1 });
 };
 
 /**
