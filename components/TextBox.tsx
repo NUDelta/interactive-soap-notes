@@ -24,6 +24,7 @@ export default function TextBox({
       onChange={onChange}
       onMouseUp={onMouseUp}
       className={className}
+      maxOptions={0}
     />
   );
 }

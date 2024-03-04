@@ -150,7 +150,7 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
   );
 
   // TODO: DRY
-  // TODO: 03-03-24 -- add a "next SIG" venue
+  // TODO: have OS do code transformation on the scripts
   let strategyFunction = '';
   switch (venue.toLowerCase()) {
     case 'morning of office hours':
@@ -179,6 +179,34 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
         });
       }.toString();
       break;
+    case 'after sig':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: 'strategyTextToReplace',
+          projectName: this.project.name,
+          opportunity: async function () {
+            return await this.hoursAfterVenue(
+              await this.venues.find(this.where('kind', 'SigMeeting')),
+              1
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
+    case 'day after sig':
+      strategyFunction = async function () {
+        return await this.messageChannel({
+          message: 'strategyTextToReplace',
+          projectName: this.project.name,
+          opportunity: async function () {
+            return await this.daysAfterVenue(
+              await this.venues.find(this.where('kind', 'SigMeeting')),
+              1
+            );
+          }.toString()
+        });
+      }.toString();
+      break;
     case 'morning of next sig':
       strategyFunction = async function () {
         return await this.messageChannel({
@@ -192,17 +220,15 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
         });
       }.toString();
       break;
-    // TODO: add at next sig venue (like 1 hour before)
-    // TODO: add a day after SIG venue
-    case 'after sig':
+    case 'at next sig':
       strategyFunction = async function () {
         return await this.messageChannel({
           message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
-            return this.endOfVenue(
-              // make this 1 hour after
-              this.venues.find(this.where('kind', 'SigMeeting'))
+            return await this.hoursBeforeVenue(
+              await this.venues.find(this.where('kind', 'SigMeeting')),
+              1
             );
           }.toString()
         });
@@ -240,8 +266,8 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
           message: 'strategyTextToReplace',
           projectName: this.project.name,
           opportunity: async function () {
-            return this.endOfVenue(
-              this.venues.find(this.where('kind', 'StudioMeeting'))
+            return await this.endOfVenue(
+              await this.venues.find(this.where('kind', 'StudioMeeting'))
             );
           }.toString()
         });
