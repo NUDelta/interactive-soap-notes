@@ -638,10 +638,26 @@ export default function SOAPNote({
                         let lines = edits.split('\n');
                         // TODO: 03-03-24 -- this overwrites all the other info about isChecked and stuff -- need to fix update command once using div
                         let updatedLines = lines.map((line) => {
+                          // check if new line is identical to old line
+                          // check if old lines were checked and in issues
+                          let oldLine = soapData[section.name].find(
+                            (oldLine) => oldLine.value === line
+                          );
+
+                          let newIsCheckedValue;
+                          let newIsInIssueValue;
+                          if (oldLine === undefined) {
+                            newIsCheckedValue = false;
+                            newIsInIssueValue = false;
+                          } else {
+                            newIsCheckedValue = oldLine.isChecked;
+                            newIsInIssueValue = oldLine.isInIssue;
+                          }
+
                           return {
                             id: new mongoose.Types.ObjectId().toString(),
-                            isChecked: false,
-                            isInIssue: false,
+                            isChecked: newIsCheckedValue,
+                            isInIssue: newIsInIssueValue,
                             type: line.includes('[practice]')
                               ? 'script'
                               : 'note',
