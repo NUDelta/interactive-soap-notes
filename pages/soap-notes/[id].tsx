@@ -909,7 +909,10 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       default:
         scriptType = 'detected issue';
     }
-    let title = `[${scriptType}] ${script.name} - ${script.strategies}`;
+    let title =
+      scriptType == 'follow-up'
+        ? `[${scriptType}] ${script.strategies}`
+        : `[${scriptType}] ${script.name} - ${script.strategies}`;
     let titleIndex = soapNoteInfo.objective.findIndex(
       (line) => line.value === title
     );
