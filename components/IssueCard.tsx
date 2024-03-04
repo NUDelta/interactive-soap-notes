@@ -15,6 +15,7 @@ export default function IssueCard({
   lastUpdated,
   selectedIssue,
   setSelectedIssue,
+  currInstance,
   issueIsResolved,
   onResolved,
   onArchive
@@ -39,7 +40,9 @@ export default function IssueCard({
         <div className="mb-1 w-full">
           <div className="flex">
             <h2 className="text-base font-bold flex-auto">{title}</h2>
-            <ExclamationTriangleIcon className="ml-2 h-6 text-orange-600 justify-end"></ExclamationTriangleIcon>
+            <ExclamationTriangleIcon
+              className={`ml-2 h-6 text-orange-600 justify-end ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
+            />
           </div>
 
           <div className="text-xs">
@@ -64,17 +67,17 @@ export default function IssueCard({
             <CheckBadgeIcon
               onClick={(e) => onResolved(e)}
               className="ml-2 h-8 text-gray-600 hover:text-green-600"
-            ></CheckBadgeIcon>
+            />
             <ArchiveBoxIcon
               onClick={(e) => onArchive(e)}
               className="ml-2 h-8 text-gray-600 hover:text-red-600"
-            ></ArchiveBoxIcon>
+            />
           </>
         ) : (
           <LockOpenIcon
             onClick={(e) => onResolved(e)}
             className="ml-2 h-8 text-gray-600"
-          ></LockOpenIcon>
+          />
         )}
       </div>
     </div>

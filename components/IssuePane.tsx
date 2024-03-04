@@ -98,10 +98,12 @@ export default function IssuePane({
           <div
             className={`flex flex-wrap w-full text-md text-orange-500 py-1 ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
           >
-            <span className="inline-flex items-baseline text-s">
-              <ExclamationTriangleIcon className="h-4" /> Current issue is
-              missing follow-up plans
-            </span>
+            <div className="inline-flex items-center">
+              <ExclamationTriangleIcon className="h-5 self-auto" />
+              <span className="mx-1 font-medium self-auto">
+                Current issue is missing follow-up plans
+              </span>
+            </div>
           </div>
 
           {/* show if there is a current instance */}

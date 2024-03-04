@@ -255,6 +255,7 @@ export default function SOAPNote({
                     lastUpdated={issue.lastUpdated}
                     selectedIssue={selectedIssue}
                     setSelectedIssue={setSelectedIssue}
+                    currInstance={issue.currentInstance}
                     issueIsResolved={issue.issueInactive}
                     onResolved={(e) => {
                       // confirm if the user wants to resolve the issue
@@ -334,6 +335,7 @@ export default function SOAPNote({
                       lastUpdated={issue.lastUpdated}
                       selectedIssue={selectedIssue}
                       setSelectedIssue={setSelectedIssue}
+                      currInstance={issue.currentInstance}
                       issueIsResolved={issue.issueInactive}
                       onResolved={() => {
                         // re-open the issue
@@ -636,7 +638,6 @@ export default function SOAPNote({
                       }}
                       onChange={(edits) => {
                         let lines = edits.split('\n');
-                        // TODO: 03-03-24 -- this overwrites all the other info about isChecked and stuff -- need to fix update command once using div
                         let updatedLines = lines.map((line) => {
                           // check if new line is identical to old line
                           // check if old lines were checked and in issues
@@ -961,14 +962,13 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     objective: {},
     assessment: {},
     plan: {
-      // TODO: 03-03-24 -- add a "next SIG" venue
       '[practice]': [
         ' morning of office hours: ',
         ' at office hours: ',
         ' after SIG: ',
         ' day after SIG: ',
         ' morning of next SIG: ',
-        ' at next SIG: ', // TODO: 03-03-24 -- add a "next SIG" venue
+        ' at next SIG: ',
         ' morning of studio: ',
         ' at studio: ',
         ' after studio: '
