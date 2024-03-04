@@ -33,7 +33,7 @@ export default function SOAPNote({
   const firstLoad = useRef(true);
 
   // sections of the soap notes
-  const diagnosisSections = [
+  const notetakingSections = [
     {
       name: 'subjective',
       title: 'Subjective information from student(s)'
@@ -46,14 +46,14 @@ export default function SOAPNote({
       name: 'assessment',
       title:
         'Assessment of situation (e.g., obstacles to practice; metacogntive blockers)'
-    },
-    {
-      name: 'plan',
-      title: 'Plan for practices and check-ins'
     }
+    // {
+    //   name: 'plan',
+    //   title: 'Plan for practices and check-ins'
+    // }
   ];
 
-  const summarySections = [
+  const issueSections = [
     {
       name: 'context',
       title: 'Context of issue instance'
@@ -396,7 +396,7 @@ export default function SOAPNote({
             </div>
 
             {/* Create a text box for each section of the SOAP note */}
-            {diagnosisSections.map((section) => (
+            {notetakingSections.map((section) => (
               <div className={`w-full`} key={section.name}>
                 <h1 className="font-bold text-xl">{section.title}</h1>
                 {section.name === 'plan' && (
@@ -572,7 +572,7 @@ export default function SOAPNote({
                   issueId={selectedIssue}
                   soapData={soapData}
                   setSoapData={setSoapData} // TODO: this needs to be per issue
-                  summarySections={summarySections}
+                  summarySections={issueSections}
                   autocompleteTriggersOptions={autocompleteTriggersOptions}
                 />
               </>
