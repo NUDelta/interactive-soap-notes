@@ -101,9 +101,6 @@ export default function SOAPNote({
           continue;
         }
 
-        // parse the date for the current instance
-        issue.currentInstance.date = new Date(issue.currentInstance.date);
-
         // parse follow-ups plans for each current issue instance
         let lines = issue.currentInstance.plan.split('\n');
         let scripts = lines.filter((line) => line.includes('[practice]'));
@@ -133,7 +130,7 @@ export default function SOAPNote({
         issue.currentInstance.practices = output;
       }
 
-      let dataToSave = {
+      let dataToSave = structuredClone({
         project: soapNoteInfo.project,
         date: soapNoteInfo.sigDate,
         lastUpdated: lastUpdated,
@@ -145,8 +142,25 @@ export default function SOAPNote({
         plan: soapData.plan ?? [],
         issues: soapData.issues ?? [],
         priorContext: soapData.priorContext ?? {}
-      };
+      });
 
+      // parse the date for issues before sending it back to the server
+      dataToSave.issues.forEach((issue) => {
+        // replace issue last updated with a date object
+        issue.lastUpdated = new Date(issue.lastUpdated);
+
+        // if currentInstance is not null, then replace it's date with a date object
+        if (issue.currentInstance !== null) {
+          issue.currentInstance.date = new Date(issue.currentInstance.date);
+        }
+
+        // replace all prior instances' dates with date objects
+        issue.priorInstances.forEach((instance) => {
+          instance.date = new Date(instance.date);
+        });
+      });
+
+      // make request to save the data to the database
       try {
         const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
           method: 'PUT',
@@ -158,16 +172,19 @@ export default function SOAPNote({
 
         // Update the local data without a revalidation
         const { data } = await res.json();
+
         mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
       } catch (err) {
         console.error('Error in saving SOAP note: ', err);
       }
 
+      // udpate the last updated timestamp for the note
       setNoteInfo((prevNoteInfo) => ({
         ...prevNoteInfo,
         lastUpdated: longDate(lastUpdated, true)
       }));
 
+      // saving is completed
       setIsSaving(false);
     }, 5000);
 
