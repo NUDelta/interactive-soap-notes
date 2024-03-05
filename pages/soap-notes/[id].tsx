@@ -185,7 +185,7 @@ export default function SOAPNote({
 
         // otherwise, update the local data without a revalidation
         if (output.data !== null) {
-          mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
+          mutate(`/api/soap/${soapNoteInfo.id}`, output.data, false);
         }
 
         // update the last updated timestamp for the note
@@ -454,7 +454,6 @@ export default function SOAPNote({
             </p>
 
             <div className="my-2">
-              {/* TODO: replace this with buttons for selected lines */}
               <IssueFromHighlight
                 selectOptions={soapData.issues.map((issue) => {
                   return { label: issue.title, value: issue.id };
