@@ -16,7 +16,7 @@ import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
 import CheckCircleIcon from '@heroicons/react/24/outline/CheckCircleIcon';
 import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
 
-import { Tooltip } from 'flowbite-react';
+import { Checkbox, Tooltip } from 'flowbite-react';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -604,17 +604,16 @@ export default function SOAPNote({
                   </h2>
                 )}
 
-                <div className="flex">
+                <div className="flex ">
                   {/* Add check-boxes so that notes can be added to issues */}
-                  <div className="flex-initial w-5">
+                  <div className="flex-inital w-6 mr-1">
                     {soapData[section.name].map((line) => (
                       <div
                         key={line.id}
-                        className={`px-0.5 p-0.4 border border-white ${line.isInIssue ? 'bg-lime-400' : ''}`}
+                        className={`flex items-center mt-1 py-0.5 px-0.5 border border-white  ${line.isInIssue ? 'bg-lime-400' : ''}`}
                       >
-                        <input
+                        <Checkbox
                           checked={line.isChecked}
-                          type="checkbox"
                           onChange={(e) => {
                             setSoapData((prevSoapData) => {
                               let newSoapData = { ...prevSoapData };
@@ -626,6 +625,7 @@ export default function SOAPNote({
                               return newSoapData;
                             });
                           }}
+                          className="bg-white focus:ring-0 focus:ring-offset-0 focus:ring-offset-white focus:ring-white"
                         />
                       </div>
                     ))}
@@ -763,7 +763,7 @@ export default function SOAPNote({
                       onMouseUp={(e) => {
                         return;
                       }}
-                      className="h-40 px-1"
+                      className="h-40 px-1 py-0.5"
                     />
                   </div>
                 </div>

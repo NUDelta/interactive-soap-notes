@@ -198,6 +198,7 @@ export default function IssuePane({
                   onMouseUp={(e) => {
                     return;
                   }}
+                  className="h-24 p-1"
                 />
               </div>
             ))}
