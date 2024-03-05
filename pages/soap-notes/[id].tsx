@@ -238,14 +238,14 @@ export default function SOAPNote({
           {/* Three states of saved: (1) saved without error; (2) saving; (3) save attemped but error */}
           <div className="flex flex-row items-center">
             {/* Last saved date */}
-            <h2 className="font-bold text-lg mr-2">
-              Last Updated: {noteInfo.lastUpdated}
+            <h2 className="font-bold text-base mr-2">
+              Last Saved: {noteInfo.lastUpdated}
             </h2>
 
             {/* Saved successfully */}
             {!isSaving && saveError === null ? (
               <>
-                <CheckCircleIcon className="w-6 h-6 mr-1 text-green-600" />
+                <CheckCircleIcon className="w-6 h-6 mr-0.5 text-green-600" />
                 <h2 className="font-bold text-base text-green-600">
                   Notes are saved
                 </h2>
@@ -257,7 +257,7 @@ export default function SOAPNote({
             {/* Saving */}
             {isSaving ? (
               <>
-                <ArrowPathIcon className="animate-spin w-6 h-6 mr-1 text-blue-600" />
+                <ArrowPathIcon className="animate-spin w-6 h-6 mr-0.5 text-blue-600" />
                 <h2 className="font-bold text-base text-blue-600">Saving...</h2>
               </>
             ) : (
@@ -268,9 +268,9 @@ export default function SOAPNote({
             {!isSaving && saveError !== null ? (
               <>
                 <Tooltip content={saveError} placement="bottom">
-                  <ExclamationCircleIcon className="w-6 h-6 mr-1 text-red-600" />
+                  <ExclamationCircleIcon className="w-6 h-6 mr-0.5 text-red-600" />
                 </Tooltip>
-                <h2 className="font-bold text-base text-red-600 mr-1">
+                <h2 className="font-bold text-base text-red-600">
                   Error in saving notes
                 </h2>
               </>
