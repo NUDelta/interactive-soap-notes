@@ -12,6 +12,12 @@ import IssuePane from '../../components/IssuePane';
 import IssueFromHighlight from '../../components/IssueFromHighlight';
 import { longDate, shortDate } from '../../lib/helperFns';
 
+import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
+import CheckCircleIcon from '@heroicons/react/24/outline/CheckCircleIcon';
+import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
+
+import { Tooltip } from 'flowbite-react';
+
 export default function SOAPNote({
   soapNoteInfo,
   data,
@@ -29,8 +35,9 @@ export default function SOAPNote({
   // hold a state for showing resolved issues
   const [showResolvedIssues, setShowResolvedIssues] = useState(false);
 
-  // let user know that we are saving
+  // let user know that we are saving and if there were any errors
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   // hold a ref that checks if first load
   const firstLoad = useRef(true);
@@ -169,20 +176,31 @@ export default function SOAPNote({
             'Content-Type': 'application/json'
           }
         });
+        const output = await res.json();
 
-        // Update the local data without a revalidation
-        const { data } = await res.json();
+        // if there's an error, throw an exception
+        if (!res.ok) {
+          throw new Error(`Error from server: ${output.error}`);
+        }
 
-        mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
+        // otherwise, update the local data without a revalidation
+        if (output.data !== null) {
+          mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
+        }
+
+        // update the last updated timestamp for the note
+        setNoteInfo((prevNoteInfo) => ({
+          ...prevNoteInfo,
+          lastUpdated: longDate(lastUpdated, true)
+        }));
+
+        // if there's no error, clear the error state
+        setSaveError(null);
       } catch (err) {
+        // if there's an error, set the error state
         console.error('Error in saving SOAP note: ', err);
+        setSaveError(err.message);
       }
-
-      // udpate the last updated timestamp for the note
-      setNoteInfo((prevNoteInfo) => ({
-        ...prevNoteInfo,
-        lastUpdated: longDate(lastUpdated, true)
-      }));
 
       // saving is completed
       setIsSaving(false);
@@ -211,16 +229,55 @@ export default function SOAPNote({
         </div>
 
         {/* Title and last updated */}
-        <div className="col-span-3">
+        <div className="flex flex-col col-span-3">
           <h1 className="font-bold text-3xl">
             {noteInfo.project} | {noteInfo.sigDate}
           </h1>
-          <h2 className="font-bold text-lg">
-            Last Updated: {noteInfo.lastUpdated}
-            <span className="italic text-blue-400">
-              {isSaving ? ' Saving...' : ''}
-            </span>
-          </h2>
+
+          {/* Save status */}
+          {/* Three states of saved: (1) saved without error; (2) saving; (3) save attemped but error */}
+          <div className="flex flex-row items-center">
+            {/* Last saved date */}
+            <h2 className="font-bold text-lg mr-2">
+              Last Updated: {noteInfo.lastUpdated}
+            </h2>
+
+            {/* Saved successfully */}
+            {!isSaving && saveError === null ? (
+              <>
+                <CheckCircleIcon className="w-6 h-6 mr-1 text-green-600" />
+                <h2 className="font-bold text-base text-green-600">
+                  Notes are saved
+                </h2>
+              </>
+            ) : (
+              <></>
+            )}
+
+            {/* Saving */}
+            {isSaving ? (
+              <>
+                <ArrowPathIcon className="animate-spin w-6 h-6 mr-1 text-blue-600" />
+                <h2 className="font-bold text-base text-blue-600">Saving...</h2>
+              </>
+            ) : (
+              <></>
+            )}
+
+            {/* Save attempted but error */}
+            {!isSaving && saveError !== null ? (
+              <>
+                <Tooltip content={saveError} placement="bottom">
+                  <ExclamationCircleIcon className="w-6 h-6 mr-1 text-red-600" />
+                </Tooltip>
+                <h2 className="font-bold text-base text-red-600 mr-1">
+                  Error in saving notes
+                </h2>
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
           <div></div>
         </div>
 
