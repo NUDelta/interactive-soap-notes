@@ -12,6 +12,12 @@ import IssuePane from '../../components/IssuePane';
 import IssueFromHighlight from '../../components/IssueFromHighlight';
 import { longDate, shortDate } from '../../lib/helperFns';
 
+import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
+import CheckCircleIcon from '@heroicons/react/24/outline/CheckCircleIcon';
+import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
+
+import { Checkbox, Tooltip } from 'flowbite-react';
+
 export default function SOAPNote({
   soapNoteInfo,
   data,
@@ -29,8 +35,9 @@ export default function SOAPNote({
   // hold a state for showing resolved issues
   const [showResolvedIssues, setShowResolvedIssues] = useState(false);
 
-  // let user know that we are saving
+  // let user know that we are saving and if there were any errors
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   // hold a ref that checks if first load
   const firstLoad = useRef(true);
@@ -130,7 +137,7 @@ export default function SOAPNote({
         issue.currentInstance.practices = output;
       }
 
-      let dataToSave = {
+      let dataToSave = structuredClone({
         project: soapNoteInfo.project,
         date: soapNoteInfo.sigDate,
         lastUpdated: lastUpdated,
@@ -142,8 +149,25 @@ export default function SOAPNote({
         plan: soapData.plan ?? [],
         issues: soapData.issues ?? [],
         priorContext: soapData.priorContext ?? {}
-      };
+      });
 
+      // parse the date for issues before sending it back to the server
+      dataToSave.issues.forEach((issue) => {
+        // replace issue last updated with a date object
+        issue.lastUpdated = new Date(issue.lastUpdated);
+
+        // if currentInstance is not null, then replace it's date with a date object
+        if (issue.currentInstance !== null) {
+          issue.currentInstance.date = new Date(issue.currentInstance.date);
+        }
+
+        // replace all prior instances' dates with date objects
+        issue.priorInstances.forEach((instance) => {
+          instance.date = new Date(instance.date);
+        });
+      });
+
+      // make request to save the data to the database
       try {
         const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
           method: 'PUT',
@@ -152,19 +176,33 @@ export default function SOAPNote({
             'Content-Type': 'application/json'
           }
         });
+        const output = await res.json();
 
-        // Update the local data without a revalidation
-        const { data } = await res.json();
-        mutate(`/api/soap/${soapNoteInfo.id}`, data, false);
+        // if there's an error, throw an exception
+        if (!res.ok) {
+          throw new Error(`Error from server: ${output.error}`);
+        }
+
+        // otherwise, update the local data without a revalidation
+        if (output.data !== null) {
+          mutate(`/api/soap/${soapNoteInfo.id}`, output.data, false);
+        }
+
+        // update the last updated timestamp for the note
+        setNoteInfo((prevNoteInfo) => ({
+          ...prevNoteInfo,
+          lastUpdated: longDate(lastUpdated, true)
+        }));
+
+        // if there's no error, clear the error state
+        setSaveError(null);
       } catch (err) {
+        // if there's an error, set the error state
         console.error('Error in saving SOAP note: ', err);
+        setSaveError(err.message);
       }
 
-      setNoteInfo((prevNoteInfo) => ({
-        ...prevNoteInfo,
-        lastUpdated: longDate(lastUpdated, true)
-      }));
-
+      // saving is completed
       setIsSaving(false);
     }, 5000);
 
@@ -191,16 +229,55 @@ export default function SOAPNote({
         </div>
 
         {/* Title and last updated */}
-        <div className="col-span-3">
+        <div className="flex flex-col col-span-3">
           <h1 className="font-bold text-3xl">
             {noteInfo.project} | {noteInfo.sigDate}
           </h1>
-          <h2 className="font-bold text-lg">
-            Last Updated: {noteInfo.lastUpdated}
-            <span className="italic text-blue-400">
-              {isSaving ? ' Saving...' : ''}
-            </span>
-          </h2>
+
+          {/* Save status */}
+          {/* Three states of saved: (1) saved without error; (2) saving; (3) save attemped but error */}
+          <div className="flex flex-row items-center">
+            {/* Last saved date */}
+            <h2 className="font-bold text-base mr-2">
+              Last Saved: {noteInfo.lastUpdated}
+            </h2>
+
+            {/* Saved successfully */}
+            {!isSaving && saveError === null ? (
+              <>
+                <CheckCircleIcon className="w-6 h-6 mr-0.5 text-green-600" />
+                <h2 className="font-bold text-base text-green-600">
+                  Notes are saved
+                </h2>
+              </>
+            ) : (
+              <></>
+            )}
+
+            {/* Saving */}
+            {isSaving ? (
+              <>
+                <ArrowPathIcon className="animate-spin w-6 h-6 mr-0.5 text-blue-600" />
+                <h2 className="font-bold text-base text-blue-600">Saving...</h2>
+              </>
+            ) : (
+              <></>
+            )}
+
+            {/* Save attempted but error */}
+            {!isSaving && saveError !== null ? (
+              <>
+                <Tooltip content={saveError} placement="bottom">
+                  <ExclamationCircleIcon className="w-6 h-6 mr-0.5 text-red-600" />
+                </Tooltip>
+                <h2 className="font-bold text-base text-red-600">
+                  Error in saving notes
+                </h2>
+              </>
+            ) : (
+              <></>
+            )}
+          </div>
           <div></div>
         </div>
 
@@ -377,7 +454,6 @@ export default function SOAPNote({
             </p>
 
             <div className="my-2">
-              {/* TODO: replace this with buttons for selected lines */}
               <IssueFromHighlight
                 selectOptions={soapData.issues.map((issue) => {
                   return { label: issue.title, value: issue.id };
@@ -427,6 +503,7 @@ export default function SOAPNote({
                       issueInactive: false,
                       issueArchived: false
                     };
+
                     setSoapData((prevSoapData) => {
                       let newSoapData = { ...prevSoapData };
                       newSoapData.issues.push(newIssue);
@@ -527,17 +604,16 @@ export default function SOAPNote({
                   </h2>
                 )}
 
-                <div className="flex">
+                <div className="flex ">
                   {/* Add check-boxes so that notes can be added to issues */}
-                  <div className="flex-initial w-5">
+                  <div className="flex-inital w-6 mr-1">
                     {soapData[section.name].map((line) => (
                       <div
                         key={line.id}
-                        className={`px-0.5 p-0.4 border border-white ${line.isInIssue ? 'bg-lime-400' : ''}`}
+                        className={`flex items-center mt-1 py-0.5 px-0.5 border border-white  ${line.isInIssue ? 'bg-lime-400' : ''}`}
                       >
-                        <input
+                        <Checkbox
                           checked={line.isChecked}
-                          type="checkbox"
                           onChange={(e) => {
                             setSoapData((prevSoapData) => {
                               let newSoapData = { ...prevSoapData };
@@ -549,6 +625,7 @@ export default function SOAPNote({
                               return newSoapData;
                             });
                           }}
+                          className="bg-white focus:ring-0 focus:ring-offset-0 focus:ring-offset-white focus:ring-white"
                         />
                       </div>
                     ))}
@@ -686,7 +763,7 @@ export default function SOAPNote({
                       onMouseUp={(e) => {
                         return;
                       }}
-                      className="h-40 px-1"
+                      className="h-40 px-1 py-0.5"
                     />
                   </div>
                 </div>

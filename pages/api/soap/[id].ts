@@ -21,21 +21,31 @@ export default async function handler(req, res) {
       try {
         const soapNote = await SOAPModel.findById(id);
         if (!soapNote) {
-          return res
-            .status(400)
-            .json({ success: false, error: 'No SOAP note found for ID ${id}' });
+          return res.status(400).json({
+            success: false,
+            data: null,
+            error: 'No SOAP note found for ID ${id}'
+          });
         }
-        res.status(200).json({ success: true, data: soapNote });
+        res.status(200).json({ success: true, data: soapNote, error: null });
       } catch (error) {
         res.status(400).json({
           success: false,
-          error: `Error in fetching SOAP note: ${error}`
+          data: null,
+          error: `Error in fetching SOAP note: ${error.message}`
         });
       }
       break;
     case 'PUT': // update SOAP note of [id] with edits
       try {
         const soapNote = await updateSOAPNote(id, req.body);
+        if (!soapNote) {
+          return res.status(400).json({
+            success: false,
+            data: null,
+            error: 'SOAP Note could not be saved.'
+          });
+        }
 
         // TODO: updateSOAPNote is already parsing the code; so parseFollowUpPlans is redundant
         // parse actionable followups
@@ -66,7 +76,6 @@ export default async function handler(req, res) {
                 }
               );
 
-              // TODO: if there's an error, we should let the user know on the front end
               // if successful, update the activeIssueId in the practice
               if (osRes.status === 200) {
                 const osResJson = await osRes.json();
@@ -74,6 +83,8 @@ export default async function handler(req, res) {
                   practiceIndex
                 ]['activeIssueId'] = osResJson.activeIssue.script_id;
               } else {
+                // print that an error has happened, but don't error out the code
+                // TODO: if there's an error, we should let the user know on the front end but on a per-issue basis. Don't outright fail the entire request. To do this, I think we need to change the response to be an array of objects, where each object is the result of the request, OR have a separate endpoint for creating follow-up practices.
                 console.error(
                   `Error in creating active issue for ${parsedFollowup.scriptName} in OS:`,
                   await osRes.json()
@@ -82,24 +93,26 @@ export default async function handler(req, res) {
             }
           }
         }
+
         // resave with updated activeIssueIds
         await soapNote.save();
-
-        if (!soapNote) {
-          return res.status(400).json({ success: false });
-        }
-        res.status(200).json({ success: true, data: soapNote });
+        res.status(200).json({ success: true, data: soapNote, error: null });
       } catch (error) {
         console.error(
           `Error in PUT for /api/soap/[id] for "${req.body.project}"`,
           error
         );
-        res.status(400).json({ success: false });
+        res
+          .status(400)
+          .json({ success: false, data: null, error: error.message });
       }
       break;
-
     default:
-      res.status(400).json({ success: false });
+      res.status(404).json({
+        success: false,
+        data: null,
+        error: '/api/soap/[id] invalid request'
+      });
       break;
   }
 }
