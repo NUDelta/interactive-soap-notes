@@ -55,7 +55,7 @@ export default function SOAPNote({
     {
       name: 'assessment',
       title:
-        'Assessment of issues (e.g., obstacles to practice; metacogntive blockers)'
+        'Assessment of issues (e.g., obstacles to practice; metacognitive blockers)'
     }
     // {
     //   name: 'plan',
