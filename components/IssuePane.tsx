@@ -25,7 +25,7 @@ export default function IssuePane({
     <div className="border p-2 mb-5">
       {/* Issue title */}
       <div className="flex flex-wrap mb-1 w-full">
-        <h2 className="text-lg font-bold">Issue Title:</h2>
+        <h2 className="text-lg font-bold">Practice:</h2>
         <textarea
           value={currIssue.title}
           onChange={(e) => {
@@ -42,7 +42,7 @@ export default function IssuePane({
           className="w-full text-base mb-2 p-1 h-16"
         />
 
-        <h2 className="text-lg font-bold">Issue Description:</h2>
+        <h2 className="text-lg font-bold">Description of practice:</h2>
         <textarea
           value={currIssue.description}
           onChange={(e) => {
@@ -61,9 +61,9 @@ export default function IssuePane({
 
         {/* Current Issue Instance */}
         <div className="w-full mt-4">
-          <div className="flex border-b border-black">
+          <div className="flex border-b border-black mb-2">
             <h1 className="inline-flex font-bold text-xl mr-2">
-              Current Issue Instance
+              Current Issue for Practice
             </h1>
 
             {/* Warning messages for incomplete follow-ups on current instance */}
@@ -71,7 +71,7 @@ export default function IssuePane({
               className={`inline-flex items-center text-md text-orange-500 ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
             >
               <ExclamationTriangleIcon className="h-4" />
-              <span className="mx-1 font-medium">Missing follow-up plans</span>
+              <span className="mx-1 font-medium">Missing practice plan</span>
             </div>
           </div>
 
@@ -79,7 +79,7 @@ export default function IssuePane({
           {currInstance === null && (
             <div className="mt-2">
               <h2 className="text-sm color-grey">
-                Add a new instance to the issue by clicking the button below.
+                Add a new issue for the practice by clicking the button below.
               </h2>
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-2 py-1 h-8 rounded-full mt-2"
@@ -100,7 +100,7 @@ export default function IssuePane({
                   }));
                 }}
               >
-                Add Issue Instance
+                Add Issue
               </button>
             </div>
           )}
@@ -228,7 +228,7 @@ export default function IssuePane({
                 }));
               }}
             >
-              Remove Current Issue Instance
+              Remove current issue
             </button>
           )}
         </div>
@@ -236,11 +236,11 @@ export default function IssuePane({
         {/* Prior Issue Instances */}
         <div className="w-full mt-4">
           <h1 className="font-bold text-xl border-b border-black mb-2">
-            Prior Issue Instances
+            Prior Issues
           </h1>
           {priorInstances.length === 0 && (
             <h2 className="text-sm color-grey">
-              There are no prior instances of this issue.
+              There are no prior issues for this stripIdFromPractice.
             </h2>
           )}
           {priorInstances.map((instance, i) => (

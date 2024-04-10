@@ -44,18 +44,18 @@ export default function SOAPNote({
 
   // sections of the soap notes
   const notetakingSections = [
-    {
-      name: 'subjective',
-      title: 'Subjective information from student(s)'
-    },
+    // {
+    //   name: 'subjective',
+    //   title: 'Subjective information from student(s)'
+    // },
     {
       name: 'objective',
-      title: 'Objective information matching student(s) summary'
+      title: 'Observations during SIG Meeting'
     },
     {
       name: 'assessment',
       title:
-        'Assessment of situation (e.g., obstacles to practice; metacogntive blockers)'
+        'Assessment of issues (e.g., obstacles to practice; metacogntive blockers)'
     }
     // {
     //   name: 'plan',
@@ -66,15 +66,15 @@ export default function SOAPNote({
   const issueSections = [
     {
       name: 'context',
-      title: 'Context of issue instance'
+      title: 'Observations for the issue'
     },
     {
       name: 'summary',
-      title: 'Summary of issue instance'
+      title: 'Assessment of issue'
     },
     {
       name: 'plan',
-      title: 'Plan for practices and check-ins'
+      title: 'Practice plan'
     }
   ];
 
@@ -309,14 +309,15 @@ export default function SOAPNote({
           {/* Issue Cards */}
           <div className="mb-5">
             <h1 className="font-bold text-2xl border-b border-black mb-3">
-              Tracked Issues
+              Tracked Practices
             </h1>
             <p className="italic mb-2">
-              Click on an issue to view its details and write follow-up
-              practices. Click the checkmark to resolve an issue, which means
-              the issue is not of current focus but can still be added to from
-              notes if needed. Click the archive icon to remove the issue from
-              the list.
+              Click on an practice to view its details, and current issue for
+              the practice. Click the checkmark to resolve a practice, which
+              means the practice is not of current focus but can still be added
+              to from notes if needed. Click the archive icon to remove the
+              practice, meaning it is no longer relevant for the project or
+              student.
             </p>
 
             {/* Active, non-archived issues */}
@@ -446,11 +447,11 @@ export default function SOAPNote({
               This week&apos;s notes
             </h1>
             <p className="italic">
-              Write notes during SIG meeting below. To attach notes to existing
-              issues or create new ones, use the checkboxes to select relevant
-              notes, and select the issue using the dropdown. Notes added to
-              issues will have a green box to their left; notes can be added to
-              multiple issues.
+              Write notes during SIG below. Attach notes as a new issue to
+              tracked practices by using the checkboxes to select relevant
+              notes, and select the practice using the dropdown. Notes added to
+              an issue will have a green box to their left; notes can be added
+              to multiple issues.
             </p>
 
             <div className="my-2">
@@ -604,7 +605,7 @@ export default function SOAPNote({
                   </h2>
                 )}
 
-                <div className="flex ">
+                <div className="flex">
                   {/* Add check-boxes so that notes can be added to issues */}
                   <div className="flex-inital w-6 mr-1">
                     {soapData[section.name].map((line) => (
@@ -778,7 +779,7 @@ export default function SOAPNote({
             {selectedIssue !== null && (
               <>
                 <h1 className="font-bold text-2xl border-b border-black mb-3">
-                  Selected Issue
+                  Selected Practice
                 </h1>
                 <IssuePane
                   issueId={selectedIssue}
