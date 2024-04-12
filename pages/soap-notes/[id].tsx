@@ -50,27 +50,27 @@ export default function SOAPNote({
     // },
     {
       name: 'objective',
-      title: 'Observations during SIG Meeting'
+      title: 'Context (e.g., signals from OS; observations during SIG)'
     },
     {
       name: 'assessment',
       title:
         'Assessment of issues (e.g., obstacles to practice; metacognitive blockers)'
+    },
+    {
+      name: 'plan',
+      title: 'General practices for students'
     }
-    // {
-    //   name: 'plan',
-    //   title: 'Plan for practices and check-ins'
-    // }
   ];
 
   const issueSections = [
     {
       name: 'context',
-      title: 'Observations for the issue'
+      title: 'Context'
     },
     {
       name: 'summary',
-      title: 'Assessment of issue'
+      title: 'Assessment'
     },
     {
       name: 'plan',
@@ -599,9 +599,11 @@ export default function SOAPNote({
                 <h1 className="font-bold text-xl">{section.title}</h1>
                 {section.name === 'plan' && (
                   <h2 className="text-sm color-grey">
-                    Add practices for Orchestration Engine to follow-up on by
-                    typing, &quot;[practice]&quot;. These will be sent to the
-                    students&apos; project channel.
+                    Add practices for CAP notes to follow-up on by typing,
+                    &quot;[&quot; and selecting from the autocomplete options.
+                    These will be sent to the students&apos; project channel
+                    before the next practice opportunity, or after SIG for
+                    self-practice.
                   </h2>
                 )}
 
@@ -766,6 +768,27 @@ export default function SOAPNote({
                       }}
                       className="h-40 px-1 py-0.5"
                     />
+                    {section.name === 'plan' && (
+                      <div className="text-xs text-gray-700 italic">
+                        <p>
+                          [plan]: stories, deliverables, or tasks to add to the
+                          student&apos;s sprint
+                        </p>
+                        <p>
+                          [mentor help]: work with your SIG head in office hours
+                          or mysore
+                        </p>
+                        <p>
+                          [student help]: get help from a peer during Pair
+                          Research
+                        </p>
+                        <p>[reflect]: reflect on a situation if it comes up</p>
+                        <p>
+                          [self-work]: work activity for student to do on their
+                          own
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1048,18 +1071,25 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     objective: {},
     assessment: {},
     plan: {
-      '[practice]': [
-        ' morning of office hours: ',
-        ' at office hours: ',
-        ' after SIG: ',
-        ' day after SIG: ',
-        ' morning of next SIG: ',
-        ' at next SIG: ',
-        ' morning of studio: ',
-        ' at studio: ',
-        ' after studio: '
-      ],
-      '[follow-up]': [' follow-up template at next SIG meeting']
+      // '[practice]': [
+      //   ' morning of office hours: ',
+      //   ' at office hours: ',
+      //   ' after SIG: ',
+      //   ' day after SIG: ',
+      //   ' morning of next SIG: ',
+      //   ' at next SIG: ',
+      //   ' morning of studio: ',
+      //   ' at studio: ',
+      //   ' after studio: '
+      // ],
+      // '[follow-up]': [' follow-up template at next SIG meeting']
+      '[': [
+        'plan]: ',
+        'mentor help]: ',
+        'student help]: ',
+        'reflect]: ',
+        'self-work]: '
+      ]
     }
   };
 

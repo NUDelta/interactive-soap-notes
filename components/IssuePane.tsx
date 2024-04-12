@@ -63,7 +63,7 @@ export default function IssuePane({
         <div className="w-full mt-4">
           <div className="flex border-b border-black mb-2">
             <h1 className="inline-flex font-bold text-xl mr-2">
-              Current Issue for Practice
+              Current Issue
             </h1>
 
             {/* Warning messages for incomplete follow-ups on current instance */}
@@ -111,11 +111,13 @@ export default function IssuePane({
               <div className={`w-full`} key={section.name}>
                 <h1 className="font-bold text-lg">{section.title}</h1>
                 {section.name === 'plan' && (
-                  <h2 className="text-sm color-grey">
-                    Add practices for Orchestration Engine to follow-up on by
-                    typing, &quot;[practice]&quot;. These will be sent to the
-                    students&apos; project channel.
-                  </h2>
+                  <p className="text-sm">
+                    Add practices for CAP notes to follow-up on by typing,
+                    &quot;[&quot; and selecting from the autocomplete options.
+                    These will be sent to the students&apos; project channel
+                    before the next practice opportunity, or after SIG for
+                    self-practice.
+                  </p>
                 )}
 
                 {/* TODO: abstract out the update code */}
@@ -200,6 +202,25 @@ export default function IssuePane({
                   }}
                   className="h-24 p-1"
                 />
+                {section.name === 'plan' && (
+                  <div className="text-xs text-gray-700 italic">
+                    <p>
+                      [plan]: stories, deliverables, or tasks to add to the
+                      student&apos;s sprint
+                    </p>
+                    <p>
+                      [mentor help]: work with your SIG head in office hours or
+                      mysore
+                    </p>
+                    <p>
+                      [student help]: get help from a peer during Pair Research
+                    </p>
+                    <p>[reflect]: reflect on a situation if it comes up</p>
+                    <p>
+                      [self-work]: work activity for student to do on their own
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
 
