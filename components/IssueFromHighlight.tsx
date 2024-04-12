@@ -25,12 +25,12 @@ export default function IssueFromHighlight({
             value={selectedOption}
             isClearable
             onChange={(selectedOption) => {
-              setSelectedOption(selectedOption);
+              onClick(null, selectedOption);
             }}
             options={selectOptions}
           />
         </div>
-        <div className="flex flex-auto ml-4">
+        {/* <div className="flex flex-auto ml-4">
           {selectedOption && (
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full"
@@ -46,7 +46,7 @@ export default function IssueFromHighlight({
                 : 'Create issue'}
             </button>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   ) : null;

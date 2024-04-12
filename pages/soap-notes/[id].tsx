@@ -59,7 +59,7 @@ export default function SOAPNote({
     },
     {
       name: 'plan',
-      title: 'General practices for students'
+      title: 'General follow-ups for students to do'
     }
   ];
 
@@ -485,6 +485,7 @@ export default function SOAPNote({
                     .trim();
 
                   // get the selected option and either create a new issue or add to the existing issue
+                  let editedIssueId;
                   if (selectedOption.hasOwnProperty('__isNew__')) {
                     // create a new issue
                     let newIssue = {
@@ -510,6 +511,8 @@ export default function SOAPNote({
                       newSoapData.issues.push(newIssue);
                       return newSoapData;
                     });
+
+                    editedIssueId = newIssue.id;
                   } else {
                     // get the objectid for the selected issue
                     let selectedIssue = selectedOption.value;
@@ -561,6 +564,8 @@ export default function SOAPNote({
                       newSoapData.issues[issueIndex].issueArchived = false;
                       return newSoapData;
                     });
+
+                    editedIssueId = soapData.issues[issueIndex].id;
                   }
 
                   // clear all the selected items in the SOAP note and mark lines that have been added to issues
@@ -589,6 +594,9 @@ export default function SOAPNote({
                     }
                     return newSoapData;
                   });
+
+                  // highlight the issue that was just edited or created
+                  setSelectedIssue(editedIssueId);
                 }}
               />
             </div>
