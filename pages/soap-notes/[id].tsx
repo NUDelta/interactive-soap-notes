@@ -15,6 +15,7 @@ import { longDate, shortDate } from '../../lib/helperFns';
 import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
 import CheckCircleIcon from '@heroicons/react/24/outline/CheckCircleIcon';
 import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
+import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 
 import { Checkbox, Tooltip } from 'flowbite-react';
 
@@ -55,11 +56,11 @@ export default function SOAPNote({
     {
       name: 'assessment',
       title:
-        'Assessment of issues (e.g., obstacles to practice; metacognitive blockers)'
+        'Assessment of practice obstacles (e.g., cognitive, metacognitive, emotional, behavorial, and / or strategic blockers)'
     },
     {
       name: 'plan',
-      title: 'General follow-ups for students to do'
+      title: 'Practice plan to address practice obstacles'
     }
   ];
 
@@ -218,7 +219,7 @@ export default function SOAPNote({
       </Head>
 
       {/* Header info for SOAP note */}
-      <div className="container mx-auto grid grid-cols-3 gap-x-5 gap-y-5 auto-rows-auto w-3/4 mt-3">
+      <div className="container mx-auto grid grid-cols-3 gap-x-5 gap-y-5 auto-rows-auto w-full mt-3">
         {/* Back button */}
         <div className="col-span-3">
           <Link href="/">
@@ -237,17 +238,12 @@ export default function SOAPNote({
           {/* Save status */}
           {/* Three states of saved: (1) saved without error; (2) saving; (3) save attemped but error */}
           <div className="flex flex-row items-center">
-            {/* Last saved date */}
-            <h2 className="font-bold text-base mr-2">
-              Last Saved: {noteInfo.lastUpdated}
-            </h2>
-
             {/* Saved successfully */}
             {!isSaving && saveError === null ? (
               <>
                 <CheckCircleIcon className="w-6 h-6 mr-0.5 text-green-600" />
                 <h2 className="font-bold text-base text-green-600">
-                  Notes are saved
+                  Notes last saved on {noteInfo.lastUpdated}
                 </h2>
               </>
             ) : (
@@ -271,7 +267,7 @@ export default function SOAPNote({
                   <ExclamationCircleIcon className="w-6 h-6 mr-0.5 text-red-600" />
                 </Tooltip>
                 <h2 className="font-bold text-base text-red-600">
-                  Error in saving notes
+                  Error in saving notes (Last saved: {noteInfo.lastUpdated})
                 </h2>
               </>
             ) : (
@@ -305,7 +301,7 @@ export default function SOAPNote({
         </div> */}
 
         {/* Issue Cards and SOAP Notes */}
-        <div className="col-span-2">
+        <div className="col-span-3">
           {/* Issue Cards */}
           <div className="mb-5">
             <h1 className="font-bold text-2xl border-b border-black mb-3">
@@ -320,8 +316,11 @@ export default function SOAPNote({
               student.
             </p>
 
-            {/* Active, non-archived issues */}
-            <div className="grid grid-cols-4 gap-4 grid-flow-row row-auto">
+            {/* Show issue cards for active, non-archived issues */}
+            {/* TODO: have a default card for this week's notes */}
+            {/* TODO: have a default card to add an issue with a dashed border outline and large plus icon */}
+            <div className="grid grid-cols-6 gap-4 grid-flow-row row-auto">
+              {/* tracked issue cards */}
               {soapData.issues
                 .filter((issue) => !issue.issueInactive && !issue.issueArchived)
                 .map((issue) => (
@@ -443,9 +442,13 @@ export default function SOAPNote({
           {/* Create a section for each component of the SOAP notes */}
           {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
           <div>
+            {/* TODO: title should change based on what practice is selected */}
+            {/* TODO: for issues, allow the title to be edited */}
             <h1 className="font-bold text-2xl border-b border-black mb-3">
               This week&apos;s notes
             </h1>
+
+            {/* TODO: show only for the default note; for issues, replace with an editable description */}
             <p className="italic">
               Write notes during SIG below. Attach notes as a new issue to
               tracked practices by using the checkboxes to select relevant
@@ -454,6 +457,7 @@ export default function SOAPNote({
               to multiple issues.
             </p>
 
+            {/* TODO: all of this will be removed */}
             <div className="my-2">
               <IssueFromHighlight
                 selectOptions={soapData.issues.map((issue) => {
@@ -603,7 +607,7 @@ export default function SOAPNote({
 
             {/* Create a text box for each section of the SOAP note */}
             {notetakingSections.map((section) => (
-              <div className={`w-full`} key={section.name}>
+              <div className="w-full mb-4" key={section.name}>
                 <h1 className="font-bold text-xl">{section.title}</h1>
                 {section.name === 'plan' && (
                   <h2 className="text-sm color-grey">
@@ -617,7 +621,7 @@ export default function SOAPNote({
 
                 <div className="flex">
                   {/* Add check-boxes so that notes can be added to issues */}
-                  <div className="flex-inital w-6 mr-1">
+                  {/* <div className="flex-inital w-6 mr-1">
                     {soapData[section.name].map((line) => (
                       <div
                         key={line.id}
@@ -640,12 +644,122 @@ export default function SOAPNote({
                         />
                       </div>
                     ))}
-                  </div>
+                  </div> */}
 
                   {/* Notetaking area */}
                   <div className="flex-auto">
-                    {/* TODO: abstract out the update code */}
-                    <TextBox
+                    {/* each section's lines of notes in it's own chunk*/}
+                    {/* TODO: turn this into a component so draggable can be used */}
+                    {/* TODO: think about how to add an empty block if there's no notes yet */}
+                    {/* One way is to have a placeholder block so the same code can be used; if the last block is deleted, then automatically add another with a placeholder text */}
+                    {soapData[section.name].map((line) => (
+                      <div
+                        key={line.id}
+                        className="border flex items-left align-middle mb-2"
+                      >
+                        {/* drag handle on left side */}
+                        <div className="flex items-center fill-slate-200 stroke-slate-200 mr-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="stroke-slate-400 h-8"
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="12" cy="5" r="1"></circle>
+                            <circle cx="12" cy="19" r="1"></circle>
+                            <circle cx="20" cy="12" r="1"></circle>
+                            <circle cx="20" cy="5" r="1"></circle>
+                            <circle cx="20" cy="19" r="1"></circle>
+                          </svg>
+                        </div>
+
+                        {/* editable content on right side */}
+                        <div
+                          placeholder="Type here..." // TODO: replace with a prop
+                          contentEditable="true"
+                          suppressContentEditableWarning={true}
+                          className="p-2 w-full empty:before:content-[attr(placeholder)] empty:before:italic empty:before:text-slate-400"
+                          onKeyDown={(e) => {
+                            // stop default behavior of enter key if both enter and shift are pressed
+                            if (e.key === 'Enter' && e.shiftKey) {
+                              e.preventDefault();
+                            }
+                          }}
+                          onKeyUp={(e) => {
+                            // check for shift-enter to add a new line
+                            if (e.key === 'Enter' && e.shiftKey) {
+                              // add new line underneath the current line
+                              setSoapData((prevSoapData) => {
+                                let newSoapData = { ...prevSoapData };
+                                let lineIndex = newSoapData[
+                                  section.name
+                                ].findIndex((l) => l.id === line.id);
+
+                                // if new line to add is at the end of the list, only add if there's not already an empty line
+                                if (
+                                  lineIndex ===
+                                  newSoapData[section.name].length - 1
+                                ) {
+                                  if (
+                                    newSoapData[section.name][
+                                      lineIndex
+                                    ].value.trim() === ''
+                                  ) {
+                                    return newSoapData;
+                                  }
+                                }
+
+                                // otherwise, add to the list
+                                newSoapData[section.name].splice(
+                                  lineIndex + 1,
+                                  0,
+                                  {
+                                    id: new mongoose.Types.ObjectId().toString(),
+                                    isChecked: false,
+                                    isInIssue: false,
+                                    type: 'note',
+                                    context: [],
+                                    value: ''
+                                  }
+                                );
+
+                                return newSoapData;
+                              });
+                            }
+                          }}
+                          // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
+                          onBlur={(e) => {
+                            // before attempting a save, check if the line is identical to the previous line (both trimmed)
+                            let edits = e.currentTarget.textContent.trim();
+                            if (edits === line.value.trim()) {
+                              return;
+                            }
+
+                            // save edits to the correct line
+                            setSoapData((prevSoapData) => {
+                              // get the current data and correct line that was changed
+                              let newSoapData = { ...prevSoapData };
+                              let lineIndex = newSoapData[
+                                section.name
+                              ].findIndex((l) => l.id === line.id);
+
+                              newSoapData[section.name][lineIndex].value =
+                                edits;
+                              return newSoapData;
+                            });
+                          }}
+                        >
+                          {line.value}
+                        </div>
+                      </div>
+                    ))}
+                    <div className="italic text-slate-400">
+                      Press Shift-Enter to add a new text block
+                    </div>
+                    {/* <TextBox
                       value={soapData[section.name]
                         .map((line) => `${line.value}`)
                         .join('\n')}
@@ -775,7 +889,7 @@ export default function SOAPNote({
                         return;
                       }}
                       className="h-40 px-1 py-0.5"
-                    />
+                    /> */}
                     {section.name === 'plan' && (
                       <div className="text-xs text-gray-700 italic">
                         <p>
@@ -783,13 +897,10 @@ export default function SOAPNote({
                           student&apos;s sprint
                         </p>
                         <p>
-                          [mentor help]: work with your SIG head in office hours
-                          or mysore
+                          [help]: work with your SIG head in office hours or
+                          mysore
                         </p>
-                        <p>
-                          [student help]: get help from a peer during Pair
-                          Research
-                        </p>
+                        <p>[help]: get help from a peer during Pair Research</p>
                         <p>[reflect]: reflect on a situation if it comes up</p>
                         <p>
                           [self-work]: work activity for student to do on their
@@ -805,7 +916,7 @@ export default function SOAPNote({
         </div>
 
         {/* Issue Pane */}
-        <div className="w-full col-span-1">
+        {/* <div className="w-full col-span-1">
           <div>
             {selectedIssue !== null && (
               <>
@@ -822,7 +933,7 @@ export default function SOAPNote({
               </>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   );
@@ -925,6 +1036,25 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       .map((issue) => stripIdFromIssue(issue))
       .sort((a, b) => (a.lastUpdated > b.lastUpdated ? -1 : 1))
   };
+
+  console.log(soapNoteInfo);
+  // if any section has no data, add a placeholder line
+  const addPlaceholderLine = (section) => {
+    if (soapNoteInfo[section].length === 0) {
+      soapNoteInfo[section].push({
+        id: new mongoose.Types.ObjectId().toString(),
+        isChecked: false,
+        isInIssue: false,
+        type: 'note',
+        context: [],
+        value: ''
+      });
+    }
+  };
+  addPlaceholderLine('subjective');
+  addPlaceholderLine('objective');
+  addPlaceholderLine('assessment');
+  addPlaceholderLine('plan');
 
   /**
    * fetch contextual data from OS
