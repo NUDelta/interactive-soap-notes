@@ -18,6 +18,7 @@ import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircle
 import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 
 import { Checkbox, Tooltip } from 'flowbite-react';
+import NoteBlock from '../../components/NoteBlock';
 
 export default function SOAPNote({
   soapNoteInfo,
@@ -620,32 +621,6 @@ export default function SOAPNote({
                 )}
 
                 <div className="flex">
-                  {/* Add check-boxes so that notes can be added to issues */}
-                  {/* <div className="flex-inital w-6 mr-1">
-                    {soapData[section.name].map((line) => (
-                      <div
-                        key={line.id}
-                        className={`flex items-center mt-1 py-0.5 px-0.5 border border-white  ${line.isInIssue ? 'bg-lime-400' : ''}`}
-                      >
-                        <Checkbox
-                          checked={line.isChecked}
-                          onChange={(e) => {
-                            setSoapData((prevSoapData) => {
-                              let newSoapData = { ...prevSoapData };
-                              let lineIndex = newSoapData[
-                                section.name
-                              ].findIndex((l) => l.id === line.id);
-                              newSoapData[section.name][lineIndex].isChecked =
-                                e.target.checked;
-                              return newSoapData;
-                            });
-                          }}
-                          className="bg-white focus:ring-0 focus:ring-offset-0 focus:ring-offset-white focus:ring-white"
-                        />
-                      </div>
-                    ))}
-                  </div> */}
-
                   {/* Notetaking area */}
                   <div className="flex-auto">
                     {/* each section's lines of notes in it's own chunk*/}
@@ -653,243 +628,87 @@ export default function SOAPNote({
                     {/* TODO: think about how to add an empty block if there's no notes yet */}
                     {/* One way is to have a placeholder block so the same code can be used; if the last block is deleted, then automatically add another with a placeholder text */}
                     {soapData[section.name].map((line) => (
-                      <div
+                      <NoteBlock
                         key={line.id}
-                        className="border flex items-left align-middle mb-2"
-                      >
-                        {/* drag handle on left side */}
-                        <div className="flex items-center fill-slate-200 stroke-slate-200 mr-1">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="stroke-slate-400 h-8"
-                            viewBox="0 0 24 24"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <circle cx="12" cy="12" r="1"></circle>
-                            <circle cx="12" cy="5" r="1"></circle>
-                            <circle cx="12" cy="19" r="1"></circle>
-                            <circle cx="20" cy="12" r="1"></circle>
-                            <circle cx="20" cy="5" r="1"></circle>
-                            <circle cx="20" cy="19" r="1"></circle>
-                          </svg>
-                        </div>
-
-                        {/* editable content on right side */}
-                        <div
-                          placeholder="Type here..." // TODO: replace with a prop
-                          contentEditable="true"
-                          suppressContentEditableWarning={true}
-                          className="p-2 w-full empty:before:content-[attr(placeholder)] empty:before:italic empty:before:text-slate-400"
-                          onKeyDown={(e) => {
-                            // stop default behavior of enter key if both enter and shift are pressed
-                            if (e.key === 'Enter' && e.shiftKey) {
-                              e.preventDefault();
-                            }
-                          }}
-                          onKeyUp={(e) => {
-                            // check for shift-enter to add a new line
-                            if (e.key === 'Enter' && e.shiftKey) {
-                              // add new line underneath the current line
-                              setSoapData((prevSoapData) => {
-                                let newSoapData = { ...prevSoapData };
-                                let lineIndex = newSoapData[
-                                  section.name
-                                ].findIndex((l) => l.id === line.id);
-
-                                // if new line to add is at the end of the list, only add if there's not already an empty line
-                                if (
-                                  lineIndex ===
-                                  newSoapData[section.name].length - 1
-                                ) {
-                                  if (
-                                    newSoapData[section.name][
-                                      lineIndex
-                                    ].value.trim() === ''
-                                  ) {
-                                    return newSoapData;
-                                  }
-                                }
-
-                                // otherwise, add to the list
-                                newSoapData[section.name].splice(
-                                  lineIndex + 1,
-                                  0,
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    isChecked: false,
-                                    isInIssue: false,
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                );
-
-                                return newSoapData;
-                              });
-                            }
-                          }}
-                          // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
-                          onBlur={(e) => {
-                            // before attempting a save, check if the line is identical to the previous line (both trimmed)
-                            let edits = e.currentTarget.textContent.trim();
-                            if (edits === line.value.trim()) {
-                              return;
-                            }
-
-                            // save edits to the correct line
+                        noteId={line.id}
+                        noteContent={line}
+                        placeholder="Type here"
+                        onKeyDown={(e) => {
+                          // stop default behavior of enter key if both enter and shift are pressed
+                          if (e.key === 'Enter' && e.shiftKey) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onKeyUp={(e) => {
+                          // check for shift-enter to add a new line
+                          if (e.key === 'Enter' && e.shiftKey) {
+                            // add new line underneath the current line
                             setSoapData((prevSoapData) => {
-                              // get the current data and correct line that was changed
                               let newSoapData = { ...prevSoapData };
                               let lineIndex = newSoapData[
                                 section.name
                               ].findIndex((l) => l.id === line.id);
 
-                              newSoapData[section.name][lineIndex].value =
-                                edits;
+                              // if new line to add is at the end of the list, only add if there's not already an empty line
+                              if (
+                                lineIndex ===
+                                newSoapData[section.name].length - 1
+                              ) {
+                                if (
+                                  newSoapData[section.name][
+                                    lineIndex
+                                  ].value.trim() === ''
+                                ) {
+                                  return newSoapData;
+                                }
+                              }
+
+                              // otherwise, add to the list
+                              newSoapData[section.name].splice(
+                                lineIndex + 1,
+                                0,
+                                {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  isChecked: false,
+                                  isInIssue: false,
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                }
+                              );
+
                               return newSoapData;
                             });
-                          }}
-                        >
-                          {line.value}
-                        </div>
-                      </div>
+                          }
+                        }}
+                        // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
+                        onChange={(e) => {
+                          // before attempting a save, check if the line is identical to the previous line (both trimmed)
+                          let edits = e.currentTarget.textContent.trim();
+                          if (edits === line.value.trim()) {
+                            return;
+                          }
+
+                          // save edits to the correct line
+                          setSoapData((prevSoapData) => {
+                            // get the current data and correct line that was changed
+                            let newSoapData = { ...prevSoapData };
+                            let lineIndex = newSoapData[section.name].findIndex(
+                              (l) => l.id === line.id
+                            );
+
+                            newSoapData[section.name][lineIndex].value = edits;
+                            return newSoapData;
+                          });
+                        }}
+                      />
                     ))}
                     <div className="italic text-slate-400">
                       Press Shift-Enter to add a new text block
                     </div>
-                    {/* <TextBox
-                      value={soapData[section.name]
-                        .map((line) => `${line.value}`)
-                        .join('\n')}
-                      triggers={Object.keys(
-                        autocompleteTriggersOptions[section.name]
-                      )}
-                      options={autocompleteTriggersOptions[section.name]}
-                      onFocus={(e) => {
-                        // add a "- " if the text box is empty
-                        if (e.target.value === '') {
-                          setSoapData((prevSoapData) => {
-                            let newSoapData = { ...prevSoapData };
-                            newSoapData[section.name] = [
-                              ...newSoapData[section.name],
-                              {
-                                id: new mongoose.Types.ObjectId().toString(),
-                                isChecked: false,
-                                isInIssue: false,
-                                type: 'note',
-                                context: [],
-                                value: '- '
-                              }
-                            ];
-                            return newSoapData;
-                          });
-                        }
-                      }}
-                      onBlur={(e) => {
-                        // remove the dash if the text box is empty
-                        if (e.target.value.trim() === '-') {
-                          setSoapData((prevSoapData) => {
-                            let newSoapData = { ...prevSoapData };
-                            newSoapData[section.name] = [
-                              ...newSoapData[section.name].slice(0, -1)
-                            ];
-                            return newSoapData;
-                          });
-                        }
-                      }}
-                      onKeyUp={(e) => {
-                        // add a new line to the text box with a dash when the user presses enter
-                        if (e.key === 'Enter') {
-                          // check if it's not a script line
-                          let lines = e.target.value.split('\n');
-                          if (
-                            lines.length >= 1 &&
-                            lines[lines.length - 1].includes('[practice]')
-                          ) {
-                            return;
-                          }
 
-                          setSoapData((prevSoapData) => {
-                            let newSoapData = { ...prevSoapData };
-                            newSoapData[section.name] = [
-                              ...newSoapData[section.name],
-                              {
-                                id: new mongoose.Types.ObjectId().toString(),
-                                isChecked: false,
-                                isInIssue: false,
-                                type: 'note',
-                                context: [],
-                                value: '- '
-                              }
-                            ];
-                            return newSoapData;
-                          });
-                        }
-
-                        // TODO: get whole line deleting working
-                        // check if backspace key
-                        if (e.key === 'Backspace') {
-                          let lines = e.target.value.split('\n');
-                          if (lines[lines.length - 1].trim() === '-') {
-                            setSoapData((prevSoapData) => {
-                              let newSoapData = { ...prevSoapData };
-                              newSoapData[section.name] = [
-                                ...newSoapData[section.name].slice(0, -1)
-                              ];
-                              return newSoapData;
-                            });
-                          }
-                        }
-                      }}
-                      onChange={(edits) => {
-                        let lines = edits.split('\n');
-                        let updatedLines = lines.map((line) => {
-                          // check if new line is identical to old line
-                          // check if old lines were checked and in issues
-                          let oldLine = soapData[section.name].find(
-                            (oldLine) => oldLine.value === line
-                          );
-
-                          let newIsCheckedValue;
-                          let newIsInIssueValue;
-                          if (oldLine === undefined) {
-                            newIsCheckedValue = false;
-                            newIsInIssueValue = false;
-                          } else {
-                            newIsCheckedValue = oldLine.isChecked;
-                            newIsInIssueValue = oldLine.isInIssue;
-                          }
-
-                          return {
-                            id: new mongoose.Types.ObjectId().toString(),
-                            isChecked: newIsCheckedValue,
-                            isInIssue: newIsInIssueValue,
-                            type: line.includes('[practice]')
-                              ? 'script'
-                              : 'note',
-                            context: [],
-                            value: line
-                          };
-                        });
-
-                        // don't do an update if the last line is blank (onKeyUp handles that
-                        if (lines[lines.length - 1] === '') {
-                          return;
-                        }
-
-                        setSoapData((prevSoapData) => {
-                          let newSoapData = { ...prevSoapData };
-                          newSoapData[section.name] = updatedLines;
-                          return newSoapData;
-                        });
-                      }}
-                      onMouseUp={(e) => {
-                        return;
-                      }}
-                      className="h-40 px-1 py-0.5"
-                    /> */}
+                    {/* Add helper text on how to use the plan section */}
+                    {/* TODO: probably good have quick adds for these */}
                     {section.name === 'plan' && (
                       <div className="text-xs text-gray-700 italic">
                         <p>
