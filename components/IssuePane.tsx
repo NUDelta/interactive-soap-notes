@@ -22,7 +22,7 @@ export default function IssuePane({
   const priorInstances = currIssue.priorInstances;
 
   return (
-    <div className="border p-2 mb-5">
+    <div className="mb-5">
       {/* Issue title */}
       <div className="flex flex-wrap mb-1 w-full">
         <h2 className="text-lg font-bold">Practice:</h2>
@@ -261,7 +261,7 @@ export default function IssuePane({
           </h1>
           {priorInstances.length === 0 && (
             <h2 className="text-sm color-grey">
-              There are no prior issues for this stripIdFromPractice.
+              There are no prior issues for this practice.
             </h2>
           )}
           {priorInstances.map((instance, i) => (

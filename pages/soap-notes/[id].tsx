@@ -20,6 +20,9 @@ import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 import { Checkbox, Tooltip } from 'flowbite-react';
 import NoteBlock from '../../components/NoteBlock';
 
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+
 export default function SOAPNote({
   soapNoteInfo,
   data,
@@ -32,7 +35,7 @@ export default function SOAPNote({
   const [soapData, setSoapData] = useState(data);
 
   // hold a state for which issue is selected
-  const [selectedIssue, setSelectedIssue] = useState(null);
+  const [selectedIssue, setSelectedIssue] = useState('this-weeks-notes');
 
   // hold a state for showing resolved issues
   const [showResolvedIssues, setShowResolvedIssues] = useState(false);
@@ -68,15 +71,16 @@ export default function SOAPNote({
   const issueSections = [
     {
       name: 'context',
-      title: 'Context'
+      title: 'Context (e.g., signals from OS; observations during SIG)'
     },
     {
       name: 'summary',
-      title: 'Assessment'
+      title:
+        'Assessment of practice obstacles (e.g., cognitive, metacognitive, emotional, behavorial, and / or strategic blockers)'
     },
     {
       name: 'plan',
-      title: 'Practice plan'
+      title: 'Practice plan to address practice obstacles'
     }
   ];
 
@@ -302,108 +306,48 @@ export default function SOAPNote({
         </div> */}
 
         {/* Issue Cards and SOAP Notes */}
-        <div className="col-span-3">
-          {/* Issue Cards */}
-          <div className="mb-5">
-            <h1 className="font-bold text-2xl border-b border-black mb-3">
-              Tracked Practices
-            </h1>
-            <p className="italic mb-2">
-              Click on an practice to view its details, and current issue for
-              the practice. Click the checkmark to resolve a practice, which
-              means the practice is not of current focus but can still be added
-              to from notes if needed. Click the archive icon to remove the
-              practice, meaning it is no longer relevant for the project or
-              student.
-            </p>
+        <DndProvider backend={HTML5Backend}>
+          <div className="col-span-3">
+            {/* Issue Cards */}
+            <div className="mb-5">
+              <h1 className="font-bold text-2xl border-b border-black mb-3">
+                Tracked Practices
+              </h1>
+              <p className="italic mb-2">
+                Click on an practice to view its details, and current issue for
+                the practice. Click the checkmark to resolve a practice, which
+                means the practice is not of current focus but can still be
+                added to from notes if needed. Click the archive icon to remove
+                the practice, meaning it is no longer relevant for the project
+                or student.
+              </p>
 
-            {/* Show issue cards for active, non-archived issues */}
-            {/* TODO: have a default card for this week's notes */}
-            {/* TODO: have a default card to add an issue with a dashed border outline and large plus icon */}
-            <div className="grid grid-cols-6 gap-4 grid-flow-row row-auto">
-              {/* tracked issue cards */}
-              {soapData.issues
-                .filter((issue) => !issue.issueInactive && !issue.issueArchived)
-                .map((issue) => (
-                  <IssueCard
-                    key={`issue-card-${issue.id}`}
-                    issueId={issue.id}
-                    title={issue.title}
-                    description={issue.description}
-                    lastUpdated={issue.lastUpdated}
-                    selectedIssue={selectedIssue}
-                    setSelectedIssue={setSelectedIssue}
-                    currInstance={issue.currentInstance}
-                    issueIsResolved={issue.issueInactive}
-                    onResolved={(e) => {
-                      // confirm if the user wants to resolve the issue
-                      if (
-                        !confirm(
-                          `Are you sure you want mark, "${issue.title}", as resolved?`
-                        )
-                      ) {
-                        return;
-                      }
-
-                      // resolve the issue
-                      let updatedIssues = soapData.issues;
-                      let issueIndex = updatedIssues.findIndex(
-                        (i) => i.id === issue.id
-                      );
-                      updatedIssues[issueIndex].issueInactive = true;
-                      updatedIssues[issueIndex].lastUpdated = longDate(
-                        new Date()
-                      );
-                      setSoapData((prevData) => ({
-                        ...prevData,
-                        issues: updatedIssues
-                      }));
-                    }}
-                    onArchive={(e) => {
-                      // confirm if the user wants to archive the issue
-                      if (
-                        !confirm(
-                          `Are you sure you want to archive, "${issue.title}"? This cannot be undone.`
-                        )
-                      ) {
-                        return;
-                      }
-
-                      // archive the issue
-                      let updatedIssues = soapData.issues;
-                      let issueIndex = updatedIssues.findIndex(
-                        (i) => i.id === issue.id
-                      );
-                      updatedIssues[issueIndex].issueArchived = true;
-                      updatedIssues[issueIndex].lastUpdated = longDate(
-                        new Date()
-                      );
-                      setSoapData((prevData) => ({
-                        ...prevData,
-                        issues: updatedIssues
-                      }));
-                    }}
-                  />
-                ))}
-            </div>
-
-            {/* Inactive issues */}
-            <div className="grid grid-cols-4 gap-4 grid-flow-row row-auto">
-              <h2 className="col-span-4 text-lg font-bold mt-3">
-                <button
-                  className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full"
-                  onClick={(e) => {
-                    setShowResolvedIssues(!showResolvedIssues);
+              {/* Show issue cards for active, non-archived issues */}
+              <div className="grid grid-cols-6 gap-4 grid-flow-row row-auto">
+                {/* issue card for this week's notes */}
+                <IssueCard
+                  key="issue-card-this-week"
+                  issueId="this-weeks-notes"
+                  title="This week's notes"
+                  description="Notes from SIG"
+                  lastUpdated={noteInfo.lastUpdated}
+                  selectedIssue={selectedIssue}
+                  setSelectedIssue={setSelectedIssue}
+                  currInstance={null}
+                  issueIsResolved={false}
+                  onResolved={() => {
+                    return;
                   }}
-                >
-                  {showResolvedIssues
-                    ? 'Hide  currently resolved issues'
-                    : 'Show currently resolved issues'}
-                </button>
-              </h2>
-              {showResolvedIssues &&
-                soapData.issues
-                  .filter((issue) => issue.issueInactive)
+                  onArchive={() => {
+                    return;
+                  }}
+                />
+
+                {/* tracked issue cards */}
+                {soapData.issues
+                  .filter(
+                    (issue) => !issue.issueInactive && !issue.issueArchived
+                  )
                   .map((issue) => (
                     <IssueCard
                       key={`issue-card-${issue.id}`}
@@ -415,14 +359,22 @@ export default function SOAPNote({
                       setSelectedIssue={setSelectedIssue}
                       currInstance={issue.currentInstance}
                       issueIsResolved={issue.issueInactive}
-                      onResolved={() => {
-                        // re-open the issue
+                      onResolved={(e) => {
+                        // confirm if the user wants to resolve the issue
+                        if (
+                          !confirm(
+                            `Are you sure you want mark, "${issue.title}", as resolved?`
+                          )
+                        ) {
+                          return;
+                        }
+
+                        // resolve the issue
                         let updatedIssues = soapData.issues;
                         let issueIndex = updatedIssues.findIndex(
                           (i) => i.id === issue.id
                         );
-                        updatedIssues[issueIndex].issueInactive = false;
-                        updatedIssues[issueIndex].issueArchived = false;
+                        updatedIssues[issueIndex].issueInactive = true;
                         updatedIssues[issueIndex].lastUpdated = longDate(
                           new Date()
                         );
@@ -432,327 +384,408 @@ export default function SOAPNote({
                         }));
                       }}
                       onArchive={(e) => {
-                        return;
+                        // confirm if the user wants to archive the issue
+                        if (
+                          !confirm(
+                            `Are you sure you want to archive, "${issue.title}"? This cannot be undone.`
+                          )
+                        ) {
+                          return;
+                        }
+
+                        // archive the issue
+                        let updatedIssues = soapData.issues;
+                        let issueIndex = updatedIssues.findIndex(
+                          (i) => i.id === issue.id
+                        );
+                        updatedIssues[issueIndex].issueArchived = true;
+                        updatedIssues[issueIndex].lastUpdated = longDate(
+                          new Date()
+                        );
+                        setSoapData((prevData) => ({
+                          ...prevData,
+                          issues: updatedIssues
+                        }));
                       }}
                     />
                   ))}
-            </div>
-          </div>
 
-          {/* Notes during SIG */}
-          {/* Create a section for each component of the SOAP notes */}
-          {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
-          <div>
-            {/* TODO: title should change based on what practice is selected */}
-            {/* TODO: for issues, allow the title to be edited */}
-            <h1 className="font-bold text-2xl border-b border-black mb-3">
-              This week&apos;s notes
-            </h1>
+                {/* issue card to add new issue */}
+                <IssueCard
+                  key="issue-card-add-issue"
+                  issueId="add-issue"
+                  title="Add issue"
+                  description="Notes from SIG"
+                  lastUpdated={noteInfo.lastUpdated}
+                  selectedIssue={selectedIssue}
+                  setSelectedIssue={setSelectedIssue}
+                  currInstance={null}
+                  issueIsResolved={false}
+                  onResolved={() => {
+                    return;
+                  }}
+                  onArchive={() => {
+                    return;
+                  }}
+                />
+              </div>
 
-            {/* TODO: show only for the default note; for issues, replace with an editable description */}
-            <p className="italic">
-              Write notes during SIG below. Attach notes as a new issue to
-              tracked practices by using the checkboxes to select relevant
-              notes, and select the practice using the dropdown. Notes added to
-              an issue will have a green box to their left; notes can be added
-              to multiple issues.
-            </p>
-
-            {/* TODO: all of this will be removed */}
-            <div className="my-2">
-              <IssueFromHighlight
-                selectOptions={soapData.issues.map((issue) => {
-                  return { label: issue.title, value: issue.id };
-                })}
-                onClick={(event, selectedOption) => {
-                  // get all lines of SOAP that were selected
-                  let selectedItems = {
-                    subjective: [],
-                    objective: [],
-                    assessment: []
-                  };
-                  for (let section of Object.keys(selectedItems)) {
-                    selectedItems[section] = soapData[section].filter(
-                      (line) => line.isChecked
-                    );
-                  }
-
-                  // create the context and summary additions from the selected item
-                  let contextAddition = selectedItems.subjective
-                    .map((line) => line.value)
-                    .concat(selectedItems.objective.map((line) => line.value))
-                    .join('\n')
-                    .trim();
-
-                  let summaryAddition = selectedItems.assessment
-                    .map((line) => line.value)
-                    .join('\n')
-                    .trim();
-
-                  // get the selected option and either create a new issue or add to the existing issue
-                  let editedIssueId;
-                  if (selectedOption.hasOwnProperty('__isNew__')) {
-                    // create a new issue
-                    let newIssue = {
-                      id: new mongoose.Types.ObjectId().toString(),
-                      title: selectedOption.label,
-                      description: '',
-                      currentInstance: {
-                        id: new mongoose.Types.ObjectId().toString(),
-                        date: longDate(new Date()),
-                        context: contextAddition,
-                        summary: summaryAddition,
-                        plan: '',
-                        practices: []
-                      },
-                      priorInstances: [],
-                      lastUpdated: longDate(new Date()),
-                      issueInactive: false,
-                      issueArchived: false
-                    };
-
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData.issues.push(newIssue);
-                      return newSoapData;
-                    });
-
-                    editedIssueId = newIssue.id;
-                  } else {
-                    // get the objectid for the selected issue
-                    let selectedIssue = selectedOption.value;
-
-                    // find the issue
-                    let issueIndex = soapData.issues.findIndex(
-                      (issue) => issue.id === selectedIssue
-                    );
-                    let issueInstance =
-                      soapData.issues[issueIndex].currentInstance;
-
-                    if (issueInstance === null) {
-                      // if the current instance doesn't exist, intialize it with the additions from the notetaking space
-                      issueInstance = {
-                        id: new mongoose.Types.ObjectId().toString(),
-                        date: longDate(new Date()),
-                        context: contextAddition,
-                        summary: summaryAddition,
-                        plan: '',
-                        practices: []
-                      };
-                    } else {
-                      // otherwise, add the additions to the current instance
-                      issueInstance.context =
-                        issueInstance.context.trim() === ''
-                          ? contextAddition
-                          : issueInstance.context.trim() +
-                            '\n' +
-                            contextAddition;
-                      issueInstance.summary =
-                        issueInstance.summary.trim() === ''
-                          ? summaryAddition
-                          : issueInstance.summary.trim() +
-                            +'\n' +
-                            summaryAddition;
-                      issueInstance.date = longDate(new Date());
-                    }
-
-                    setSoapData((prevSoapData) => {
-                      let newSoapData = { ...prevSoapData };
-                      newSoapData.issues[issueIndex].currentInstance =
-                        issueInstance;
-                      newSoapData.issues[issueIndex].lastUpdated = longDate(
-                        new Date()
-                      );
-
-                      // re-open the issue if new notes are added
-                      newSoapData.issues[issueIndex].issueInactive = false;
-                      newSoapData.issues[issueIndex].issueArchived = false;
-                      return newSoapData;
-                    });
-
-                    editedIssueId = soapData.issues[issueIndex].id;
-                  }
-
-                  // clear all the selected items in the SOAP note and mark lines that have been added to issues
-                  let selectedItemsSets = {};
-                  for (let section of Object.keys(selectedItems)) {
-                    selectedItemsSets[section] = new Set(
-                      selectedItems[section].map((line) => line.id)
-                    );
-                  }
-                  setSoapData((prevSoapData) => {
-                    let newSoapData = { ...prevSoapData };
-                    for (let section of Object.keys(selectedItemsSets)) {
-                      newSoapData[section] = newSoapData[section].map(
-                        (line) => {
-                          if (selectedItemsSets[section].has(line.id)) {
-                            return {
-                              ...line,
-                              isInIssue: true,
-                              isChecked: false
-                            };
-                          } else {
-                            return line;
-                          }
-                        }
-                      );
-                    }
-                    return newSoapData;
-                  });
-
-                  // highlight the issue that was just edited or created
-                  setSelectedIssue(editedIssueId);
-                }}
-              />
-            </div>
-
-            {/* Create a text box for each section of the SOAP note */}
-            {notetakingSections.map((section) => (
-              <div className="w-full mb-4" key={section.name}>
-                <h1 className="font-bold text-xl">{section.title}</h1>
-                {section.name === 'plan' && (
-                  <h2 className="text-sm color-grey">
-                    Add practices for CAP notes to follow-up on by typing,
-                    &quot;[&quot; and selecting from the autocomplete options.
-                    These will be sent to the students&apos; project channel
-                    before the next practice opportunity, or after SIG for
-                    self-practice.
-                  </h2>
-                )}
-
-                <div className="flex">
-                  {/* Notetaking area */}
-                  <div className="flex-auto">
-                    {/* each section's lines of notes in it's own chunk*/}
-                    {/* TODO: turn this into a component so draggable can be used */}
-                    {/* TODO: think about how to add an empty block if there's no notes yet */}
-                    {/* One way is to have a placeholder block so the same code can be used; if the last block is deleted, then automatically add another with a placeholder text */}
-                    {soapData[section.name].map((line) => (
-                      <NoteBlock
-                        key={line.id}
-                        noteId={line.id}
-                        noteContent={line}
-                        placeholder="Type here"
-                        onKeyDown={(e) => {
-                          // stop default behavior of enter key if both enter and shift are pressed
-                          if (e.key === 'Enter' && e.shiftKey) {
-                            e.preventDefault();
-                          }
+              {/* Inactive issues */}
+              <div className="grid grid-cols-4 gap-4 grid-flow-row row-auto">
+                <h2 className="col-span-4 text-lg font-bold mt-3">
+                  <button
+                    className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full"
+                    onClick={(e) => {
+                      setShowResolvedIssues(!showResolvedIssues);
+                    }}
+                  >
+                    {showResolvedIssues
+                      ? 'Hide  currently resolved issues'
+                      : 'Show currently resolved issues'}
+                  </button>
+                </h2>
+                {showResolvedIssues &&
+                  soapData.issues
+                    .filter((issue) => issue.issueInactive)
+                    .map((issue) => (
+                      <IssueCard
+                        key={`issue-card-${issue.id}`}
+                        issueId={issue.id}
+                        title={issue.title}
+                        description={issue.description}
+                        lastUpdated={issue.lastUpdated}
+                        selectedIssue={selectedIssue}
+                        setSelectedIssue={setSelectedIssue}
+                        currInstance={issue.currentInstance}
+                        issueIsResolved={issue.issueInactive}
+                        onResolved={() => {
+                          // re-open the issue
+                          let updatedIssues = soapData.issues;
+                          let issueIndex = updatedIssues.findIndex(
+                            (i) => i.id === issue.id
+                          );
+                          updatedIssues[issueIndex].issueInactive = false;
+                          updatedIssues[issueIndex].issueArchived = false;
+                          updatedIssues[issueIndex].lastUpdated = longDate(
+                            new Date()
+                          );
+                          setSoapData((prevData) => ({
+                            ...prevData,
+                            issues: updatedIssues
+                          }));
                         }}
-                        onKeyUp={(e) => {
-                          // check for shift-enter to add a new line
-                          if (e.key === 'Enter' && e.shiftKey) {
-                            // add new line underneath the current line
-                            setSoapData((prevSoapData) => {
-                              let newSoapData = { ...prevSoapData };
-                              let lineIndex = newSoapData[
-                                section.name
-                              ].findIndex((l) => l.id === line.id);
-
-                              // if new line to add is at the end of the list, only add if there's not already an empty line
-                              if (
-                                lineIndex ===
-                                newSoapData[section.name].length - 1
-                              ) {
-                                if (
-                                  newSoapData[section.name][
-                                    lineIndex
-                                  ].value.trim() === ''
-                                ) {
-                                  return newSoapData;
-                                }
-                              }
-
-                              // otherwise, add to the list
-                              newSoapData[section.name].splice(
-                                lineIndex + 1,
-                                0,
-                                {
-                                  id: new mongoose.Types.ObjectId().toString(),
-                                  isChecked: false,
-                                  isInIssue: false,
-                                  type: 'note',
-                                  context: [],
-                                  value: ''
-                                }
-                              );
-
-                              return newSoapData;
-                            });
-                          }
-                        }}
-                        // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
-                        onChange={(e) => {
-                          // before attempting a save, check if the line is identical to the previous line (both trimmed)
-                          let edits = e.currentTarget.textContent.trim();
-                          if (edits === line.value.trim()) {
-                            return;
-                          }
-
-                          // save edits to the correct line
-                          setSoapData((prevSoapData) => {
-                            // get the current data and correct line that was changed
-                            let newSoapData = { ...prevSoapData };
-                            let lineIndex = newSoapData[section.name].findIndex(
-                              (l) => l.id === line.id
-                            );
-
-                            newSoapData[section.name][lineIndex].value = edits;
-                            return newSoapData;
-                          });
+                        onArchive={(e) => {
+                          return;
                         }}
                       />
                     ))}
-                    <div className="italic text-slate-400">
-                      Press Shift-Enter to add a new text block
-                    </div>
-
-                    {/* Add helper text on how to use the plan section */}
-                    {/* TODO: probably good have quick adds for these */}
-                    {section.name === 'plan' && (
-                      <div className="text-xs text-gray-700 italic">
-                        <p>
-                          [plan]: stories, deliverables, or tasks to add to the
-                          student&apos;s sprint
-                        </p>
-                        <p>
-                          [help]: work with your SIG head in office hours or
-                          mysore
-                        </p>
-                        <p>[help]: get help from a peer during Pair Research</p>
-                        <p>[reflect]: reflect on a situation if it comes up</p>
-                        <p>
-                          [self-work]: work activity for student to do on their
-                          own
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Issue Pane */}
-        {/* <div className="w-full col-span-1">
-          <div>
-            {selectedIssue !== null && (
-              <>
-                <h1 className="font-bold text-2xl border-b border-black mb-3">
-                  Selected Practice
-                </h1>
-                <IssuePane
-                  issueId={selectedIssue}
-                  soapData={soapData}
-                  setSoapData={setSoapData} // TODO: this needs to be per issue
-                  summarySections={issueSections}
-                  autocompleteTriggersOptions={autocompleteTriggersOptions}
-                />
-              </>
-            )}
+            {/* Notes during SIG */}
+            {/* Create a section for each component of the SOAP notes */}
+            {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
+            {/* show either the regular note section or the note pane */}
+            <div>
+              {selectedIssue !== null &&
+              selectedIssue !== 'this-weeks-notes' ? (
+                <>
+                  {/* TODO: title should change based on what practice is selected */}
+                  {/* TODO: for issues, allow the title to be edited */}
+                  {/* TODO: once this uses the same schema as the regular notes, then the code can be compressed */}
+                  <h1 className="font-bold text-2xl border-b border-black mb-3">
+                    Selected Practice
+                  </h1>
+                  <IssuePane
+                    issueId={selectedIssue}
+                    soapData={soapData}
+                    setSoapData={setSoapData} // TODO: this needs to be per issue
+                    summarySections={issueSections}
+                    autocompleteTriggersOptions={autocompleteTriggersOptions}
+                  />
+                </>
+              ) : (
+                <div>
+                  <h1 className="font-bold text-2xl border-b border-black mb-3">
+                    This week&apos;s notes
+                  </h1>
+
+                  {/* TODO: show only for the default note; for issues, replace with an editable description */}
+                  <p className="italic">
+                    Write notes from SIG below. Attach notes to existing
+                    practices or create a new tracked practice by dragging the
+                    note onto the Tracked Practices above.
+                  </p>
+
+                  {/* Create section for each part of the CAP notes */}
+                  {notetakingSections.map((section) => (
+                    <div className="w-full mb-4" key={section.name}>
+                      <h1 className="font-bold text-xl">{section.title}</h1>
+                      {section.name === 'plan' && (
+                        <h2 className="text-sm color-grey">
+                          Add practices for CAP notes to follow-up on by typing,
+                          &quot;[&quot; and selecting from the autocomplete
+                          options. These will be sent to the students&apos;
+                          project channel before the next practice opportunity,
+                          or after SIG for self-practice.
+                        </h2>
+                      )}
+
+                      <div className="flex">
+                        {/* Notetaking area */}
+                        <div className="flex-auto">
+                          {/* each section's lines of notes in it's own chunk*/}
+                          {/* TODO: turn this into a component so draggable can be used */}
+                          {/* TODO: think about how to add an empty block if there's no notes yet */}
+                          {/* One way is to have a placeholder block so the same code can be used; if the last block is deleted, then automatically add another with a placeholder text */}
+                          {soapData[section.name].map((line) => (
+                            <NoteBlock
+                              key={line.id}
+                              noteSection={section.name}
+                              noteId={line.id}
+                              noteContent={line}
+                              onKeyDown={(e) => {
+                                // stop default behavior of enter key if both enter and shift are pressed
+                                if (e.key === 'Enter' && e.shiftKey) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              onKeyUp={(e) => {
+                                // check for shift-enter to add a new line
+                                if (e.key === 'Enter' && e.shiftKey) {
+                                  // add new line underneath the current line
+                                  setSoapData((prevSoapData) => {
+                                    let newSoapData = { ...prevSoapData };
+                                    let lineIndex = newSoapData[
+                                      section.name
+                                    ].findIndex((l) => l.id === line.id);
+
+                                    // if new line to add is at the end of the list, only add if there's not already an empty line
+                                    // if (
+                                    //   lineIndex ===
+                                    //   newSoapData[section.name].length - 1
+                                    // ) {
+                                    //   if (
+                                    //     newSoapData[section.name][
+                                    //       lineIndex
+                                    //     ].value.trim() === ''
+                                    //   ) {
+                                    //     return newSoapData;
+                                    //   }
+                                    // }
+
+                                    // otherwise, add to the list
+                                    newSoapData[section.name].splice(
+                                      lineIndex + 1,
+                                      0,
+                                      {
+                                        id: new mongoose.Types.ObjectId().toString(),
+                                        isChecked: false,
+                                        isInIssue: false,
+                                        type: 'note',
+                                        context: [],
+                                        value: ''
+                                      }
+                                    );
+
+                                    return newSoapData;
+                                  });
+                                }
+                              }}
+                              // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
+                              onChange={(e) => {
+                                // before attempting a save, check if the line is identical to the previous line (both trimmed)
+                                let edits = e.currentTarget.textContent.trim();
+                                if (edits === line.value.trim()) {
+                                  return;
+                                }
+
+                                // save edits to the correct line
+                                setSoapData((prevSoapData) => {
+                                  // get the current data and correct line that was changed
+                                  let newSoapData = { ...prevSoapData };
+                                  let lineIndex = newSoapData[
+                                    section.name
+                                  ].findIndex((l) => l.id === line.id);
+
+                                  newSoapData[section.name][lineIndex].value =
+                                    edits;
+                                  return newSoapData;
+                                });
+                              }}
+                              onDragToIssue={(
+                                issueId,
+                                noteSection,
+                                noteBlock
+                              ) => {
+                                // map note content into the correct section
+                                // TODO: make the names consistent
+                                // TODO: make the schema consistent and just move around note blocks
+                                let editsToIssue = {
+                                  context:
+                                    noteSection === 'objective'
+                                      ? noteBlock.value
+                                      : '',
+                                  summary:
+                                    noteSection === 'assessment'
+                                      ? noteBlock.value
+                                      : '',
+                                  plan:
+                                    noteSection === 'plan'
+                                      ? noteBlock.value
+                                      : ''
+                                };
+
+                                // get the issue to add the edits to
+                                if (
+                                  issueId === 'add-issue' ||
+                                  issueId === 'this-weeks-notes'
+                                ) {
+                                  // create a new issue
+                                  let newIssue = {
+                                    id: new mongoose.Types.ObjectId().toString(),
+                                    title: 'unnamed issue',
+                                    description: '',
+                                    currentInstance: {
+                                      id: new mongoose.Types.ObjectId().toString(),
+                                      date: longDate(new Date()),
+                                      context: editsToIssue['context'],
+                                      summary: editsToIssue['summary'],
+                                      plan: editsToIssue['plan'],
+                                      practices: []
+                                    },
+                                    priorInstances: [],
+                                    lastUpdated: longDate(new Date()),
+                                    issueInactive: false,
+                                    issueArchived: false
+                                  };
+                                  setSoapData((prevSoapData) => {
+                                    let newSoapData = { ...prevSoapData };
+                                    newSoapData.issues.push(newIssue);
+                                    return newSoapData;
+                                  });
+
+                                  issueId = newIssue.id;
+                                } else {
+                                  // find the issue
+                                  let issueIndex = soapData.issues.findIndex(
+                                    (issue) => issue.id === issueId
+                                  );
+                                  let issueInstance =
+                                    soapData.issues[issueIndex].currentInstance;
+
+                                  if (issueInstance === null) {
+                                    // if the current instance doesn't exist, intialize it with the additions from the notetaking space
+                                    issueInstance = {
+                                      id: new mongoose.Types.ObjectId().toString(),
+                                      date: longDate(new Date()),
+                                      context: editsToIssue['context'],
+                                      summary: editsToIssue['summary'],
+                                      plan: editsToIssue['plan'],
+                                      practices: []
+                                    };
+                                  } else {
+                                    // TODO: issue instance doesn't use the same schema as SOAP notes
+                                    // otherwise, add the additions to the current instance
+                                    issueInstance.context =
+                                      issueInstance.context.trim() === ''
+                                        ? editsToIssue['context']
+                                        : issueInstance.context.trim() +
+                                          '\n' +
+                                          editsToIssue['context'];
+
+                                    issueInstance.summary =
+                                      issueInstance.summary.trim() === ''
+                                        ? editsToIssue['summary']
+                                        : issueInstance.summary.trim() +
+                                          +'\n' +
+                                          editsToIssue['summary'];
+
+                                    issueInstance.plan =
+                                      issueInstance.plan.trim() === ''
+                                        ? editsToIssue['plan']
+                                        : issueInstance.plan.trim() +
+                                          +'\n' +
+                                          editsToIssue['plan'];
+
+                                    issueInstance.date = longDate(new Date());
+                                  }
+
+                                  setSoapData((prevSoapData) => {
+                                    let newSoapData = { ...prevSoapData };
+                                    newSoapData.issues[
+                                      issueIndex
+                                    ].currentInstance = issueInstance;
+                                    newSoapData.issues[issueIndex].lastUpdated =
+                                      longDate(new Date());
+
+                                    // re-open the issue if new notes are added
+                                    newSoapData.issues[
+                                      issueIndex
+                                    ].issueInactive = false;
+                                    newSoapData.issues[
+                                      issueIndex
+                                    ].issueArchived = false;
+                                    return newSoapData;
+                                  });
+
+                                  issueId = soapData.issues[issueIndex].id;
+                                }
+
+                                // TODO: remove note block that was dragged into the issue
+                                setSoapData((prevSoapData) => {
+                                  let newSoapData = { ...prevSoapData };
+
+                                  // remove the note block from the edited section
+                                  newSoapData[noteSection] = newSoapData[
+                                    noteSection
+                                  ].filter((line) => line.id !== noteBlock.id);
+                                  return newSoapData;
+                                });
+
+                                // highlight the issue that was just edited or created
+                                setSelectedIssue(issueId);
+                              }}
+                            />
+                          ))}
+                          <div className="italic text-slate-400">
+                            Press Shift-Enter to add a new text block
+                          </div>
+
+                          {/* Add helper text on how to use the plan section */}
+                          {/* TODO: probably good have quick adds for these */}
+                          {section.name === 'plan' && (
+                            <div className="text-xs text-gray-700 italic">
+                              <p>
+                                [plan]: stories, deliverables, or tasks to add
+                                to the student&apos;s sprint
+                              </p>
+                              <p>
+                                [help]: work with your SIG head in office hours
+                                or mysore
+                              </p>
+                              <p>
+                                [help]: get help from a peer during Pair
+                                Research
+                              </p>
+                              <p>
+                                [reflect]: reflect on a situation if it comes up
+                              </p>
+                              <p>
+                                [self-work]: work activity for student to do on
+                                their own
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div> */}
+        </DndProvider>
       </div>
     </>
   );
@@ -856,7 +889,6 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       .sort((a, b) => (a.lastUpdated > b.lastUpdated ? -1 : 1))
   };
 
-  console.log(soapNoteInfo);
   // if any section has no data, add a placeholder line
   const addPlaceholderLine = (section) => {
     if (soapNoteInfo[section].length === 0) {
