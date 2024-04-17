@@ -210,7 +210,7 @@ export default function SOAPNote({
 
       // saving is completed
       setIsSaving(false);
-    }, 5000);
+    }, 1000); // TODO: lowering for now to handle div issue, but should be 5000
 
     return () => clearTimeout(timeOutId);
   }, [soapData, soapNoteInfo]);
@@ -610,6 +610,7 @@ export default function SOAPNote({
 
                                   newSoapData[section.name][lineIndex].value =
                                     edits;
+
                                   return newSoapData;
                                 });
                               }}
@@ -753,30 +754,50 @@ export default function SOAPNote({
                           </div>
 
                           {/* Add helper text on how to use the plan section */}
-                          {/* TODO: probably good have quick adds for these */}
-                          {section.name === 'plan' && (
-                            <div className="text-xs text-gray-700 italic">
-                              <p>
-                                [plan]: stories, deliverables, or tasks to add
-                                to the student&apos;s sprint
-                              </p>
-                              <p>
-                                [help]: work with your SIG head in office hours
-                                or mysore
-                              </p>
-                              <p>
-                                [help]: get help from a peer during Pair
-                                Research
-                              </p>
-                              <p>
-                                [reflect]: reflect on a situation if it comes up
-                              </p>
-                              <p>
-                                [self-work]: work activity for student to do on
-                                their own
-                              </p>
+                          {/* TODO: these don't work so disabling them for now */}
+                          {/* practice first (what), then: who, where / when, how as optional info*/}
+                          {/* {section.name === 'plan' && (
+                            <div className="text-sm text-gray-700 italic mt-2">
+                              <h2 className="font-bold">Practice follow-ups</h2>
+                              <div className="grid grid-cols-2 gap-y-1 w-2/3">
+                                <p>
+                                  [plan]: stories, deliverables, or tasks to add
+                                  to the student&apos;s sprint
+                                </p>
+                                <p>
+                                  [help]: work with a peer or mentor on practice
+                                </p>
+                                <p>
+                                  [reflect]: reflect on a situation if it comes
+                                  up
+                                </p>
+                                <p>
+                                  [self-work]: work activity for student to do
+                                  on their own
+                                </p>
+                              </div>
+
+                              <h2 className="font-bold mt-4">
+                                Include additional info using:
+                              </h2>
+                              <div className="grid grid-cols-2 gap-y-1 w-2/3">
+                                <p>
+                                  w/[person]: who the practice should be done
+                                  with (e.g., mentor, peer, self)
+                                </p>
+                                <p>
+                                  @[venue]: specific venue to do the practice;
+                                  CAP will follow-up at the next one.
+                                </p>
+                                <p>
+                                  rep/[representation]: representation to use
+                                  for practice (e.g., canvas section; sketch of
+                                  a journey map; reflection question(s))
+                                </p>
+                              </div>
+                              <br></br>
                             </div>
-                          )}
+                          )} */}
                         </div>
                       </div>
                     </div>
@@ -1072,13 +1093,22 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       //   ' after studio: '
       // ],
       // '[follow-up]': [' follow-up template at next SIG meeting']
-      '[': [
-        'plan]: ',
-        'mentor help]: ',
-        'student help]: ',
-        'reflect]: ',
-        'self-work]: '
-      ]
+      // TODO: what are other kinds of self-regulation strategies / buckets
+      '[': ['plan]: ', 'help]: ', 'reflect]: ', 'self-work]: '],
+      'w/': ['mentor', 'peer', 'self'],
+      'rep/': [
+        'problem statement',
+        'design argument',
+        'interface argument',
+        'system argument',
+        'user testing plan',
+        'testing takeaways',
+        'approach tree',
+        'sketch a journey map / storyboard',
+        'write: ',
+        'reflect on: '
+      ],
+      '@': ['mysore', 'pair research', 'office hours', 'sig']
     }
   };
 

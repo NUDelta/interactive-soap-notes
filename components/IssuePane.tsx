@@ -166,7 +166,9 @@ export default function IssuePane({
                       let lines = e.target.value.split('\n');
                       if (
                         lines.length >= 1 &&
-                        lines[lines.length - 1].includes('[practice]')
+                        lines[lines.length - 1].match(
+                          /\[(plan|help|reflect|self-work)]:/g
+                        ) !== null
                       ) {
                         return;
                       }
@@ -203,22 +205,41 @@ export default function IssuePane({
                   className="h-24 p-1"
                 />
                 {section.name === 'plan' && (
-                  <div className="text-xs text-gray-700 italic">
-                    <p>
-                      [plan]: stories, deliverables, or tasks to add to the
-                      student&apos;s sprint
-                    </p>
-                    <p>
-                      [mentor help]: work with your SIG head in office hours or
-                      mysore
-                    </p>
-                    <p>
-                      [student help]: get help from a peer during Pair Research
-                    </p>
-                    <p>[reflect]: reflect on a situation if it comes up</p>
-                    <p>
-                      [self-work]: work activity for student to do on their own
-                    </p>
+                  <div className="text-sm text-gray-700 italic mt-2">
+                    <h2 className="font-bold">Practice follow-ups</h2>
+                    <div className="grid grid-cols-2 gap-y-1 w-2/3">
+                      <p>
+                        [plan]: stories, deliverables, or tasks to add to the
+                        student&apos;s sprint
+                      </p>
+                      <p>[help]: work with a peer or mentor on practice</p>
+                      <p>[reflect]: reflect on a situation if it comes up</p>
+                      <p>
+                        [self-work]: work activity for student to do on their
+                        own
+                      </p>
+                    </div>
+
+                    <h2 className="font-bold mt-4">
+                      Include additional info using:
+                    </h2>
+                    <div className="grid grid-cols-2 gap-y-1 w-2/3">
+                      {/* what (practice), who, where / when, how */}
+                      <p>
+                        w/[person]: who the practice should be done with (e.g.,
+                        mentor, peer, self)
+                      </p>
+                      <p>
+                        @[venue]: specific venue to do the practice; CAP will
+                        follow-up at the next one.
+                      </p>
+                      <p>
+                        rep/[representation]: representation to use for practice
+                        (e.g., canvas section; sketch of a journey map;
+                        reflection question(s))
+                      </p>
+                    </div>
+                    <br></br>
                   </div>
                 )}
               </div>
