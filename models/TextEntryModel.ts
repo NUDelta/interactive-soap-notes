@@ -1,9 +1,7 @@
 import mongoose from 'mongoose';
 
 export interface TextEntryStruct {
-  isChecked: boolean;
-  isInIssue: boolean;
-  type: 'note' | 'script';
+  type: 'note' | 'script' | 'follow-up';
   context: ContextObj[];
   value: string;
 }
@@ -14,14 +12,6 @@ interface ContextObj {
 }
 
 export const TextEntrySchema = new mongoose.Schema<TextEntryStruct>({
-  isChecked: {
-    type: Boolean,
-    required: true
-  },
-  isInIssue: {
-    type: Boolean,
-    required: true
-  },
   type: {
     type: String,
     required: true

@@ -1,24 +1,25 @@
 import mongoose from 'mongoose';
 import { TextEntrySchema, TextEntryStruct } from './TextEntryModel';
-import { ConceptualIssueSchema, ConceptualIssueStruct } from './IssueModel';
+import {
+  PracticeObjectSchema,
+  PracticeObjectStruct
+} from './PracticeObjectModel';
+import { IssueObjectSchema } from './IssueObjectModel';
 
-export interface SOAPStruct {
+export interface CAPStruct {
   project: string;
   date: Date;
   lastUpdated: Date;
   sigName: string;
   sigAbbreviation: string;
-  subjective: TextEntryStruct[];
-  objective: TextEntryStruct[];
+  context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
-  issues: ConceptualIssueStruct[];
-  // priorContext: object;
-  // notedAssessments: object;
-  // followUpContext: object;
+  trackedPractices: [];
+  currIssueInstances: PracticeObjectStruct[];
 }
 
-const SOAPSchema = new mongoose.Schema<SOAPStruct>({
+const CAPNote = new mongoose.Schema<CAPStruct>({
   project: {
     type: String,
     required: true
@@ -39,11 +40,11 @@ const SOAPSchema = new mongoose.Schema<SOAPStruct>({
     type: String,
     required: true
   },
-  subjective: [TextEntrySchema],
-  objective: [TextEntrySchema],
+  context: [TextEntrySchema],
   assessment: [TextEntrySchema],
   plan: [TextEntrySchema],
-  issues: [ConceptualIssueSchema]
+  trackedPractices: [PracticeObjectSchema],
+  currIssueInstances: [IssueObjectSchema]
   // priorContext: {
   //   type: Object,
   //   required: true
@@ -58,5 +59,5 @@ const SOAPSchema = new mongoose.Schema<SOAPStruct>({
   // }
 });
 
-export default (mongoose.models.SOAPNote as mongoose.Model<SOAPStruct>) ||
-  mongoose.model('SOAPNote', SOAPSchema);
+export default (mongoose.models.CAPNote as mongoose.Model<CAPStruct>) ||
+  mongoose.model('CAPNote', CAPNote);
