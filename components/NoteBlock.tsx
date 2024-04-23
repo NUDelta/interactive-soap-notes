@@ -50,8 +50,6 @@ export default function NoteBlock({
     [noteId]
   );
 
-  console.log('dragging');
-
   // TODO: notes should be draggable within and across the CAP sections
   return (
     <>

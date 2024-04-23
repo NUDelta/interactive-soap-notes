@@ -1,23 +1,20 @@
-import type { GetServerSideProps, NextPage } from 'next';
+import type { GetServerSideProps } from 'next';
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
-import mongoose, { set } from 'mongoose';
+import mongoose from 'mongoose';
 import { mutate } from 'swr';
 
 import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
-import TextBox from '../../components/TextBox';
 import IssueCard from '../../components/IssueCard';
 import IssuePane from '../../components/IssuePane';
-import IssueFromHighlight from '../../components/IssueFromHighlight';
 import { longDate, shortDate } from '../../lib/helperFns';
 
 import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
 import CheckCircleIcon from '@heroicons/react/24/outline/CheckCircleIcon';
 import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
-import { EllipsisVerticalIcon } from '@heroicons/react/24/outline';
 
-import { Checkbox, Tooltip } from 'flowbite-react';
+import { Tooltip } from 'flowbite-react';
 import NoteBlock from '../../components/NoteBlock';
 
 import { DndProvider } from 'react-dnd';

@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import { IssueObjectStruct, IssueObjectSchema } from './IssueObjectModel';
-import { TextEntryStruct, TextEntrySchema } from './TextEntryModel';
 
 export interface PracticeObjectStruct {
   title: string;

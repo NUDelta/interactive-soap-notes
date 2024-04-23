@@ -1,5 +1,5 @@
 import dbConnect from '../../lib/dbConnect';
-import CAPNoteModel, { CAPStruct } from '../../models/CAPNoteModel';
+import CAPNoteModel from '../../models/CAPNoteModel';
 
 export const updateCAPNote = async (id: string, capNote: object) => {
   let capNoteUpdatedContent = parseCAPNotes(capNote);

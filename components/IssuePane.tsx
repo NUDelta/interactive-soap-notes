@@ -1,11 +1,4 @@
-import { Switch } from '@headlessui/react';
-import {
-  ArrowUpIcon,
-  ArrowDownIcon,
-  TrashIcon,
-  ExclamationTriangleIcon
-} from '@heroicons/react/24/outline';
-import TextBox from './TextBox';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { longDate } from '../lib/helperFns';
 
 import NoteBlock from './NoteBlock';

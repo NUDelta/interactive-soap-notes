@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import CAPNoteModel, { CAPStruct } from '../CAPNoteModel';
+import CAPNoteModel from '../CAPNoteModel';
 import dbConnect from '../../lib/dbConnect';
 
 /**

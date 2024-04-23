@@ -6,7 +6,7 @@ import ArchiveBoxIcon from '@heroicons/react/24/outline/ArchiveBoxIcon';
 import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
 import LockOpenIcon from '@heroicons/react/24/outline/LockOpenIcon';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useDrop } from 'react-dnd';
 
 export default function IssueCard({
