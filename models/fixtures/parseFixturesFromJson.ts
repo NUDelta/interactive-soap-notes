@@ -2,6 +2,19 @@ import mongoose from 'mongoose';
 import CAPNoteModel, { CAPStruct } from '../CAPNoteModel';
 import dbConnect from '../../lib/dbConnect';
 
+/**
+ *
+ * @param timestamp
+ * @param timezone e.g., America/Chicago
+ * @returns
+ */
+const convertTimestampToDate = (timestamp, timezone) => {
+  // convert timestamp from date and timezone into utc
+  let date = new Date(timestamp);
+  // let utcDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
+  return date;
+};
+
 export const parseFixturesFromJson = async (fixtures) => {
   // create an array to hold the parsed fixtures
   let parsedFixtures = [];
@@ -11,9 +24,13 @@ export const parseFixturesFromJson = async (fixtures) => {
     // create a new CAP note object to hold everything
     let newCAPNote = new CAPNoteModel({
       project: fixture.project,
-      date: new Date(Number(fixture.date['$date']['$numberLong'])),
-      lastUpdated: new Date(
-        Number(fixture.lastUpdated['$date']['$numberLong'])
+      date: convertTimestampToDate(
+        Number(fixture.date['$date']['$numberLong']),
+        'America/Chicago'
+      ),
+      lastUpdated: convertTimestampToDate(
+        Number(fixture.lastUpdated['$date']['$numberLong']),
+        'America/Chicago'
       ),
       sigName: fixture.sigName,
       sigAbbreviation: fixture.sigAbbreviation,
@@ -73,8 +90,9 @@ export const parseFixturesFromJson = async (fixtures) => {
           ? null
           : {
               id: new mongoose.Types.ObjectId().toString(),
-              date: new Date(
-                Number(practice.currentInstance.date['$date']['$numberLong'])
+              date: convertTimestampToDate(
+                Number(practice.currentInstance.date['$date']['$numberLong']),
+                'America/Chicago'
               ),
               context: practice.currentInstance.context
                 .split('\n')
@@ -113,8 +131,9 @@ export const parseFixturesFromJson = async (fixtures) => {
         id: new mongoose.Types.ObjectId().toString(),
         title: practice.title,
         description: practice.description,
-        lastUpdated: new Date(
-          Number(practice.lastUpdated['$date']['$numberLong'])
+        lastUpdated: convertTimestampToDate(
+          Number(practice.lastUpdated['$date']['$numberLong']),
+          'America/Chicago'
         ),
         practiceInactive: practice.practiceInactive,
         practiceArchived: practice.practiceArchived,
