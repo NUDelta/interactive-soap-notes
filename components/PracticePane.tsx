@@ -383,19 +383,21 @@ export default function PracticePane({
               </p>
 
               <h3 className="text-sm font-bold mt-2">Practices:</h3>
-              <p className="text-sm">
+              <div>
                 {instance.plan && instance.plan.length > 0 ? (
                   <>
                     {instance.plan.map((plan) => (
-                      <p key={plan.id}>{plan.value}</p>
+                      <p key={plan.id} className="text-sm">
+                        {plan.value}
+                      </p>
                     ))}
                   </>
                 ) : (
-                  <span className="italic">
+                  <p className="italic">
                     No follow-up practices for this instance.
-                  </span>
+                  </p>
                 )}
-              </p>
+              </div>
             </div>
           ))}
         </div>
