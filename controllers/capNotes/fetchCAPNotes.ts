@@ -1,39 +1,39 @@
 import dbConnect from '../../lib/dbConnect';
-import SOAPModel from '../../models/SOAPModel';
+import CAPNoteModel from '../../models/CAPNoteModel';
 
 /**
- * Fetches all soap notes.
- * @returns {Array} Array of soap notes or null
+ * Fetches all CAP notes.
+ * @returns {Array} Array of CAP notes or null
  */
-export const fetchAllSoapNotes = async () => {
+export const fetchAllCAPNotes = async () => {
   await dbConnect();
-  return await SOAPModel.find({}).sort({ sigName: 1, date: 1 });
+  return await CAPNoteModel.find({}).sort({ sigName: 1, date: 1 });
 };
 
 /**
- * Fetches a soap note by sig name and date.
+ * Fetches a CAP note by sig name and date.
  * @param sigName Sig name (e.g., RALE)
  * @param date Date in YYYY-MM-DD format (e.g., 2023-05-08)
  * @param project Project name
- * @returns {Object} Soap note object or null
+ * @returns {Object} CAP note object or null
  */
-export const fetchSoapNote = async (
+export const fetchCAPNote = async (
   sigName: string,
   project: string,
   date: string
 ) => {
   await dbConnect();
 
-  // get current soap note
+  // get current CAP note
   const startDate = new Date(date);
   const endDate = new Date(date);
   endDate.setDate(endDate.getDate() + 1);
 
-  let currentSoapNote = await SOAPModel.findOne({
+  let currentCAPNote = await CAPNoteModel.findOne({
     sigAbbreviation: sigName.toUpperCase(),
     project: project,
     date: { $gte: startDate, $lte: endDate }
   });
 
-  return currentSoapNote;
+  return currentCAPNote;
 };
