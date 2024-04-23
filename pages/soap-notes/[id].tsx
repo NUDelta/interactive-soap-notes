@@ -6,8 +6,8 @@ import mongoose from 'mongoose';
 import { mutate } from 'swr';
 
 import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
-import IssueCard from '../../components/IssueCard';
-import IssuePane from '../../components/IssuePane';
+import PracticeCard from '../../components/PracticeCard';
+import PracticePane from '../../components/PracticePane';
 import { longDate, shortDate } from '../../lib/helperFns';
 
 import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
@@ -318,7 +318,7 @@ export default function SOAPNote({
               {/* Show issue cards for active, non-archived issues */}
               <div className="grid grid-cols-6 gap-4 grid-flow-row row-auto">
                 {/* issue card for this week's notes */}
-                <IssueCard
+                <PracticeCard
                   key="issue-card-this-week"
                   issueId="this-weeks-notes"
                   title="This week's notes"
@@ -343,7 +343,7 @@ export default function SOAPNote({
                       !practice.practiceInactive && !practice.practiceArchived
                   )
                   .map((practice) => (
-                    <IssueCard
+                    <PracticeCard
                       key={`issue-card-${practice.id}`}
                       issueId={practice.id}
                       title={practice.title}
@@ -405,7 +405,7 @@ export default function SOAPNote({
                   ))}
 
                 {/* issue card to add new issue */}
-                <IssueCard
+                <PracticeCard
                   key="issue-card-add-practice"
                   issueId="add-practice"
                   title="Add issue"
@@ -442,7 +442,7 @@ export default function SOAPNote({
                   capData.practices
                     .filter((practice) => practice.practiceInactive)
                     .map((practice) => (
-                      <IssueCard
+                      <PracticeCard
                         key={`issue-card-${practice.id}`}
                         issueId={practice.id}
                         title={practice.title}
@@ -489,7 +489,7 @@ export default function SOAPNote({
                   <h1 className="font-bold text-2xl border-b border-black mb-3">
                     Selected Practice
                   </h1>
-                  <IssuePane
+                  <PracticePane
                     practiceId={selectedIssue}
                     capData={capData}
                     setCAPData={setCAPData} // TODO: this needs to be per issue

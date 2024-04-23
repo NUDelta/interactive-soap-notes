@@ -9,7 +9,7 @@ import LockOpenIcon from '@heroicons/react/24/outline/LockOpenIcon';
 import React, { useState } from 'react';
 import { useDrop } from 'react-dnd';
 
-export default function IssueCard({
+export default function PracticeCard({
   issueId,
   title,
   description,

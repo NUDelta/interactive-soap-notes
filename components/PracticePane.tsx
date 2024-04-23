@@ -4,7 +4,7 @@ import { longDate } from '../lib/helperFns';
 import NoteBlock from './NoteBlock';
 import mongoose from 'mongoose';
 
-export default function IssuePane({
+export default function PracticePane({
   practiceId,
   capData,
   setCAPData,
