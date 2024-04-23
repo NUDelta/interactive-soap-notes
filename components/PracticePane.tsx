@@ -250,8 +250,206 @@ export default function PracticePane({
                             return newCAPData;
                           });
                         }}
-                        onDragToIssue={(practiceId, noteSection, noteBlock) => {
-                          return;
+                        onDragToIssue={(
+                          targetPracticeId,
+                          noteSection,
+                          noteBlock
+                        ) => {
+                          // map note content into the correct section
+                          let editsToIssue = {
+                            context:
+                              noteSection === 'context'
+                                ? [noteBlock]
+                                : [
+                                    {
+                                      id: new mongoose.Types.ObjectId().toString(),
+                                      type: 'note',
+                                      context: [],
+                                      value: ''
+                                    }
+                                  ],
+                            assessment:
+                              noteSection === 'assessment'
+                                ? [noteBlock]
+                                : [
+                                    {
+                                      id: new mongoose.Types.ObjectId().toString(),
+                                      type: 'note',
+                                      context: [],
+                                      value: ''
+                                    }
+                                  ],
+                            plan:
+                              noteSection === 'plan'
+                                ? [noteBlock]
+                                : [
+                                    {
+                                      id: new mongoose.Types.ObjectId().toString(),
+                                      type: 'note',
+                                      context: [],
+                                      value: ''
+                                    }
+                                  ]
+                          };
+
+                          // TODO: 04-23-24 -- case: what if note is dragged from practice to week's notes?
+                          // create a new practice if the note is dragged into the add practice section
+                          if (
+                            targetPracticeId === 'add-practice' ||
+                            targetPracticeId === 'this-weeks-notes'
+                          ) {
+                            // create a new practice
+                            let newPractice = {
+                              id: new mongoose.Types.ObjectId().toString(),
+                              title: noteBlock.value,
+                              description: '',
+                              lastUpdated: longDate(new Date()),
+                              practiceInactive: false,
+                              practiceArchived: false,
+                              currentInstance: {
+                                id: new mongoose.Types.ObjectId().toString(),
+                                date: longDate(new Date()),
+                                context: editsToIssue['context'],
+                                assessment: editsToIssue['assessment'],
+                                plan: editsToIssue['plan'],
+                                followUps: []
+                              },
+                              priorInstances: []
+                            };
+
+                            setCAPData((prevCapData) => {
+                              let newCAPData = { ...prevCapData };
+                              newCAPData.practices.push(newPractice);
+                              return newCAPData;
+                            });
+
+                            targetPracticeId = newPractice.id;
+                          }
+                          // otherwise, add data to the practice
+                          else {
+                            // find the practice and its issue instance
+                            let practiceIndex = capData.practices.findIndex(
+                              (practice) => practice.id === targetPracticeId
+                            );
+                            let issueInstance =
+                              capData.practices[practiceIndex].currentInstance;
+
+                            // create a new issue instance for the practice if it doesn't exist
+                            if (issueInstance === null) {
+                              // if the current instance doesn't exist, intialize it with the additions from the notetaking space
+                              issueInstance = {
+                                id: new mongoose.Types.ObjectId().toString(),
+                                date: longDate(new Date()),
+                                context: editsToIssue['context'],
+                                assessment: editsToIssue['summary'],
+                                plan: editsToIssue['plan'],
+                                practices: []
+                              };
+                            } else {
+                              // if the current instance exists, check if the new additions are empty
+                              if (
+                                issueInstance['context'].length === 1 &&
+                                issueInstance['context'][0].value === ''
+                              ) {
+                                issueInstance.context = editsToIssue['context'];
+                              } else {
+                                // otherwise, add the additions to the current instance
+                                issueInstance.context =
+                                  issueInstance.context.concat(
+                                    editsToIssue['context']
+                                  );
+                              }
+
+                              // repeat for assessment
+                              if (
+                                issueInstance['assessment'].length === 1 &&
+                                issueInstance['assessment'][0].value === ''
+                              ) {
+                                issueInstance.assessment =
+                                  editsToIssue['assessment'];
+                              } else {
+                                // otherwise, add the additions to the current instance
+                                issueInstance.assessment =
+                                  issueInstance.assessment.concat(
+                                    editsToIssue['assessment']
+                                  );
+                              }
+
+                              // repeat for plan
+                              if (
+                                issueInstance['plan'].length === 1 &&
+                                issueInstance['plan'][0].value === ''
+                              ) {
+                                issueInstance.plan = editsToIssue['plan'];
+                              } else {
+                                // otherwise, add the additions to the current instance
+                                issueInstance.plan = issueInstance.plan.concat(
+                                  editsToIssue['plan']
+                                );
+                              }
+
+                              // update the last updated date
+                              issueInstance.date = longDate(new Date());
+                            }
+
+                            setCAPData((prevCAPData) => {
+                              let newCAPData = { ...prevCAPData };
+                              newCAPData.practices[
+                                practiceIndex
+                              ].currentInstance = issueInstance;
+                              newCAPData.practices[practiceIndex].lastUpdated =
+                                longDate(new Date());
+
+                              // re-open the issue if new notes are added
+                              newCAPData.practices[
+                                practiceIndex
+                              ].issueInactive = false;
+                              newCAPData.practices[
+                                practiceIndex
+                              ].issueArchived = false;
+
+                              return newCAPData;
+                            });
+
+                            targetPracticeId =
+                              capData.practices[practiceIndex].id;
+                          }
+
+                          // remove note block that was dragged into the issue from the practice it was dragged from
+                          setCAPData((prevCAPData) => {
+                            let newSoapData = { ...prevCAPData };
+
+                            // get the practiceIndex of the practice the block was dragged from
+                            let practiceIndex = newSoapData.practices.findIndex(
+                              (practice) => practice.id === practiceId
+                            );
+
+                            // remove the note block from the edited section
+                            newSoapData.practices[
+                              practiceIndex
+                            ].currentInstance[noteSection] =
+                              newSoapData.practices[
+                                practiceIndex
+                              ].currentInstance[noteSection].filter(
+                                (line) => line.id !== noteBlock.id
+                              );
+
+                            // if the section is empty, add a new empty block
+                            if (
+                              newSoapData.practices[practiceIndex]
+                                .currentInstance[noteSection].length === 0
+                            ) {
+                              newSoapData.practices[
+                                practiceIndex
+                              ].currentInstance[noteSection].push({
+                                id: new mongoose.Types.ObjectId().toString(),
+                                type: 'note',
+                                context: [],
+                                value: ''
+                              });
+                            }
+                            return newSoapData;
+                          });
                         }}
                       />
                     ))}
