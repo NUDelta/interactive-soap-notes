@@ -1,5 +1,5 @@
 import dbConnect from '../../lib/dbConnect';
-import SOAPModel from '../../models/SOAPModel';
+import SOAPModel from '../../models/CAPNoteModel';
 
 /**
  * Create a new SOAP note given the project and date of the note.
@@ -38,6 +38,7 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
     }).sort({ date: -1 });
     const previousSoapNote = previousSoapNotes[0];
 
+    // TODO: 04-23-24 check if issue is empty before pulling into the new note
     // get issues from the prior soap note
     let issues = [];
     if (previousSoapNote) {
