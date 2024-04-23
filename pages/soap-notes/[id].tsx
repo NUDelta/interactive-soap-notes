@@ -315,7 +315,7 @@ export default function SOAPNote({
                 or student.
               </p>
 
-              {/* Show issue cards for active, non-archived issues */}
+              {/* Active Practices */}
               <div className="grid grid-cols-6 gap-4 grid-flow-row row-auto">
                 {/* issue card for this week's notes */}
                 <PracticeCard
@@ -404,7 +404,7 @@ export default function SOAPNote({
                     />
                   ))}
 
-                {/* issue card to add new issue */}
+                {/* practice card for new issues */}
                 <PracticeCard
                   key="issue-card-add-practice"
                   issueId="add-practice"
@@ -421,10 +421,57 @@ export default function SOAPNote({
                   onArchive={() => {
                     return;
                   }}
+                  onAddPractice={(practiceTitle) => {
+                    // create a new practice
+                    let newPractice = {
+                      id: new mongoose.Types.ObjectId().toString(),
+                      title: practiceTitle,
+                      description: '',
+                      lastUpdated: longDate(new Date()),
+                      practiceInactive: false,
+                      practiceArchived: false,
+                      currentInstance: {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        date: longDate(new Date()),
+                        context: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        assessment: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        plan: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        followUps: []
+                      },
+                      priorInstances: []
+                    };
+
+                    setCAPData((prevCapData) => {
+                      let newCAPData = { ...prevCapData };
+                      newCAPData.practices.push(newPractice);
+                      return newCAPData;
+                    });
+                  }}
                 />
               </div>
 
-              {/* Inactive issues */}
+              {/* Inactive practices */}
               <div className="grid grid-cols-4 gap-4 grid-flow-row row-auto">
                 <h2 className="col-span-4 text-lg font-bold mt-3">
                   <button

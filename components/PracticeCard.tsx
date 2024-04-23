@@ -19,7 +19,8 @@ export default function PracticeCard({
   currInstance,
   issueIsResolved,
   onResolved,
-  onArchive
+  onArchive,
+  onAddPractice = undefined
 }): JSX.Element {
   // special cases for this week's notes and add practice
   const isThisWeek = issueId === 'this-weeks-notes';
@@ -89,9 +90,35 @@ export default function PracticeCard({
         {isAddPractice ? (
           <>
             {/* Large plus icon in center of square */}
-            <div className="p-2 flex h-full w-full items-center">
-              <h2 className="text-base font-bold flex-auto">
-                Hover note block over tile to create new tracked practice
+            <div className="p-2 flex flex-wrap h-full w-full items-center justify-center">
+              <textarea
+                className="w-full h-1/3 mx-auto text-sm"
+                placeholder="Type a new practice and hit enter..."
+                onKeyUp={(e) => {
+                  if (e.key === 'Enter') {
+                    // check if blank first
+                    let input = e.target.value.trim();
+                    if (input === '') {
+                      return;
+                    }
+
+                    // add new practice
+                    onAddPractice(input);
+
+                    // clear the textarea
+                    e.target.value = '';
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                  }
+                }}
+              ></textarea>
+              <h2 className="text-base font-bold items-center">
+                <span className="text-sm italic">
+                  or drag a note onto this block...
+                </span>
               </h2>
             </div>
           </>
@@ -101,9 +128,11 @@ export default function PracticeCard({
             <div className="p-2 mb-1 w-full">
               <div className="flex">
                 <h2 className="text-base font-bold flex-auto">
-                  {title.length > 50
+                  {title.length > 100
                     ? title.substring(0, 100 - 3) + '...'
-                    : title}
+                    : title.trim() === ''
+                      ? 'click to enter title'
+                      : title}
                 </h2>
               </div>
 
@@ -151,7 +180,7 @@ export default function PracticeCard({
             )}
             <div className="">
               <ExclamationTriangleIcon
-                className={`ml-2 h-8 text-orange-600 ${currInstance !== null && currInstance.plan.length === 0 ? '' : 'opacity-0'}`}
+                className={`ml-2 h-8 text-orange-600 ${currInstance !== null && currInstance.plan.some((currPlan) => currPlan.value.trim !== '') ? '' : 'opacity-0'}`}
               />
             </div>
           </div>
