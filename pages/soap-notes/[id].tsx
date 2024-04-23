@@ -816,6 +816,16 @@ export default function SOAPNote({
                                   newSoapData[noteSection] = newSoapData[
                                     noteSection
                                   ].filter((line) => line.id !== noteBlock.id);
+
+                                  // if the section is empty, add a new empty block
+                                  if (newSoapData[noteSection].length === 0) {
+                                    newSoapData[noteSection].push({
+                                      id: new mongoose.Types.ObjectId().toString(),
+                                      type: 'note',
+                                      context: [],
+                                      value: ''
+                                    });
+                                  }
                                   return newSoapData;
                                 });
                               }}
