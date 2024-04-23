@@ -36,7 +36,7 @@ export default function PracticePane({
               practices: updatedPractices
             }));
           }}
-          placeholder="Describe the issue..."
+          placeholder="What practice are you working on?"
           className="w-full text-base mb-2 p-1 h-16"
         />
 
@@ -53,7 +53,7 @@ export default function PracticePane({
               practices: updatedPractices
             }));
           }}
-          placeholder="Describe the issue..."
+          placeholder="Describe the practice obstacles..."
           className="w-full text-base p-1 h-20"
         />
 
@@ -66,7 +66,7 @@ export default function PracticePane({
 
             {/* Warning messages for incomplete follow-ups on current instance */}
             <div
-              className={`inline-flex items-center text-md text-orange-500 ${currInstance !== null && currInstance.plan.length === 0 ? '' : 'opacity-0'}`}
+              className={`inline-flex items-center text-md text-orange-500 ${currInstance !== null && currInstance.plan.every((currPlan) => currPlan.value.trim() === '') ? '' : 'opacity-0'}`}
             >
               <ExclamationTriangleIcon className="h-4" />
               <span className="mx-1 font-medium">Missing practice plan</span>

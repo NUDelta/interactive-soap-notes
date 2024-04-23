@@ -180,7 +180,7 @@ export default function PracticeCard({
             )}
             <div className="">
               <ExclamationTriangleIcon
-                className={`ml-2 h-8 text-orange-600 ${currInstance !== null && currInstance.plan.some((currPlan) => currPlan.value.trim !== '') ? '' : 'opacity-0'}`}
+                className={`ml-2 h-8 text-orange-600 ${currInstance !== null && currInstance.plan.every((currPlan) => currPlan.value.trim() === '') ? '' : 'opacity-0'}`}
               />
             </div>
           </div>
