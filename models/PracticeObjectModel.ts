@@ -21,14 +21,6 @@ export const PracticeObjectSchema = new mongoose.Schema<PracticeObjectStruct>({
     type: String,
     required: true
   },
-  currentInstance: {
-    type: IssueObjectSchema,
-    default: null
-  },
-  priorInstances: {
-    type: [IssueObjectSchema],
-    default: []
-  },
   lastUpdated: {
     type: Date,
     required: true
@@ -42,5 +34,13 @@ export const PracticeObjectSchema = new mongoose.Schema<PracticeObjectStruct>({
     type: Boolean,
     required: true,
     default: false
+  },
+  currentInstance: {
+    type: IssueObjectSchema,
+    default: null
+  },
+  priorInstances: {
+    type: [IssueObjectSchema],
+    default: []
   }
 });

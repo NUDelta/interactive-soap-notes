@@ -1,5 +1,5 @@
 import dbConnect from '../../lib/dbConnect';
-import SOAPModel from '../SOAPModel';
+import SOAPModel from '../CAPNoteModel';
 
 const soapNotesForSigs = [
   {

@@ -45,18 +45,6 @@ const CAPNote = new mongoose.Schema<CAPStruct>({
   plan: [TextEntrySchema],
   trackedPractices: [PracticeObjectSchema],
   currIssueInstances: [IssueObjectSchema]
-  // priorContext: {
-  //   type: Object,
-  //   required: true
-  // },
-  // notedAssessments: {
-  //   type: Object,
-  //   required: true
-  // },
-  // followUpContext: {
-  //   type: Object,
-  //   required: true
-  // }
 });
 
 export default (mongoose.models.CAPNote as mongoose.Model<CAPStruct>) ||
