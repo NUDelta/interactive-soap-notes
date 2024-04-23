@@ -547,6 +547,9 @@ export default function SOAPNote({
                                 }
                               }}
                               onKeyUp={(e) => {
+                                // store id of new line so it can be focused on
+                                let newLineId;
+
                                 // check for shift-enter to add a new line
                                 if (e.key === 'Enter' && e.shiftKey) {
                                   // add new line underneath the current line
@@ -556,97 +559,86 @@ export default function SOAPNote({
                                       section.name
                                     ].findIndex((l) => l.id === line.id);
 
-                                    // if new line to add is at the end of the list, only add if there's not already an empty line
+                                    // check if the current line is empty
                                     if (
                                       lineIndex ===
                                       newCAPData[section.name].length - 1
                                     ) {
+                                      // don't add a new line if the current line is empty
                                       if (
                                         newCAPData[section.name][
                                           lineIndex
                                         ].value.trim() === ''
                                       ) {
+                                        newLineId =
+                                          newCAPData[section.name][lineIndex]
+                                            .id;
                                         return newCAPData;
                                       }
-                                    } else if (
+                                    }
+                                    // check if the next line is empty
+                                    else if (
                                       lineIndex + 1 <
                                       newCAPData[section.name].length
                                     ) {
+                                      // don't add a new line if the next line is already an empty block
                                       if (
                                         newCAPData[section.name][
                                           lineIndex + 1
                                         ].value.trim() === ''
                                       ) {
+                                        newLineId =
+                                          newCAPData[section.name][
+                                            lineIndex + 1
+                                          ].id;
                                         return newCAPData;
                                       }
                                     }
 
                                     // otherwise, add to the list
+                                    newLineId =
+                                      new mongoose.Types.ObjectId().toString();
                                     newCAPData[section.name].splice(
                                       lineIndex + 1,
                                       0,
                                       {
-                                        id: new mongoose.Types.ObjectId().toString(),
+                                        id: newLineId,
                                         type: 'note',
                                         context: [],
                                         value: ''
                                       }
                                     );
-
                                     return newCAPData;
                                   });
-                                }
 
-                                // if shift tab is pressed, move to the previous line
-                                if (e.key === 'Tab' && e.shiftKey) {
-                                  let lineIndex = capData[
-                                    section.name
-                                  ].findIndex((l) => l.id === line.id);
-                                  if (lineIndex > 0) {
-                                    document
-                                      .getElementById(
-                                        capData[section.name][lineIndex - 1].id
-                                      )
-                                      .focus();
-                                  }
-                                }
-                                // if tab is pressed, move to the next line
-                                else if (e.key === 'Tab' && !e.shiftKey) {
-                                  let lineIndex = capData[
-                                    section.name
-                                  ].findIndex((l) => l.id === line.id);
-                                  if (
-                                    lineIndex + 1 <
-                                    capData[section.name].length
-                                  ) {
-                                    document
-                                      .getElementById(
-                                        capData[section.name][lineIndex + 1].id
-                                      )
-                                      .focus();
-                                  }
+                                  // TODO: 04-23-24 this causes a race condition where the new line is not yet rendered
+                                  // could be fixed with a callback: https://github.com/the-road-to-learn-react/use-state-with-callback#usage
+                                  // set focus to added line if not undefined
+                                  // if (newLineId !== undefined) {
+                                  //   document.getElementById(newLineId).focus();
+                                  // }
                                 }
                               }}
                               // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
-                              onChange={(e) => {
+                              onChange={(edits) => {
                                 // before attempting a save, check if the line is identical to the previous line (both trimmed)
-                                let edits = e.currentTarget.textContent.trim();
+                                edits = edits.trim();
                                 if (edits === line.value.trim()) {
                                   return;
                                 }
 
                                 // save edits to the correct line
-                                setCAPData((prevSoapData) => {
+                                setCAPData((prevCAPData) => {
                                   // get the current data and correct line that was changed
-                                  let newSoapData = { ...prevSoapData };
-                                  let lineIndex = newSoapData[
+                                  let newCAPData = { ...prevCAPData };
+                                  let lineIndex = newCAPData[
                                     section.name
                                   ].findIndex((l) => l.id === line.id);
 
-                                  newSoapData[section.name][lineIndex].value =
+                                  newCAPData[section.name][lineIndex].value =
                                     edits;
 
-                                  return newSoapData;
+                                  return newCAPData;
                                 });
                               }}
                               onDragToIssue={(
@@ -1190,9 +1182,9 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   };
 
   // print before returning
-  console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 4));
-  console.log('data', data);
-  console.log('autocompleteTriggersOptions', autocompleteTriggersOptions);
+  // console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 4));
+  // console.log('data', data);
+  // console.log('autocompleteTriggersOptions', autocompleteTriggersOptions);
 
   // TODO: 03-03-24 -- data might be redundant with the capNoteInfo
   return {

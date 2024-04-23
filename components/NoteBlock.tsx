@@ -2,8 +2,9 @@
  * This component provides a note block component, which is the smallest unit of a note. Mentors use this component to write notes.
  */
 
-import React, { useState, useEffect } from 'react';
 import { useDrag } from 'react-dnd';
+import { useRef } from 'react';
+import ContentEditable from 'react-contenteditable';
 
 // TODO: add a note section and onDragToIssue function
 export default function NoteBlock({
@@ -15,6 +16,10 @@ export default function NoteBlock({
   onChange,
   onDragToIssue
 }): JSX.Element {
+  // ref to the note block's content so state changes don't trigger a re-render
+  const blockContent = useRef(noteContent.value);
+
+  // define drag and drop functionality
   const [{ opacity }, drag] = useDrag(
     () => ({
       type: 'NOTE_BLOCK',
@@ -27,8 +32,6 @@ export default function NoteBlock({
           const isDropAllowed =
             dropResult.allowedDropEffect === 'move' ||
             dropResult.allowedDropEffect === dropResult.dropEffect;
-
-          console.log(isDropAllowed);
 
           // if drop was allowed, then move the note to the issue
           if (isDropAllowed) {
@@ -47,6 +50,9 @@ export default function NoteBlock({
     [noteId]
   );
 
+  console.log('dragging');
+
+  // TODO: notes should be draggable within and across the CAP sections
   return (
     <>
       <div ref={drag} className="border flex items-left align-middle mb-2">
@@ -71,24 +77,21 @@ export default function NoteBlock({
           </svg>
         </div>
 
-        {/* editable content on right side */}
-        <div
-          contentEditable="true"
-          suppressContentEditableWarning={true}
+        {/* editable content */}
+        <ContentEditable
+          id={noteId}
+          html={blockContent.current}
+          onChange={(e) => {
+            // update ref with new content
+            blockContent.current = e.target.value;
+
+            // save note changes
+            onChange(e.target.value);
+          }}
+          onKeyDown={onKeyDown}
+          onKeyUp={onKeyUp}
           className={`p-2 w-full empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
-          onKeyDown={(e) => {
-            onKeyDown(e);
-          }}
-          onKeyUp={(e) => {
-            onKeyUp(e);
-          }}
-          // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
-          onBlur={(e) => {
-            onChange(e);
-          }}
-        >
-          {noteContent.value}
-        </div>
+        />
       </div>
     </>
   );

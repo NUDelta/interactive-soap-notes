@@ -128,94 +128,6 @@ export default function IssuePane({
                   </p>
                 )}
 
-                {/* TODO: abstract out the update code */}
-                {/* <TextBox
-                  value={currInstance[section.name]}
-                  triggers={Object.keys(
-                    autocompleteTriggersOptions[section.name]
-                  )}
-                  options={autocompleteTriggersOptions[section.name]}
-                  onFocus={(e) => {
-                    // add a "- " if the text box is empty
-                    if (e.target.value === '') {
-                      let updatedIssues = capData.practices;
-                      updatedIssues[practiceIndex].currentInstance[
-                        section.name
-                      ] = '- ';
-                      updatedIssues[practiceIndex].lastUpdated = longDate(
-                        new Date()
-                      );
-
-                      setCAPData((prevData) => ({
-                        ...prevData,
-                        issues: updatedIssues
-                      }));
-                    }
-                  }}
-                  onBlur={(e) => {
-                    // remove the dash if the text box is empty
-                    if (e.target.value.trim() === '-') {
-                      let updatedIssues = capData.practices;
-                      updatedIssues[practiceIndex].currentInstance[
-                        section.name
-                      ] = '';
-                      updatedIssues[practiceIndex].lastUpdated = longDate(
-                        new Date()
-                      );
-
-                      setCAPData((prevData) => ({
-                        ...prevData,
-                        issues: updatedIssues
-                      }));
-                    }
-                  }}
-                  onKeyUp={(e) => {
-                    // add a new line to the text box with a dash when the user presses enter
-                    if (e.key === 'Enter') {
-                      // check if it's not a script line
-                      let lines = e.target.value.split('\n');
-                      if (
-                        lines.length >= 1 &&
-                        lines[lines.length - 1].match(
-                          /\[(plan|help|reflect|self-work)]:/g
-                        ) !== null
-                      ) {
-                        return;
-                      }
-
-                      let updatedIssues = capData.practices;
-                      updatedIssues[practiceIndex].currentInstance[
-                        section.name
-                      ] = e.target.value + '- ';
-                      updatedIssues[practiceIndex].lastUpdated = longDate(
-                        new Date()
-                      );
-
-                      setCAPData((prevData) => ({
-                        ...prevData,
-                        issues: updatedIssues
-                      }));
-                    }
-                  }}
-                  onChange={(edits) => {
-                    let updatedIssues = capData.practices;
-                    updatedIssues[practiceIndex].currentInstance[section.name] =
-                      edits;
-                    updatedIssues[practiceIndex].lastUpdated = longDate(
-                      new Date()
-                    );
-
-                    setCAPData((prevData) => ({
-                      ...prevData,
-                      issues: updatedIssues
-                    }));
-                  }}
-                  onMouseUp={(e) => {
-                    return;
-                  }}
-                  className="h-24 p-1"
-                /> */}
-
                 {/* Create section for each part of the CAP notes */}
                 <div className="flex">
                   {/* Notetaking area */}
@@ -234,6 +146,9 @@ export default function IssuePane({
                           }
                         }}
                         onKeyUp={(e) => {
+                          // store id of new line so it can be focused on
+                          let newLineId;
+
                           // check for shift-enter to add a new line
                           if (e.key === 'Enter' && e.shiftKey) {
                             // add new line underneath the current line
@@ -247,13 +162,14 @@ export default function IssuePane({
                                 (l) => l.id === line.id
                               );
 
-                              // if new line to add is at the end of the list, only add if there's not already an empty line
+                              // check if the current line is empty
                               if (
                                 lineIndex ===
                                 newCAPData.practices[practiceIndex]
                                   .currentInstance[section.name].length -
                                   1
                               ) {
+                                // don't add a new line if the current line is empty
                                 if (
                                   newCAPData.practices[
                                     practiceIndex
@@ -261,6 +177,10 @@ export default function IssuePane({
                                     lineIndex
                                   ].value.trim() === ''
                                 ) {
+                                  newLineId =
+                                    newCAPData.practices[practiceIndex]
+                                      .currentInstance[section.name][lineIndex]
+                                      .id;
                                   return newCAPData;
                                 }
                               } else if (
@@ -268,6 +188,7 @@ export default function IssuePane({
                                 newCAPData.practices[practiceIndex]
                                   .currentInstance[section.name].length
                               ) {
+                                // don't add a new line if the next line is already an empty block
                                 if (
                                   newCAPData.practices[
                                     practiceIndex
@@ -275,18 +196,25 @@ export default function IssuePane({
                                     lineIndex + 1
                                   ].value.trim() === ''
                                 ) {
+                                  newLineId =
+                                    newCAPData.practices[practiceIndex]
+                                      .currentInstance[section.name][
+                                      lineIndex + 1
+                                    ].id;
                                   return newCAPData;
                                 }
                               }
 
                               // otherwise, add to the list
+                              newLineId =
+                                new mongoose.Types.ObjectId().toString();
                               newCAPData.practices[
                                 practiceIndex
                               ].currentInstance[section.name].splice(
                                 lineIndex + 1,
                                 0,
                                 {
-                                  id: new mongoose.Types.ObjectId().toString(),
+                                  id: newLineId,
                                   type: 'note',
                                   context: [],
                                   value: ''
@@ -295,54 +223,19 @@ export default function IssuePane({
 
                               return newCAPData;
                             });
-                          }
 
-                          // if shift tab is pressed, move to the previous line
-                          if (e.key === 'Tab' && e.shiftKey) {
-                            let lineIndex = capData.practices[
-                              practiceIndex
-                            ].currentInstance[section.name].findIndex(
-                              (l) => l.id === line.id
-                            );
-                            if (lineIndex > 0) {
-                              document
-                                .getElementById(
-                                  capData.practices[practiceIndex]
-                                    .currentInstance[section.name][
-                                    lineIndex - 1
-                                  ].id
-                                )
-                                .focus();
-                            }
-                          }
-                          // if tab is pressed, move to the next line
-                          else if (e.key === 'Tab' && !e.shiftKey) {
-                            let lineIndex = capData.practices[
-                              practiceIndex
-                            ].currentInstance[section.name].findIndex(
-                              (l) => l.id === line.id
-                            );
-                            if (
-                              lineIndex + 1 <
-                              capData.practices[practiceIndex].currentInstance[
-                                section.name
-                              ].length
-                            ) {
-                              document
-                                .getElementById(
-                                  capData.practices[practiceIndex]
-                                    .currentInstance[section.name][
-                                    lineIndex + 1
-                                  ].id
-                                )
-                                .focus();
-                            }
+                            // TODO: 04-23-24 this causes a race condition where the new line is not yet rendered
+                            // could be fixed with a callback: https://github.com/the-road-to-learn-react/use-state-with-callback#usage
+                            // set focus to added line if not undefined
+                            // if (newLineId !== undefined) {
+                            //   document.getElementById(newLineId).focus();
+                            // }
                           }
                         }}
                         // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
-                        onChange={(e) => {
+                        onChange={(edits) => {
                           // before attempting a save, check if the line is identical to the previous line (both trimmed)
-                          let edits = e.currentTarget.textContent.trim();
+                          edits = edits.trim();
                           if (edits === line.value.trim()) {
                             return;
                           }
@@ -465,15 +358,48 @@ export default function IssuePane({
               key={i}
             >
               <h2 className="text-sm font-bold">{instance.date}</h2>
-              <h3 className="text-sm font-bold mt-2">Summary:</h3>
-              <p className="text-sm">{instance.summary}</p>
-              <h3 className="text-sm font-bold mt-2">Practices:</h3>
+
+              <h3 className="text-sm font-bold mt-2">Context:</h3>
               <p className="text-sm">
-                {instance.plan && instance.plan.length ? (
-                  <>{instance.plan}</>
+                {instance.context && instance.context.length > 0 ? (
+                  <>
+                    {instance.context.map((context) => (
+                      <p key={context.id}>{context.value}</p>
+                    ))}
+                  </>
                 ) : (
                   <span className="italic">
-                    No follow-up practices for this issue instance.
+                    No context was written for this instance.
+                  </span>
+                )}
+              </p>
+
+              <h3 className="text-sm font-bold mt-2">Assessment:</h3>
+              <p className="text-sm">
+                {instance.assessment && instance.assessment.length > 0 ? (
+                  <>
+                    {instance.assessment.map((assessment) => (
+                      <p key={assessment.id}>{assessment.value}</p>
+                    ))}
+                  </>
+                ) : (
+                  <span className="italic">
+                    No assessments were written for this instance.
+                  </span>
+                )}
+              </p>
+
+              <h3 className="text-sm font-bold mt-2">Practices:</h3>
+              <p className="text-sm">
+                {instance.plan && instance.plan.length > 0 ? (
+                  <>
+                    {instance.plan.map((plan) => (
+                      <p key={plan.id}>{plan.value}</p>
+                    ))}
+                  </>
+                ) : (
+                  <span className="italic">
+                    No follow-up practices for this instance.
                   </span>
                 )}
               </p>
