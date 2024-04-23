@@ -21,9 +21,9 @@ export default function IssueCard({
   onResolved,
   onArchive
 }): JSX.Element {
-  // special cases for this week's notes and add issue
+  // special cases for this week's notes and add practice
   const isThisWeek = issueId === 'this-weeks-notes';
-  const isAddIssue = issueId === 'add-issue';
+  const isAddPractice = issueId === 'add-practice';
 
   // store selected state for card
   const [isSelected, setIsSelected] = useState(false);
@@ -70,12 +70,12 @@ export default function IssueCard({
   return (
     <div
       ref={drop}
-      className={`flex flex-wrap aspect-square border-4 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddIssue ? 'border-dashed' : 'border hover:bg-blue-100'}`}
+      className={`flex flex-wrap aspect-square border-4 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
     >
       <div
         className={`h-full`}
         onClick={() => {
-          if (!isAddIssue) {
+          if (!isAddPractice) {
             setIsSelected(!isSelected);
             if (issueId === selectedIssue) {
               // set default to this week's notes
@@ -86,7 +86,7 @@ export default function IssueCard({
           }
         }}
       >
-        {isAddIssue ? (
+        {isAddPractice ? (
           <>
             {/* Large plus icon in center of square */}
             <div className="p-2 flex h-full w-full items-center">
@@ -100,7 +100,11 @@ export default function IssueCard({
             {/* Issue title */}
             <div className="p-2 mb-1 w-full">
               <div className="flex">
-                <h2 className="text-base font-bold flex-auto">{title}</h2>
+                <h2 className="text-base font-bold flex-auto">
+                  {title.length > 50
+                    ? title.substring(0, 100 - 3) + '...'
+                    : title}
+                </h2>
               </div>
 
               <div className="text-xs">
@@ -120,7 +124,7 @@ export default function IssueCard({
         )}
 
         {/* Resolve and archive buttons */}
-        {!isThisWeek && !isAddIssue ? (
+        {!isThisWeek && !isAddPractice ? (
           <div className="w-full flex flex-row mt-auto">
             {!issueIsResolved ? (
               <>
@@ -147,7 +151,7 @@ export default function IssueCard({
             )}
             <div className="">
               <ExclamationTriangleIcon
-                className={`ml-2 h-8 text-orange-600 ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
+                className={`ml-2 h-8 text-orange-600 ${currInstance !== null && currInstance.plan.length === 0 ? '' : 'opacity-0'}`}
               />
             </div>
           </div>

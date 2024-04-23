@@ -8,16 +8,21 @@ import {
 import TextBox from './TextBox';
 import { longDate } from '../lib/helperFns';
 
+import NoteBlock from './NoteBlock';
+import mongoose from 'mongoose';
+
 export default function IssuePane({
-  issueId,
-  soapData,
-  setSoapData,
+  practiceId,
+  capData,
+  setCAPData,
   summarySections,
   autocompleteTriggersOptions
 }): JSX.Element {
-  // get the issue from soapData with the given issueId
-  const issueIndex = soapData.issues.findIndex((issue) => issue.id === issueId);
-  const currIssue = soapData.issues[issueIndex];
+  // get the issue from soapData with the given practiceId
+  const practiceIndex = capData.practices.findIndex(
+    (practice) => practice.id === practiceId
+  );
+  const currIssue = capData.practices[practiceIndex];
   const currInstance = currIssue.currentInstance;
   const priorInstances = currIssue.priorInstances;
 
@@ -29,13 +34,13 @@ export default function IssuePane({
         <textarea
           value={currIssue.title}
           onChange={(e) => {
-            let updatedIssues = soapData.issues;
-            updatedIssues[issueIndex].title = e.target.value;
-            updatedIssues[issueIndex].lastUpdated = longDate(new Date());
+            let updatedPractices = capData.practices;
+            updatedPractices[practiceIndex].title = e.target.value;
+            updatedPractices[practiceIndex].lastUpdated = longDate(new Date());
 
-            setSoapData((prevData) => ({
+            setCAPData((prevData) => ({
               ...prevData,
-              issues: updatedIssues
+              practices: updatedPractices
             }));
           }}
           placeholder="Describe the issue..."
@@ -46,13 +51,13 @@ export default function IssuePane({
         <textarea
           value={currIssue.description}
           onChange={(e) => {
-            let updatedIssues = soapData.issues;
-            updatedIssues[issueIndex].description = e.target.value;
-            updatedIssues[issueIndex].lastUpdated = longDate(new Date());
+            let updatedPractices = capData.practices;
+            updatedPractices[practiceIndex].description = e.target.value;
+            updatedPractices[practiceIndex].lastUpdated = longDate(new Date());
 
-            setSoapData((prevData) => ({
+            setCAPData((prevData) => ({
               ...prevData,
-              issues: updatedIssues
+              practices: updatedPractices
             }));
           }}
           placeholder="Describe the issue..."
@@ -68,7 +73,7 @@ export default function IssuePane({
 
             {/* Warning messages for incomplete follow-ups on current instance */}
             <div
-              className={`inline-flex items-center text-md text-orange-500 ${currInstance !== null && currInstance.plan.trim().length === 0 ? '' : 'opacity-0'}`}
+              className={`inline-flex items-center text-md text-orange-500 ${currInstance !== null && currInstance.plan.length === 0 ? '' : 'opacity-0'}`}
             >
               <ExclamationTriangleIcon className="h-4" />
               <span className="mx-1 font-medium">Missing practice plan</span>
@@ -84,19 +89,21 @@ export default function IssuePane({
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-2 py-1 h-8 rounded-full mt-2"
                 onClick={() => {
-                  let updatedIssues = soapData.issues;
-                  updatedIssues[issueIndex].currentInstance = {
+                  let updatedPractices = capData.practices;
+                  updatedPractices[practiceIndex].currentInstance = {
                     date: new Date(),
-                    context: '',
-                    summary: '',
-                    plan: '',
-                    practices: []
+                    context: [],
+                    assessment: [],
+                    plan: [],
+                    followUps: []
                   };
-                  updatedIssues[issueIndex].lastUpdated = longDate(new Date());
+                  updatedPractices[practiceIndex].lastUpdated = longDate(
+                    new Date()
+                  );
 
-                  setSoapData((prevData) => ({
+                  setCAPData((prevData) => ({
                     ...prevData,
-                    issues: updatedIssues
+                    practices: updatedPractices
                   }));
                 }}
               >
@@ -105,6 +112,7 @@ export default function IssuePane({
             </div>
           )}
 
+          {/* TODO: this is hella jank and a shit load of repeated code */}
           {/* show if there is a current instance */}
           {currInstance !== null &&
             summarySections.map((section) => (
@@ -121,7 +129,7 @@ export default function IssuePane({
                 )}
 
                 {/* TODO: abstract out the update code */}
-                <TextBox
+                {/* <TextBox
                   value={currInstance[section.name]}
                   triggers={Object.keys(
                     autocompleteTriggersOptions[section.name]
@@ -130,14 +138,15 @@ export default function IssuePane({
                   onFocus={(e) => {
                     // add a "- " if the text box is empty
                     if (e.target.value === '') {
-                      let updatedIssues = soapData.issues;
-                      updatedIssues[issueIndex].currentInstance[section.name] =
-                        '- ';
-                      updatedIssues[issueIndex].lastUpdated = longDate(
+                      let updatedIssues = capData.practices;
+                      updatedIssues[practiceIndex].currentInstance[
+                        section.name
+                      ] = '- ';
+                      updatedIssues[practiceIndex].lastUpdated = longDate(
                         new Date()
                       );
 
-                      setSoapData((prevData) => ({
+                      setCAPData((prevData) => ({
                         ...prevData,
                         issues: updatedIssues
                       }));
@@ -146,14 +155,15 @@ export default function IssuePane({
                   onBlur={(e) => {
                     // remove the dash if the text box is empty
                     if (e.target.value.trim() === '-') {
-                      let updatedIssues = soapData.issues;
-                      updatedIssues[issueIndex].currentInstance[section.name] =
-                        '';
-                      updatedIssues[issueIndex].lastUpdated = longDate(
+                      let updatedIssues = capData.practices;
+                      updatedIssues[practiceIndex].currentInstance[
+                        section.name
+                      ] = '';
+                      updatedIssues[practiceIndex].lastUpdated = longDate(
                         new Date()
                       );
 
-                      setSoapData((prevData) => ({
+                      setCAPData((prevData) => ({
                         ...prevData,
                         issues: updatedIssues
                       }));
@@ -173,28 +183,29 @@ export default function IssuePane({
                         return;
                       }
 
-                      let updatedIssues = soapData.issues;
-                      updatedIssues[issueIndex].currentInstance[section.name] =
-                        e.target.value + '- ';
-                      updatedIssues[issueIndex].lastUpdated = longDate(
+                      let updatedIssues = capData.practices;
+                      updatedIssues[practiceIndex].currentInstance[
+                        section.name
+                      ] = e.target.value + '- ';
+                      updatedIssues[practiceIndex].lastUpdated = longDate(
                         new Date()
                       );
 
-                      setSoapData((prevData) => ({
+                      setCAPData((prevData) => ({
                         ...prevData,
                         issues: updatedIssues
                       }));
                     }
                   }}
                   onChange={(edits) => {
-                    let updatedIssues = soapData.issues;
-                    updatedIssues[issueIndex].currentInstance[section.name] =
+                    let updatedIssues = capData.practices;
+                    updatedIssues[practiceIndex].currentInstance[section.name] =
                       edits;
-                    updatedIssues[issueIndex].lastUpdated = longDate(
+                    updatedIssues[practiceIndex].lastUpdated = longDate(
                       new Date()
                     );
 
-                    setSoapData((prevData) => ({
+                    setCAPData((prevData) => ({
                       ...prevData,
                       issues: updatedIssues
                     }));
@@ -203,7 +214,169 @@ export default function IssuePane({
                     return;
                   }}
                   className="h-24 p-1"
-                />
+                /> */}
+
+                {/* Create section for each part of the CAP notes */}
+                <div className="flex">
+                  {/* Notetaking area */}
+                  <div className="flex-auto">
+                    {/* TODO: 04-23-24 -- current issues need to be initialized with an empty block and checked if there's an empty block before adding to it  */}
+                    {currInstance[section.name].map((line) => (
+                      <NoteBlock
+                        key={line.id}
+                        noteSection={section.name}
+                        noteId={line.id}
+                        noteContent={line}
+                        onKeyDown={(e) => {
+                          // stop default behavior of enter key if both enter and shift are pressed
+                          if (e.key === 'Enter' && e.shiftKey) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onKeyUp={(e) => {
+                          // check for shift-enter to add a new line
+                          if (e.key === 'Enter' && e.shiftKey) {
+                            // add new line underneath the current line
+                            setCAPData((prevCAPData) => {
+                              let newCAPData = { ...prevCAPData };
+
+                              // find that line that was edited in the current instance of the practice
+                              let lineIndex = newCAPData.practices[
+                                practiceIndex
+                              ].currentInstance[section.name].findIndex(
+                                (l) => l.id === line.id
+                              );
+
+                              // if new line to add is at the end of the list, only add if there's not already an empty line
+                              if (
+                                lineIndex ===
+                                newCAPData.practices[practiceIndex]
+                                  .currentInstance[section.name].length -
+                                  1
+                              ) {
+                                if (
+                                  newCAPData.practices[
+                                    practiceIndex
+                                  ].currentInstance[section.name][
+                                    lineIndex
+                                  ].value.trim() === ''
+                                ) {
+                                  return newCAPData;
+                                }
+                              } else if (
+                                lineIndex + 1 <
+                                newCAPData.practices[practiceIndex]
+                                  .currentInstance[section.name].length
+                              ) {
+                                if (
+                                  newCAPData.practices[
+                                    practiceIndex
+                                  ].currentInstance[section.name][
+                                    lineIndex + 1
+                                  ].value.trim() === ''
+                                ) {
+                                  return newCAPData;
+                                }
+                              }
+
+                              // otherwise, add to the list
+                              newCAPData.practices[
+                                practiceIndex
+                              ].currentInstance[section.name].splice(
+                                lineIndex + 1,
+                                0,
+                                {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                }
+                              );
+
+                              return newCAPData;
+                            });
+                          }
+
+                          // if shift tab is pressed, move to the previous line
+                          if (e.key === 'Tab' && e.shiftKey) {
+                            let lineIndex = capData.practices[
+                              practiceIndex
+                            ].currentInstance[section.name].findIndex(
+                              (l) => l.id === line.id
+                            );
+                            if (lineIndex > 0) {
+                              document
+                                .getElementById(
+                                  capData.practices[practiceIndex]
+                                    .currentInstance[section.name][
+                                    lineIndex - 1
+                                  ].id
+                                )
+                                .focus();
+                            }
+                          }
+                          // if tab is pressed, move to the next line
+                          else if (e.key === 'Tab' && !e.shiftKey) {
+                            let lineIndex = capData.practices[
+                              practiceIndex
+                            ].currentInstance[section.name].findIndex(
+                              (l) => l.id === line.id
+                            );
+                            if (
+                              lineIndex + 1 <
+                              capData.practices[practiceIndex].currentInstance[
+                                section.name
+                              ].length
+                            ) {
+                              document
+                                .getElementById(
+                                  capData.practices[practiceIndex]
+                                    .currentInstance[section.name][
+                                    lineIndex + 1
+                                  ].id
+                                )
+                                .focus();
+                            }
+                          }
+                        }}
+                        // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
+                        onChange={(e) => {
+                          // before attempting a save, check if the line is identical to the previous line (both trimmed)
+                          let edits = e.currentTarget.textContent.trim();
+                          if (edits === line.value.trim()) {
+                            return;
+                          }
+
+                          // save edits to the correct line
+                          setCAPData((prevCAPData) => {
+                            // get the current data and correct line that was changed
+                            let newCAPData = { ...prevCAPData };
+                            let lineIndex = newCAPData.practices[
+                              practiceIndex
+                            ].currentInstance[section.name].findIndex(
+                              (l) => l.id === line.id
+                            );
+
+                            newCAPData.practices[practiceIndex].currentInstance[
+                              section.name
+                            ][lineIndex].value = edits;
+
+                            return newCAPData;
+                          });
+                        }}
+                        onDragToIssue={(practiceId, noteSection, noteBlock) => {
+                          return;
+                        }}
+                      />
+                    ))}
+                    <div className="italic text-slate-400">
+                      Press Shift-Enter to add a new text block. Press Tab to
+                      move to next block, and Shift-Tab to move to previous
+                      block.
+                    </div>
+                  </div>
+                </div>
+
                 {section.name === 'plan' && (
                   <div className="text-sm text-gray-700 italic mt-2">
                     <h2 className="font-bold">Practice follow-ups</h2>
@@ -260,11 +433,11 @@ export default function IssuePane({
                 }
 
                 // remove the current instance
-                let updatedIssues = soapData.issues;
-                updatedIssues[issueIndex].currentInstance = null;
-                updatedIssues[issueIndex].lastUpdated = longDate(new Date());
+                let updatedIssues = capData.practices;
+                updatedIssues[practiceIndex].currentInstance = null;
+                updatedIssues[practiceIndex].lastUpdated = longDate(new Date());
 
-                setSoapData((prevData) => ({
+                setCAPData((prevData) => ({
                   ...prevData,
                   issues: updatedIssues
                 }));
@@ -278,13 +451,14 @@ export default function IssuePane({
         {/* Prior Issue Instances */}
         <div className="w-full mt-4">
           <h1 className="font-bold text-xl border-b border-black mb-2">
-            Prior Issues
+            Last Instance
           </h1>
           {priorInstances.length === 0 && (
             <h2 className="text-sm color-grey">
               There are no prior issues for this practice.
             </h2>
           )}
+          {/* TODO 04-23-24: make this show only 1 */}
           {priorInstances.map((instance, i) => (
             <div
               className="w-full border border-gray-300 rounded-lg mb-3 p-1"

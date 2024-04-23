@@ -5,7 +5,7 @@ import Head from 'next/head';
 import mongoose, { set } from 'mongoose';
 import { mutate } from 'swr';
 
-import { fetchSoapNote } from '../../controllers/soapNotes/fetchSoapNotes';
+import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
 import TextBox from '../../components/TextBox';
 import IssueCard from '../../components/IssueCard';
 import IssuePane from '../../components/IssuePane';
@@ -24,15 +24,15 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 export default function SOAPNote({
-  soapNoteInfo,
+  capNoteInfo,
   data,
   autocompleteTriggersOptions
 }): JSX.Element {
   // have state for soap note data
-  const [noteInfo, setNoteInfo] = useState(soapNoteInfo);
+  const [noteInfo, setNoteInfo] = useState(capNoteInfo);
 
   // hold data from the current soap notes
-  const [soapData, setSoapData] = useState(data);
+  const [capData, setCAPData] = useState(data);
 
   // hold a state for which issue is selected
   const [selectedIssue, setSelectedIssue] = useState('this-weeks-notes');
@@ -47,40 +47,34 @@ export default function SOAPNote({
   // hold a ref that checks if first load
   const firstLoad = useRef(true);
 
-  // sections of the soap notes
+  // sections of the CAP notes
   const notetakingSections = [
-    // {
-    //   name: 'subjective',
-    //   title: 'Subjective information from student(s)'
-    // },
     {
-      name: 'objective',
-      title: 'Context (e.g., signals from OS; observations during SIG)'
+      name: 'context',
+      title: 'Context: what are you hearing or seeing that’s bothering you? '
     },
     {
       name: 'assessment',
-      title:
-        'Assessment of practice obstacles (e.g., cognitive, metacognitive, emotional, behavorial, and / or strategic blockers)'
+      title: 'Assessment: what is happening?'
     },
     {
       name: 'plan',
-      title: 'Practice plan to address practice obstacles'
+      title: 'Plan: what do we do about it?'
     }
   ];
 
   const issueSections = [
     {
       name: 'context',
-      title: 'Context (e.g., signals from OS; observations during SIG)'
+      title: 'Context: what are you hearing or seeing that’s bothering you? '
     },
     {
-      name: 'summary',
-      title:
-        'Assessment of practice obstacles (e.g., cognitive, metacognitive, emotional, behavorial, and / or strategic blockers)'
+      name: 'assessment',
+      title: 'Assessment: what is happening?'
     },
     {
       name: 'plan',
-      title: 'Practice plan to address practice obstacles'
+      title: 'Plan: what do we do about it?'
     }
   ];
 
@@ -107,75 +101,77 @@ export default function SOAPNote({
       // hold a last updated timestamp
       const lastUpdated = new Date();
 
+      // TODO: needs to be fixed for the new practice agents
       // check if any lines have a [practice] tag
-      for (let issue of soapData.issues) {
-        // check if current instance is not null
-        if (issue.currentInstance === null) {
-          continue;
-        }
+      // for (let practice of capData.practices) {
+      //   // check if current instance is not null
+      //   if (practice.currentInstance === null) {
+      //     continue;
+      //   }
 
-        // parse follow-ups plans for each current issue instance
-        let lines = issue.currentInstance.plan.split('\n');
-        let scripts = lines.filter((line) => line.includes('[practice]'));
+      //   // parse follow-ups plans for each current issue instance
+      //   let lines = practice.currentInstance.plan;
+      //   let scripts = lines.filter((line) => line.value.includes('[practice]'));
 
-        // create objects for each script
-        let output = [];
-        for (let script of scripts) {
-          // check if the script is fully written before adding it to output
-          let splitFollowUp = script.split('[practice]')[1].split(':');
-          if (
-            splitFollowUp.length < 2 ||
-            splitFollowUp[1].trim() === '[follow-up to send]' ||
-            splitFollowUp[1].trim() === ''
-          ) {
-            continue;
-          } else {
-            let [venue, strategy] = splitFollowUp;
-            output.push({
-              practice: strategy.trim(),
-              opportunity: venue.trim(),
-              person: 'students',
-              activeIssueId: ''
-            });
-          }
-        }
+      //   // create objects for each script
+      //   let output = [];
+      //   for (let script of scripts) {
+      //     // check if the script is fully written before adding it to output
+      //     let splitFollowUp = script.split('[practice]')[1].split(':');
+      //     if (
+      //       splitFollowUp.length < 2 ||
+      //       splitFollowUp[1].trim() === '[follow-up to send]' ||
+      //       splitFollowUp[1].trim() === ''
+      //     ) {
+      //       continue;
+      //     } else {
+      //       let [venue, strategy] = splitFollowUp;
+      //       output.push({
+      //         practice: strategy.trim(),
+      //         opportunity: venue.trim(),
+      //         person: 'students',
+      //         activeIssueId: ''
+      //       });
+      //     }
+      //   }
 
-        issue.currentInstance.practices = output;
-      }
+      //   practice.currentInstance.practices = output;
+      // }
 
       let dataToSave = structuredClone({
-        project: soapNoteInfo.project,
-        date: soapNoteInfo.sigDate,
+        project: capNoteInfo.project,
+        date: capNoteInfo.sigDate,
         lastUpdated: lastUpdated,
-        sigName: soapNoteInfo.sigName,
-        sigAbbreviation: soapNoteInfo.sigAbbreviation,
-        subjective: soapData.subjective ?? [],
-        objective: soapData.objective ?? [],
-        assessment: soapData.assessment ?? [],
-        plan: soapData.plan ?? [],
-        issues: soapData.issues ?? [],
-        priorContext: soapData.priorContext ?? {}
+        sigName: capNoteInfo.sigName,
+        sigAbbreviation: capNoteInfo.sigAbbreviation,
+        context: capData.context ?? [],
+        assessment: capData.assessment ?? [],
+        plan: capData.plan ?? [],
+        trackedPractices: capData.practices ?? [],
+        currIssueInstances: capData.issues ?? []
       });
 
-      // parse the date for issues before sending it back to the server
-      dataToSave.issues.forEach((issue) => {
+      // parse the date for trackedPractices before sending it back to the server
+      dataToSave.trackedPractices.forEach((practice) => {
         // replace issue last updated with a date object
-        issue.lastUpdated = new Date(issue.lastUpdated);
+        practice.lastUpdated = new Date(practice.lastUpdated);
 
         // if currentInstance is not null, then replace it's date with a date object
-        if (issue.currentInstance !== null) {
-          issue.currentInstance.date = new Date(issue.currentInstance.date);
+        if (practice.currentInstance !== null) {
+          practice.currentInstance.date = new Date(
+            practice.currentInstance.date
+          );
         }
 
         // replace all prior instances' dates with date objects
-        issue.priorInstances.forEach((instance) => {
+        practice.priorInstances.forEach((instance) => {
           instance.date = new Date(instance.date);
         });
       });
 
       // make request to save the data to the database
       try {
-        const res = await fetch(`/api/soap/${soapNoteInfo.id}`, {
+        const res = await fetch(`/api/soap/${capNoteInfo.id}`, {
           method: 'PUT',
           body: JSON.stringify(dataToSave),
           headers: {
@@ -191,7 +187,7 @@ export default function SOAPNote({
 
         // otherwise, update the local data without a revalidation
         if (output.data !== null) {
-          mutate(`/api/soap/${soapNoteInfo.id}`, output.data, false);
+          mutate(`/api/soap/${capNoteInfo.id}`, output.data, false);
         }
 
         // update the last updated timestamp for the note
@@ -213,7 +209,7 @@ export default function SOAPNote({
     }, 1000); // TODO: lowering for now to handle div issue, but should be 5000
 
     return () => clearTimeout(timeOutId);
-  }, [soapData, soapNoteInfo]);
+  }, [capData, capNoteInfo]);
 
   // return the page
   return (
@@ -343,68 +339,69 @@ export default function SOAPNote({
                   }}
                 />
 
-                {/* tracked issue cards */}
-                {soapData.issues
+                {/* tracked practices */}
+                {capData.practices
                   .filter(
-                    (issue) => !issue.issueInactive && !issue.issueArchived
+                    (practice) =>
+                      !practice.practiceInactive && !practice.practiceArchived
                   )
-                  .map((issue) => (
+                  .map((practice) => (
                     <IssueCard
-                      key={`issue-card-${issue.id}`}
-                      issueId={issue.id}
-                      title={issue.title}
-                      description={issue.description}
-                      lastUpdated={issue.lastUpdated}
+                      key={`issue-card-${practice.id}`}
+                      issueId={practice.id}
+                      title={practice.title}
+                      description={practice.description}
+                      lastUpdated={practice.lastUpdated}
                       selectedIssue={selectedIssue}
                       setSelectedIssue={setSelectedIssue}
-                      currInstance={issue.currentInstance}
-                      issueIsResolved={issue.issueInactive}
+                      currInstance={practice.currentInstance}
+                      issueIsResolved={practice.practiceInactive}
                       onResolved={(e) => {
                         // confirm if the user wants to resolve the issue
                         if (
                           !confirm(
-                            `Are you sure you want mark, "${issue.title}", as resolved?`
+                            `Are you sure you want mark, "${practice.title}", as resolved?`
                           )
                         ) {
                           return;
                         }
 
                         // resolve the issue
-                        let updatedIssues = soapData.issues;
-                        let issueIndex = updatedIssues.findIndex(
-                          (i) => i.id === issue.id
+                        let updatedPractices = capData.practices;
+                        let practiceIndex = updatedPractices.findIndex(
+                          (i) => i.id === practice.id
                         );
-                        updatedIssues[issueIndex].issueInactive = true;
-                        updatedIssues[issueIndex].lastUpdated = longDate(
+                        updatedPractices[practiceIndex].practiceInactive = true;
+                        updatedPractices[practiceIndex].lastUpdated = longDate(
                           new Date()
                         );
-                        setSoapData((prevData) => ({
+                        setCAPData((prevData) => ({
                           ...prevData,
-                          issues: updatedIssues
+                          trackedPractices: updatedPractices
                         }));
                       }}
                       onArchive={(e) => {
                         // confirm if the user wants to archive the issue
                         if (
                           !confirm(
-                            `Are you sure you want to archive, "${issue.title}"? This cannot be undone.`
+                            `Are you sure you want to archive, "${practice.title}"? This cannot be undone.`
                           )
                         ) {
                           return;
                         }
 
                         // archive the issue
-                        let updatedIssues = soapData.issues;
-                        let issueIndex = updatedIssues.findIndex(
-                          (i) => i.id === issue.id
+                        let updatedPractices = capData.practices;
+                        let practiceIndex = updatedPractices.findIndex(
+                          (i) => i.id === practice.id
                         );
-                        updatedIssues[issueIndex].issueArchived = true;
-                        updatedIssues[issueIndex].lastUpdated = longDate(
+                        updatedPractices[practiceIndex].practiceArchived = true;
+                        updatedPractices[practiceIndex].lastUpdated = longDate(
                           new Date()
                         );
-                        setSoapData((prevData) => ({
+                        setCAPData((prevData) => ({
                           ...prevData,
-                          issues: updatedIssues
+                          practices: updatedPractices
                         }));
                       }}
                     />
@@ -412,8 +409,8 @@ export default function SOAPNote({
 
                 {/* issue card to add new issue */}
                 <IssueCard
-                  key="issue-card-add-issue"
-                  issueId="add-issue"
+                  key="issue-card-add-practice"
+                  issueId="add-practice"
                   title="Add issue"
                   description="Notes from SIG"
                   lastUpdated={noteInfo.lastUpdated}
@@ -440,38 +437,37 @@ export default function SOAPNote({
                     }}
                   >
                     {showResolvedIssues
-                      ? 'Hide  currently resolved issues'
+                      ? 'Hide currently resolved issues'
                       : 'Show currently resolved issues'}
                   </button>
                 </h2>
                 {showResolvedIssues &&
-                  soapData.issues
-                    .filter((issue) => issue.issueInactive)
-                    .map((issue) => (
+                  capData.practices
+                    .filter((practice) => practice.practiceInactive)
+                    .map((practice) => (
                       <IssueCard
-                        key={`issue-card-${issue.id}`}
-                        issueId={issue.id}
-                        title={issue.title}
-                        description={issue.description}
-                        lastUpdated={issue.lastUpdated}
+                        key={`issue-card-${practice.id}`}
+                        issueId={practice.id}
+                        title={practice.title}
+                        description={practice.description}
+                        lastUpdated={practice.lastUpdated}
                         selectedIssue={selectedIssue}
                         setSelectedIssue={setSelectedIssue}
-                        currInstance={issue.currentInstance}
-                        issueIsResolved={issue.issueInactive}
+                        currInstance={practice.currentInstance}
+                        issueIsResolved={practice.practiceInactive}
                         onResolved={() => {
                           // re-open the issue
-                          let updatedIssues = soapData.issues;
-                          let issueIndex = updatedIssues.findIndex(
-                            (i) => i.id === issue.id
+                          let updatedPractices = capData.practices;
+                          let practiceIndex = updatedPractices.findIndex(
+                            (i) => i.id === practice.id
                           );
-                          updatedIssues[issueIndex].issueInactive = false;
-                          updatedIssues[issueIndex].issueArchived = false;
-                          updatedIssues[issueIndex].lastUpdated = longDate(
-                            new Date()
-                          );
-                          setSoapData((prevData) => ({
+                          updatedPractices[practiceIndex].issueInactive = false;
+                          updatedPractices[practiceIndex].issueArchived = false;
+                          updatedPractices[practiceIndex].lastUpdated =
+                            longDate(new Date());
+                          setCAPData((prevData) => ({
                             ...prevData,
-                            issues: updatedIssues
+                            issues: updatedPractices
                           }));
                         }}
                         onArchive={(e) => {
@@ -497,9 +493,9 @@ export default function SOAPNote({
                     Selected Practice
                   </h1>
                   <IssuePane
-                    issueId={selectedIssue}
-                    soapData={soapData}
-                    setSoapData={setSoapData} // TODO: this needs to be per issue
+                    practiceId={selectedIssue}
+                    capData={capData}
+                    setCAPData={setCAPData} // TODO: this needs to be per issue
                     summarySections={issueSections}
                     autocompleteTriggersOptions={autocompleteTriggersOptions}
                   />
@@ -538,7 +534,7 @@ export default function SOAPNote({
                           {/* TODO: turn this into a component so draggable can be used */}
                           {/* TODO: think about how to add an empty block if there's no notes yet */}
                           {/* One way is to have a placeholder block so the same code can be used; if the last block is deleted, then automatically add another with a placeholder text */}
-                          {soapData[section.name].map((line) => (
+                          {capData[section.name].map((line) => (
                             <NoteBlock
                               key={line.id}
                               noteSection={section.name}
@@ -554,42 +550,81 @@ export default function SOAPNote({
                                 // check for shift-enter to add a new line
                                 if (e.key === 'Enter' && e.shiftKey) {
                                   // add new line underneath the current line
-                                  setSoapData((prevSoapData) => {
-                                    let newSoapData = { ...prevSoapData };
-                                    let lineIndex = newSoapData[
+                                  setCAPData((prevCAPData) => {
+                                    let newCAPData = { ...prevCAPData };
+                                    let lineIndex = newCAPData[
                                       section.name
                                     ].findIndex((l) => l.id === line.id);
 
                                     // if new line to add is at the end of the list, only add if there's not already an empty line
-                                    // if (
-                                    //   lineIndex ===
-                                    //   newSoapData[section.name].length - 1
-                                    // ) {
-                                    //   if (
-                                    //     newSoapData[section.name][
-                                    //       lineIndex
-                                    //     ].value.trim() === ''
-                                    //   ) {
-                                    //     return newSoapData;
-                                    //   }
-                                    // }
+                                    if (
+                                      lineIndex ===
+                                      newCAPData[section.name].length - 1
+                                    ) {
+                                      if (
+                                        newCAPData[section.name][
+                                          lineIndex
+                                        ].value.trim() === ''
+                                      ) {
+                                        return newCAPData;
+                                      }
+                                    } else if (
+                                      lineIndex + 1 <
+                                      newCAPData[section.name].length
+                                    ) {
+                                      if (
+                                        newCAPData[section.name][
+                                          lineIndex + 1
+                                        ].value.trim() === ''
+                                      ) {
+                                        return newCAPData;
+                                      }
+                                    }
 
                                     // otherwise, add to the list
-                                    newSoapData[section.name].splice(
+                                    newCAPData[section.name].splice(
                                       lineIndex + 1,
                                       0,
                                       {
                                         id: new mongoose.Types.ObjectId().toString(),
-                                        isChecked: false,
-                                        isInIssue: false,
                                         type: 'note',
                                         context: [],
                                         value: ''
                                       }
                                     );
 
-                                    return newSoapData;
+                                    return newCAPData;
                                   });
+                                }
+
+                                // if shift tab is pressed, move to the previous line
+                                if (e.key === 'Tab' && e.shiftKey) {
+                                  let lineIndex = capData[
+                                    section.name
+                                  ].findIndex((l) => l.id === line.id);
+                                  if (lineIndex > 0) {
+                                    document
+                                      .getElementById(
+                                        capData[section.name][lineIndex - 1].id
+                                      )
+                                      .focus();
+                                  }
+                                }
+                                // if tab is pressed, move to the next line
+                                else if (e.key === 'Tab' && !e.shiftKey) {
+                                  let lineIndex = capData[
+                                    section.name
+                                  ].findIndex((l) => l.id === line.id);
+                                  if (
+                                    lineIndex + 1 <
+                                    capData[section.name].length
+                                  ) {
+                                    document
+                                      .getElementById(
+                                        capData[section.name][lineIndex + 1].id
+                                      )
+                                      .focus();
+                                  }
                                 }
                               }}
                               // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
@@ -601,7 +636,7 @@ export default function SOAPNote({
                                 }
 
                                 // save edits to the correct line
-                                setSoapData((prevSoapData) => {
+                                setCAPData((prevSoapData) => {
                                   // get the current data and correct line that was changed
                                   let newSoapData = { ...prevSoapData };
                                   let lineIndex = newSoapData[
@@ -615,127 +650,178 @@ export default function SOAPNote({
                                 });
                               }}
                               onDragToIssue={(
-                                issueId,
+                                practiceId,
                                 noteSection,
                                 noteBlock
                               ) => {
                                 // map note content into the correct section
-                                // TODO: make the names consistent
-                                // TODO: make the schema consistent and just move around note blocks
                                 let editsToIssue = {
                                   context:
-                                    noteSection === 'objective'
-                                      ? noteBlock.value
-                                      : '',
-                                  summary:
+                                    noteSection === 'context'
+                                      ? [noteBlock]
+                                      : [
+                                          {
+                                            id: new mongoose.Types.ObjectId().toString(),
+                                            type: 'note',
+                                            context: [],
+                                            value: ''
+                                          }
+                                        ],
+                                  assessment:
                                     noteSection === 'assessment'
-                                      ? noteBlock.value
-                                      : '',
+                                      ? [noteBlock]
+                                      : [
+                                          {
+                                            id: new mongoose.Types.ObjectId().toString(),
+                                            type: 'note',
+                                            context: [],
+                                            value: ''
+                                          }
+                                        ],
                                   plan:
                                     noteSection === 'plan'
-                                      ? noteBlock.value
-                                      : ''
+                                      ? [noteBlock]
+                                      : [
+                                          {
+                                            id: new mongoose.Types.ObjectId().toString(),
+                                            type: 'note',
+                                            context: [],
+                                            value: ''
+                                          }
+                                        ]
                                 };
 
-                                // get the issue to add the edits to
+                                // create a new practice if the note is dragged into the add practice section
                                 if (
-                                  issueId === 'add-issue' ||
-                                  issueId === 'this-weeks-notes'
+                                  practiceId === 'add-practice' ||
+                                  practiceId === 'this-weeks-notes'
                                 ) {
-                                  // create a new issue
-                                  let newIssue = {
+                                  // create a new practice
+                                  let newPractice = {
                                     id: new mongoose.Types.ObjectId().toString(),
-                                    title: 'unnamed issue',
+                                    title: noteBlock.value,
                                     description: '',
+                                    lastUpdated: longDate(new Date()),
+                                    practiceInactive: false,
+                                    practiceArchived: false,
                                     currentInstance: {
                                       id: new mongoose.Types.ObjectId().toString(),
                                       date: longDate(new Date()),
                                       context: editsToIssue['context'],
-                                      summary: editsToIssue['summary'],
+                                      assessment: editsToIssue['assessment'],
                                       plan: editsToIssue['plan'],
-                                      practices: []
+                                      followUps: []
                                     },
-                                    priorInstances: [],
-                                    lastUpdated: longDate(new Date()),
-                                    issueInactive: false,
-                                    issueArchived: false
+                                    priorInstances: []
                                   };
-                                  setSoapData((prevSoapData) => {
-                                    let newSoapData = { ...prevSoapData };
-                                    newSoapData.issues.push(newIssue);
-                                    return newSoapData;
+
+                                  setCAPData((prevCapData) => {
+                                    let newCAPData = { ...prevCapData };
+                                    newCAPData.practices.push(newPractice);
+                                    return newCAPData;
                                   });
 
-                                  issueId = newIssue.id;
-                                } else {
-                                  // find the issue
-                                  let issueIndex = soapData.issues.findIndex(
-                                    (issue) => issue.id === issueId
-                                  );
+                                  practiceId = newPractice.id;
+                                }
+                                // otherwise, add data to the practice
+                                else {
+                                  // find the practice
+                                  let practiceIndex =
+                                    capData.practices.findIndex(
+                                      (practice) => practice.id === practiceId
+                                    );
                                   let issueInstance =
-                                    soapData.issues[issueIndex].currentInstance;
+                                    capData.practices[practiceIndex]
+                                      .currentInstance;
 
+                                  // create a new issue instance for the practice if it doesn't exist
                                   if (issueInstance === null) {
                                     // if the current instance doesn't exist, intialize it with the additions from the notetaking space
                                     issueInstance = {
                                       id: new mongoose.Types.ObjectId().toString(),
                                       date: longDate(new Date()),
                                       context: editsToIssue['context'],
-                                      summary: editsToIssue['summary'],
+                                      assessment: editsToIssue['summary'],
                                       plan: editsToIssue['plan'],
                                       practices: []
                                     };
                                   } else {
-                                    // TODO: issue instance doesn't use the same schema as SOAP notes
-                                    // otherwise, add the additions to the current instance
-                                    issueInstance.context =
-                                      issueInstance.context.trim() === ''
-                                        ? editsToIssue['context']
-                                        : issueInstance.context.trim() +
-                                          '\n' +
-                                          editsToIssue['context'];
+                                    // if the current instance exists, check if the new additions are empty
+                                    if (
+                                      issueInstance['context'].length === 1 &&
+                                      issueInstance['context'][0].value === ''
+                                    ) {
+                                      issueInstance.context =
+                                        editsToIssue['context'];
+                                    } else {
+                                      // otherwise, add the additions to the current instance
+                                      issueInstance.context =
+                                        issueInstance.context.concat(
+                                          editsToIssue['context']
+                                        );
+                                    }
 
-                                    issueInstance.summary =
-                                      issueInstance.summary.trim() === ''
-                                        ? editsToIssue['summary']
-                                        : issueInstance.summary.trim() +
-                                          +'\n' +
-                                          editsToIssue['summary'];
+                                    // repeat for assessment
+                                    if (
+                                      issueInstance['assessment'].length ===
+                                        1 &&
+                                      issueInstance['assessment'][0].value ===
+                                        ''
+                                    ) {
+                                      issueInstance.assessment =
+                                        editsToIssue['assessment'];
+                                    } else {
+                                      // otherwise, add the additions to the current instance
+                                      issueInstance.assessment =
+                                        issueInstance.assessment.concat(
+                                          editsToIssue['assessment']
+                                        );
+                                    }
 
-                                    issueInstance.plan =
-                                      issueInstance.plan.trim() === ''
-                                        ? editsToIssue['plan']
-                                        : issueInstance.plan.trim() +
-                                          +'\n' +
-                                          editsToIssue['plan'];
+                                    // repeat for plan
+                                    if (
+                                      issueInstance['plan'].length === 1 &&
+                                      issueInstance['plan'][0].value === ''
+                                    ) {
+                                      issueInstance.plan = editsToIssue['plan'];
+                                    } else {
+                                      // otherwise, add the additions to the current instance
+                                      issueInstance.plan =
+                                        issueInstance.plan.concat(
+                                          editsToIssue['plan']
+                                        );
+                                    }
 
+                                    // update the last updated date
                                     issueInstance.date = longDate(new Date());
                                   }
 
-                                  setSoapData((prevSoapData) => {
-                                    let newSoapData = { ...prevSoapData };
-                                    newSoapData.issues[
-                                      issueIndex
+                                  setCAPData((prevCAPData) => {
+                                    let newCAPData = { ...prevCAPData };
+                                    newCAPData.practices[
+                                      practiceIndex
                                     ].currentInstance = issueInstance;
-                                    newSoapData.issues[issueIndex].lastUpdated =
-                                      longDate(new Date());
+                                    newCAPData.practices[
+                                      practiceIndex
+                                    ].lastUpdated = longDate(new Date());
 
                                     // re-open the issue if new notes are added
-                                    newSoapData.issues[
-                                      issueIndex
+                                    newCAPData.practices[
+                                      practiceIndex
                                     ].issueInactive = false;
-                                    newSoapData.issues[
-                                      issueIndex
+                                    newCAPData.practices[
+                                      practiceIndex
                                     ].issueArchived = false;
-                                    return newSoapData;
+                                    return newCAPData;
                                   });
 
-                                  issueId = soapData.issues[issueIndex].id;
+                                  practiceId =
+                                    capData.practices[practiceIndex].id;
                                 }
 
-                                // TODO: remove note block that was dragged into the issue
-                                setSoapData((prevSoapData) => {
-                                  let newSoapData = { ...prevSoapData };
+                                // remove note block that was dragged into the issue
+                                setCAPData((prevCAPData) => {
+                                  let newSoapData = { ...prevCAPData };
 
                                   // remove the note block from the edited section
                                   newSoapData[noteSection] = newSoapData[
@@ -743,14 +829,13 @@ export default function SOAPNote({
                                   ].filter((line) => line.id !== noteBlock.id);
                                   return newSoapData;
                                 });
-
-                                // highlight the issue that was just edited or created
-                                setSelectedIssue(issueId);
                               }}
                             />
                           ))}
                           <div className="italic text-slate-400">
-                            Press Shift-Enter to add a new text block
+                            Press Shift-Enter to add a new text block. Press Tab
+                            to move to next block, and Shift-Tab to move to
+                            previous block.
                           </div>
 
                           {/* Add helper text on how to use the plan section */}
@@ -818,17 +903,15 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   let [sigAbbrev, project, date] = (query.params?.id as string).split('_');
 
   /**
-   * fetch SOAP note for the given sig and date, and format for display
+   * fetch CAP note for the given sig and date, and format for display
    */
   // TODO: see how I can add type checking to this
-  let currentSoapNote = await fetchSoapNote(sigAbbrev, project, date);
+  let currentCAPNote = await fetchCAPNote(sigAbbrev, project, date);
 
-  // remove id from text entry
+  // remove id from TextEntryObjects
   const stripIdFromTextEntry = (entry) => {
     return {
       id: entry.id.toString(),
-      isChecked: entry.isChecked,
-      isInIssue: entry.isInIssue,
       type: entry.type,
       context: entry.context.map((context) => {
         return {
@@ -840,91 +923,87 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     };
   };
 
-  const stripIdFromPractice = (practice) => {
+  // remove id from FollowUpObjects
+  const stripIdFromFollowUpObject = (followUpObject) => {
     return {
-      id: practice.id.toString(),
-      practice: practice.practice,
-      opportunity: practice.opportunity,
-      person: practice.person,
-      activeIssueId: practice.activeIssueId
+      id: followUpObject.id.toString(),
+      parsedPractice: followUpObject.parsedPractice,
+      outcome: followUpObject.outcome
     };
   };
 
-  // remove id from issues (and subissues)
-  const stripIdFromIssue = (issue) => {
+  // remove id from IssueObjects
+  const stripIdFromIssueObject = (issue) => {
     return {
       id: issue.id.toString(),
-      title: issue.title,
-      description: issue.description,
-      currentInstance:
-        issue.currentInstance == null
-          ? null
-          : {
-              id: issue.currentInstance.id.toString(),
-              date: longDate(issue.currentInstance.date),
-              context: issue.currentInstance.context,
-              summary: issue.currentInstance.summary,
-              plan: issue.currentInstance.plan,
-              practices: issue.currentInstance.practices.map((practice) =>
-                stripIdFromPractice(practice)
-              )
-            },
-      priorInstances: issue.priorInstances.map((instance) => {
-        return {
-          id: instance.id.toString(),
-          date: longDate(instance.date),
-          context: instance.context,
-          summary: instance.summary,
-          plan: instance.plan,
-          practices: instance.practices.map((practice) =>
-            stripIdFromPractice(practice)
-          )
-        };
+      date: longDate(issue.date),
+      context: issue.context.map((textEntry) => {
+        return stripIdFromTextEntry(textEntry);
       }),
-      lastUpdated: longDate(issue.lastUpdated),
-      issueInactive: issue.issueInactive,
-      issueArchived: issue.issueArchived
+      assessment: issue.assessment.map((textEntry) => {
+        return stripIdFromTextEntry(textEntry);
+      }),
+      plan: issue.plan.map((textEntry) => {
+        return stripIdFromTextEntry(textEntry);
+      }),
+      followUps: issue.followUps.map((followUp) => {
+        return stripIdFromFollowUpObject(followUp);
+      })
+    };
+  };
+
+  // remove id from PracticeObjects (and subissues)
+  const stripIdFromPracticeObject = (practice) => {
+    return {
+      id: practice.id.toString(),
+      title: practice.title,
+      description: practice.description,
+      lastUpdated: longDate(practice.lastUpdated),
+      practiceInactive: practice.practiceInactive,
+      practiceArchived: practice.practiceArchived,
+      currentInstance:
+        practice.currentInstance == null
+          ? null
+          : stripIdFromIssueObject(practice.currentInstance),
+      priorInstances: practice.priorInstances.map((instance) => {
+        return stripIdFromIssueObject(instance);
+      })
     };
   };
 
   // create data object for display
-  const soapNoteInfo = {
-    id: currentSoapNote.id,
-    project: currentSoapNote.project,
-    sigName: currentSoapNote.sigName,
-    sigAbbreviation: currentSoapNote.sigAbbreviation,
-    sigDate: shortDate(currentSoapNote.date),
-    lastUpdated: longDate(currentSoapNote.lastUpdated, true),
-    subjective: currentSoapNote.subjective.map((line) =>
+  const capNoteInfo = {
+    id: currentCAPNote.id,
+    project: currentCAPNote.project,
+    sigName: currentCAPNote.sigName,
+    sigAbbreviation: currentCAPNote.sigAbbreviation,
+    sigDate: shortDate(currentCAPNote.date),
+    lastUpdated: longDate(currentCAPNote.lastUpdated, true),
+    context: currentCAPNote.context.map((line) => stripIdFromTextEntry(line)),
+    assessment: currentCAPNote.assessment.map((line) =>
       stripIdFromTextEntry(line)
     ),
-    objective: currentSoapNote.objective.map((line) =>
-      stripIdFromTextEntry(line)
+    plan: currentCAPNote.plan.map((line) => stripIdFromTextEntry(line)),
+    trackedPractices: currentCAPNote.trackedPractices.map((practice) =>
+      stripIdFromPracticeObject(practice)
     ),
-    assessment: currentSoapNote.assessment.map((line) =>
-      stripIdFromTextEntry(line)
-    ),
-    plan: currentSoapNote.plan.map((line) => stripIdFromTextEntry(line)),
-    issues: currentSoapNote.issues
-      .map((issue) => stripIdFromIssue(issue))
-      .sort((a, b) => (a.lastUpdated > b.lastUpdated ? -1 : 1))
+    currIssueInstances: currentCAPNote.currIssueInstances.map((issue) =>
+      stripIdFromIssueObject(issue)
+    )
   };
 
   // if any section has no data, add a placeholder line
   const addPlaceholderLine = (section) => {
-    if (soapNoteInfo[section].length === 0) {
-      soapNoteInfo[section].push({
+    if (capNoteInfo[section].length === 0) {
+      capNoteInfo[section].push({
         id: new mongoose.Types.ObjectId().toString(),
-        isChecked: false,
-        isInIssue: false,
         type: 'note',
         context: [],
         value: ''
       });
     }
   };
-  addPlaceholderLine('subjective');
-  addPlaceholderLine('objective');
+  addPlaceholderLine('context');
   addPlaceholderLine('assessment');
   addPlaceholderLine('plan');
 
@@ -940,7 +1019,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ projectName: currentSoapNote.project })
+        body: JSON.stringify({ projectName: currentCAPNote.project })
       }
     );
 
@@ -980,7 +1059,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       `${
         process.env.ORCH_ENGINE
       }/activeIssues/fetchActiveIssuesForProject?${new URLSearchParams({
-        projectName: currentSoapNote.project
+        projectName: currentCAPNote.project
       })}`
     );
     activeIssues = await res.json();
@@ -1024,15 +1103,13 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       scriptType == 'follow-up'
         ? `[${scriptType}] ${script.strategies}`
         : `[${scriptType}] ${script.name} - ${script.strategies}`;
-    let titleIndex = soapNoteInfo.objective.findIndex(
+    let titleIndex = capNoteInfo.context.findIndex(
       (line) => line.value === title
     );
 
     if (titleIndex === -1) {
-      soapNoteInfo.objective.push({
+      capNoteInfo.context.push({
         id: new mongoose.Types.ObjectId().toString(),
-        isChecked: false,
-        isInIssue: false,
         type: 'script',
         context: [],
         value: title
@@ -1040,8 +1117,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     }
   }
 
-  // sort objective notes by [detected issues] first
-  soapNoteInfo.objective.sort((a, b) => {
+  // sort context notes by [detected issues] first
+  capNoteInfo.context.sort((a, b) => {
     if (a.type === 'script' && b.type !== 'script') {
       return -1;
     } else {
@@ -1065,11 +1142,11 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       triggeredScripts: [],
       followUpPlans: 'none'
     },
-    issues: soapNoteInfo.issues,
-    subjective: soapNoteInfo.subjective,
-    objective: soapNoteInfo.objective,
-    assessment: soapNoteInfo.assessment,
-    plan: soapNoteInfo.plan
+    context: capNoteInfo.context,
+    assessment: capNoteInfo.assessment,
+    plan: capNoteInfo.plan,
+    practices: capNoteInfo.trackedPractices,
+    issues: capNoteInfo.currIssueInstances
   };
 
   // setup triggers and options for each section's text boxes
@@ -1112,8 +1189,13 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     }
   };
 
-  // TODO: 03-03-24 -- data might be redundant with the soapNoteInfo
+  // print before returning
+  console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 4));
+  console.log('data', data);
+  console.log('autocompleteTriggersOptions', autocompleteTriggersOptions);
+
+  // TODO: 03-03-24 -- data might be redundant with the capNoteInfo
   return {
-    props: { soapNoteInfo, data, autocompleteTriggersOptions }
+    props: { capNoteInfo: capNoteInfo, data, autocompleteTriggersOptions }
   };
 };
