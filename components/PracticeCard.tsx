@@ -352,7 +352,6 @@ export default function PracticeCard({
                       {practice.deliverable !== null ? (
                         <div className="w-full mt-1">
                           <p className="text-normal font-semibold">
-                            Deliverable:{' '}
                             {practice.deliverable !== '' ? (
                               <>
                                 <a
@@ -363,13 +362,15 @@ export default function PracticeCard({
                                 >
                                   Link to deliverable
                                 </a>
-                                {practice.yellkey === null ? (
+                                {practice.yellkey == null ? (
                                   <></>
                                 ) : (
                                   <span className="font-semibold">
                                     {' '}
-                                    {`(Yellkey: `}
-                                    <span>{practice.yellkey}</span>
+                                    {`(yellkey: `}
+                                    <span className="text-indigo-600">
+                                      {practice.yellkey}
+                                    </span>
                                     {`)`}
                                   </span>
                                 )}
