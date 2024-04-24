@@ -1,6 +1,6 @@
-import { updateSOAPNote } from '../../../controllers/soapNotes/updateSoapNote';
+import { updateCAPNote } from '../../../controllers/capNotes/updateSoapNote';
 import dbConnect from '../../../lib/dbConnect';
-import SOAPModel from '../../../models/SOAPModel';
+import SOAPModel from '../../../models/CAPNoteModel';
 import crypto from 'crypto';
 
 /**
@@ -19,15 +19,15 @@ export default async function handler(req, res) {
   switch (method) {
     case 'GET': // fetch a SOAP note by [id]
       try {
-        const soapNote = await SOAPModel.findById(id);
-        if (!soapNote) {
+        const capNote = await SOAPModel.findById(id);
+        if (!capNote) {
           return res.status(400).json({
             success: false,
             data: null,
             error: 'No SOAP note found for ID ${id}'
           });
         }
-        res.status(200).json({ success: true, data: soapNote, error: null });
+        res.status(200).json({ success: true, data: capNote, error: null });
       } catch (error) {
         res.status(400).json({
           success: false,
@@ -36,10 +36,10 @@ export default async function handler(req, res) {
         });
       }
       break;
-    case 'PUT': // update SOAP note of [id] with edits
+    case 'PUT': // update CAP note of [id] with edits
       try {
-        const soapNote = await updateSOAPNote(id, req.body);
-        if (!soapNote) {
+        const capNote = await updateCAPNote(id, req.body);
+        if (!capNote) {
           return res.status(400).json({
             success: false,
             data: null,
@@ -47,56 +47,56 @@ export default async function handler(req, res) {
           });
         }
 
-        // TODO: updateSOAPNote is already parsing the code; so parseFollowUpPlans is redundant
+        // TODO: update with practice agents
         // parse actionable followups
-        for (let issueIndex in soapNote.issues) {
-          let issue = soapNote.issues[issueIndex];
-          // get practices for current instance if not null
-          if (issue.currentInstance !== null) {
-            let currentInstance = issue.currentInstance;
-            for (let practiceIndex in currentInstance.practices) {
-              let practice = currentInstance.practices[practiceIndex];
-              let parsedFollowup = parseFollowUpPlans(
-                id,
-                req.body.project,
-                practice.opportunity,
-                practice.practice
-              );
+        // for (let issueIndex in capNote.issues) {
+        //   let issue = capNote.issues[issueIndex];
+        //   // get practices for current instance if not null
+        //   if (issue.currentInstance !== null) {
+        //     let currentInstance = issue.currentInstance;
+        //     for (let practiceIndex in currentInstance.practices) {
+        //       let practice = currentInstance.practices[practiceIndex];
+        //       let parsedFollowup = parseFollowUpPlans(
+        //         id,
+        //         req.body.project,
+        //         practice.opportunity,
+        //         practice.practice
+        //       );
 
-              // TODO: handle case where activeIssueId is already present and an update is needed
-              // attempt to create an active issue in OS
-              const osRes = await fetch(
-                `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
-                {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(parsedFollowup)
-                }
-              );
+        //       // TODO: handle case where activeIssueId is already present and an update is needed
+        //       // attempt to create an active issue in OS
+        //       const osRes = await fetch(
+        //         `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
+        //         {
+        //           method: 'POST',
+        //           headers: {
+        //             'Content-Type': 'application/json'
+        //           },
+        //           body: JSON.stringify(parsedFollowup)
+        //         }
+        //       );
 
-              // if successful, update the activeIssueId in the practice
-              if (osRes.status === 200) {
-                const osResJson = await osRes.json();
-                soapNote['issues'][issueIndex]['currentInstance']['practices'][
-                  practiceIndex
-                ]['activeIssueId'] = osResJson.activeIssue.script_id;
-              } else {
-                // print that an error has happened, but don't error out the code
-                // TODO: if there's an error, we should let the user know on the front end but on a per-issue basis. Don't outright fail the entire request. To do this, I think we need to change the response to be an array of objects, where each object is the result of the request, OR have a separate endpoint for creating follow-up practices.
-                console.error(
-                  `Error in creating active issue for ${parsedFollowup.scriptName} in OS:`,
-                  await osRes.json()
-                );
-              }
-            }
-          }
-        }
+        //       // if successful, update the activeIssueId in the practice
+        //       if (osRes.status === 200) {
+        //         const osResJson = await osRes.json();
+        //         capNote['issues'][issueIndex]['currentInstance']['practices'][
+        //           practiceIndex
+        //         ]['activeIssueId'] = osResJson.activeIssue.script_id;
+        //       } else {
+        //         // print that an error has happened, but don't error out the code
+        //         // TODO: if there's an error, we should let the user know on the front end but on a per-issue basis. Don't outright fail the entire request. To do this, I think we need to change the response to be an array of objects, where each object is the result of the request, OR have a separate endpoint for creating follow-up practices.
+        //         console.error(
+        //           `Error in creating active issue for ${parsedFollowup.scriptName} in OS:`,
+        //           await osRes.json()
+        //         );
+        //       }
+        //     }
+        //   }
+        // }
 
         // resave with updated activeIssueIds
-        await soapNote.save();
-        res.status(200).json({ success: true, data: soapNote, error: null });
+        await capNote.save();
+        res.status(200).json({ success: true, data: capNote, error: null });
       } catch (error) {
         console.error(
           `Error in PUT for /api/soap/[id] for "${req.body.project}"`,

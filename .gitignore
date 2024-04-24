@@ -453,3 +453,6 @@ $RECYCLE.BIN/
 
 .env.local
 .vercel
+
+# user added
+models/fixtures/*.json
