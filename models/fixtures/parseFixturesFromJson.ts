@@ -135,8 +135,8 @@ export const parseFixturesFromJson = async (fixtures) => {
           Number(practice.lastUpdated['$date']['$numberLong']),
           'America/Chicago'
         ),
-        practiceInactive: practice.practiceInactive,
-        practiceArchived: practice.practiceArchived,
+        practiceInactive: practice.issueInactive,
+        practiceArchived: practice.issueArchived,
         currentInstance: currPracticeInstance,
         priorInstances: practice.priorInstances.map((instance) => {
           return {
