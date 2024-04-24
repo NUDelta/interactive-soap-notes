@@ -66,7 +66,16 @@ export default function PracticePane({
 
             {/* Warning messages for incomplete follow-ups on current instance */}
             <div
-              className={`inline-flex items-center text-md text-orange-500 ${currInstance !== null && currInstance.plan.every((currPlan) => currPlan.value.trim() === '') ? '' : 'opacity-0'}`}
+              className={`inline-flex items-center text-md text-orange-500 ${
+                currInstance !== null &&
+                currInstance.plan.some((currPlan) => {
+                  return currPlan.value.trim() !== '';
+                })
+                  ? 'opacity-0'
+                  : currInstance === null
+                    ? 'opacity-0'
+                    : ''
+              }`}
             >
               <ExclamationTriangleIcon className="h-4" />
               <span className="mx-1 font-medium">Missing practice plan</span>
@@ -85,9 +94,30 @@ export default function PracticePane({
                   let updatedPractices = capData.practices;
                   updatedPractices[practiceIndex].currentInstance = {
                     date: new Date(),
-                    context: [],
-                    assessment: [],
-                    plan: [],
+                    context: [
+                      {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        type: 'note',
+                        context: [],
+                        value: ''
+                      }
+                    ],
+                    assessment: [
+                      {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        type: 'note',
+                        context: [],
+                        value: ''
+                      }
+                    ],
+                    plan: [
+                      {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        type: 'note',
+                        context: [],
+                        value: ''
+                      }
+                    ],
                     followUps: []
                   };
                   updatedPractices[practiceIndex].lastUpdated = longDate(
@@ -551,7 +581,7 @@ export default function PracticePane({
               <h2 className="text-sm font-bold">{instance.date}</h2>
 
               <h3 className="text-sm font-bold mt-2">Context:</h3>
-              <p className="text-sm">
+              <div className="text-sm">
                 {instance.context && instance.context.length > 0 ? (
                   <>
                     {instance.context.map((context) => (
@@ -563,10 +593,10 @@ export default function PracticePane({
                     No context was written for this instance.
                   </span>
                 )}
-              </p>
+              </div>
 
               <h3 className="text-sm font-bold mt-2">Assessment:</h3>
-              <p className="text-sm">
+              <div className="text-sm">
                 {instance.assessment && instance.assessment.length > 0 ? (
                   <>
                     {instance.assessment.map((assessment) => (
@@ -578,7 +608,7 @@ export default function PracticePane({
                     No assessments were written for this instance.
                   </span>
                 )}
-              </p>
+              </div>
 
               <h3 className="text-sm font-bold mt-2">Practices:</h3>
               <div>

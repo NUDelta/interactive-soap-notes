@@ -71,7 +71,7 @@ export default function PracticeCard({
   return (
     <div
       ref={drop}
-      className={`flex flex-wrap aspect-square border-4 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
+      className={`flex flex-wrap border-4 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
     >
       <div
         className={`h-full`}
@@ -180,7 +180,16 @@ export default function PracticeCard({
             )}
             <div className="">
               <ExclamationTriangleIcon
-                className={`ml-2 h-8 text-orange-600 ${currInstance !== null && currInstance.plan.every((currPlan) => currPlan.value.trim() === '') ? '' : 'opacity-0'}`}
+                className={`ml-2 h-8 text-orange-600 ${
+                  currInstance !== null &&
+                  currInstance.plan.some((currPlan) => {
+                    return currPlan.value.trim() !== '';
+                  })
+                    ? 'opacity-0'
+                    : currInstance === null
+                      ? 'opacity-0'
+                      : ''
+                }`}
               />
             </div>
           </div>
