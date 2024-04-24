@@ -50,13 +50,13 @@ export const createCAPNote = async (projectName: string, noteDate: Date) => {
           // check if all practice fields are empty before adding to prior instances
           let someFieldPopulated =
             practice.currentInstance.context.some((contextEntry) => {
-              contextEntry.value.trim() !== '';
-            }) &&
+              return contextEntry.value.trim() !== '';
+            }) ||
             practice.currentInstance.assessment.some((assessmentEntry) => {
-              assessmentEntry.value.trim() !== '';
-            }) &&
+              return assessmentEntry.value.trim() !== '';
+            }) ||
             practice.currentInstance.plan.some((planEntry) => {
-              planEntry.value.trim() !== '';
+              return planEntry.value.trim() !== '';
             });
 
           if (someFieldPopulated) {
