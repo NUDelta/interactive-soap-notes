@@ -5,6 +5,8 @@ import ExclamationTriangleIcon from '@heroicons/react/24/outline/ExclamationTria
 import ArchiveBoxIcon from '@heroicons/react/24/outline/ArchiveBoxIcon';
 import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
 import LockOpenIcon from '@heroicons/react/24/outline/LockOpenIcon';
+import EyeSlashIcon from '@heroicons/react/24/outline/EyeSlashIcon';
+import EyeIcon from '@heroicons/react/24/outline/EyeIcon';
 
 import React, { useState, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
@@ -31,6 +33,9 @@ export default function PracticeCard({
 
   // store selected state for card
   const [isSelected, setIsSelected] = useState(false);
+
+  // store state for minimizing content
+  const [shouldShow, setShouldShow] = useState(true);
 
   // drag and drop colors
   function selectBackgroundColor(isActive, canDrop) {
@@ -215,9 +220,9 @@ export default function PracticeCard({
         {isAddPractice ? (
           <>
             {/* Large plus icon in center of square */}
-            <div className="p-2 flex flex-col w-1/2 h-full mx-auto items-center justify-center">
+            <div className="p-2 flex flex-col w-3/4 h-full mx-auto my-auto items-center justify-center">
               <textarea
-                className="w-full mx-auto text-base"
+                className="w-full h-1/2 text-base"
                 placeholder="Type a new practice and hit enter..."
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
@@ -250,8 +255,8 @@ export default function PracticeCard({
         ) : (
           <>
             {/* Issue title */}
-            <div className="p-2 mb-1 w-full">
-              <div className="flex">
+            <div className="p-2 mb-1 w-full flex flex-col">
+              <div className="flex flex-row">
                 <h2 className="text-base font-bold flex-auto">
                   {title.length > 100
                     ? title.substring(0, 100 - 3) + '...'
@@ -259,6 +264,27 @@ export default function PracticeCard({
                       ? 'click to enter title'
                       : title}
                 </h2>
+                <div>
+                  {shouldShow ? (
+                    <EyeSlashIcon
+                      className={`h-10 text-slate-600`}
+                      onClick={() => {
+                        console.log('clicked hide');
+                        setShouldShow(false);
+                      }}
+                    />
+                  ) : (
+                    <>
+                      <EyeIcon
+                        className={`h-10 text-slate-600`}
+                        onClick={() => {
+                          console.log('clicked hide');
+                          setShouldShow(true);
+                        }}
+                      />
+                    </>
+                  )}
+                </div>
               </div>
 
               <div className="text-xs">
@@ -324,7 +350,7 @@ export default function PracticeCard({
         )}
 
         {/* Show practice follow-ups */}
-        {!isLoading && practiceOutcome !== null ? (
+        {!isLoading && shouldShow && practiceOutcome !== null ? (
           <div className="w-full mt-8">
             <h2 className="text-md font-bold underline">
               Practice Outcomes from {shortDate(new Date(lastUpdated))}

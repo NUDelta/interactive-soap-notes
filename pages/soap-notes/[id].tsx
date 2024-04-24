@@ -314,7 +314,7 @@ export default function SOAPNote({
               </p>
 
               {/* Active Practices */}
-              <div className="grid grid-cols-4 gap-2 grid-flow-row row-auto">
+              <div className="grid grid-cols-4 gap-1 grid-flow-row row-auto">
                 {/* issue card for this week's notes */}
                 {/* <PracticeCard
                   key="issue-card-this-week"
