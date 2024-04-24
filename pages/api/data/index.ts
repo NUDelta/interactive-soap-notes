@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { createSoapNoteFixtures } from '../../../models/fixtures/soapNotes';
 import { parseFixturesFromJson } from '../../../models/fixtures/parseFixturesFromJson';
 import CAPNoteModel from '../../../models/CAPNoteModel';
+import dbConnect from '../../../lib/dbConnect';
 
 type Data = {
   msg: string;
@@ -36,6 +37,7 @@ export default async function handler(
         // clear the fixtures if requested
         if (shouldClear) {
           console.log('Clearing CAP notes');
+          await dbConnect();
           await CAPNoteModel.deleteMany({});
         }
 

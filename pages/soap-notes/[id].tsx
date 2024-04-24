@@ -472,7 +472,7 @@ export default function SOAPNote({
               </div>
 
               {/* Inactive practices */}
-              <div className="grid grid-cols-4 gap-4 grid-flow-row row-auto">
+              {/* <div className="grid grid-cols-4 gap-4 grid-flow-row row-auto">
                 <h2 className="col-span-4 text-lg font-bold mt-3">
                   <button
                     className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-bold px-4 h-8 rounded-full"
@@ -519,7 +519,7 @@ export default function SOAPNote({
                         }}
                       />
                     ))}
-              </div>
+              </div> */}
             </div>
 
             {/* Notes during SIG */}
@@ -973,8 +973,33 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   const stripIdFromFollowUpObject = (followUpObject) => {
     return {
       id: followUpObject.id.toString(),
-      parsedPractice: followUpObject.parsedPractice,
-      outcome: followUpObject.outcome
+      practice: followUpObject.practice,
+      parsedPractice: {
+        id: followUpObject.parsedPractice.id.toString(),
+        practice: followUpObject.parsedPractice.practice,
+        opportunity: followUpObject.parsedPractice.opportunity,
+        person: followUpObject.parsedPractice.person,
+        reflectionQuestions:
+          followUpObject.parsedPractice.reflectionQuestions.map((question) => {
+            return {
+              id: question.id.toString(),
+              prompt: question.prompt,
+              responseType: question.responseType
+            };
+          })
+      },
+      outcome: {
+        id: followUpObject.outcome.id.toString(),
+        didHappen: followUpObject.outcome.didHappen,
+        deliverableLink: followUpObject.outcome.deliverableLink,
+        reflections: followUpObject.outcome.reflections.map((reflection) => {
+          return {
+            id: reflection.id.toString(),
+            prompt: reflection.prompt,
+            response: reflection.response
+          };
+        })
+      }
     };
   };
 

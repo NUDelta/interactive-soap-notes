@@ -124,7 +124,7 @@ export const parseFixturesFromJson = async (fixtures) => {
                     value: planEntry.replace(/^-/gm, '').trim()
                   };
                 }),
-              followUps: []
+              followUps: computeFollowUpObjects(practice.currentInstance.plan)
             };
 
       trackedPractices.push({
@@ -193,4 +193,110 @@ export const parseFixturesFromJson = async (fixtures) => {
 
   await dbConnect();
   return await CAPNoteModel.insertMany(parsedFixtures);
+};
+
+const computeFollowUpObjects = (plan) => {
+  // parse followUp plans into blocks
+  let followUpPlans = plan.split('\n').map((planEntry) => {
+    return {
+      id: new mongoose.Types.ObjectId().toString(),
+      type: 'note',
+      context: [],
+      value: planEntry.replace(/^-/gm, '').trim()
+    };
+  });
+
+  // store followUp objects
+  let followUps = [];
+
+  // for each followUp plan, create a followUp object
+  followUpPlans.forEach((planEntry) => {
+    // get reflection questions based on the plan entry
+    let reflectionQuestions = [];
+    if (planEntry.value.includes('[plan]')) {
+      reflectionQuestions = [];
+    } else if (planEntry.value.includes('[reflect]')) {
+      {
+        reflectionQuestions = [
+          {
+            prompt: 'Enter your reflections on the above, based on this week',
+            responseType: 'string'
+          },
+          {
+            prompt:
+              'In general: did this reflection help you see your practices and understand why they happen? What was helpful? What obstacles do you still have?',
+            responseType: 'string'
+          }
+        ];
+      }
+    } else if (planEntry.value.includes('[self-work]')) {
+      reflectionQuestions = [
+        {
+          prompt: 'Did you do the work practice your mentor suggested?',
+          responseType: 'boolean'
+        },
+        {
+          prompt: 'If not, what obstacles came up in trying to do it?',
+          responseType: 'string'
+        },
+        {
+          prompt:
+            'If yes, share a link to any deliverable that shows what you worked on',
+          responseType: 'string'
+        },
+        {
+          prompt:
+            'If yes, how did your understanding change? What new risk(s) do you see?',
+          responseType: 'string'
+        }
+      ];
+    } else if (planEntry.value.includes('[help]')) {
+      reflectionQuestions = [
+        {
+          prompt:
+            'Did you do the help-seeking interaction your mentor suggested?',
+          responseType: 'boolean'
+        },
+        {
+          prompt: 'If not, why weren’t you able to do it?',
+          responseType: 'string'
+        },
+        {
+          prompt:
+            'If yes, share a link to any deliverable that shows what you worked on',
+          responseType: 'string'
+        },
+        {
+          prompt:
+            'If yes, what did it help you learn or progress?  What new risk(s) do you see?',
+          responseType: 'string'
+        }
+      ];
+    }
+
+    followUps.push({
+      id: new mongoose.Types.ObjectId().toString(),
+      practice: planEntry.value,
+      parsedPractice: {
+        id: new mongoose.Types.ObjectId().toString(),
+        practice: planEntry.value,
+        opportunity: '',
+        person: '',
+        reflectionQuestions: reflectionQuestions
+      },
+      outcome: {
+        id: new mongoose.Types.ObjectId().toString(),
+        didHappen: false,
+        deliverableLink: '',
+        reflections: reflectionQuestions.map((question) => {
+          return {
+            prompt: question.prompt,
+            response: ''
+          };
+        })
+      }
+    });
+  });
+
+  return followUps;
 };

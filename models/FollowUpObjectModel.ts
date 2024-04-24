@@ -12,29 +12,87 @@ export interface FollowUpObjectStruct {
   outcome: {
     didHappen: boolean;
     deliverableLink: string | null;
-    reflection: string;
+    reflection: FollowUpReflection[];
   };
 }
 
-export const FollowUpObjectSchema = new mongoose.Schema<FollowUpObjectStruct>({
+interface ReflectionQuestion {
+  prompt: string;
+  responseType: string;
+}
+
+interface FollowUpReflection {
+  prompt: string;
+  response: string;
+}
+
+const ReflectionQuestionSchema = new mongoose.Schema<ReflectionQuestion>({
+  prompt: {
+    type: String,
+    required: true
+  },
+  responseType: {
+    type: String,
+    required: true
+  }
+});
+
+const FollowUpReflectionSchema = new mongoose.Schema<FollowUpReflection>({
+  prompt: {
+    type: String,
+    required: true
+  },
+  response: {
+    type: String,
+    required: true
+  }
+});
+
+const ParsedPracticeSchema = new mongoose.Schema({
+  practice: {
+    type: String,
+    required: true
+  },
+  opportunity: {
+    type: String,
+    required: true
+  },
+  person: {
+    type: String,
+    required: true
+  },
+  reflectionQuestions: {
+    type: [ReflectionQuestionSchema],
+    required: true
+  }
+});
+
+const PracticeOutcomeSchema = new mongoose.Schema({
+  didHappen: {
+    type: Boolean,
+    required: true
+  },
+  deliverableLink: {
+    type: String,
+    required: false
+  },
+  reflections: {
+    type: [FollowUpReflectionSchema],
+    required: true
+  }
+});
+
+export const FollowUpObjectSchema = new mongoose.Schema({
   practice: {
     type: String,
     required: true
   },
   parsedPractice: {
-    type: {
-      practice: String,
-      opportunity: String,
-      person: String,
-      reflectionQuestions: [String]
-    },
+    type: ParsedPracticeSchema,
     required: true
   },
   outcome: {
-    type: {
-      didHappen: Boolean,
-      deliverableLink: String,
-      reflection: String
-    }
+    type: PracticeOutcomeSchema,
+    required: true
   }
 });
