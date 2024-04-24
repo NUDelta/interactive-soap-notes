@@ -917,8 +917,8 @@ export default function SOAPNote({
                                 <div className="grid grid-cols-2 gap-y-1 w-2/3">
                                   {/* what (practice), who, where / when, how */}
                                   <p>
-                                    w/[person]: who the practice should be done
-                                    with (e.g., mentor, peer, self)
+                                    w/[person, person]: person(s) who the
+                                    practice should be done with
                                   </p>
                                   <p>
                                     @[venue]: specific venue to do the practice;
