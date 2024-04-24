@@ -1,12 +1,13 @@
+import mongoose from 'mongoose';
 import dbConnect from '../../lib/dbConnect';
-import SOAPModel from '../../models/CAPNoteModel';
+import CAPNoteModel from '../../models/CAPNoteModel';
 
 /**
- * Create a new SOAP note given the project and date of the note.
+ * Create a new CAP note given the project and date of the note.
  * @param projectName
  * @param noteDate
  */
-export const createSOAPNote = async (projectName: string, noteDate: Date) => {
+export const createCAPNote = async (projectName: string, noteDate: Date) => {
   try {
     // get proj and sig info
     const projInfoRes = await fetch(
@@ -30,46 +31,82 @@ export const createSOAPNote = async (projectName: string, noteDate: Date) => {
         socialStructure.kind === 'SigStructure'
     ).abbreviation;
 
-    // get the previous SOAP note for the project
+    // get the previous CAP note for the project
     await dbConnect();
-    const previousSoapNotes = await SOAPModel.find({
+    const previousCAPNotes = await CAPNoteModel.find({
       project: projectName,
       sigName: sigName
     }).sort({ date: -1 });
-    const previousSoapNote = previousSoapNotes[0];
+    const previousCAPNote = previousCAPNotes[0];
 
-    // TODO: 04-23-24 check if issue is empty before pulling into the new note
-    // get issues from the prior soap note
-    let issues = [];
-    if (previousSoapNote) {
-      issues = previousSoapNote.issues;
+    // get practices from the prior CAP note
+    let practices = [];
+    if (previousCAPNote) {
+      practices = previousCAPNote.trackedPractices;
 
       // for each issue, add the currentInstance to the top of the priorInstances list (if not null) and set currentInstance to null
-      issues = issues.map((issue) => {
-        if (issue.currentInstance) {
-          issue.priorInstances.unshift(issue.currentInstance);
-          issue.currentInstance = null;
+      practices = practices.map((practice) => {
+        if (practice.currentInstance) {
+          // check if all practice fields are empty before adding to prior instances
+          let someFieldPopulated =
+            practice.currentInstance.context.some((contextEntry) => {
+              contextEntry.value.trim() !== '';
+            }) &&
+            practice.currentInstance.assessment.some((assessmentEntry) => {
+              assessmentEntry.value.trim() !== '';
+            }) &&
+            practice.currentInstance.plan.some((planEntry) => {
+              planEntry.value.trim() !== '';
+            });
+
+          if (someFieldPopulated) {
+            practice.priorInstances.unshift(practice.currentInstance);
+          }
+
+          // reset the current instance
+          practice.currentInstance = null;
         }
-        return issue;
+        return practice;
       });
     }
 
     // save the new SOAP note to the database
     await dbConnect();
-    return await SOAPModel.create({
+    return await CAPNoteModel.create({
       project: projectName,
       date: noteDate,
       lastUpdated: noteDate,
       sigName: sigName,
       sigAbbreviation: sigAbbreviation,
-      subjective: [],
-      objective: [],
-      assessment: [],
-      plan: [],
-      issues: issues
+      context: [
+        {
+          id: new mongoose.Types.ObjectId().toString(),
+          type: 'note',
+          context: [],
+          value: ''
+        }
+      ],
+      assessment: [
+        {
+          id: new mongoose.Types.ObjectId().toString(),
+          type: 'note',
+          context: [],
+          value: ''
+        }
+      ],
+      plan: [
+        {
+          id: new mongoose.Types.ObjectId().toString(),
+          type: 'note',
+          context: [],
+          value: ''
+        }
+      ],
+      trackedPractices: practices,
+      currIssueInstances: []
     });
   } catch (err) {
-    console.error('Error in creating SOAP note: ', err, err.stack);
+    console.error('Error in creating CAP note: ', err, err.stack);
     return null;
   }
 };

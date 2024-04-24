@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createSOAPNote } from '../../../controllers/capNotes/createSoapNote';
+import { createCAPNote } from '../../../controllers/capNotes/createSoapNote';
 import { CAPStruct } from '../../../models/CAPNoteModel';
 
 type Data = {
@@ -23,28 +23,28 @@ export default async function handler(
     method
   } = req;
   switch (method) {
-    case 'POST': // creates soap notes from input
+    case 'POST': // creates CAP notes from input
       let projectName;
       let noteDate;
       try {
         projectName = req.body.projectName;
         noteDate = new Date(req.body.noteDate);
-        let createdSOAPNote: CAPStruct = await createSOAPNote(
+        let createdCAPNote: CAPStruct = await createCAPNote(
           projectName,
           noteDate
         );
         res.status(200).json({
-          msg: 'Soap note created',
+          msg: 'CAP note created',
           success: true,
-          data: createdSOAPNote
+          data: createdCAPNote
         });
       } catch (error) {
         console.error(
-          `Error in /api/soap for creating soap note: ${projectName} -- ${noteDate}`,
+          `Error in /api/soap for creating CAP note: ${projectName} -- ${noteDate}`,
           error
         );
         res.status(400).json({
-          msg: 'Soap note not created',
+          msg: 'CAP note not created',
           success: false,
           error: error
         });
