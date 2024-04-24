@@ -19,6 +19,128 @@ export default function NoteBlock({
   // ref to the note block's content so state changes don't trigger a re-render
   const blockContent = useRef(noteContent.value);
 
+  const studentNameSet = new Set(
+    [
+      'Maalvika',
+      'Jason',
+      'Arya',
+      'Ella',
+      'Billy',
+      'Edward',
+      'Shirley',
+      'Jackie',
+      'Gustavo',
+      'Ryan',
+      'Grace',
+      'Linh',
+      'Kapil',
+      'Yinmiao'
+    ].map((name) => name.toLowerCase())
+  );
+
+  function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  const parsePracticeFollowup = (content) => {
+    let output = {
+      notificationsToStudents: null,
+      followUpAtNextMeeting: null
+    };
+
+    // TODO: one way to parse might be to use rep/[------] or @------ or w/------
+    // find what kinds of script it is
+    let splitContent = null;
+    let regexMatch = content.match(/\[(.*?)\]\s*(.*)/);
+    if (regexMatch) {
+      splitContent = regexMatch.slice(1);
+    }
+
+    // parse the content
+    if (splitContent && splitContent.length === 2 && splitContent[1] !== '') {
+      // create the message based on the script type
+      let scriptType = splitContent[0];
+      if (scriptType === 'plan') {
+        output = {
+          notificationsToStudents: `I'll link students to their sprint log and ask them to re-plan with your feedback. I'll also check tomorrow to see if they've done so, and if not ping their channel on Slack.`,
+          followUpAtNextMeeting: null
+        };
+      } else if (scriptType === 'reflect') {
+        output = {
+          notificationsToStudents:
+            "I'll share the reflection suggestions with students, and ask them to be mindful of them throughout the week.",
+          followUpAtNextMeeting:
+            "I'll ask students to reflect on how the week went with your prompts, and bring you their responses."
+        };
+      } else if (scriptType === 'help') {
+        if (!splitContent[1].includes('@') && !splitContent[1].includes('w/')) {
+          // case: general help request with no venue or people
+          output = {
+            notificationsToStudents:
+              "I'll remind students about Mysore and Pair Research opportunities throughout the week.",
+            followUpAtNextMeeting:
+              "I'll ask students to share a deliverable outcome from the help opportunity, and how that changed their research understanding."
+          };
+        } else if (
+          splitContent[1].includes('@') &&
+          !splitContent[1].includes('w/')
+        ) {
+          // case: at a venue
+          if (splitContent[1].toLowerCase().includes('mysore')) {
+            output = {
+              notificationsToStudents:
+                "I'll remind students about Mysore for this practice.",
+              followUpAtNextMeeting:
+                "I'll ask students to share a deliverable outcome from Mysore, and how that changed their research understanding."
+            };
+          } else if (splitContent[1].toLowerCase().includes('pair')) {
+            output = {
+              notificationsToStudents:
+                "I'll remind students about Pair Research for this practice.",
+              followUpAtNextMeeting:
+                "I'll share the student's Pair Research request and how it helped the students with their blockers."
+            };
+          }
+        } else if (splitContent[1].includes('w/')) {
+          // case: with a person
+          let people = [];
+          studentNameSet.forEach((name) => {
+            if (splitContent[1].toLowerCase().includes(name)) {
+              people.push(name);
+            }
+          });
+
+          if (people.length >= 0) {
+            output = {
+              notificationsToStudents: `I'll setup a group DM with ${people.map((person) => capitalizeFirstLetter(person)).join(' and ')}, and suggest they work together on the practice.`,
+              followUpAtNextMeeting: `I'll ask students to share a deliverable outcome from the help opportunity, and how that changed their research understanding.`
+            };
+          }
+        }
+
+        // check if a rep was given
+        if (splitContent[1].includes('rep/')) {
+          output = {
+            notificationsToStudents: `${output.notificationsToStudents}. I'll suggest they use the representation above.`,
+            followUpAtNextMeeting: output.followUpAtNextMeeting.replace(
+              'deliverable outcome',
+              'copy of the representation you suggested'
+            )
+          };
+        }
+      } else if (scriptType === 'self-work') {
+        output = {
+          notificationsToStudents:
+            "I'll ask students to work on the practice you suggested.",
+          followUpAtNextMeeting:
+            "I'll ask students to share their deliverable, and a reflection on how it changed their understanding."
+        };
+      }
+    }
+
+    return output;
+  };
+
   // define drag and drop functionality
   const [{ opacity }, drag] = useDrag(
     () => ({
@@ -53,43 +175,73 @@ export default function NoteBlock({
   // TODO: notes should be draggable within and across the CAP sections
   return (
     <>
-      <div ref={drag} className="border flex items-left align-middle mb-2">
-        {/* drag handle on left side */}
-        <div
-          className={`flex items-center fill-slate-200 stroke-slate-200 mr-1 ${opacity}`}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="stroke-slate-400 h-8"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      <div
+        ref={drag}
+        className="border flex flex-col items-left align-middle mb-2"
+      >
+        <div className="flex flex-row">
+          {/* drag handle on left side */}
+          <div
+            className={`flex items-center fill-slate-200 stroke-slate-200 mr-1 ${opacity}`}
           >
-            <circle cx="12" cy="12" r="1"></circle>
-            <circle cx="12" cy="5" r="1"></circle>
-            <circle cx="12" cy="19" r="1"></circle>
-            <circle cx="20" cy="12" r="1"></circle>
-            <circle cx="20" cy="5" r="1"></circle>
-            <circle cx="20" cy="19" r="1"></circle>
-          </svg>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="stroke-slate-400 h-8"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="12" cy="5" r="1"></circle>
+              <circle cx="12" cy="19" r="1"></circle>
+              <circle cx="20" cy="12" r="1"></circle>
+              <circle cx="20" cy="5" r="1"></circle>
+              <circle cx="20" cy="19" r="1"></circle>
+            </svg>
+          </div>
+
+          {/* editable content */}
+          <ContentEditable
+            id={noteId}
+            html={blockContent.current}
+            onChange={(e) => {
+              // update ref with new content
+              blockContent.current = e.target.value;
+
+              // save note changes
+              onChange(e.target.value);
+            }}
+            onKeyDown={onKeyDown}
+            onKeyUp={onKeyUp}
+            className={`p-2 flex-none w-full empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
+          />
         </div>
 
-        {/* editable content */}
-        <ContentEditable
-          id={noteId}
-          html={blockContent.current}
-          onChange={(e) => {
-            // update ref with new content
-            blockContent.current = e.target.value;
-
-            // save note changes
-            onChange(e.target.value);
-          }}
-          onKeyDown={onKeyDown}
-          onKeyUp={onKeyUp}
-          className={`p-2 w-full empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
-        />
+        {noteSection === 'plan' && (
+          <div className="ml-[40px]">
+            {parsePracticeFollowup(blockContent.current)
+              .notificationsToStudents && (
+              <p className="text-sm text-indigo-800 italic">
+                After SIG:{' '}
+                {
+                  parsePracticeFollowup(blockContent.current)
+                    .notificationsToStudents
+                }
+              </p>
+            )}
+            {parsePracticeFollowup(blockContent.current)
+              .followUpAtNextMeeting && (
+              <p className="text-sm text-sky-800 italic">
+                For next SIG:{' '}
+                {
+                  parsePracticeFollowup(blockContent.current)
+                    .followUpAtNextMeeting
+                }
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </>
   );
