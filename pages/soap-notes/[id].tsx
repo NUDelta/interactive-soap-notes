@@ -885,9 +885,7 @@ export default function SOAPNote({
                           </div>
 
                           {/* Add helper text on how to use the plan section */}
-                          {/* TODO: these don't work so disabling them for now */}
-                          {/* practice first (what), then: who, where / when, how as optional info*/}
-                          {/* {section.name === 'plan' && (
+                          {section.name === 'plan' && (
                             <div className="text-sm text-gray-700 italic mt-2">
                               <h2 className="font-bold">Practice follow-ups</h2>
                               <div className="grid grid-cols-2 gap-y-1 w-2/3">
@@ -912,6 +910,7 @@ export default function SOAPNote({
                                 Include additional info using:
                               </h2>
                               <div className="grid grid-cols-2 gap-y-1 w-2/3">
+                                {/* what (practice), who, where / when, how */}
                                 <p>
                                   w/[person]: who the practice should be done
                                   with (e.g., mentor, peer, self)
@@ -928,7 +927,7 @@ export default function SOAPNote({
                               </div>
                               <br></br>
                             </div>
-                          )} */}
+                          )}
                         </div>
                       </div>
                     </div>
