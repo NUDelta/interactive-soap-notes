@@ -483,51 +483,53 @@ export default function PracticePane({
                         }}
                       />
                     ))}
+                  </div>
+                </div>
+
+                {section.name === 'plan' && (
+                  <>
                     <div className="italic text-slate-400">
                       Press Shift-Enter to add a new text block. Press Tab to
                       move to next block, and Shift-Tab to move to previous
                       block.
                     </div>
-                  </div>
-                </div>
+                    <div className="text-sm text-gray-700 italic mt-2">
+                      <h2 className="font-bold">Practice follow-ups</h2>
+                      <div className="grid grid-cols-2 gap-y-1 w-2/3">
+                        <p>
+                          [plan]: stories, deliverables, or tasks to add to the
+                          student&apos;s sprint
+                        </p>
+                        <p>[help]: work with a peer or mentor on practice</p>
+                        <p>[reflect]: reflect on a situation if it comes up</p>
+                        <p>
+                          [self-work]: work activity for student to do on their
+                          own
+                        </p>
+                      </div>
 
-                {section.name === 'plan' && (
-                  <div className="text-sm text-gray-700 italic mt-2">
-                    <h2 className="font-bold">Practice follow-ups</h2>
-                    <div className="grid grid-cols-2 gap-y-1 w-2/3">
-                      <p>
-                        [plan]: stories, deliverables, or tasks to add to the
-                        student&apos;s sprint
-                      </p>
-                      <p>[help]: work with a peer or mentor on practice</p>
-                      <p>[reflect]: reflect on a situation if it comes up</p>
-                      <p>
-                        [self-work]: work activity for student to do on their
-                        own
-                      </p>
+                      <h2 className="font-bold mt-4">
+                        Include additional info using:
+                      </h2>
+                      <div className="grid grid-cols-2 gap-y-1 w-2/3">
+                        {/* what (practice), who, where / when, how */}
+                        <p>
+                          w/[person]: who the practice should be done with
+                          (e.g., mentor, peer, self)
+                        </p>
+                        <p>
+                          @[venue]: specific venue to do the practice; CAP will
+                          follow-up at the next one.
+                        </p>
+                        <p>
+                          rep/[representation]: representation to use for
+                          practice (e.g., canvas section; sketch of a journey
+                          map; reflection question(s))
+                        </p>
+                      </div>
+                      <br></br>
                     </div>
-
-                    <h2 className="font-bold mt-4">
-                      Include additional info using:
-                    </h2>
-                    <div className="grid grid-cols-2 gap-y-1 w-2/3">
-                      {/* what (practice), who, where / when, how */}
-                      <p>
-                        w/[person]: who the practice should be done with (e.g.,
-                        mentor, peer, self)
-                      </p>
-                      <p>
-                        @[venue]: specific venue to do the practice; CAP will
-                        follow-up at the next one.
-                      </p>
-                      <p>
-                        rep/[representation]: representation to use for practice
-                        (e.g., canvas section; sketch of a journey map;
-                        reflection question(s))
-                      </p>
-                    </div>
-                    <br></br>
-                  </div>
+                  </>
                 )}
               </div>
             ))}
