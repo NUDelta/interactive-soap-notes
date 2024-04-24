@@ -6,7 +6,7 @@ import ArchiveBoxIcon from '@heroicons/react/24/outline/ArchiveBoxIcon';
 import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
 import LockOpenIcon from '@heroicons/react/24/outline/LockOpenIcon';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { shortDate } from '../lib/helperFns';
 
@@ -29,70 +29,6 @@ export default function PracticeCard({
   const isThisWeek = issueId === 'this-weeks-notes';
   const isAddPractice = issueId === 'add-practice';
 
-  // get the last prior instance, if provided
-  // prior instances are ordered by date, so the first one is the most recent
-  let lastPriorInstance = null;
-  let practiceOutcome = null;
-  if (priorInstances !== undefined && priorInstances.length > 0) {
-    lastPriorInstance = priorInstances[0];
-
-    // TODO: 04-23-24 buggy -- probably a simpler way
-    // check if lastUpdated is today and lastPriorInstance is no more than 10 days before last updated
-    const lastUpdatedDate = new Date(lastUpdated);
-    const lastPriorInstanceDate = new Date(lastPriorInstance.date);
-    const timeDiff = Math.abs(
-      lastUpdatedDate.getTime() - lastPriorInstanceDate.getTime()
-    );
-    const issueDiffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-    const parsedNoteDate = new Date(noteDate);
-    const timeDiffToday = Math.abs(
-      parsedNoteDate.getTime() - lastUpdatedDate.getTime()
-    );
-    const diffDaysNotePractice = Math.ceil(timeDiffToday / (1000 * 3600 * 24));
-
-    // note date and date of practice should be less than 10
-    if (diffDaysNotePractice > 10) {
-      lastPriorInstance = null;
-    } else {
-      // create an object that holds all the practices, their outcome, and the deliverables / reflections
-      practiceOutcome = lastPriorInstance.followUps
-        .filter((followup) => {
-          return !followup.practice.includes('[plan]');
-        })
-        .map((followUp) => {
-          return {
-            practice: followUp.practice,
-            didHappen: followUp.outcome.didHappen,
-            deliverable: followUp.practice.includes('[reflect]')
-              ? null
-              : followUp.outcome.deliverableLink,
-            reflections: followUp.outcome.reflections
-              .filter((reflection) => {
-                if (followUp.practice.includes('[reflect]')) {
-                  return true;
-                }
-
-                return (
-                  (followUp.outcome.didHappen &&
-                    reflection.prompt.includes('If yes') &&
-                    !reflection.prompt.includes(
-                      'share a link to any deliverable'
-                    )) ||
-                  (!followUp.outcome.didHappen &&
-                    reflection.prompt.includes('If not'))
-                );
-              })
-              .map((reflection) => {
-                return {
-                  prompt: reflection.prompt,
-                  response: reflection.response
-                };
-              })
-          };
-        });
-    }
-  }
   // store selected state for card
   const [isSelected, setIsSelected] = useState(false);
 
@@ -134,6 +70,130 @@ export default function PracticeCard({
   );
   const isActive = canDrop && isOver;
   const backgroundColor = selectBackgroundColor(isActive, canDrop);
+
+  // compute and store practice outcome for the last
+  const [practiceOutcome, setPracticeOutcome] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const createYellkeyForURL = async (url) => {
+      let shorteredUrl = null;
+      try {
+        shorteredUrl = await fetch(
+          'https://www.yellkey.com/api/new?' +
+            new URLSearchParams({ url: url, time: '60' })
+        );
+        let res = await shorteredUrl.json();
+        shorteredUrl = res.key;
+      } catch (error) {
+        console.error('Error in creating yellkey for URL', error);
+      }
+      return shorteredUrl;
+    };
+
+    const getYellKeysForAllDeliverables = async (practiceOutcome) => {
+      setIsLoading(true);
+
+      // check if practiceOutcome is null before proceeding
+      if (practiceOutcome === null) {
+        setIsLoading(false);
+        setPracticeOutcome(practiceOutcome);
+        return;
+      }
+
+      /// create a yellkey for each deliverable
+      let updatedPracticeOutcome = [];
+      for (let i = 0; i < practiceOutcome.length; i++) {
+        let practice = practiceOutcome[i];
+        let updatedDeliverable = practice.deliverable;
+        if (updatedDeliverable !== null) {
+          let yellkey = await createYellkeyForURL(updatedDeliverable);
+          updatedPracticeOutcome.push({
+            ...practice,
+            yellkey
+          });
+        } else {
+          updatedPracticeOutcome.push({
+            ...practice,
+            yellkey: null
+          });
+        }
+      }
+      setIsLoading(false);
+
+      // set state variable
+      setPracticeOutcome(updatedPracticeOutcome);
+    };
+
+    // get the last prior instance, if provided
+    // prior instances are ordered by date, so the first one is the most recent
+    let lastPriorInstance = null;
+    let practiceOutcome = null;
+    if (priorInstances !== undefined && priorInstances.length > 0) {
+      lastPriorInstance = priorInstances[0];
+
+      // TODO: 04-23-24 buggy -- probably a simpler way
+      // check if lastUpdated is today and lastPriorInstance is no more than 10 days before last updated
+      const lastUpdatedDate = new Date(lastUpdated);
+      const lastPriorInstanceDate = new Date(lastPriorInstance.date);
+      const timeDiff = Math.abs(
+        lastUpdatedDate.getTime() - lastPriorInstanceDate.getTime()
+      );
+      const issueDiffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+      const parsedNoteDate = new Date(noteDate);
+      const timeDiffToday = Math.abs(
+        parsedNoteDate.getTime() - lastUpdatedDate.getTime()
+      );
+      const diffDaysNotePractice = Math.ceil(
+        timeDiffToday / (1000 * 3600 * 24)
+      );
+
+      // note date and date of practice should be less than 10
+      if (diffDaysNotePractice > 10) {
+        lastPriorInstance = null;
+      } else {
+        // create an object that holds all the practices, their outcome, and the deliverables / reflections
+        practiceOutcome = lastPriorInstance.followUps
+          .filter((followup) => {
+            return !followup.practice.includes('[plan]');
+          })
+          .map((followUp) => {
+            return {
+              practice: followUp.practice,
+              didHappen: followUp.outcome.didHappen,
+              deliverable: followUp.practice.includes('[reflect]')
+                ? null
+                : followUp.outcome.deliverableLink,
+              reflections: followUp.outcome.reflections
+                .filter((reflection) => {
+                  if (followUp.practice.includes('[reflect]')) {
+                    return true;
+                  }
+
+                  return (
+                    (followUp.outcome.didHappen &&
+                      reflection.prompt.includes('If yes') &&
+                      !reflection.prompt.includes(
+                        'share a link to any deliverable'
+                      )) ||
+                    (!followUp.outcome.didHappen &&
+                      reflection.prompt.includes('If not'))
+                  );
+                })
+                .map((reflection) => {
+                  return {
+                    prompt: reflection.prompt,
+                    response: reflection.response
+                  };
+                })
+            };
+          });
+      }
+    }
+
+    getYellKeysForAllDeliverables(practiceOutcome);
+  }, [priorInstances, lastUpdated, noteDate]);
 
   return (
     <div
@@ -264,7 +324,7 @@ export default function PracticeCard({
         )}
 
         {/* Show practice follow-ups */}
-        {practiceOutcome !== null ? (
+        {!isLoading && practiceOutcome !== null ? (
           <div className="w-full mt-8">
             <h2 className="text-md font-bold underline">
               Practice Outcomes from {shortDate(new Date(lastUpdated))}
@@ -294,14 +354,26 @@ export default function PracticeCard({
                           <p className="text-normal font-semibold">
                             Deliverable:{' '}
                             {practice.deliverable !== '' ? (
-                              <a
-                                href={practice.deliverable}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-blue-600 underline font-normal"
-                              >
-                                Link to deliverable
-                              </a>
+                              <>
+                                <a
+                                  href={practice.deliverable}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-blue-600 underline font-normal"
+                                >
+                                  Link to deliverable
+                                </a>
+                                {practice.yellkey === null ? (
+                                  <></>
+                                ) : (
+                                  <span className="font-semibold">
+                                    {' '}
+                                    {`(Yellkey: `}
+                                    <span>{practice.yellkey}</span>
+                                    {`)`}
+                                  </span>
+                                )}
+                              </>
                             ) : (
                               <span className="font-normal text-rose-600">
                                 Deliverable not linked
