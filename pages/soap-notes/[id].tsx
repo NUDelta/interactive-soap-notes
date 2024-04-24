@@ -217,7 +217,7 @@ export default function SOAPNote({
       </Head>
 
       {/* Header info for SOAP note */}
-      <div className="container mx-auto grid grid-cols-3 gap-x-5 gap-y-5 auto-rows-auto w-full mt-3">
+      <div className="w-11/12 mx-auto grid grid-cols-3 gap-x-5 gap-y-5 auto-rows-auto  mt-3">
         {/* Back button */}
         <div className="col-span-3">
           <Link href="/">
@@ -308,17 +308,15 @@ export default function SOAPNote({
               </h1>
               <p className="italic mb-2">
                 Click on an practice to view its details, and current issue for
-                the practice. Click the checkmark to resolve a practice, which
-                means the practice is not of current focus but can still be
-                added to from notes if needed. Click the archive icon to remove
-                the practice, meaning it is no longer relevant for the project
-                or student.
+                the practice; clicking it again will switch you back to This
+                Week&apos;s Notes. New practices can be created using the last
+                cell.
               </p>
 
               {/* Active Practices */}
-              <div className="grid grid-cols-6 gap-4 grid-flow-row row-auto">
+              <div className="grid grid-cols-4 gap-2 grid-flow-row row-auto">
                 {/* issue card for this week's notes */}
-                <PracticeCard
+                {/* <PracticeCard
                   key="issue-card-this-week"
                   issueId="this-weeks-notes"
                   title="This week's notes"
@@ -334,7 +332,7 @@ export default function SOAPNote({
                   onArchive={() => {
                     return;
                   }}
-                />
+                /> */}
 
                 {/* tracked practices */}
                 {capData.practices
@@ -352,7 +350,9 @@ export default function SOAPNote({
                       selectedIssue={selectedIssue}
                       setSelectedIssue={setSelectedIssue}
                       currInstance={practice.currentInstance}
+                      priorInstances={practice.priorInstances}
                       issueIsResolved={practice.practiceInactive}
+                      noteDate={noteInfo.sigDate}
                       onResolved={(e) => {
                         // confirm if the user wants to resolve the issue
                         if (
@@ -415,6 +415,7 @@ export default function SOAPNote({
                   setSelectedIssue={setSelectedIssue}
                   currInstance={null}
                   issueIsResolved={false}
+                  noteDate={noteInfo.sigDate}
                   onResolved={() => {
                     return;
                   }}
@@ -547,7 +548,7 @@ export default function SOAPNote({
               ) : (
                 <div>
                   <h1 className="font-bold text-2xl border-b border-black mb-3">
-                    This week&apos;s notes
+                    This Week&apos;s Notes
                   </h1>
 
                   {/* TODO: show only for the default note; for issues, replace with an editable description */}
@@ -735,7 +736,7 @@ export default function SOAPNote({
                                   // create a new practice
                                   let newPractice = {
                                     id: new mongoose.Types.ObjectId().toString(),
-                                    title: noteBlock.value,
+                                    title: noteBlock.value.trim(),
                                     description: '',
                                     lastUpdated: longDate(new Date()),
                                     practiceInactive: false,
@@ -952,6 +953,23 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
    */
   // TODO: see how I can add type checking to this
   let currentCAPNote = await fetchCAPNote(sigAbbrev, project, date);
+
+  // sort the practices by last updated date
+  currentCAPNote.trackedPractices.sort((a, b) => {
+    return new Date(b.lastUpdated) - new Date(a.lastUpdated);
+  });
+
+  // sort current issue instances by date
+  currentCAPNote.currIssueInstances.sort((a, b) => {
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  // sort the prior instances in each practice by date
+  currentCAPNote.trackedPractices.forEach((practice) => {
+    practice.priorInstances.sort((a, b) => {
+      return new Date(b.date) - new Date(a.date);
+    });
+  });
 
   // remove id from TextEntryObjects
   const stripIdFromTextEntry = (entry) => {

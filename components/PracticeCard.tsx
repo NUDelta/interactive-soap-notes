@@ -17,15 +17,81 @@ export default function PracticeCard({
   selectedIssue,
   setSelectedIssue,
   currInstance,
+  priorInstances = undefined,
   issueIsResolved,
   onResolved,
   onArchive,
-  onAddPractice = undefined
+  onAddPractice = undefined,
+  noteDate
 }): JSX.Element {
   // special cases for this week's notes and add practice
   const isThisWeek = issueId === 'this-weeks-notes';
   const isAddPractice = issueId === 'add-practice';
 
+  // get the last prior instance, if provided
+  // prior instances are ordered by date, so the first one is the most recent
+  let lastPriorInstance = null;
+  let practiceOutcome = null;
+  if (priorInstances !== undefined && priorInstances.length > 0) {
+    lastPriorInstance = priorInstances[0];
+
+    // TODO: 04-23-24 buggy -- probably a simpler way
+    // check if lastUpdated is today and lastPriorInstance is no more than 10 days before last updated
+    const lastUpdatedDate = new Date(lastUpdated);
+    const lastPriorInstanceDate = new Date(lastPriorInstance.date);
+    const timeDiff = Math.abs(
+      lastUpdatedDate.getTime() - lastPriorInstanceDate.getTime()
+    );
+    const issueDiffDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+    const parsedNoteDate = new Date(noteDate);
+    const timeDiffToday = Math.abs(
+      parsedNoteDate.getTime() - lastUpdatedDate.getTime()
+    );
+    const diffDaysNotePractice = Math.ceil(timeDiffToday / (1000 * 3600 * 24));
+
+    // note date and date of practice should be less than 10
+    if (diffDaysNotePractice > 10) {
+      lastPriorInstance = null;
+    } else {
+      // create an object that holds all the practices, their outcome, and the deliverables / reflections
+      practiceOutcome = lastPriorInstance.followUps
+        .filter((followup) => {
+          return !followup.practice.includes('[plan]');
+        })
+        .map((followUp) => {
+          return {
+            practice: followUp.practice,
+            didHappen: followUp.outcome.didHappen,
+            deliverable: followUp.practice.includes('[reflect]')
+              ? null
+              : followUp.outcome.deliverableLink,
+            reflections: followUp.outcome.reflections
+              .filter((reflection) => {
+                if (followUp.practice.includes('[reflect]')) {
+                  return true;
+                }
+
+                return (
+                  (followUp.outcome.didHappen &&
+                    reflection.prompt.includes('If yes') &&
+                    !reflection.prompt.includes(
+                      'share a link to any deliverable'
+                    )) ||
+                  (!followUp.outcome.didHappen &&
+                    reflection.prompt.includes('If not'))
+                );
+              })
+              .map((reflection) => {
+                return {
+                  prompt: reflection.prompt,
+                  response: reflection.response
+                };
+              })
+          };
+        });
+    }
+  }
   // store selected state for card
   const [isSelected, setIsSelected] = useState(false);
 
@@ -71,28 +137,26 @@ export default function PracticeCard({
   return (
     <div
       ref={drop}
-      className={`flex flex-wrap border-4 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
-    >
-      <div
-        className={`h-full`}
-        onClick={() => {
-          if (!isAddPractice) {
-            setIsSelected(!isSelected);
-            if (issueId === selectedIssue) {
-              // set default to this week's notes
-              setSelectedIssue('this-weeks-notes');
-            } else {
-              setSelectedIssue(issueId);
-            }
+      className={`flex flex-wrap border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
+      onClick={() => {
+        if (!isAddPractice) {
+          setIsSelected(!isSelected);
+          if (issueId === selectedIssue) {
+            // set default to this week's notes
+            setSelectedIssue('this-weeks-notes');
+          } else {
+            setSelectedIssue(issueId);
           }
-        }}
-      >
+        }
+      }}
+    >
+      <div className={`w-full h-full`}>
         {isAddPractice ? (
           <>
             {/* Large plus icon in center of square */}
-            <div className="p-2 flex flex-wrap h-full w-full items-center justify-center">
+            <div className="p-2 flex flex-col w-1/2 h-full mx-auto items-center justify-center">
               <textarea
-                className="w-full h-1/3 mx-auto text-sm"
+                className="w-full mx-auto text-base"
                 placeholder="Type a new practice and hit enter..."
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
@@ -143,7 +207,8 @@ export default function PracticeCard({
               {/* Issue description */}
               <div className="mt-1">
                 {description.trim() === '' ? (
-                  <p className="text-base italic">No description available</p>
+                  // <p className="text-base italic">No description available</p>
+                  <></>
                 ) : (
                   <p className="text-base">{description}</p>
                 )}
@@ -191,6 +256,95 @@ export default function PracticeCard({
                       : ''
                 }`}
               />
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+
+        {/* Show practice follow-ups */}
+        {practiceOutcome !== null ? (
+          <div className="w-full mt-8">
+            <h2 className="text-md font-bold underline">Practice Outcomes</h2>
+            <div className="flex flex-wrap">
+              {practiceOutcome.map((practice) => {
+                return (
+                  <div key={practice.practice} className="w-full mb-4">
+                    <h2 className="text-base">{practice.practice}</h2>
+
+                    {/* Did the practice happen? */}
+                    <div className="flex flex-wrap">
+                      <div className="w-full">
+                        <p className="text-normal font-semibold">
+                          Did this happen?{' '}
+                          <span
+                            className={`font-normal ${practice.didHappen ? 'text-green-600' : 'text-rose-600'}`}
+                          >
+                            {practice.didHappen ? 'Yes' : 'No'}
+                          </span>
+                        </p>
+                      </div>
+
+                      {/* Link to deliverable */}
+                      {practice.deliverable !== null ? (
+                        <div className="w-full mt-1">
+                          <p className="text-normal font-semibold">
+                            Deliverable:{' '}
+                            {practice.deliverable !== '' ? (
+                              <a
+                                href={practice.deliverable}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-blue-600 underline font-normal"
+                              >
+                                Link to deliverable
+                              </a>
+                            ) : (
+                              <span className="font-normal text-rose-600">
+                                Deliverable not linked
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      ) : (
+                        <></>
+                      )}
+
+                      {/* Reflections */}
+                      {practice.reflections.length > 0 ? (
+                        <div className="w-full mt-1">
+                          <h3 className="text-normal font-bold">
+                            Reflections:
+                          </h3>
+                          {practice.reflections.map((reflection) => {
+                            return (
+                              <div
+                                key={reflection.prompt}
+                                className="w-full mb-2"
+                              >
+                                <h4 className="text-normal font-medium">
+                                  Q: {reflection.prompt}
+                                </h4>
+                                {reflection.response === '' ? (
+                                  <p className="text-normal text-rose-600">
+                                    No response from student
+                                  </p>
+                                ) : (
+                                  <p className="text-normal text-green-600">
+                                    {reflection.response}
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <></>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : (

@@ -331,7 +331,7 @@ export default function PracticePane({
                             // create a new practice
                             let newPractice = {
                               id: new mongoose.Types.ObjectId().toString(),
-                              title: noteBlock.value,
+                              title: noteBlock.value.trim(),
                               description: '',
                               lastUpdated: longDate(new Date()),
                               practiceInactive: false,
