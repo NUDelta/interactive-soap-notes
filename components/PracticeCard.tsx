@@ -8,6 +8,7 @@ import LockOpenIcon from '@heroicons/react/24/outline/LockOpenIcon';
 
 import React, { useState } from 'react';
 import { useDrop } from 'react-dnd';
+import { shortDate } from '../lib/helperFns';
 
 export default function PracticeCard({
   issueId,
@@ -265,7 +266,9 @@ export default function PracticeCard({
         {/* Show practice follow-ups */}
         {practiceOutcome !== null ? (
           <div className="w-full mt-8">
-            <h2 className="text-md font-bold underline">Practice Outcomes</h2>
+            <h2 className="text-md font-bold underline">
+              Practice Outcomes from {shortDate(new Date(lastUpdated))}
+            </h2>
             <div className="flex flex-wrap">
               {practiceOutcome.map((practice) => {
                 return (
