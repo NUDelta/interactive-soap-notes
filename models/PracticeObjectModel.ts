@@ -4,11 +4,11 @@ import { IssueObjectStruct, IssueObjectSchema } from './IssueObjectModel';
 export interface PracticeObjectStruct {
   title: string;
   description: string;
-  currentInstance: IssueObjectStruct;
-  priorInstances: IssueObjectStruct[];
-  lastUpdated: Date; // indicator of when practice was last discussed
+  createdAt: Date;
+  lastUpdated: Date;
   practiceInactive: boolean; // whether the practice has temporarily been resolved
   practiceArchived: boolean; // whether practice should be permanently archived
+  prevIssues: IssueObjectStruct[];
 }
 
 export const PracticeObjectSchema = new mongoose.Schema<PracticeObjectStruct>({
@@ -18,6 +18,10 @@ export const PracticeObjectSchema = new mongoose.Schema<PracticeObjectStruct>({
   },
   description: {
     type: String,
+    required: true
+  },
+  createdAt: {
+    type: Date,
     required: true
   },
   lastUpdated: {
@@ -34,12 +38,8 @@ export const PracticeObjectSchema = new mongoose.Schema<PracticeObjectStruct>({
     required: true,
     default: false
   },
-  currentInstance: {
-    type: IssueObjectSchema,
-    default: null
-  },
-  priorInstances: {
+  prevIssues: {
     type: [IssueObjectSchema],
-    default: []
+    required: true
   }
 });

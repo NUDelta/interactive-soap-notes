@@ -11,52 +11,49 @@ import dbConnect from '../../lib/dbConnect';
 const convertTimestampToDate = (timestamp, timezone) => {
   // convert timestamp from date and timezone into utc
   let date = new Date(timestamp);
-  // let utcDate = new Date(date.toLocaleString('en-US', { timeZone: timezone }));
   return date;
 };
 
+// UPDATED: parses data from 04-29-24 backup onwards
 export const parseFixturesFromJson = async (fixtures) => {
   // create an array to hold the parsed fixtures
   let parsedFixtures = [];
 
   // loop through the fixtures and parse them
   fixtures.forEach((fixture) => {
+    // store note date
+    let noteDate = convertTimestampToDate(
+      fixture.date['$date'],
+      'America/Chicago'
+    );
+    let lastUpdated = convertTimestampToDate(
+      fixture.lastUpdated['$date'],
+      'America/Chicago'
+    );
+
     // create a new CAP note object to hold everything
     let newCAPNote = new CAPNoteModel({
       project: fixture.project,
-      date: convertTimestampToDate(
-        Number(fixture.date['$date']['$numberLong']),
-        'America/Chicago'
-      ),
-      lastUpdated: convertTimestampToDate(
-        Number(fixture.lastUpdated['$date']['$numberLong']),
-        'America/Chicago'
-      ),
+      date: noteDate,
+      lastUpdated: lastUpdated,
       sigName: fixture.sigName,
       sigAbbreviation: fixture.sigAbbreviation,
       context: [],
       assessment: [],
       plan: [],
-      trackedPractices: [],
-      currIssueInstances: []
+      pastIssues: [],
+      currentIssues: [],
+      trackedPractices: []
     });
 
     // parse context
     let context = [];
-    fixture.subjective.forEach((contextEntry) => {
+    fixture.context.forEach((contextEntry) => {
       context.push({
         id: new mongoose.Types.ObjectId().toString(),
         type: 'note',
         context: contextEntry.context,
         value: contextEntry.value
-      });
-    });
-    fixture.objective.forEach((contextEntry) => {
-      context.push({
-        id: new mongoose.Types.ObjectId().toString(),
-        type: 'note',
-        context: contextEntry.context,
-        value: contextEntry.value.replace(' - ', '').trim()
       });
     });
 
@@ -67,7 +64,7 @@ export const parseFixturesFromJson = async (fixtures) => {
         id: new mongoose.Types.ObjectId().toString(),
         type: 'note',
         context: assessmentEntry.context,
-        value: assessmentEntry.value.replace(' - ', '').trim()
+        value: assessmentEntry.value
       });
     });
 
@@ -78,114 +75,205 @@ export const parseFixturesFromJson = async (fixtures) => {
         id: new mongoose.Types.ObjectId().toString(),
         type: 'note',
         context: planEntry.context,
-        value: planEntry.value.replace(' - ', '').trim()
+        value: planEntry.value
       });
     });
 
-    // parse trackedPractices
+    // convert trackedPractices from fixture into currentIssues and trackedPractices
+    let pastIssues = [];
+    let currentIssues = [];
     let trackedPractices = [];
-    fixture.issues.forEach((practice) => {
+
+    fixture.trackedPractices.forEach((practice) => {
+      // get the current data of the practice
+      let practiceLastUpdated = convertTimestampToDate(
+        practice.lastUpdated['$date'],
+        'America/Chicago'
+      );
+
+      // if there's a current instance of the practice, create a new current issue for it
       let currPracticeInstance =
         practice.currentInstance === null
           ? null
           : {
               id: new mongoose.Types.ObjectId().toString(),
+              title: practice.title,
               date: convertTimestampToDate(
-                Number(practice.currentInstance.date['$date']['$numberLong']),
+                practice.currentInstance.date['$date'],
                 'America/Chicago'
               ),
-              context: practice.currentInstance.context
-                .split('\n')
-                .map((contextEntry) => {
+              lastUpdated: convertTimestampToDate(
+                practice.currentInstance.date['$date'],
+                'America/Chicago'
+              ),
+              context: practice.currentInstance.context.map((contextEntry) => {
+                return {
+                  id: new mongoose.Types.ObjectId().toString(),
+                  type: 'note',
+                  context: contextEntry.context,
+                  value: contextEntry.value
+                };
+              }),
+              assessment: practice.currentInstance.assessment.map(
+                (assessmentEntry) => {
                   return {
                     id: new mongoose.Types.ObjectId().toString(),
                     type: 'note',
-                    context: [],
-                    value: contextEntry.replace(/^-/gm, '').trim()
+                    context: assessmentEntry.context,
+                    value: assessmentEntry.value
                   };
-                }),
-              assessment: practice.currentInstance.summary
-                .split('\n')
-                .map((assessmentEntry) => {
-                  return {
-                    id: new mongoose.Types.ObjectId().toString(),
-                    type: 'note',
-                    context: [],
-                    value: assessmentEntry.replace(/^-/gm, '').trim()
-                  };
-                }),
-              plan: practice.currentInstance.plan
-                .split('\n')
-                .map((planEntry) => {
-                  return {
-                    id: new mongoose.Types.ObjectId().toString(),
-                    type: 'note',
-                    context: [],
-                    value: planEntry.replace(/^-/gm, '').trim()
-                  };
-                }),
-              followUps: computeFollowUpObjects(practice.currentInstance.plan)
+                }
+              ),
+              plan: practice.currentInstance.plan.map((planEntry) => {
+                return {
+                  id: new mongoose.Types.ObjectId().toString(),
+                  type: 'note',
+                  context: planEntry.context,
+                  value: planEntry.value
+                };
+              }),
+              followUps:
+                practice.currentInstance.followUps.length == 0
+                  ? computeFollowUpObjects(practice.currentInstance.plan) // compute if no follow-ups are already there
+                  : practice.currentInstance.followUps.map((followUp) => {
+                      return {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        practice: followUp.practice,
+                        parsedPractice: {
+                          id: new mongoose.Types.ObjectId().toString(),
+                          practice: followUp.practice,
+                          opportunity: '',
+                          person: '',
+                          reflectionQuestions: []
+                        },
+                        outcome: {
+                          id: new mongoose.Types.ObjectId().toString(),
+                          didHappen: followUp.outcome.didHappen,
+                          deliverableLink: followUp.outcome.deliverableLink,
+                          reflections: followUp.outcome.reflections.map(
+                            (reflection) => {
+                              return {
+                                prompt: reflection.prompt,
+                                response: reflection.response
+                              };
+                            }
+                          )
+                        }
+                      };
+                    })
             };
+      if (currPracticeInstance !== null) {
+        currentIssues.push(currPracticeInstance);
+      }
 
+      // for each prior instance, check if the date is within 1 week of the noteDate. add as a pastIssue if so
+      practice.priorInstances.forEach((instance) => {
+        let instanceDate = new Date(instance.date['$date']);
+        let roundedInstanceDate = new Date(
+          instanceDate.getFullYear(),
+          instanceDate.getMonth(),
+          instanceDate.getDate()
+        );
+
+        let oneWeekAgoFromCurrNote = new Date(
+          noteDate.getFullYear(),
+          noteDate.getMonth(),
+          noteDate.getDate()
+        );
+        oneWeekAgoFromCurrNote.setDate(oneWeekAgoFromCurrNote.getDate() - 7);
+
+        if (
+          instanceDate >= oneWeekAgoFromCurrNote &&
+          instanceDate <= noteDate
+        ) {
+          pastIssues.push({
+            id: new mongoose.Types.ObjectId().toString(),
+            title: practice.title,
+            date: roundedInstanceDate,
+            lastUpdated: instanceDate,
+            context: instance.context.map((contextEntry) => {
+              return {
+                id: new mongoose.Types.ObjectId().toString(),
+                type: 'note',
+                context: contextEntry.context,
+                value: contextEntry.value
+              };
+            }),
+            assessment: instance.assessment.map((assessmentEntry) => {
+              return {
+                id: new mongoose.Types.ObjectId().toString(),
+                type: 'note',
+                context: assessmentEntry.context,
+                value: assessmentEntry.value
+              };
+            }),
+            plan: instance.plan.map((planEntry) => {
+              return {
+                id: new mongoose.Types.ObjectId().toString(),
+                type: 'note',
+                context: planEntry.context,
+                value: planEntry.value
+              };
+            }),
+            followUps:
+              instance.followUps.length == 0
+                ? computeFollowUpObjects(instance.plan) // compute if no follow-ups are already there
+                : instance.followUps.map((followUp) => {
+                    return {
+                      id: new mongoose.Types.ObjectId().toString(),
+                      practice: followUp.practice,
+                      parsedPractice: {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        practice: followUp.practice,
+                        opportunity: '',
+                        person: '',
+                        reflectionQuestions: []
+                      },
+                      outcome: {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        didHappen: followUp.outcome.didHappen,
+                        deliverableLink: followUp.outcome.deliverableLink,
+                        reflections: followUp.outcome.reflections.map(
+                          (reflection) => {
+                            return {
+                              prompt: reflection.prompt,
+                              response: reflection.response
+                            };
+                          }
+                        )
+                      }
+                    };
+                  })
+          });
+        }
+      });
+
+      // TODO: add remaining as tracked practices (data model is different)
       trackedPractices.push({
         id: new mongoose.Types.ObjectId().toString(),
         title: practice.title,
         description: practice.description,
+        createdAt: convertTimestampToDate(
+          practice.lastUpdated['$date'],
+          'America/Chicago'
+        ),
         lastUpdated: convertTimestampToDate(
-          Number(practice.lastUpdated['$date']['$numberLong']),
+          practice.lastUpdated['$date'],
           'America/Chicago'
         ),
         practiceInactive: practice.issueInactive,
         practiceArchived: practice.issueArchived,
-        currentInstance: currPracticeInstance,
-        priorInstances: practice.priorInstances.map((instance) => {
-          return {
-            id: new mongoose.Types.ObjectId().toString(),
-            date: new Date(Number(instance.date['$date']['$numberLong'])),
-            context: instance.context.split('\n').map((contextEntry) => {
-              return {
-                id: new mongoose.Types.ObjectId().toString(),
-                type: 'note',
-                context: [],
-                value: contextEntry.replace(/^-/gm, '').trim()
-              };
-            }),
-            assessment: instance.summary.split('\n').map((assessmentEntry) => {
-              return {
-                id: new mongoose.Types.ObjectId().toString(),
-                type: 'note',
-                context: [],
-                value: assessmentEntry.replace(/^-/gm, '').trim()
-              };
-            }),
-            plan: instance.plan.split('\n').map((planEntry) => {
-              return {
-                id: new mongoose.Types.ObjectId().toString(),
-                type: 'note',
-                context: [],
-                value: planEntry.replace(/^-/gm, '').trim()
-              };
-            }),
-            followUps: []
-          };
-        })
+        prevIssues: []
       });
-    });
-
-    // get current instances from tracked practices
-    let currIssueInstances = [];
-    trackedPractices.forEach((practice) => {
-      // add current instance if not null
-      if (practice.currentInstance)
-        currIssueInstances.push(practice.currentInstance);
     });
 
     // add everything to the new CAP note
     newCAPNote.context = context;
     newCAPNote.assessment = assessment;
     newCAPNote.plan = plan;
+    newCAPNote.pastIssues = pastIssues;
+    newCAPNote.currentIssues = currentIssues;
     newCAPNote.trackedPractices = trackedPractices;
-    newCAPNote.currIssueInstances = currIssueInstances;
 
     // add the new CAP note to the parsed fixtures array
     parsedFixtures.push(newCAPNote);
@@ -197,12 +285,12 @@ export const parseFixturesFromJson = async (fixtures) => {
 
 const computeFollowUpObjects = (plan) => {
   // parse followUp plans into blocks
-  let followUpPlans = plan.split('\n').map((planEntry) => {
+  let followUpPlans = plan.map((planEntry) => {
     return {
       id: new mongoose.Types.ObjectId().toString(),
       type: 'note',
-      context: [],
-      value: planEntry.replace(/^-/gm, '').trim()
+      context: planEntry.context,
+      value: planEntry.value
     };
   });
 
