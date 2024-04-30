@@ -253,7 +253,7 @@ export const parseFixturesFromJson = async (fixtures) => {
         id: new mongoose.Types.ObjectId().toString(),
         title: practice.title,
         description: practice.description,
-        createdAt: convertTimestampToDate(
+        date: convertTimestampToDate(
           practice.lastUpdated['$date'],
           'America/Chicago'
         ),
