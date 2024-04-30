@@ -12,7 +12,7 @@ export default function Home({ sigs }): JSX.Element {
       <div className="container m-auto w-3/4 mt-3">
         <div className="mb-5">
           <h1 className="font-bold text-4xl">
-            Welcome to Interactive SOAP Notes
+            Welcome to Interactive CAP Notes
           </h1>
         </div>
 
