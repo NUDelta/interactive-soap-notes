@@ -298,6 +298,25 @@ export default function SOAPNote({
           </div>
         </div> */}
 
+        {/* TODO: 04-30-24 setup the page as 2 half pages, with a 2 flex rows */}
+        <DndProvider backend={HTML5Backend}>
+          {/* Past issues and tracked practices */}
+          <div className="w-1/2">
+            <div className="flex flex-row">
+              <div>Current issues</div>
+              <div>Note space</div>
+            </div>
+          </div>
+
+          {/* Current issues and note space */}
+          <div className="w-1/2">
+            <div className="flex flex-row">
+              <div>Current issues</div>
+              <div>Note space</div>
+            </div>
+          </div>
+        </DndProvider>
+
         {/* Issue Cards and SOAP Notes */}
         <DndProvider backend={HTML5Backend}>
           <div className="col-span-3">
@@ -335,6 +354,7 @@ export default function SOAPNote({
                 /> */}
 
                 {/* tracked practices */}
+                {/* TODO: 04-30-24 -- practice cards should only show the practice. as used here, these should be issue cards */}
                 {capData.practices
                   .filter(
                     (practice) =>
@@ -953,29 +973,33 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // get the sig name and date from the query
   let [sigAbbrev, project, date] = (query.params?.id as string).split('_');
 
-  /**
+  /** it
+   *
    * fetch CAP note for the given sig and date, and format for display
    */
   // TODO: see how I can add type checking to this
   let currentCAPNote = await fetchCAPNote(sigAbbrev, project, date);
 
-  // sort the practices by last updated date
+  // sort issues and practices by last edited date
+  currentCAPNote.pastIssues.sort((a, b) => {
+    return new Date(b.date) - new Date(a.date);
+  });
+  currentCAPNote.currentIssues.sort((a, b) => {
+    return new Date(b.lastUpdated) - new Date(a.lastUpdated);
+  });
   currentCAPNote.trackedPractices.sort((a, b) => {
     return new Date(b.lastUpdated) - new Date(a.lastUpdated);
   });
 
-  // sort current issue instances by date
-  currentCAPNote.currIssueInstances.sort((a, b) => {
-    return new Date(b.date) - new Date(a.date);
+  // flatten CAP note ObjectIds
+  let currentCAPNoteFlattened = currentCAPNote.toJSON({
+    transform: function (doc, ret) {
+      ret.id = ret._id.toString();
+      delete ret._id;
+    }
   });
 
-  // sort the prior instances in each practice by date
-  currentCAPNote.trackedPractices.forEach((practice) => {
-    practice.priorInstances.sort((a, b) => {
-      return new Date(b.date) - new Date(a.date);
-    });
-  });
-
+  // TODO: 04-30-24 this will probably change since the data model has changed
   // remove id from TextEntryObjects
   const stripIdFromTextEntry = (entry) => {
     return {
@@ -1064,26 +1088,54 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     };
   };
 
+  const serializeDates = (object) => {
+    return {
+      ...object,
+      date: longDate(object.date),
+      lastUpdated: longDate(object.lastUpdated)
+    };
+  };
+
   // create data object for display
   const capNoteInfo = {
-    id: currentCAPNote.id,
-    project: currentCAPNote.project,
-    sigName: currentCAPNote.sigName,
-    sigAbbreviation: currentCAPNote.sigAbbreviation,
-    sigDate: shortDate(currentCAPNote.date),
-    lastUpdated: longDate(currentCAPNote.lastUpdated, true),
-    context: currentCAPNote.context.map((line) => stripIdFromTextEntry(line)),
-    assessment: currentCAPNote.assessment.map((line) =>
-      stripIdFromTextEntry(line)
-    ),
-    plan: currentCAPNote.plan.map((line) => stripIdFromTextEntry(line)),
-    trackedPractices: currentCAPNote.trackedPractices.map((practice) =>
-      stripIdFromPracticeObject(practice)
-    ),
-    currIssueInstances: currentCAPNote.currIssueInstances.map((issue) =>
-      stripIdFromIssueObject(issue)
+    id: currentCAPNoteFlattened.id,
+    project: currentCAPNoteFlattened.project,
+    sigName: currentCAPNoteFlattened.sigName,
+    sigAbbreviation: currentCAPNoteFlattened.sigAbbreviation,
+    sigDate: shortDate(currentCAPNoteFlattened.date),
+    lastUpdated: longDate(currentCAPNoteFlattened.lastUpdated, true),
+    context: currentCAPNoteFlattened.context,
+    assessment: currentCAPNoteFlattened.assessment,
+    plan: currentCAPNoteFlattened.plan,
+    pastIssues: currentCAPNoteFlattened.pastIssues.map((issue) => {
+      return {
+        ...serializeDates(issue),
+        priorInstances: issue.priorInstances.map((instance) => {
+          return serializeDates(instance);
+        })
+      };
+    }),
+    currentIssues: currentCAPNoteFlattened.currentIssues.map((issue) => {
+      return {
+        ...serializeDates(issue),
+        priorInstances: issue.priorInstances.map((instance) => {
+          return serializeDates(instance);
+        })
+      };
+    }),
+    trackedPractices: currentCAPNoteFlattened.trackedPractices.map(
+      (practice) => {
+        return {
+          ...serializeDates(practice),
+          priorInstances: practice.prevIssues.map((issueInstance) => {
+            return serializeDates(issueInstance);
+          })
+        };
+      }
     )
   };
+
+  console.log('capNoteInfo', capNoteInfo);
 
   // if any section has no data, add a placeholder line
   const addPlaceholderLine = (section) => {
@@ -1238,8 +1290,9 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     context: capNoteInfo.context,
     assessment: capNoteInfo.assessment,
     plan: capNoteInfo.plan,
-    practices: capNoteInfo.trackedPractices,
-    issues: capNoteInfo.currIssueInstances
+    pastIssues: capNoteInfo.pastIssues,
+    currentIssues: capNoteInfo.currentIssues,
+    practices: capNoteInfo.trackedPractices
   };
 
   // setup triggers and options for each section's text boxes
@@ -1275,6 +1328,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
         'testing takeaways',
         'approach tree',
         'sketch a journey map / storyboard',
+        '', // empty string for no representation
         'write: ',
         'reflect on: '
       ],
