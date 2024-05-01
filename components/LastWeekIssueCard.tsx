@@ -112,28 +112,12 @@ export default function LastWeekIssueCard({
           deliverable: followUp.practice.includes('[reflect]')
             ? null
             : followUp.outcome.deliverableLink,
-          reflections: followUp.outcome.reflections
-            .filter((reflection) => {
-              if (followUp.practice.includes('[reflect]')) {
-                return true;
-              }
-
-              return (
-                (followUp.outcome.didHappen &&
-                  reflection.prompt.includes('If yes') &&
-                  !reflection.prompt.includes(
-                    'share a link to any deliverable'
-                  )) ||
-                (!followUp.outcome.didHappen &&
-                  reflection.prompt.includes('If not'))
-              );
-            })
-            .map((reflection) => {
-              return {
-                prompt: reflection.prompt,
-                response: reflection.response
-              };
-            })
+          reflections: followUp.outcome.reflections.map((reflection) => {
+            return {
+              prompt: reflection.prompt,
+              response: reflection.response
+            };
+          })
         };
       });
 
