@@ -114,8 +114,10 @@ export default function LastWeekIssueCard({
             : followUp.outcome.deliverableLink,
           reflections: followUp.outcome.reflections
             .filter((reflection) => {
-              return !reflection.prompt.includes(
-                'Share a link to any deliverable'
+              return (
+                !reflection.prompt.includes(
+                  'Share a link to any deliverable'
+                ) && !reflection.prompt.includes('Did you do the')
               );
             })
             .map((reflection) => {
