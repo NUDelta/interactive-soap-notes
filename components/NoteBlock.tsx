@@ -5,6 +5,7 @@
 import { useDrag } from 'react-dnd';
 import { useRef } from 'react';
 import ContentEditable from 'react-contenteditable';
+import { DragTypes } from '../controllers/draggable/dragTypes';
 
 // TODO: add a note section and onDragToIssue function
 export default function NoteBlock({
@@ -144,7 +145,7 @@ export default function NoteBlock({
   // define drag and drop functionality
   const [{ opacity }, drag] = useDrag(
     () => ({
-      type: 'NOTE_BLOCK',
+      type: DragTypes.NOTE_BLOCK,
       item: { noteId },
       end(item, monitor) {
         const dropResult = monitor.getDropResult();

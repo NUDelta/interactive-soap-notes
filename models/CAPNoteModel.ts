@@ -4,7 +4,7 @@ import {
   PracticeObjectSchema,
   PracticeObjectStruct
 } from './PracticeObjectModel';
-import { IssueObjectSchema } from './IssueObjectModel';
+import { IssueObjectSchema, IssueObjectStruct } from './IssueObjectModel';
 
 export interface CAPStruct {
   project: string;
@@ -15,8 +15,9 @@ export interface CAPStruct {
   context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
-  trackedPractices: [];
-  currIssueInstances: PracticeObjectStruct[];
+  pastIssues: IssueObjectStruct[];
+  currentIssues: IssueObjectStruct[];
+  trackedPractices: PracticeObjectStruct[];
 }
 
 const CAPNote = new mongoose.Schema<CAPStruct>({
@@ -43,8 +44,9 @@ const CAPNote = new mongoose.Schema<CAPStruct>({
   context: [TextEntrySchema],
   assessment: [TextEntrySchema],
   plan: [TextEntrySchema],
-  trackedPractices: [PracticeObjectSchema],
-  currIssueInstances: [IssueObjectSchema]
+  pastIssues: [IssueObjectSchema],
+  currentIssues: [IssueObjectSchema],
+  trackedPractices: [PracticeObjectSchema]
 });
 
 export default (mongoose.models.CAPNote as mongoose.Model<CAPStruct>) ||

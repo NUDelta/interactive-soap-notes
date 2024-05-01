@@ -6,15 +6,26 @@ import {
 } from './FollowUpObjectModel';
 
 export interface IssueObjectStruct {
+  title: string;
   date: Date;
+  lastUpdated: Date;
   context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
   followUps: FollowUpObjectStruct[];
+  priorInstances: IssueObjectStruct[];
 }
 
 export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
+  title: {
+    type: String,
+    required: true
+  },
   date: {
+    type: Date,
+    required: true
+  },
+  lastUpdated: {
     type: Date,
     required: true
   },
@@ -30,5 +41,9 @@ export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
     type: [TextEntrySchema],
     required: true
   },
-  followUps: [FollowUpObjectSchema]
+  followUps: [FollowUpObjectSchema],
+  priorInstances: {
+    type: [mongoose.Types.ObjectId],
+    default: []
+  }
 });

@@ -39,35 +39,12 @@ export const createCAPNote = async (projectName: string, noteDate: Date) => {
     }).sort({ date: -1 });
     const previousCAPNote = previousCAPNotes[0];
 
-    // get practices from the prior CAP note
-    let practices = [];
+    // get the currentIssues from the prior CAP note, which will become the pastIssues for the new note
+    let pastIssues = [];
+    let trackedPractices = [];
     if (previousCAPNote) {
-      practices = previousCAPNote.trackedPractices;
-
-      // for each issue, add the currentInstance to the top of the priorInstances list (if not null) and set currentInstance to null
-      practices = practices.map((practice) => {
-        if (practice.currentInstance) {
-          // check if all practice fields are empty before adding to prior instances
-          let someFieldPopulated =
-            practice.currentInstance.context.some((contextEntry) => {
-              return contextEntry.value.trim() !== '';
-            }) ||
-            practice.currentInstance.assessment.some((assessmentEntry) => {
-              return assessmentEntry.value.trim() !== '';
-            }) ||
-            practice.currentInstance.plan.some((planEntry) => {
-              return planEntry.value.trim() !== '';
-            });
-
-          if (someFieldPopulated) {
-            practice.priorInstances.unshift(practice.currentInstance);
-          }
-
-          // reset the current instance
-          practice.currentInstance = null;
-        }
-        return practice;
-      });
+      pastIssues = previousCAPNote.currentIssues;
+      trackedPractices = previousCAPNote.trackedPractices;
     }
 
     // save the new SOAP note to the database
@@ -102,8 +79,9 @@ export const createCAPNote = async (projectName: string, noteDate: Date) => {
           value: ''
         }
       ],
-      trackedPractices: practices,
-      currIssueInstances: []
+      pastIssues: pastIssues,
+      currentIssues: [],
+      trackedPractices: trackedPractices
     });
   } catch (err) {
     console.error('Error in creating CAP note: ', err, err.stack);
