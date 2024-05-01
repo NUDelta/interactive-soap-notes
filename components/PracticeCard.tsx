@@ -15,14 +15,15 @@ export default function PracticeCard({
   description,
   date,
   lastUpdated,
-  priorInstances,
+  priorInstances = null,
   issueIsResolved,
   showPracticeGaps,
   onResolved,
   onArchive,
   onAddPractice,
   onEdit,
-  dragType = DragTypes.PRACTICE
+  dragType = DragTypes.PRACTICE,
+  onDrag
 }): JSX.Element {
   // special cases for this week's notes and add practice
   const isThisWeek = issueId === 'this-weeks-notes';
@@ -49,7 +50,7 @@ export default function PracticeCard({
 
         // see if the note was dropped into an issue
         if (item && dropResult) {
-          console.log('dragging practice');
+          onDrag(item.issueId, dropResult.issue);
         }
       },
       collect: (monitor) => ({
@@ -194,19 +195,27 @@ export default function PracticeCard({
               )}
 
               {/* Prior instances */}
-              {showPracticeGaps && (
+              {showPracticeGaps && priorInstances && (
                 <div className="flex flex-col">
                   <h3 className="mt-4 font-medium border-b border-black">
-                    Issues with this practice gap in the past:
+                    Project issues that had this this practice gap in the past:
                   </h3>
-                  {/* Show if prior instances length is greater than 0 */}
 
                   {priorInstances.map((instance, idx) => (
                     <div key={idx} className="flex flex-col">
-                      <h4 className="mt-1 font-medium">
-                        {shortDate(instance.date)}
+                      <h4 className="mt-1 text-normal font-normal">
+                        {instance.title}
                       </h4>
-                      <p>{instance.description}</p>
+                      <span className="text-xs">
+                        {shortDate(new Date(instance.date))}
+                      </span>
+                      {instance.plan.map((plan, idx) => (
+                        <div key={idx} className="text-xs">
+                          <div className="w-11/12">
+                            <p>{plan.value}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ))}
 

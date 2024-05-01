@@ -398,8 +398,7 @@ export default function SOAPNote({
                   </div>
                   <p className="italic mb-2">
                     Connect a practice gap to an issue by dragging it onto the
-                    issue. Track a new practice gap by dragging a note onto the
-                    last cell. Edit a practice gap by clicking on its title or
+                    issue. Edit a practice gap by clicking on its title or
                     description.
                   </p>
 
@@ -485,6 +484,84 @@ export default function SOAPNote({
                               ...prevData,
                               trackedPractices: practiceToUpdate
                             }));
+                          }}
+                          onDrag={(sourcePracticeId, targetCurrentIssueId) => {
+                            // find index of the source practice
+                            let sourcePracticeIndex =
+                              capData.trackedPractices.findIndex(
+                                (practice) => practice.id === sourcePracticeId
+                              );
+                            let sourcePractice =
+                              capData.trackedPractices[sourcePracticeIndex];
+
+                            // find the target issue index
+                            let targetIssueIndex =
+                              capData.currentIssues.findIndex(
+                                (issue) => issue.id === targetCurrentIssueId
+                              );
+                            let targetIssue =
+                              capData.currentIssues[targetIssueIndex];
+
+                            // update state
+                            setCAPData((prevCapData) => {
+                              let newCAPData = { ...prevCapData };
+
+                              // attach practice to targetIssue as an assessment
+                              let newAssessment = {
+                                id: new mongoose.Types.ObjectId().toString(),
+                                type: 'note',
+                                context: [],
+                                value: `[practice gap] ${sourcePractice.title}`
+                              };
+
+                              // check if last assessment is blank before adding
+                              if (
+                                targetIssue.assessment.length === 1 &&
+                                targetIssue.assessment[0].value.trim() === ''
+                              ) {
+                                newCAPData.currentIssues[
+                                  targetIssueIndex
+                                ].assessment = [newAssessment];
+                              } // check if the last assessment is blank
+                              else if (
+                                newCAPData.currentIssues[
+                                  targetIssueIndex
+                                ].assessment[
+                                  newCAPData.currentIssues[targetIssueIndex]
+                                    .assessment.length - 1
+                                ].value.trim() === ''
+                              ) {
+                                newCAPData.currentIssues[
+                                  targetIssueIndex
+                                ].assessment[
+                                  newCAPData.currentIssues[targetIssueIndex]
+                                    .assessment.length - 1
+                                ] = newAssessment;
+                              } else {
+                                newCAPData.currentIssues[
+                                  targetIssueIndex
+                                ].assessment.push(newAssessment);
+                              }
+
+                              // update the last updated timestamp
+                              newCAPData.currentIssues[
+                                targetIssueIndex
+                              ].lastUpdated = longDate(new Date());
+
+                              // attach the current issue as an instance to the practice
+                              let newIssueInstance = {
+                                id: targetIssue.id,
+                                title: targetIssue.title,
+                                date: targetIssue.date,
+                                lastUpdated: targetIssue.lastUpdated
+                              };
+                              newCAPData.trackedPractices[
+                                sourcePracticeIndex
+                              ].prevIssues.push(targetIssue);
+
+                              // return the new data
+                              return newCAPData;
+                            });
                           }}
                         />
                       ))}
@@ -657,8 +734,6 @@ export default function SOAPNote({
                           setCAPData((prevCapData) => {
                             let newCAPData = { ...prevCapData };
                             newCAPData.currentIssues.push(newIssueForWeek);
-
-                            console.log(newCAPData);
                             return newCAPData;
                           });
                         }}
@@ -1214,8 +1289,6 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     )
   };
 
-  console.log('capNoteInfo', capNoteInfo);
-
   // if any section has no data, add a placeholder line
   const addPlaceholderLine = (section) => {
     if (capNoteInfo[section].length === 0) {
@@ -1416,9 +1489,9 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   };
 
   // print before returning
-  // console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 4));
-  // console.log('data', data);
-  // console.log('autocompleteTriggersOptions', autocompleteTriggersOptions);
+  console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 2));
+  console.log('data', data);
+  console.log('autocompleteTriggersOptions', autocompleteTriggersOptions);
 
   // TODO: 03-03-24 -- data might be redundant with the capNoteInfo
   return {
