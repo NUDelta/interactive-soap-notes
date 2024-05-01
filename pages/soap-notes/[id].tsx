@@ -162,11 +162,11 @@ export default function SOAPNote({
         issue.date = new Date(issue.date);
         issue.lastUpdated = new Date(issue.lastUpdated);
 
-        // replace all prior instances' dates with date objects
-        issue.priorInstances.forEach((instance) => {
-          instance.date = new Date(instance.date);
-          instance.lastUpdated = new Date(instance.date);
-        });
+        // // replace all prior instances' dates with date objects
+        // issue.priorInstances.forEach((instance) => {
+        //   instance.date = new Date(instance.date);
+        //   instance.lastUpdated = new Date(instance.date);
+        // });
       });
 
       /*
@@ -177,11 +177,11 @@ export default function SOAPNote({
         issue.date = new Date(issue.date);
         issue.lastUpdated = new Date(issue.lastUpdated);
 
-        // replace all prior instances' dates with date objects
-        issue.priorInstances.forEach((instance) => {
-          instance.date = new Date(instance.date);
-          instance.lastUpdated = new Date(instance.date);
-        });
+        // // replace all prior instances' dates with date objects
+        // issue.priorInstances.forEach((instance) => {
+        //   instance.date = new Date(instance.date);
+        //   instance.lastUpdated = new Date(instance.date);
+        // });
       });
 
       /*
@@ -370,6 +370,56 @@ export default function SOAPNote({
                         followUps={lastWeekIssue.followUps}
                         showLastWeeksIssues={showLastWeeksIssues}
                         setShowLastWeeksIssues={setShowLastWeeksIssues}
+                        onDrag={(sourceIssueId, targetIssueId) => {
+                          // find index of the source issue
+                          let sourceIssueIndex = capData.pastIssues.findIndex(
+                            (issue) => issue.id === sourceIssueId
+                          );
+                          let sourcePastIssue =
+                            capData.pastIssues[sourceIssueIndex];
+
+                          // check that the targetIssueId is add-practice
+                          if (targetIssueId === 'add-practice') {
+                            // add the source issue to the current issues
+                            setCAPData((prevCapData) => {
+                              let newCAPData = { ...prevCapData };
+                              newCAPData.currentIssues.push({
+                                id: new mongoose.Types.ObjectId().toString(),
+                                title:
+                                  capData.pastIssues[sourceIssueIndex].title,
+                                date: longDate(new Date()),
+                                lastUpdated: longDate(new Date()),
+                                context: [
+                                  {
+                                    id: new mongoose.Types.ObjectId().toString(),
+                                    type: 'note',
+                                    context: [],
+                                    value: ''
+                                  }
+                                ],
+                                assessment: [
+                                  {
+                                    id: new mongoose.Types.ObjectId().toString(),
+                                    type: 'note',
+                                    context: [],
+                                    value: ''
+                                  }
+                                ],
+                                plan: [
+                                  {
+                                    id: new mongoose.Types.ObjectId().toString(),
+                                    type: 'note',
+                                    context: [],
+                                    value: ''
+                                  }
+                                ],
+                                followUps: [],
+                                priorInstances: [] // TODO: 04-30-24 add the source issue to the prior instances
+                              });
+                              return newCAPData;
+                            });
+                          }
+                        }}
                       />
                     ))}
                   </div>
@@ -1263,18 +1313,12 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     plan: currentCAPNoteFlattened.plan,
     pastIssues: currentCAPNoteFlattened.pastIssues.map((issue) => {
       return {
-        ...serializeDates(issue),
-        priorInstances: issue.priorInstances.map((instance) => {
-          return serializeDates(instance);
-        })
+        ...serializeDates(issue)
       };
     }),
     currentIssues: currentCAPNoteFlattened.currentIssues.map((issue) => {
       return {
-        ...serializeDates(issue),
-        priorInstances: issue.priorInstances.map((instance) => {
-          return serializeDates(instance);
-        })
+        ...serializeDates(issue)
       };
     }),
     trackedPractices: currentCAPNoteFlattened.trackedPractices.map(

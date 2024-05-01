@@ -19,7 +19,8 @@ export default function LastWeekIssueCard({
   date,
   followUps,
   showLastWeeksIssues,
-  setShowLastWeeksIssues
+  setShowLastWeeksIssues,
+  onDrag
 }): JSX.Element {
   // store state for minimizing content
   const [shouldShow, setShouldShow] = useState(showLastWeeksIssues);
@@ -34,7 +35,7 @@ export default function LastWeekIssueCard({
 
         // see if the note was dropped into an issue
         if (item && dropResult) {
-          console.log('dragging practice');
+          onDrag(item.issueId, dropResult.issue);
         }
       },
       collect: (monitor) => ({
