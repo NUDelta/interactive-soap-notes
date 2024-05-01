@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev --turbo",
     "build": "next build",
-    "start": "next start -p 8080"
+    "start": "next start -p 8080",
+    "lines": "npx cloc --exclude-dir=node_modules,.next,fixtures --exclude-ext=json components controllers lib models pages styles"
   },
   "dependencies": {
     "@editorjs/checklist": "^1.6.0",

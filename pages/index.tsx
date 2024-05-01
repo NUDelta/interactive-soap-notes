@@ -27,6 +27,7 @@ export default function Home({ sigs }): JSX.Element {
                   {sig.name} ({sig.abbreviation})
                 </h2>
                 {/* List of CAP Notes for a SIG */}
+                {/* * TODO: 04-30-24 -- create a reflection page and link to it from here */}
                 {sig.capNotes.map((capNote) => (
                   <div
                     className="grid grid-cols-4 gap-y-5 auto-rows-auto w-full"

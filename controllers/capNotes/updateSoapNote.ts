@@ -23,7 +23,8 @@ const parseCAPNotes = (capNote: object) => {
     context: capNote['context'],
     assessment: capNote['assessment'],
     plan: capNote['plan'],
-    trackedPractices: capNote['trackedPractices'],
-    currIssueInstances: capNote['currIssueInstances']
+    pastIssues: capNote['pastIssues'],
+    currentIssues: capNote['currentIssues'],
+    trackedPractices: capNote['trackedPractices']
   };
 };
