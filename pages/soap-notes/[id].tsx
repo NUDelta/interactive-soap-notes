@@ -1533,6 +1533,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   };
 
   // print before returning
+  console.log('capNoteInfo', capNoteInfo);
   console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 2));
   console.log('data', data);
   console.log('autocompleteTriggersOptions', autocompleteTriggersOptions);

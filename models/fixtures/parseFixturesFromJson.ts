@@ -324,17 +324,17 @@ const computeFollowUpObjects = (plan) => {
           responseType: 'boolean'
         },
         {
-          prompt: 'If not, what obstacles came up in trying to do it?',
+          prompt:
+            'Share a link to any deliverable that shows what you worked on. Make sure it is accessible to anyone (e.g., use “anyone with link” permission on Google Drive).',
           responseType: 'string'
         },
         {
           prompt:
-            'If yes, share a link to any deliverable that shows what you worked on',
+            'How did your understanding change? What new risk(s) do you see?',
           responseType: 'string'
         },
         {
-          prompt:
-            'If yes, how did your understanding change? What new risk(s) do you see?',
+          prompt: 'What obstacles came up in trying to do it, if any?',
           responseType: 'string'
         }
       ];
@@ -346,17 +346,17 @@ const computeFollowUpObjects = (plan) => {
           responseType: 'boolean'
         },
         {
-          prompt: 'If not, why weren’t you able to do it?',
+          prompt:
+            'Share a link to any deliverable that shows what you worked on. Make sure it is accessible to anyone (e.g., use “anyone with link” permission on Google Drive).',
           responseType: 'string'
         },
         {
           prompt:
-            'If yes, share a link to any deliverable that shows what you worked on',
+            'How did your understanding change? What new risk(s) do you see?',
           responseType: 'string'
         },
         {
-          prompt:
-            'If yes, what did it help you learn or progress?  What new risk(s) do you see?',
+          prompt: 'What obstacles came up in trying to do it, if any?',
           responseType: 'string'
         }
       ];
