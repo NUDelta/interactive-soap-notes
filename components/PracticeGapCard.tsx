@@ -13,7 +13,6 @@ export default function PracticeGapCard({
   issueId,
   title,
   description,
-  date,
   lastUpdated,
   priorInstances = null,
   issueIsResolved,
@@ -119,7 +118,7 @@ export default function PracticeGapCard({
                       titleRef.current = e.target.value;
                       onEdit('title', e.target.value);
                     }}
-                    className={`p-0.5 flex-none w-full empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-base font-bold rounded-lg`}
+                    className={`p-0.5 flex-none w-full empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg text-base font-semibold`}
                   />
                 </div>
 
@@ -188,7 +187,7 @@ export default function PracticeGapCard({
                   descriptionRef.current = e.target.value;
                   onEdit('description', e.target.value);
                 }}
-                className={`p-0.5 flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg`}
+                className={`p-0.5 text-sm flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg`}
               />
 
               {/* Prior instances */}

@@ -105,9 +105,9 @@ export default function CurrWeekIssueCard({
   return (
     <div
       ref={ref}
-      className={`basis-1/3 shrink-0 border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
+      className={`basis-1/4 shrink-0 border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
       onClick={() => {
-        if (!isAddPractice) {
+        if (!isAddPractice && !isThisWeek) {
           setIsSelected(!isSelected);
           if (issueId === selectedIssue) {
             // set default to this week's notes
@@ -115,12 +115,25 @@ export default function CurrWeekIssueCard({
           } else {
             setSelectedIssue(issueId);
           }
+        } else if (isThisWeek) {
+          setSelectedIssue('this-weeks-notes');
         }
       }}
     >
       <div className={`w-full h-full`}>
-        {/* Adding Practice */}
-        {isAddPractice ? (
+        {/* Navigation to scratch space */}
+        {isThisWeek ? (
+          <>
+            {/* Large plus icon in center of square */}
+            <div className="p-2 flex flex-col w-3/4 h-full mx-auto my-auto items-center justify-center">
+              <h2 className="text-base font-bold items-center">
+                <p className="text-sm text-center italic">
+                  Scratch space for this week&apos;s notes
+                </p>
+              </h2>
+            </div>
+          </>
+        ) : isAddPractice ? (
           <>
             {/* Large plus icon in center of square */}
             <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
@@ -151,11 +164,11 @@ export default function CurrWeekIssueCard({
                 }}
               ></textarea>
               <h2 className="text-base font-bold items-center">
-                <span className="text-sm text-center italic">
+                <p className="text-sm text-center italic">
                   {newIssue.trim() === ''
                     ? 'or drag a note onto this block'
                     : "hit 'Enter' to add new issue"}
-                </span>
+                </p>
               </h2>
             </div>
           </>
@@ -177,7 +190,7 @@ export default function CurrWeekIssueCard({
                 />
               </div>
 
-              <div className="flex flex-row">
+              <div className="flex flex-row items-center">
                 {/* Missing strategies */}
                 <div className="w-11/12">
                   {issue &&

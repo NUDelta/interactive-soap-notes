@@ -3,12 +3,15 @@ import { longDate } from '../lib/helperFns';
 
 import NoteBlock from './NoteBlock';
 import mongoose from 'mongoose';
+import PracticeGapCard from './PracticeGapCard';
 
 export default function CurrWeekIssuePane({
   issueId,
   capData,
   setCAPData,
   capSections,
+  showPracticeGaps,
+  setShowPracticeGaps,
   autocompleteTriggersOptions
 }): JSX.Element {
   // get the issue from soapData with the given issueId
@@ -407,48 +410,300 @@ export default function CurrWeekIssuePane({
                   </div>
                 </div>
 
+                {section.name === 'assessment' && (
+                  <div className="w-full">
+                    {/* Practice Cards */}
+                    <div className="mb-5">
+                      <div className="flex flex-row items-center">
+                        <h1 className="font-bold text-lg">
+                          Tracked Practice Gaps
+                        </h1>
+                        <button
+                          className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1 h-6 rounded-full ml-2"
+                          onClick={() => {
+                            setShowPracticeGaps(!showPracticeGaps);
+                          }}
+                        >
+                          {showPracticeGaps ? 'Hide details' : 'Show details'}
+                        </button>
+                      </div>
+                      <p className="italic text-sm mb-2">
+                        Drag a practice onto the assessment to add it to the
+                        current issue. Edit a practice gap by clicking on its
+                        title or description.
+                      </p>
+
+                      {/* Active Practices */}
+                      <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
+                        {/* tracked practices */}
+                        {capData.trackedPractices
+                          .filter((practice) => {
+                            return (
+                              !practice.practiceInactive &&
+                              !practice.practiceArchived
+                            );
+                          })
+                          .map((practice) => (
+                            <PracticeGapCard
+                              key={`issue-card-${practice.id}`}
+                              issueId={practice.id}
+                              title={practice.title}
+                              description={practice.description}
+                              lastUpdated={practice.lastUpdated}
+                              priorInstances={practice.prevIssues}
+                              issueIsResolved={false}
+                              showPracticeGaps={showPracticeGaps}
+                              onResolved={(e) => {
+                                // confirm if the user wants to resolve the issue
+                                if (
+                                  !confirm(
+                                    `Are you sure you want mark, "${practice.title}", as resolved?`
+                                  )
+                                ) {
+                                  return;
+                                }
+
+                                // resolve the issue
+                                let practiceToUpdate = capData.trackedPractices;
+                                let practiceIndex = practiceToUpdate.findIndex(
+                                  (i) => i.id === practice.id
+                                );
+                                practiceToUpdate[
+                                  practiceIndex
+                                ].practiceInactive = true;
+                                practiceToUpdate[practiceIndex].lastUpdated =
+                                  longDate(new Date());
+                                setCAPData((prevData) => ({
+                                  ...prevData,
+                                  trackedPractices: practiceToUpdate
+                                }));
+                              }}
+                              onArchive={(e) => {
+                                // confirm if the user wants to archive the issue
+                                if (
+                                  !confirm(
+                                    `Are you sure you want to archive, "${practice.title}"? This cannot be undone.`
+                                  )
+                                ) {
+                                  return;
+                                }
+
+                                // archive the issue
+                                let practiceToUpdate = capData.trackedPractices;
+                                let practiceIndex = practiceToUpdate.findIndex(
+                                  (i) => i.id === practice.id
+                                );
+                                practiceToUpdate[
+                                  practiceIndex
+                                ].practiceArchived = true;
+                                practiceToUpdate[practiceIndex].lastUpdated =
+                                  longDate(new Date());
+                                setCAPData((prevData) => ({
+                                  ...prevData,
+                                  trackedPractices: practiceToUpdate
+                                }));
+                              }}
+                              onEdit={(field, edits) => {
+                                // update the practice with the edits
+                                let practiceToUpdate = capData.trackedPractices;
+                                let practiceIndex = practiceToUpdate.findIndex(
+                                  (i) => i.id === practice.id
+                                );
+                                practiceToUpdate[practiceIndex][field] = edits;
+                                practiceToUpdate[practiceIndex].lastUpdated =
+                                  longDate(new Date());
+                                setCAPData((prevData) => ({
+                                  ...prevData,
+                                  trackedPractices: practiceToUpdate
+                                }));
+                              }}
+                              onDrag={(
+                                sourcePracticeId,
+                                targetCurrentIssueId
+                              ) => {
+                                // find index of the source practice
+                                let sourcePracticeIndex =
+                                  capData.trackedPractices.findIndex(
+                                    (practice) =>
+                                      practice.id === sourcePracticeId
+                                  );
+                                let sourcePractice =
+                                  capData.trackedPractices[sourcePracticeIndex];
+
+                                // find the target issue index
+                                let targetIssueIndex =
+                                  capData.currentIssues.findIndex(
+                                    (issue) => issue.id === targetCurrentIssueId
+                                  );
+                                let targetIssue =
+                                  capData.currentIssues[targetIssueIndex];
+
+                                // update state
+                                setCAPData((prevCapData) => {
+                                  let newCAPData = { ...prevCapData };
+
+                                  // attach practice to targetIssue as an assessment
+                                  let newAssessment = {
+                                    id: new mongoose.Types.ObjectId().toString(),
+                                    type: 'note',
+                                    context: [],
+                                    value: `[practice gap] ${sourcePractice.title}`
+                                  };
+
+                                  // check if last assessment is blank before adding
+                                  if (
+                                    targetIssue.assessment.length === 1 &&
+                                    targetIssue.assessment[0].value.trim() ===
+                                      ''
+                                  ) {
+                                    newCAPData.currentIssues[
+                                      targetIssueIndex
+                                    ].assessment = [newAssessment];
+                                  } // check if the last assessment is blank
+                                  else if (
+                                    newCAPData.currentIssues[
+                                      targetIssueIndex
+                                    ].assessment[
+                                      newCAPData.currentIssues[targetIssueIndex]
+                                        .assessment.length - 1
+                                    ].value.trim() === ''
+                                  ) {
+                                    newCAPData.currentIssues[
+                                      targetIssueIndex
+                                    ].assessment[
+                                      newCAPData.currentIssues[targetIssueIndex]
+                                        .assessment.length - 1
+                                    ] = newAssessment;
+                                  } else {
+                                    newCAPData.currentIssues[
+                                      targetIssueIndex
+                                    ].assessment.push(newAssessment);
+                                  }
+
+                                  // update the last updated timestamp
+                                  newCAPData.currentIssues[
+                                    targetIssueIndex
+                                  ].lastUpdated = longDate(new Date());
+
+                                  // attach the current issue as an instance to the practice
+                                  let newIssueInstance = {
+                                    id: targetIssue.id,
+                                    title: targetIssue.title,
+                                    date: targetIssue.date,
+                                    lastUpdated: targetIssue.lastUpdated
+                                  };
+                                  newCAPData.trackedPractices[
+                                    sourcePracticeIndex
+                                  ].prevIssues.push(targetIssue);
+
+                                  // return the new data
+                                  return newCAPData;
+                                });
+                              }}
+                            />
+                          ))}
+
+                        {/* practice card for new practice gaps */}
+                        <PracticeGapCard
+                          key="issue-card-add-practice"
+                          issueId="add-practice"
+                          title="Add practice"
+                          description="Notes from SIG"
+                          lastUpdated={capData.lastUpdated}
+                          issueIsResolved={false}
+                          onAddPractice={(practiceTitle) => {
+                            // create a new practice
+                            let newPractice = {
+                              id: new mongoose.Types.ObjectId().toString(),
+                              title: practiceTitle,
+                              description: '',
+                              date: longDate(new Date()),
+                              lastUpdated: longDate(new Date()),
+                              practiceInactive: false,
+                              practiceArchived: false,
+                              prevIssues: []
+                            };
+
+                            setCAPData((prevCapData) => {
+                              let newCAPData = { ...prevCapData };
+                              newCAPData.trackedPractices.push(newPractice);
+                              return newCAPData;
+                            });
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Add helper text on how to use the plan section */}
                 {section.name === 'plan' && (
                   <>
-                    <div className="italic text-slate-400">
-                      Press Shift-Enter to add a new text block and
-                      Shift-Backspace to delete current block. Press Tab to move
-                      to next block, and Shift-Tab to move to previous block.
-                    </div>
-                    <div className="text-sm text-gray-700 italic mt-2">
-                      <h2 className="font-bold">Practice follow-ups</h2>
-                      <div className="grid grid-cols-2 gap-y-1 w-2/3">
-                        <p>
-                          [plan]: stories, deliverables, or tasks to add to the
-                          student&apos;s sprint
-                        </p>
-                        <p>[help]: work with a peer or mentor on practice</p>
-                        <p>[reflect]: reflect on a situation if it comes up</p>
-                        <p>
-                          [self-work]: work activity for student to do on their
-                          own
-                        </p>
+                    <div className="text-sm text-gray-700 italic mt-2 flex flex-row">
+                      {/* Kinds of practice agents */}
+                      <div className="mr-2 align-top basis-1/4">
+                        <h2 className="font-bold">Practice follow-ups</h2>
+                        <div>
+                          <p>
+                            <span className="font-semibold">[plan]:</span>{' '}
+                            stories, deliverables, or tasks to add to sprint log
+                          </p>
+                          <p>
+                            <span className="font-semibold">[help]:</span> work
+                            with a peer or mentor on practice
+                          </p>
+                        </div>
                       </div>
 
-                      <h2 className="font-bold mt-4">
-                        Include additional info using:
-                      </h2>
-                      <div className="grid grid-cols-2 gap-y-1 w-2/3">
-                        {/* what (practice), who, where / when, how */}
-                        <p>
-                          w/[person, person]: person(s) who the practice should
-                          be done with
-                        </p>
-                        <p>
-                          @[venue]: specific venue to do the practice; CAP will
-                          follow-up at the next one.
-                        </p>
-                        <p>
-                          rep/[representation]: representation to use for
-                          practice (e.g., canvas section; sketch of a journey
-                          map; reflection question(s))
-                        </p>
+                      <div className="mr-6 align-top basis-1/4">
+                        <h2 className="font-bold">&nbsp;</h2>
+                        <div>
+                          <p>
+                            <span className="font-semibold">[reflect]:</span>{' '}
+                            reflect on a situation if it comes up
+                          </p>
+                          <p>
+                            <span className="font-semibold">[self-work]:</span>{' '}
+                            work activity for student to do on their own
+                          </p>
+                        </div>
                       </div>
-                      <br></br>
+
+                      {/* Additional info to attach */}
+                      <div className="mr-2 align-top basis-1/4">
+                        <h2 className="font-bold">
+                          Include additional info with...
+                        </h2>
+                        <div>
+                          {/* what (practice), who, where / when, how */}
+                          <p>
+                            <span className="font-semibold">
+                              w/[person, person]:
+                            </span>{' '}
+                            who the practice should be done with
+                          </p>
+                          <p>
+                            <span className="font-semibold">@[venue]:</span>{' '}
+                            specific venue to do the practice; CAP will
+                            follow-up at the next one.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="align-top basis-1/4">
+                        <h2 className="font-bold">&nbsp;</h2>
+                        <div>
+                          {/* what (practice), who, where / when, how */}
+                          <p>
+                            <span className="font-semibold">
+                              rep/[representation]:
+                            </span>{' '}
+                            representation to use for practice (e.g., canvas
+                            section; sketch of a journey map; reflection
+                            question(s))
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </>
                 )}
@@ -458,7 +713,8 @@ export default function CurrWeekIssuePane({
 
           {/* Prior Issue Instances */}
           {/* TODO: 04-30-24 -- fix once the drag and drop to connect past issues is working */}
-          <div className="w-full mt-4">
+          {/* TODO: 04-23-24 make this show only 1 */}
+          {/* <div className="w-full mt-4">
             <h1 className="font-bold text-xl border-b border-black mb-2">
               Last Instance
             </h1>
@@ -467,7 +723,7 @@ export default function CurrWeekIssuePane({
                 There are no prior issues for this practice.
               </h2>
             )}
-            {/* TODO: 04-23-24 make this show only 1 */}
+
             {priorInstances.map((instance, i) => (
               <div
                 className="w-full border border-gray-300 rounded-lg mb-3 p-1"
@@ -523,7 +779,7 @@ export default function CurrWeekIssuePane({
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       )}
     </div>

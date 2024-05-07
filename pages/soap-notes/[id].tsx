@@ -442,7 +442,21 @@ export default function SOAPNote({
 
                 {/* This week's issues */}
                 <div className="flex flex-row gap-1 flex-nowrap overflow-auto">
-                  {/* TODO: 05-06-24: need a card for navigating to the scratch space */}
+                  {/* Default card for the scratch space */}
+                  <CurrWeekIssueCard
+                    key="issue-card-this-weeks-notes"
+                    issueId="this-weeks-notes"
+                    issue={null}
+                    selectedIssue={selectedIssue}
+                    setSelectedIssue={setSelectedIssue}
+                    editable={false}
+                    onAddIssue={() => {
+                      return;
+                    }}
+                    onDeleteIssue={() => {
+                      return;
+                    }}
+                  />
 
                   {/* Current Issues */}
                   {capData.currentIssues.map((currIssue) => (
@@ -559,10 +573,8 @@ export default function SOAPNote({
 
           {/* Note Space */}
           <div className="flex flex-col h-[65vh] overflow-auto">
-            {/* Note Space */}
-            {/* Create a section for each component of the SOAP notes */}
-            {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
-            {/* show either the regular note section or the note pane */}
+            {/* show either the CAP note section for scratch space or current issues, or the summary interface for last week's issue */}
+            {/* TODO: should check if the issue id is in the current issues or past issues */}
             <div className="">
               {selectedIssue !== null &&
               selectedIssue !== 'this-weeks-notes' ? (
@@ -570,7 +582,7 @@ export default function SOAPNote({
                   {/* TODO: title should change based on what practice is selected */}
                   {/* TODO: for issues, allow the title to be edited */}
                   {/* TODO: once this uses the same schema as the regular notes, then the code can be compressed */}
-                  <h1 className="font-bold text-2xl border-b border-black mb-3">
+                  <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
                     {capData.currentIssues.findIndex(
                       (practice) => practice.id === selectedIssue
                     ) !== -1 &&
@@ -580,18 +592,31 @@ export default function SOAPNote({
                         )
                       ].title}
                   </h1>
+
+                  <p className="italic text-sm">
+                    Use the space below to add notes for the selected issue.
+                  </p>
+
+                  <p className="italic text-sm text-slate-500 mb-2">
+                    Press Shift-Enter to add a new text block and
+                    Shift-Backspace to delete current block. Press Tab to move
+                    to next block, and Shift-Tab to move to previous block.
+                  </p>
+
                   <CurrWeekIssuePane
                     issueId={selectedIssue}
                     capData={capData}
                     setCAPData={setCAPData} // TODO: this needs to be per issue
                     capSections={issueSections}
+                    showPracticeGaps={showPracticeGaps}
+                    setShowPracticeGaps={setShowPracticeGaps}
                     autocompleteTriggersOptions={autocompleteTriggersOptions}
                   />
                 </>
               ) : (
                 <div>
                   <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
-                    Scratch Space to Take Notes
+                    Scratch Space
                   </h1>
 
                   {/* TODO: show only for the default note; for issues, replace with an editable description */}
@@ -1004,7 +1029,6 @@ export default function SOAPNote({
                                         issueId={practice.id}
                                         title={practice.title}
                                         description={practice.description}
-                                        date={practice.date}
                                         lastUpdated={practice.lastUpdated}
                                         priorInstances={practice.prevIssues}
                                         issueIsResolved={false}
@@ -1188,7 +1212,6 @@ export default function SOAPNote({
                                     issueId="add-practice"
                                     title="Add practice"
                                     description="Notes from SIG"
-                                    date={noteInfo.sigDate}
                                     lastUpdated={noteInfo.lastUpdated}
                                     issueIsResolved={false}
                                     onAddPractice={(practiceTitle) => {
@@ -1221,53 +1244,82 @@ export default function SOAPNote({
                           {/* Add helper text on how to use the plan section */}
                           {section.name === 'plan' && (
                             <>
-                              <div className="text-sm text-gray-700 italic mt-2 flex flex-row items-stretch">
+                              <div className="text-sm text-gray-700 italic mt-2 flex flex-row">
                                 {/* Kinds of practice agents */}
-                                <div className="mr-6 align-top">
+                                <div className="mr-2 align-top basis-1/4">
                                   <h2 className="font-bold">
                                     Practice follow-ups
                                   </h2>
                                   <div>
                                     <p>
-                                      [plan]: stories, deliverables, or tasks to
-                                      add to the student&apos;s sprint
+                                      <span className="font-semibold">
+                                        [plan]:
+                                      </span>{' '}
+                                      stories, deliverables, or tasks to add to
+                                      sprint log
                                     </p>
                                     <p>
-                                      [help]: work with a peer or mentor on
-                                      practice
+                                      <span className="font-semibold">
+                                        [help]:
+                                      </span>{' '}
+                                      work with a peer or mentor on practice
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="mr-6 align-top basis-1/4">
+                                  <h2 className="font-bold">&nbsp;</h2>
+                                  <div>
+                                    <p>
+                                      <span className="font-semibold">
+                                        [reflect]:
+                                      </span>{' '}
+                                      reflect on a situation if it comes up
                                     </p>
                                     <p>
-                                      [reflect]: reflect on a situation if it
-                                      comes up
-                                    </p>
-                                    <p>
-                                      [self-work]: work activity for student to
-                                      do on their own
+                                      <span className="font-semibold">
+                                        [self-work]:
+                                      </span>{' '}
+                                      work activity for student to do on their
+                                      own
                                     </p>
                                   </div>
                                 </div>
 
                                 {/* Additional info to attach */}
-                                <div className="align-top">
+                                <div className="mr-2 align-top basis-1/4">
                                   <h2 className="font-bold">
-                                    Include additional info using:
+                                    Include additional info with...
                                   </h2>
                                   <div>
                                     {/* what (practice), who, where / when, how */}
                                     <p>
-                                      w/[person, person]: person(s) who the
-                                      practice should be done with
+                                      <span className="font-semibold">
+                                        w/[person, person]:
+                                      </span>{' '}
+                                      who the practice should be done with
                                     </p>
                                     <p>
-                                      @[venue]: specific venue to do the
-                                      practice; CAP will follow-up at the next
-                                      one.
+                                      <span className="font-semibold">
+                                        @[venue]:
+                                      </span>{' '}
+                                      specific venue to do the practice; CAP
+                                      will follow-up at the next one.
                                     </p>
+                                  </div>
+                                </div>
+
+                                <div className="align-top basis-1/4">
+                                  <h2 className="font-bold">&nbsp;</h2>
+                                  <div>
+                                    {/* what (practice), who, where / when, how */}
                                     <p>
-                                      rep/[representation]: representation to
-                                      use for practice (e.g., canvas section;
-                                      sketch of a journey map; reflection
-                                      question(s))
+                                      <span className="font-semibold">
+                                        rep/[representation]:
+                                      </span>{' '}
+                                      representation to use for practice (e.g.,
+                                      canvas section; sketch of a journey map;
+                                      reflection question(s))
                                     </p>
                                   </div>
                                 </div>
