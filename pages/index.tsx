@@ -9,7 +9,7 @@ export default function Home({ sigs }): JSX.Element {
       <Head>
         <title>Home</title>
       </Head>
-      <div className="container m-auto w-3/4 mt-3">
+      <div className="container m-auto w-3/4 h-dvh overflow-scroll mt-3">
         <div className="mb-5">
           <h1 className="font-bold text-4xl">
             Welcome to Interactive CAP Notes
