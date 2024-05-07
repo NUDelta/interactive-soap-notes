@@ -7,7 +7,7 @@ import { mutate } from 'swr';
 
 import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
 import IssueCard from '../../components/IssueCard';
-import IssuePane from '../../components/IssuePane';
+import CurrWeekIssuePane from '../../components/CurrWeekIssuePane';
 import PracticeCard from '../../components/PracticeCard';
 import { longDate, shortDate } from '../../lib/helperFns';
 
@@ -580,7 +580,7 @@ export default function SOAPNote({
                         )
                       ].title}
                   </h1>
-                  <IssuePane
+                  <CurrWeekIssuePane
                     issueId={selectedIssue}
                     capData={capData}
                     setCAPData={setCAPData} // TODO: this needs to be per issue
