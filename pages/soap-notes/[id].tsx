@@ -595,10 +595,16 @@ export default function SOAPNote({
                   </h1>
 
                   {/* TODO: show only for the default note; for issues, replace with an editable description */}
-                  <p className="italic text-sm mb-2">
+                  <p className="italic text-sm">
                     Use the space below to scratch notes during SIG meeting.
                     Attach notes to Current Issues by dragging them onto the
                     cards above, or create an issue by using the last card.
+                  </p>
+
+                  <p className="italic text-sm text-slate-500 mb-2">
+                    Press Shift-Enter to add a new text block and
+                    Shift-Backspace to delete current block. Press Tab to move
+                    to next block, and Shift-Tab to move to previous block.
                   </p>
 
                   {/* Create section for each part of the CAP notes */}
@@ -629,8 +635,13 @@ export default function SOAPNote({
                               noteId={line.id}
                               noteContent={line}
                               onKeyDown={(e) => {
-                                // stop default behavior of enter key if both enter and shift are pressed
-                                if (e.key === 'Enter' && e.shiftKey) {
+                                // stop default behavior of enter key if enter + shift OR shift + backspace are pressed
+                                if (
+                                  (e.key === 'Enter' && e.shiftKey) ||
+                                  ((e.key === 'Backspace' ||
+                                    e.key === 'Delete') &&
+                                    e.shiftKey)
+                                ) {
                                   e.preventDefault();
                                 }
                               }}
@@ -705,9 +716,40 @@ export default function SOAPNote({
                                   // if (newLineId !== undefined) {
                                   //   document.getElementById(newLineId).focus();
                                   // }
+                                } else if (
+                                  (e.key === 'Backspace' ||
+                                    e.key === 'Delete') &&
+                                  e.shiftKey
+                                ) {
+                                  // remove line
+                                  // add new line underneath the current line
+                                  setCAPData((prevCAPData) => {
+                                    let newCAPData = { ...prevCAPData };
+
+                                    // find that line that was edited in the current instance of the practice
+                                    let lineIndex = newCAPData[
+                                      section.name
+                                    ].findIndex((l) => l.id === line.id);
+
+                                    // remove line
+                                    newCAPData[section.name] = newCAPData[
+                                      section.name
+                                    ].filter((l) => l.id !== line.id);
+
+                                    // if the section is empty, add a new empty block
+                                    if (newCAPData[section.name].length === 0) {
+                                      newCAPData[section.name].push({
+                                        id: new mongoose.Types.ObjectId().toString(),
+                                        type: 'note',
+                                        context: [],
+                                        value: ''
+                                      });
+                                    }
+
+                                    return newCAPData;
+                                  });
                                 }
                               }}
-                              // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
                               onChange={(edits) => {
                                 // before attempting a save, check if the line is identical to the previous line (both trimmed)
                                 edits = edits.trim();
@@ -1179,12 +1221,6 @@ export default function SOAPNote({
                           {/* Add helper text on how to use the plan section */}
                           {section.name === 'plan' && (
                             <>
-                              <div className="italic text-slate-400">
-                                Press Shift-Enter to add a new text block and
-                                Shift-Backspace to delete current block. Press
-                                Tab to move to next block, and Shift-Tab to move
-                                to previous block.
-                              </div>
                               <div className="text-sm text-gray-700 italic mt-2 flex flex-row items-stretch">
                                 {/* Kinds of practice agents */}
                                 <div className="mr-6 align-top">

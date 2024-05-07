@@ -54,11 +54,10 @@ export default function IssuePane({
                         noteContent={line}
                         onKeyDown={(e) => {
                           // stop default behavior of enter key if both enter and shift are pressed
-                          if (e.key === 'Enter' && e.shiftKey) {
-                            e.preventDefault();
-                          } else if (
-                            (e.key === 'Backspace' || e.key === 'Delete') &&
-                            e.shiftKey
+                          if (
+                            (e.key === 'Enter' && e.shiftKey) ||
+                            ((e.key === 'Backspace' || e.key === 'Delete') &&
+                              e.shiftKey)
                           ) {
                             e.preventDefault();
                           }
