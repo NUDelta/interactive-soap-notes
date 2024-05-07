@@ -105,7 +105,7 @@ export default function IssueCard({
   return (
     <div
       ref={ref}
-      className={`flex flex-wrap border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
+      className={`basis-1/4 shrink-0 border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
       onClick={() => {
         if (!isAddPractice) {
           setIsSelected(!isSelected);
@@ -185,11 +185,6 @@ export default function IssueCard({
                     />
                   )}
                 </div>
-              </div>
-
-              {/* Last update */}
-              <div className="text-xs">
-                <h3 className="mt-1 font-medium">Updated: {lastUpdated}</h3>
               </div>
 
               {/* Missing strategies */}

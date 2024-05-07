@@ -133,7 +133,7 @@ export default function LastWeekIssueCard({
   }, [followUps, date]);
 
   return (
-    <div ref={drag} className={`flex flex-wrap border-4 p-1 ${opacity}`}>
+    <div ref={drag} className={`basis-1/6 border-4 p-1 ${opacity}`}>
       <div className={`w-full h-full`}>
         <>
           {/* Issue title */}
@@ -175,14 +175,15 @@ export default function LastWeekIssueCard({
               </div> */}
             </div>
 
-            <div className="text-xs">
+            {/* <div className="text-xs">
               <h3 className="mt-1 font-medium">Updated: {date}</h3>
-            </div>
+            </div> */}
           </div>
         </>
 
         {/* Show practice follow-ups */}
-        {!isLoading &&
+        {/* TODO: 05-06-24 maybe add a warning for missing deliverables or reflections */}
+        {/* {!isLoading &&
         showLastWeeksIssues &&
         shouldShow &&
         practiceOutcome !== null ? (
@@ -196,7 +197,7 @@ export default function LastWeekIssueCard({
                   <div key={practice.practice} className="w-full mb-4">
                     <h2 className="text-base">{practice.practice}</h2>
 
-                    {/* Did the practice happen? */}
+                    { Did the practice happen? }
                     <div className="flex flex-wrap">
                       <div className="w-full">
                         <p className="text-normal font-semibold">
@@ -209,7 +210,7 @@ export default function LastWeekIssueCard({
                         </p>
                       </div>
 
-                      {/* Link to deliverable */}
+                      { Link to deliverable }
                       {practice.deliverable !== null ? (
                         <div className="w-full mt-1">
                           <p className="text-normal font-semibold">
@@ -247,7 +248,7 @@ export default function LastWeekIssueCard({
                         <></>
                       )}
 
-                      {/* Reflections */}
+                      { Reflections }
                       {practice.reflections.length > 0 ? (
                         <div className="w-full mt-1">
                           <h3 className="text-normal font-bold">
@@ -286,7 +287,7 @@ export default function LastWeekIssueCard({
           </div>
         ) : (
           <></>
-        )}
+        )} */}
       </div>
     </div>
   );

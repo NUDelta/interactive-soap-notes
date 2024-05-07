@@ -16,11 +16,14 @@ export default function IssuePane({
     (practice) => practice.id === issueId
   );
   const currIssue = capData.currentIssues[issueIndex];
-  const priorInstances = currIssue.priorInstances;
+  let priorInstances = [];
+  if (currIssue && currIssue.priorInstances) {
+    priorInstances = currIssue.priorInstances;
+  }
 
   return (
     <div className="mb-5">
-      <div className="flex flex-wrap w-full">
+      <div className="flex flex-wrap w-full overflow-y-scroll overscroll-y-auto">
         <div className="w-full">
           {/* TODO: this is hella jank and a shit load of repeated code */}
           {/* show if there is a current instance */}

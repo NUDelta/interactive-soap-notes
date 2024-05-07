@@ -9,3 +9,7 @@ textarea {
   border-radius: 10px;
   border-width: 1px;
 }
+
+body {
+  overflow: hidden;
+}
