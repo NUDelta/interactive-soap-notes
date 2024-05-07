@@ -9,7 +9,7 @@ import { shortDate } from '../lib/helperFns';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import ContentEditable from 'react-contenteditable';
 
-export default function PracticeCard({
+export default function PracticeGapCard({
   issueId,
   title,
   description,

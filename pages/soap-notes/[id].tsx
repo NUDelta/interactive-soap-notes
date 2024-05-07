@@ -8,7 +8,7 @@ import { mutate } from 'swr';
 import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
 import CurrWeekIssueCard from '../../components/CurrWeekIssueCard';
 import CurrWeekIssuePane from '../../components/CurrWeekIssuePane';
-import PracticeCard from '../../components/PracticeCard';
+import PracticeGapCard from '../../components/PracticeGapCard';
 import { longDate, shortDate } from '../../lib/helperFns';
 
 import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
@@ -999,7 +999,7 @@ export default function SOAPNote({
                                       );
                                     })
                                     .map((practice) => (
-                                      <PracticeCard
+                                      <PracticeGapCard
                                         key={`issue-card-${practice.id}`}
                                         issueId={practice.id}
                                         title={practice.title}
@@ -1183,7 +1183,7 @@ export default function SOAPNote({
                                     ))}
 
                                   {/* practice card for new practice gaps */}
-                                  <PracticeCard
+                                  <PracticeGapCard
                                     key="issue-card-add-practice"
                                     issueId="add-practice"
                                     title="Add practice"
