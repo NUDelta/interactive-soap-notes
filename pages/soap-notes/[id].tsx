@@ -246,29 +246,40 @@ export default function SOAPNote({
     <>
       {/* Set title of the page to be project name */}
       <Head>
-        <title>{noteInfo.project}</title>
+        <title>
+          {`${
+            noteInfo.project.length > 15
+              ? noteInfo.project.substring(0, 15 - 3) + '...'
+              : noteInfo.project
+          } | ${new Date(noteInfo.sigDate).toLocaleString().split(',')[0]}`}
+        </title>
       </Head>
 
       {/* Header info for SOAP note */}
       <div className="w-11/12 mx-auto mt-3">
-        {/* Back button */}
-        <div className="col-span-3 mb-2">
-          <Link href="/">
-            <h3 className="text-md text-blue-600 hover:text-blue-800 visited:text-purple-600">
-              &#8592; Back
-            </h3>
-          </Link>
-        </div>
+        {/* Back, title, and last updated */}
+        <div className="flex flex-row items-center flex-nowrap mb-4">
+          {/* Back button */}
+          <div className="mr-2">
+            <Link href="/">
+              <Tooltip content="Back to all notes" placement="bottom">
+                <h3 className="text-lg font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                  &#8592;
+                </h3>
+              </Tooltip>
+            </Link>
+          </div>
 
-        {/* Title and last updated */}
-        <div className="flex flex-col col-span-3 mb-4">
-          <h1 className="font-bold text-3xl mb-1">
-            {noteInfo.project} | {noteInfo.sigDate}
-          </h1>
+          {/* Title */}
+          <div className="mr-2">
+            <h1 className="font-bold text-3xl mb-1">
+              {noteInfo.project} | {noteInfo.sigDate}
+            </h1>
+          </div>
 
           {/* Save status */}
           {/* Three states of saved: (1) saved without error; (2) saving; (3) save attemped but error */}
-          <div className="flex flex-row items-center">
+          <div className="flex flex-row">
             {/* Saved successfully */}
             {!isSaving && saveError === null ? (
               <>
