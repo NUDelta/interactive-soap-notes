@@ -162,8 +162,8 @@ export default function IssueCard({
         ) : (
           <>
             {/* Issue title */}
-            <div className="p-2 mb-1 w-full flex flex-col">
-              <div className="w-11/12 flex flex-row">
+            <div className="p-2 mb-2 w-full flex flex-col">
+              <div className="w-full h-16 flex flex-row mb-2">
                 <ContentEditable
                   id={`title-${issueId}`}
                   html={titleRef.current}
@@ -177,29 +177,31 @@ export default function IssueCard({
                 />
               </div>
 
-              {/* Missing strategies */}
-              <div className="text-xs">
-                {issue &&
-                  !issue.plan.some((currPlan) => {
-                    return currPlan.value.trim() !== '';
-                  }) && (
-                    <h3 className="mt-2 font-medium text-red-500 flex flex-row items-center">
-                      <ExclamationTriangleIcon className="h-6 mr-1" />
-                      Missing strategies
-                    </h3>
-                  )}
-              </div>
+              <div className="flex flex-row">
+                {/* Missing strategies */}
+                <div className="w-11/12">
+                  {issue &&
+                    !issue.plan.some((currPlan) => {
+                      return currPlan.value.trim() !== '';
+                    }) && (
+                      <h3 className="mt-2 text-xs font-medium text-red-500 flex flex-row items-center">
+                        <ExclamationTriangleIcon className="h-6 mr-1" />
+                        Missing strategies
+                      </h3>
+                    )}
+                </div>
 
-              {/* TODO: 05-07-24 move this to the bottom right */}
-              <div className="flex items-right">
-                {!isThisWeek && (
-                  <TrashIcon
-                    className={`h-8 text-slate-600`}
-                    onClick={() => {
-                      onDeleteIssue(issueId);
-                    }}
-                  />
-                )}
+                {/* TODO: 05-07-24 move this to the bottom right */}
+                <div className="float-right">
+                  {!isThisWeek && (
+                    <TrashIcon
+                      className={`h-8 text-slate-600`}
+                      onClick={() => {
+                        onDeleteIssue(issueId);
+                      }}
+                    />
+                  )}
+                </div>
               </div>
             </div>
           </>

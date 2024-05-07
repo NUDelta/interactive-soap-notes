@@ -40,7 +40,7 @@ export default function SOAPNote({
   const [showLastWeeksIssues, setShowLastWeeksIssues] = useState(true);
 
   // hold a state for showing / hiding practice gap details
-  const [showPracticeGaps, setShowPracticeGaps] = useState(true);
+  const [showPracticeGaps, setShowPracticeGaps] = useState(false);
 
   // let user know that we are saving and if there were any errors
   const [isSaving, setIsSaving] = useState(false);
@@ -343,217 +343,217 @@ export default function SOAPNote({
         </div> */}
 
         <DndProvider backend={HTML5Backend}>
-          {/* Past issues and tracked practices */}
-          <div className="flex flex-col fixed w-11/12">
+          {/* Past issues and tracked practices fixed to top of page */}
+          {/* TODO: 05-06-24: maybe add a hide and show button so mentor can recover vertical space when done browsing past issues */}
+          <div className="fixed w-11/12">
             <div className="flex flex-row mr-7">
               {/* Past Issues */}
-              <div className="w-1/2 mr-2">
-                {/* Past Issue Cards */}
-                {/* TODO: 05-06-24: maybe add a hide and show button so mentor can recover vertical space when done browsing past issues */}
-                <div className="mb-5">
-                  <div className="flex flex-row items-center border-b border-black mb-2">
-                    <h1 className="font-bold text-2xl">
-                      Last Week&apos;s Issues
-                    </h1>
-                  </div>
+              <div className="w-1/2 mr-2 mb-5">
+                {/* Section title and description */}
+                <div className="flex flex-col">
+                  <h1 className="font-bold text-2xl border-b border-black mb-2">
+                    Last Week&apos;s Issues
+                  </h1>
+                  <p className="italic text-sm mb-2">
+                    Click on an issue to view it&apos;s assessments and
+                    follow-up outcomes.
+                  </p>
+                </div>
 
-                  {/* Issues from the past week */}
-                  <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
-                    {capData.pastIssues.map((lastWeekIssue) => (
-                      <LastWeekIssueCard
-                        key={`issue-card-${lastWeekIssue.id}`}
-                        issueId={lastWeekIssue.id}
-                        title={lastWeekIssue.title}
-                        date={lastWeekIssue.date}
-                        followUps={lastWeekIssue.followUps}
-                        showLastWeeksIssues={showLastWeeksIssues}
-                        setShowLastWeeksIssues={setShowLastWeeksIssues}
-                        onDrag={(sourceIssueId, targetIssueId) => {
-                          // find index of the source issue
-                          let sourceIssueIndex = capData.pastIssues.findIndex(
-                            (issue) => issue.id === sourceIssueId
-                          );
-                          let sourcePastIssue =
-                            capData.pastIssues[sourceIssueIndex];
+                {/* Issues from the past week */}
+                <div className="flex flex-row gap-1 flex-nowrap overflow-auto">
+                  {capData.pastIssues.map((lastWeekIssue) => (
+                    <LastWeekIssueCard
+                      key={`issue-card-${lastWeekIssue.id}`}
+                      issueId={lastWeekIssue.id}
+                      title={lastWeekIssue.title}
+                      date={lastWeekIssue.date}
+                      followUps={lastWeekIssue.followUps}
+                      showLastWeeksIssues={showLastWeeksIssues}
+                      setShowLastWeeksIssues={setShowLastWeeksIssues}
+                      onDrag={(sourceIssueId, targetIssueId) => {
+                        // find index of the source issue
+                        let sourceIssueIndex = capData.pastIssues.findIndex(
+                          (issue) => issue.id === sourceIssueId
+                        );
+                        let sourcePastIssue =
+                          capData.pastIssues[sourceIssueIndex];
 
-                          // check that the targetIssueId is add-practice
-                          if (targetIssueId === 'add-practice') {
-                            // add the source issue to the current issues
-                            setCAPData((prevCapData) => {
-                              let newCAPData = { ...prevCapData };
-                              newCAPData.currentIssues.push({
-                                id: new mongoose.Types.ObjectId().toString(),
-                                title:
-                                  capData.pastIssues[sourceIssueIndex].title,
-                                date: longDate(new Date()),
-                                lastUpdated: longDate(new Date()),
-                                context: [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ],
-                                assessment: [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ],
-                                plan: [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ],
-                                followUps: [],
-                                priorInstances: [] // TODO: 04-30-24 add the source issue to the prior instances
-                              });
-                              return newCAPData;
+                        // check that the targetIssueId is add-practice
+                        if (targetIssueId === 'add-practice') {
+                          // add the source issue to the current issues
+                          setCAPData((prevCapData) => {
+                            let newCAPData = { ...prevCapData };
+                            newCAPData.currentIssues.push({
+                              id: new mongoose.Types.ObjectId().toString(),
+                              title: capData.pastIssues[sourceIssueIndex].title,
+                              date: longDate(new Date()),
+                              lastUpdated: longDate(new Date()),
+                              context: [
+                                {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                }
+                              ],
+                              assessment: [
+                                {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                }
+                              ],
+                              plan: [
+                                {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                }
+                              ],
+                              followUps: [],
+                              priorInstances: [] // TODO: 04-30-24 add the source issue to the prior instances
                             });
-                          }
-                        }}
-                      />
-                    ))}
-                  </div>
+                            return newCAPData;
+                          });
+                        }
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
 
               {/* Current Issues */}
-              <div className="w-1/2 ml-2">
-                <div className="mb-5">
-                  <div className="h-8 mb-3">
-                    <h1 className="font-bold text-2xl border-b border-black ">
-                      Current Issues
-                    </h1>
-                  </div>
-                  <p className="italic mb-2">
-                    Click on an issue to edit it&apos;s CAP notes; clicking it
-                    again will switch you back to your scratch space. New
-                    practices can be created using typing in the last cell or by
-                    dragging a Past Issue onto it.
+              <div className="w-1/2 ml-2 mb-5">
+                {/* Section title and description */}
+                <div className="flex flex-col">
+                  <h1 className="font-bold text-2xl border-b border-black mb-2">
+                    Current Issues
+                  </h1>
+                  <p className="italic text-sm mb-2">
+                    Click on an issue to edit it&apos;s CAP notes. Drag a Last
+                    Week Issue or a note onto the last card to create a new
+                    issue.
                   </p>
+                </div>
 
-                  {/* This week's issues */}
-                  <div className="flex flex-row gap-1 flex-nowrap overflow-auto">
-                    {/* TODO: 05-06-24: need a card for navigating to the scratch space */}
+                {/* This week's issues */}
+                <div className="flex flex-row gap-1 flex-nowrap overflow-auto">
+                  {/* TODO: 05-06-24: need a card for navigating to the scratch space */}
 
-                    {/* Current Issues */}
-                    {capData.currentIssues.map((currIssue) => (
-                      <IssueCard
-                        key={`issue-card-${currIssue.id}`}
-                        issueId={currIssue.id}
-                        issue={currIssue}
-                        selectedIssue={selectedIssue}
-                        setSelectedIssue={setSelectedIssue}
-                        onAddIssue={() => {
-                          return;
-                        }}
-                        onDeleteIssue={(issueId) => {
-                          // confirm if the user wants to delete the issue
-                          if (
-                            !confirm(
-                              `Are you sure you want to delete, "${currIssue.title}"? This cannot be undone.`
-                            )
-                          ) {
-                            return;
-                          }
-
-                          // reset the selected issue
-                          // delete the issue
-                          let issuesToUpdate = capData.currentIssues;
-                          let issueIndex = issuesToUpdate.findIndex(
-                            (i) => i.id === issueId
-                          );
-                          issuesToUpdate.splice(issueIndex, 1);
-
-                          setCAPData((prevData) => {
-                            // TODO: 05-06-24: creates a race condition if the current issue is is highlighted when being deleted
-                            setSelectedIssue('this-weeks-notes');
-                            return {
-                              ...prevData,
-                              currentIssues: issuesToUpdate
-                            };
-                          });
-                        }}
-                        onTitleEdit={(newTitle) => {
-                          // update the title of the issue
-                          let issuesToUpdate = capData.currentIssues;
-                          let issueIndex = issuesToUpdate.findIndex(
-                            (i) => i.id === currIssue.id
-                          );
-                          issuesToUpdate[issueIndex].title = newTitle;
-                          setCAPData((prevData) => ({
-                            ...prevData,
-                            currentIssues: issuesToUpdate
-                          }));
-                        }}
-                      />
-                    ))}
-
-                    {/* Create a new issue for the week */}
+                  {/* Current Issues */}
+                  {capData.currentIssues.map((currIssue) => (
                     <IssueCard
-                      key="issue-card-add-practice"
-                      issueId="add-practice"
-                      issue={null}
+                      key={`issue-card-${currIssue.id}`}
+                      issueId={currIssue.id}
+                      issue={currIssue}
                       selectedIssue={selectedIssue}
                       setSelectedIssue={setSelectedIssue}
-                      onAddIssue={(newIssueTitle) => {
-                        // create a new issue for the current week
-                        let newIssueForWeek = {
-                          id: new mongoose.Types.ObjectId().toString(),
-                          title: newIssueTitle,
-                          date: longDate(new Date(noteInfo.sigDate)),
-                          lastUpdated: longDate(new Date()),
-                          context: [
-                            {
-                              id: new mongoose.Types.ObjectId().toString(),
-                              type: 'note',
-                              context: [],
-                              value: ''
-                            }
-                          ],
-                          assessment: [
-                            {
-                              id: new mongoose.Types.ObjectId().toString(),
-                              type: 'note',
-                              context: [],
-                              value: ''
-                            }
-                          ],
-                          plan: [
-                            {
-                              id: new mongoose.Types.ObjectId().toString(),
-                              type: 'note',
-                              context: [],
-                              value: ''
-                            }
-                          ],
-                          followUps: [],
-                          priorInstances: []
-                        };
-
-                        setCAPData((prevCapData) => {
-                          let newCAPData = { ...prevCapData };
-                          newCAPData.currentIssues.push(newIssueForWeek);
-                          return newCAPData;
-                        });
-                      }}
-                      onDeleteIssue={() => {
+                      onAddIssue={() => {
                         return;
                       }}
+                      onDeleteIssue={(issueId) => {
+                        // confirm if the user wants to delete the issue
+                        if (
+                          !confirm(
+                            `Are you sure you want to delete, "${currIssue.title}"? This cannot be undone.`
+                          )
+                        ) {
+                          return;
+                        }
+
+                        // reset the selected issue
+                        // delete the issue
+                        let issuesToUpdate = capData.currentIssues;
+                        let issueIndex = issuesToUpdate.findIndex(
+                          (i) => i.id === issueId
+                        );
+                        issuesToUpdate.splice(issueIndex, 1);
+
+                        setCAPData((prevData) => {
+                          // TODO: 05-06-24: creates a race condition if the current issue is is highlighted when being deleted
+                          setSelectedIssue('this-weeks-notes');
+                          return {
+                            ...prevData,
+                            currentIssues: issuesToUpdate
+                          };
+                        });
+                      }}
+                      onTitleEdit={(newTitle) => {
+                        // update the title of the issue
+                        let issuesToUpdate = capData.currentIssues;
+                        let issueIndex = issuesToUpdate.findIndex(
+                          (i) => i.id === currIssue.id
+                        );
+                        issuesToUpdate[issueIndex].title = newTitle;
+                        setCAPData((prevData) => ({
+                          ...prevData,
+                          currentIssues: issuesToUpdate
+                        }));
+                      }}
                     />
-                  </div>
+                  ))}
+
+                  {/* Create a new issue for the week */}
+                  <IssueCard
+                    key="issue-card-add-practice"
+                    issueId="add-practice"
+                    issue={null}
+                    selectedIssue={selectedIssue}
+                    setSelectedIssue={setSelectedIssue}
+                    onAddIssue={(newIssueTitle) => {
+                      // create a new issue for the current week
+                      let newIssueForWeek = {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        title: newIssueTitle,
+                        date: longDate(new Date(noteInfo.sigDate)),
+                        lastUpdated: longDate(new Date()),
+                        context: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        assessment: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        plan: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        followUps: [],
+                        priorInstances: []
+                      };
+
+                      setCAPData((prevCapData) => {
+                        let newCAPData = { ...prevCapData };
+                        newCAPData.currentIssues.push(newIssueForWeek);
+                        return newCAPData;
+                      });
+                    }}
+                    onDeleteIssue={() => {
+                      return;
+                    }}
+                  />
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Placeholder div to push down the non-fixed portion */}
           <div className="h-[25vh]" />
 
           {/* Note Space */}
@@ -594,7 +594,7 @@ export default function SOAPNote({
                   </h1>
 
                   {/* TODO: show only for the default note; for issues, replace with an editable description */}
-                  <p className="italic">
+                  <p className="italic text-sm mb-2">
                     Use the space below to scratch notes during SIG meeting.
                     Attach notes to Current Issues by dragging them onto the
                     cards above, or create an issue by using the last card.
@@ -605,7 +605,7 @@ export default function SOAPNote({
                     <div className="w-full mb-4" key={section.name}>
                       <h1 className="font-bold text-xl">{section.title}</h1>
                       {section.name === 'plan' && (
-                        <h2 className="text-sm color-grey">
+                        <h2 className="text-sm italic color-grey">
                           Add practices for CAP notes to follow-up on by typing,
                           &quot;[&quot; and selecting from the autocomplete
                           options. These will be sent to the students&apos;
@@ -935,13 +935,13 @@ export default function SOAPNote({
                                     }}
                                   >
                                     {showPracticeGaps
-                                      ? 'Hide practice gap details'
-                                      : 'Show practice gap details'}
+                                      ? 'Hide details'
+                                      : 'Show details'}
                                   </button>
                                 </div>
-                                <p className="italic mb-2">
-                                  Connect a practice gap to an issue by dragging
-                                  it onto the issue. Edit a practice gap by
+                                <p className="italic text-sm mb-2">
+                                  Drag a practice onto the assessment to add it
+                                  to the current issue. Edit a practice gap by
                                   clicking on its title or description.
                                 </p>
 
