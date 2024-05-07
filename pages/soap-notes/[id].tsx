@@ -1386,81 +1386,81 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     sprintPoints = ['unable to fetch sprint points'];
   }
 
-  /**
-   * get active issues from OS
-   */
-  let activeIssues;
-  try {
-    const res = await fetch(
-      `${
-        process.env.ORCH_ENGINE
-      }/activeIssues/fetchActiveIssuesForProject?${new URLSearchParams({
-        projectName: currentCAPNote.project
-      })}`
-    );
-    activeIssues = await res.json();
-  } catch (err) {
-    console.error(err);
-  }
+  // /**
+  //  * get active issues from OS
+  //  */
+  // let activeIssues;
+  // try {
+  //   const res = await fetch(
+  //     `${
+  //       process.env.ORCH_ENGINE
+  //     }/activeIssues/fetchActiveIssuesForProject?${new URLSearchParams({
+  //       projectName: currentCAPNote.project
+  //     })}`
+  //   );
+  //   activeIssues = await res.json();
+  // } catch (err) {
+  //   console.error(err);
+  // }
 
-  // TODO: 03-03-24 -- see if I can filter out actionable followups and get some context separately
-  // get only issues and follow-ups for next SIG
-  const triggeredScripts = activeIssues
-    .filter(
-      (issue) =>
-        !issue.name.includes('actionable follow-up') ||
-        (issue.name.includes('actionable follow-up') &&
-          (issue.name.includes('morning of next SIG') ||
-            issue.name.includes('at next SIG')))
-    )
-    .map((script) => {
-      return {
-        name: script.name,
-        type: script.name.includes('follow-up') ? 'follow-up' : 'issue',
-        strategies: script.computed_strategies[0].outlet_args.message
-      };
-    });
+  // // TODO: 03-03-24 -- see if I can filter out actionable followups and get some context separately
+  // // get only issues and follow-ups for next SIG
+  // const triggeredScripts = activeIssues
+  //   .filter(
+  //     (issue) =>
+  //       !issue.name.includes('actionable follow-up') ||
+  //       (issue.name.includes('actionable follow-up') &&
+  //         (issue.name.includes('morning of next SIG') ||
+  //           issue.name.includes('at next SIG')))
+  //   )
+  //   .map((script) => {
+  //     return {
+  //       name: script.name,
+  //       type: script.name.includes('follow-up') ? 'follow-up' : 'issue',
+  //       strategies: script.computed_strategies[0].outlet_args.message
+  //     };
+  //   });
 
-  // add active issues to SOAP notes
-  for (let script of triggeredScripts) {
-    let scriptType = '';
-    switch (script.type) {
-      case 'follow-up':
-        scriptType = 'follow-up';
-        break;
-      case 'practice':
-        scriptType = 'practice';
-        break;
-      case 'issue':
-      default:
-        scriptType = 'detected issue';
-    }
-    let title =
-      scriptType == 'follow-up'
-        ? `[${scriptType}] ${script.strategies}`
-        : `[${scriptType}] ${script.name} - ${script.strategies}`;
-    let titleIndex = capNoteInfo.context.findIndex(
-      (line) => line.value === title
-    );
+  // // add active issues to SOAP notes
+  // for (let script of triggeredScripts) {
+  //   let scriptType = '';
+  //   switch (script.type) {
+  //     case 'follow-up':
+  //       scriptType = 'follow-up';
+  //       break;
+  //     case 'practice':
+  //       scriptType = 'practice';
+  //       break;
+  //     case 'issue':
+  //     default:
+  //       scriptType = 'detected issue';
+  //   }
+  //   let title =
+  //     scriptType == 'follow-up'
+  //       ? `[${scriptType}] ${script.strategies}`
+  //       : `[${scriptType}] ${script.name} - ${script.strategies}`;
+  //   let titleIndex = capNoteInfo.context.findIndex(
+  //     (line) => line.value === title
+  //   );
 
-    if (titleIndex === -1) {
-      capNoteInfo.context.push({
-        id: new mongoose.Types.ObjectId().toString(),
-        type: 'script',
-        context: [],
-        value: title
-      });
-    }
-  }
+  //   if (titleIndex === -1) {
+  //     capNoteInfo.context.push({
+  //       id: new mongoose.Types.ObjectId().toString(),
+  //       type: 'script',
+  //       context: [],
+  //       value: title
+  //     });
+  //   }
+  // }
 
-  // sort context notes by [detected issues] first
-  capNoteInfo.context.sort((a, b) => {
-    if (a.type === 'script' && b.type !== 'script') {
-      return -1;
-    } else {
-      return 1;
-    }
-  });
+  // // sort context notes by [detected issues] first
+  // capNoteInfo.context.sort((a, b) => {
+  //   if (a.type === 'script' && b.type !== 'script') {
+  //     return -1;
+  //   } else {
+  //     return 1;
+  //   }
+  // });
 
   // setup the page with the data from the database
   // - list of tracked practices and when they last occurred
