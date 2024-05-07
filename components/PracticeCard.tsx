@@ -64,7 +64,7 @@ export default function PracticeCard({
   return (
     <div
       ref={drag}
-      className={`flex flex-wrap border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
+      className={`flex-none basis-1/4 border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
     >
       <div className={`w-full h-full`}>
         {isAddPractice ? (
@@ -175,24 +175,21 @@ export default function PracticeCard({
               </div>
 
               <div className="text-xs mb-2">
-                <h3 className="mt-1 font-medium">First Tracked: {date}</h3>
                 <h3 className="mt-1 font-medium">
-                  Last Updated: {lastUpdated}
+                  Last noticed: {lastUpdated}
                 </h3>
               </div>
 
               {/* Issue description */}
-              {showPracticeGaps && (
-                <ContentEditable
-                  id={`description-${issueId}`}
-                  html={descriptionRef.current}
-                  onChange={(e) => {
-                    descriptionRef.current = e.target.value;
-                    onEdit('description', e.target.value);
-                  }}
-                  className={`p-0.5 flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg`}
-                />
-              )}
+              <ContentEditable
+                id={`description-${issueId}`}
+                html={descriptionRef.current}
+                onChange={(e) => {
+                  descriptionRef.current = e.target.value;
+                  onEdit('description', e.target.value);
+                }}
+                className={`p-0.5 flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg`}
+              />
 
               {/* Prior instances */}
               {showPracticeGaps && priorInstances && (

@@ -133,7 +133,7 @@ export default function LastWeekIssueCard({
   }, [followUps, date]);
 
   return (
-    <div ref={drag} className={`basis-1/6 border-4 p-1 ${opacity}`}>
+    <div ref={drag} className={`basis-1/3 border-4 p-1 ${opacity}`}>
       <div className={`w-full h-full`}>
         <>
           {/* Issue title */}

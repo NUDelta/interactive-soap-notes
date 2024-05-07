@@ -105,7 +105,7 @@ export default function IssueCard({
   return (
     <div
       ref={ref}
-      className={`basis-1/4 shrink-0 border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
+      className={`basis-1/3 shrink-0 border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
       onClick={() => {
         if (!isAddPractice) {
           setIsSelected(!isSelected);
@@ -125,8 +125,8 @@ export default function IssueCard({
             {/* Large plus icon in center of square */}
             <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
               <textarea
-                className="w-full h-3/4 text-base"
-                placeholder="Enter a new issue as, 'We are trying to do X, but Y is preventing progress,' and hit enter..."
+                className="w-full h-3/4 text-sm"
+                placeholder="Type a new issue here..."
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
                     // check if blank first
@@ -175,16 +175,6 @@ export default function IssueCard({
                   }}
                   className={`p-0.5 mr-2 flex-none w-full empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-base font-bold rounded-lg`}
                 />
-                <div>
-                  {!isThisWeek && (
-                    <TrashIcon
-                      className={`h-8 text-slate-600`}
-                      onClick={() => {
-                        onDeleteIssue(issueId);
-                      }}
-                    />
-                  )}
-                </div>
               </div>
 
               {/* Missing strategies */}
@@ -198,6 +188,18 @@ export default function IssueCard({
                       Missing strategies
                     </h3>
                   )}
+              </div>
+
+              {/* TODO: 05-07-24 move this to the bottom right */}
+              <div className="flex items-right">
+                {!isThisWeek && (
+                  <TrashIcon
+                    className={`h-8 text-slate-600`}
+                    onClick={() => {
+                      onDeleteIssue(issueId);
+                    }}
+                  />
+                )}
               </div>
             </div>
           </>
