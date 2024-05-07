@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import { mutate } from 'swr';
 
 import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
-import IssueCard from '../../components/IssueCard';
+import CurrWeekIssueCard from '../../components/CurrWeekIssueCard';
 import CurrWeekIssuePane from '../../components/CurrWeekIssuePane';
 import PracticeCard from '../../components/PracticeCard';
 import { longDate, shortDate } from '../../lib/helperFns';
@@ -446,7 +446,7 @@ export default function SOAPNote({
 
                   {/* Current Issues */}
                   {capData.currentIssues.map((currIssue) => (
-                    <IssueCard
+                    <CurrWeekIssueCard
                       key={`issue-card-${currIssue.id}`}
                       issueId={currIssue.id}
                       issue={currIssue}
@@ -498,7 +498,7 @@ export default function SOAPNote({
                   ))}
 
                   {/* Create a new issue for the week */}
-                  <IssueCard
+                  <CurrWeekIssueCard
                     key="issue-card-add-practice"
                     issueId="add-practice"
                     issue={null}

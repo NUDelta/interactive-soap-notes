@@ -9,7 +9,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import ContentEditable from 'react-contenteditable';
 
-export default function IssueCard({
+export default function CurrWeekIssueCard({
   issueId,
   issue,
   selectedIssue,
