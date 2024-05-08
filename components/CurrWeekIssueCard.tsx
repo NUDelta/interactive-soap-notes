@@ -9,7 +9,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import ContentEditable from 'react-contenteditable';
 
-export default function IssueCard({
+export default function CurrWeekIssueCard({
   issueId,
   issue,
   selectedIssue,
@@ -105,9 +105,9 @@ export default function IssueCard({
   return (
     <div
       ref={ref}
-      className={`flex flex-wrap border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
+      className={`basis-1/4 shrink-0 border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
       onClick={() => {
-        if (!isAddPractice) {
+        if (!isAddPractice && !isThisWeek) {
           setIsSelected(!isSelected);
           if (issueId === selectedIssue) {
             // set default to this week's notes
@@ -115,18 +115,31 @@ export default function IssueCard({
           } else {
             setSelectedIssue(issueId);
           }
+        } else if (isThisWeek) {
+          setSelectedIssue('this-weeks-notes');
         }
       }}
     >
       <div className={`w-full h-full`}>
-        {/* Adding Practice */}
-        {isAddPractice ? (
+        {/* Navigation to scratch space */}
+        {isThisWeek ? (
+          <>
+            {/* Large plus icon in center of square */}
+            <div className="p-2 flex flex-col w-3/4 h-full mx-auto my-auto items-center justify-center">
+              <h2 className="text-base font-bold items-center">
+                <p className="text-sm text-center italic">
+                  Scratch space for this week&apos;s notes
+                </p>
+              </h2>
+            </div>
+          </>
+        ) : isAddPractice ? (
           <>
             {/* Large plus icon in center of square */}
             <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
               <textarea
-                className="w-full h-3/4 text-base"
-                placeholder="Enter a new issue as, 'We are trying to do X, but Y is preventing progress,' and hit enter..."
+                className="w-full h-3/4 text-sm"
+                placeholder="Type a new issue here..."
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
                     // check if blank first
@@ -151,19 +164,19 @@ export default function IssueCard({
                 }}
               ></textarea>
               <h2 className="text-base font-bold items-center">
-                <span className="text-sm text-center italic">
+                <p className="text-sm text-center italic">
                   {newIssue.trim() === ''
                     ? 'or drag a note onto this block'
                     : "hit 'Enter' to add new issue"}
-                </span>
+                </p>
               </h2>
             </div>
           </>
         ) : (
           <>
             {/* Issue title */}
-            <div className="p-2 mb-1 w-full flex flex-col">
-              <div className="w-11/12 flex flex-row">
+            <div className="p-2 mb-2 w-full flex flex-col">
+              <div className="w-full h-16 flex flex-row mb-2">
                 <ContentEditable
                   id={`title-${issueId}`}
                   html={titleRef.current}
@@ -175,7 +188,24 @@ export default function IssueCard({
                   }}
                   className={`p-0.5 mr-2 flex-none w-full empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-base font-bold rounded-lg`}
                 />
-                <div>
+              </div>
+
+              <div className="flex flex-row items-center">
+                {/* Missing strategies */}
+                <div className="w-11/12">
+                  {issue &&
+                    !issue.plan.some((currPlan) => {
+                      return currPlan.value.trim() !== '';
+                    }) && (
+                      <h3 className="mt-2 text-xs font-medium text-red-500 flex flex-row items-center">
+                        <ExclamationTriangleIcon className="h-6 mr-1" />
+                        Missing strategies
+                      </h3>
+                    )}
+                </div>
+
+                {/* TODO: 05-07-24 move this to the bottom right */}
+                <div className="float-right">
                   {!isThisWeek && (
                     <TrashIcon
                       className={`h-8 text-slate-600`}
@@ -185,24 +215,6 @@ export default function IssueCard({
                     />
                   )}
                 </div>
-              </div>
-
-              {/* Last update */}
-              <div className="text-xs">
-                <h3 className="mt-1 font-medium">Updated: {lastUpdated}</h3>
-              </div>
-
-              {/* Missing strategies */}
-              <div className="text-xs">
-                {issue &&
-                  !issue.plan.some((currPlan) => {
-                    return currPlan.value.trim() !== '';
-                  }) && (
-                    <h3 className="mt-2 font-medium text-red-500 flex flex-row items-center">
-                      <ExclamationTriangleIcon className="h-6 mr-1" />
-                      Missing strategies
-                    </h3>
-                  )}
               </div>
             </div>
           </>

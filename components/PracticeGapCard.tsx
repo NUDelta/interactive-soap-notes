@@ -9,11 +9,10 @@ import { shortDate } from '../lib/helperFns';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import ContentEditable from 'react-contenteditable';
 
-export default function PracticeCard({
+export default function PracticeGapCard({
   issueId,
   title,
   description,
-  date,
   lastUpdated,
   priorInstances = null,
   issueIsResolved,
@@ -64,7 +63,7 @@ export default function PracticeCard({
   return (
     <div
       ref={drag}
-      className={`flex flex-wrap border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
+      className={`flex-none basis-1/4 border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
     >
       <div className={`w-full h-full`}>
         {isAddPractice ? (
@@ -119,7 +118,7 @@ export default function PracticeCard({
                       titleRef.current = e.target.value;
                       onEdit('title', e.target.value);
                     }}
-                    className={`p-0.5 flex-none w-full empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-base font-bold rounded-lg`}
+                    className={`p-0.5 flex-none w-full empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg text-base font-semibold`}
                   />
                 </div>
 
@@ -175,47 +174,44 @@ export default function PracticeCard({
               </div>
 
               <div className="text-xs mb-2">
-                <h3 className="mt-1 font-medium">First Tracked: {date}</h3>
                 <h3 className="mt-1 font-medium">
-                  Last Updated: {lastUpdated}
+                  Last noticed: {lastUpdated}
                 </h3>
               </div>
 
               {/* Issue description */}
-              {showPracticeGaps && (
-                <ContentEditable
-                  id={`description-${issueId}`}
-                  html={descriptionRef.current}
-                  onChange={(e) => {
-                    descriptionRef.current = e.target.value;
-                    onEdit('description', e.target.value);
-                  }}
-                  className={`p-0.5 flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg`}
-                />
-              )}
+              <ContentEditable
+                id={`description-${issueId}`}
+                html={descriptionRef.current}
+                onChange={(e) => {
+                  descriptionRef.current = e.target.value;
+                  onEdit('description', e.target.value);
+                }}
+                className={`p-0.5 text-sm flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg`}
+              />
 
               {/* Prior instances */}
               {showPracticeGaps && priorInstances && (
                 <div className="flex flex-col">
                   <h3 className="mt-4 font-medium border-b border-black">
-                    Project issues that had this this practice gap in the past:
+                    Past issues with this practice gap:
                   </h3>
 
                   {priorInstances.map((instance, idx) => (
                     <div key={idx} className="flex flex-col">
-                      <h4 className="mt-1 text-normal font-normal">
-                        {instance.title}
+                      <h4 className="mt-1 text-sm font-semibold">
+                        {instance.title} | {shortDate(new Date(instance.date))}
                       </h4>
-                      <span className="text-xs">
-                        {shortDate(new Date(instance.date))}
-                      </span>
-                      {instance.plan.map((plan, idx) => (
-                        <div key={idx} className="text-xs">
-                          <div className="w-11/12">
-                            <p>{plan.value}</p>
+                      <div className="w-full">
+                        <h3 className="text-sm">Context from instance</h3>
+                        {instance.context.map((context, idx) => (
+                          <div key={idx} className="text-xs">
+                            {context.value.trim() !== '' && (
+                              <p>- {context.value}</p>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   ))}
 

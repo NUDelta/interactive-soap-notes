@@ -5,6 +5,10 @@ import {
   PracticeObjectStruct
 } from './PracticeObjectModel';
 import { IssueObjectSchema, IssueObjectStruct } from './IssueObjectModel';
+// import {
+//   FollowUpObjectSchema,
+//   FollowUpObjectStruct
+// } from './FollowUpObjectModel';
 
 export interface CAPStruct {
   project: string;
@@ -15,6 +19,7 @@ export interface CAPStruct {
   context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
+  // followUps: FollowUpObjectStruct[];
   pastIssues: IssueObjectStruct[];
   currentIssues: IssueObjectStruct[];
   trackedPractices: PracticeObjectStruct[];
@@ -44,6 +49,7 @@ const CAPNote = new mongoose.Schema<CAPStruct>({
   context: [TextEntrySchema],
   assessment: [TextEntrySchema],
   plan: [TextEntrySchema],
+  // followUps: [FollowUpObjectSchema],
   pastIssues: [IssueObjectSchema],
   currentIssues: [IssueObjectSchema],
   trackedPractices: [PracticeObjectSchema]

@@ -15,7 +15,8 @@ export default function NoteBlock({
   onKeyDown,
   onKeyUp,
   onChange,
-  onDragToIssue
+  onDragToIssue,
+  editable = true
 }): JSX.Element {
   // ref to the note block's content so state changes don't trigger a re-render
   const blockContent = useRef(noteContent.value);
@@ -178,7 +179,7 @@ export default function NoteBlock({
     <>
       <div
         ref={drag}
-        className="border flex flex-col items-left align-middle mb-2"
+        className="border flex flex-col items-left align-middle mb-2 w-full"
       >
         <div className="flex flex-row">
           {/* drag handle on left side */}
@@ -206,6 +207,7 @@ export default function NoteBlock({
           <ContentEditable
             id={noteId}
             html={blockContent.current}
+            disabled={!editable}
             onChange={(e) => {
               // update ref with new content
               blockContent.current = e.target.value;
@@ -215,11 +217,11 @@ export default function NoteBlock({
             }}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
-            className={`p-2 flex-none w-full empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
+            className={`p-2 flex-initial basis-full text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
           />
         </div>
 
-        {noteSection === 'plan' && (
+        {/* {noteSection === 'plan' && (
           <div className="ml-[40px]">
             {parsePracticeFollowup(blockContent.current)
               .notificationsToStudents && (
@@ -242,7 +244,7 @@ export default function NoteBlock({
               </p>
             )}
           </div>
-        )}
+        )} */}
       </div>
     </>
   );

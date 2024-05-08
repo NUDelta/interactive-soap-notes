@@ -6,9 +6,9 @@ import mongoose from 'mongoose';
 import { mutate } from 'swr';
 
 import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
-import IssueCard from '../../components/IssueCard';
-import IssuePane from '../../components/IssuePane';
-import PracticeCard from '../../components/PracticeCard';
+import CurrWeekIssueCard from '../../components/CurrWeekIssueCard';
+import CurrWeekIssuePane from '../../components/CurrWeekIssuePane';
+import PracticeGapCard from '../../components/PracticeGapCard';
 import { longDate, shortDate } from '../../lib/helperFns';
 
 import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
@@ -21,6 +21,7 @@ import NoteBlock from '../../components/NoteBlock';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import LastWeekIssueCard from '../../components/LastWeekIssueCard';
+import LastWeekIssuePane from '../../components/LastWeekIssuePane';
 
 export default function SOAPNote({
   capNoteInfo,
@@ -40,7 +41,7 @@ export default function SOAPNote({
   const [showLastWeeksIssues, setShowLastWeeksIssues] = useState(true);
 
   // hold a state for showing / hiding practice gap details
-  const [showPracticeGaps, setShowPracticeGaps] = useState(true);
+  const [showPracticeGaps, setShowPracticeGaps] = useState(false);
 
   // let user know that we are saving and if there were any errors
   const [isSaving, setIsSaving] = useState(false);
@@ -246,29 +247,40 @@ export default function SOAPNote({
     <>
       {/* Set title of the page to be project name */}
       <Head>
-        <title>{noteInfo.project}</title>
+        <title>
+          {`${
+            noteInfo.project.length > 15
+              ? noteInfo.project.substring(0, 15 - 3) + '...'
+              : noteInfo.project
+          } | ${new Date(noteInfo.sigDate).toLocaleString().split(',')[0]}`}
+        </title>
       </Head>
 
       {/* Header info for SOAP note */}
       <div className="w-11/12 mx-auto mt-3">
-        {/* Back button */}
-        <div className="col-span-3 mb-2">
-          <Link href="/">
-            <h3 className="text-md text-blue-600 hover:text-blue-800 visited:text-purple-600">
-              &#8592; Back
-            </h3>
-          </Link>
-        </div>
+        {/* Back, title, and last updated */}
+        <div className="flex flex-row items-center flex-nowrap mb-4">
+          {/* Back button */}
+          <div className="mr-2">
+            <Link href="/">
+              <Tooltip content="Back to all notes" placement="bottom">
+                <h3 className="text-lg font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                  &#8592;
+                </h3>
+              </Tooltip>
+            </Link>
+          </div>
 
-        {/* Title and last updated */}
-        <div className="flex flex-col col-span-3 mb-4">
-          <h1 className="font-bold text-3xl mb-1">
-            {noteInfo.project} | {noteInfo.sigDate}
-          </h1>
+          {/* Title */}
+          <div className="mr-2">
+            <h1 className="font-bold text-3xl mb-1">
+              {noteInfo.project} | {noteInfo.sigDate}
+            </h1>
+          </div>
 
           {/* Save status */}
           {/* Three states of saved: (1) saved without error; (2) saving; (3) save attemped but error */}
-          <div className="flex flex-row items-center">
+          <div className="flex flex-row">
             {/* Saved successfully */}
             {!isSaving && saveError === null ? (
               <>
@@ -332,923 +344,1030 @@ export default function SOAPNote({
         </div> */}
 
         <DndProvider backend={HTML5Backend}>
-          {/* Past issues and tracked practices */}
-          <div className="grid grid-cols-2">
-            <div className="flex flex-col col-span-1 mr-7">
+          {/* Past issues and tracked practices fixed to top of page */}
+          {/* TODO: 05-06-24: maybe add a hide and show button so mentor can recover vertical space when done browsing past issues */}
+          <div className="fixed w-11/12">
+            <div className="flex flex-row mr-7">
               {/* Past Issues */}
-              <div className="w-full">
-                {/* Past Issue Cards */}
-                <div className="mb-5">
-                  <div className="flex flex-row items-center border-b border-black mb-2">
-                    <h1 className="font-bold text-2xl mb-2">
-                      Last Week&apos;s Issues
-                    </h1>
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-2 py-2 h-8 rounded-full ml-2 mb-2"
-                      onClick={() => {
-                        setShowLastWeeksIssues(!showLastWeeksIssues);
-                      }}
-                    >
-                      {showLastWeeksIssues
-                        ? 'Hide follow-up details'
-                        : 'Show follow-up details'}
-                    </button>
-                  </div>
+              <div className="w-1/2 mr-2 mb-5">
+                {/* Section title and description */}
+                <div className="flex flex-col">
+                  <h1 className="font-bold text-2xl border-b border-black mb-2">
+                    Last Week&apos;s Issues
+                  </h1>
+                  <p className="italic text-sm mb-2">
+                    {capData.pastIssues.length > 0
+                      ? "Click on an issue to view it's assessments and follow-up outcomes."
+                      : 'No issues from the past week.'}
+                  </p>
+                </div>
 
-                  {/* TODO: 04-30-24 hide and show */}
+                {/* Issues from the past week */}
+                <div className="flex flex-row gap-1 flex-nowrap overflow-auto">
+                  {capData.pastIssues.map((lastWeekIssue) => (
+                    <LastWeekIssueCard
+                      key={`issue-card-${lastWeekIssue.id}`}
+                      issueId={lastWeekIssue.id}
+                      title={lastWeekIssue.title}
+                      date={lastWeekIssue.date}
+                      selectedIssue={selectedIssue}
+                      setSelectedIssue={setSelectedIssue}
+                      onDrag={(sourceIssueId, targetIssueId) => {
+                        // find index of the source issue
+                        let sourceIssueIndex = capData.pastIssues.findIndex(
+                          (issue) => issue.id === sourceIssueId
+                        );
+                        let sourcePastIssue =
+                          capData.pastIssues[sourceIssueIndex];
 
-                  {/* Active Practices */}
-                  <div className="grid grid-cols-2 gap-1 grid-flow-row row-auto">
-                    {/* tracked practices */}
-                    {/* TODO: 04-30-24 -- practice cards should only show the practice. as used here, these should be issue cards */}
-                    {capData.pastIssues.map((lastWeekIssue) => (
-                      <LastWeekIssueCard
-                        key={`issue-card-${lastWeekIssue.id}`}
-                        issueId={lastWeekIssue.id}
-                        title={lastWeekIssue.title}
-                        date={lastWeekIssue.date}
-                        followUps={lastWeekIssue.followUps}
-                        showLastWeeksIssues={showLastWeeksIssues}
-                        setShowLastWeeksIssues={setShowLastWeeksIssues}
-                        onDrag={(sourceIssueId, targetIssueId) => {
-                          // find index of the source issue
-                          let sourceIssueIndex = capData.pastIssues.findIndex(
-                            (issue) => issue.id === sourceIssueId
-                          );
-                          let sourcePastIssue =
-                            capData.pastIssues[sourceIssueIndex];
-
-                          // check that the targetIssueId is add-practice
-                          if (targetIssueId === 'add-practice') {
-                            // add the source issue to the current issues
-                            setCAPData((prevCapData) => {
-                              let newCAPData = { ...prevCapData };
-                              newCAPData.currentIssues.push({
-                                id: new mongoose.Types.ObjectId().toString(),
-                                title:
-                                  capData.pastIssues[sourceIssueIndex].title,
-                                date: longDate(new Date()),
-                                lastUpdated: longDate(new Date()),
-                                context: [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ],
-                                assessment: [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ],
-                                plan: [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ],
-                                followUps: [],
-                                priorInstances: [] // TODO: 04-30-24 add the source issue to the prior instances
-                              });
-                              return newCAPData;
+                        // check that the targetIssueId is add-practice
+                        if (targetIssueId === 'add-practice') {
+                          // add the source issue to the current issues
+                          setCAPData((prevCapData) => {
+                            let newCAPData = { ...prevCapData };
+                            newCAPData.currentIssues.push({
+                              id: new mongoose.Types.ObjectId().toString(),
+                              title: capData.pastIssues[sourceIssueIndex].title,
+                              date: longDate(new Date()),
+                              lastUpdated: longDate(new Date()),
+                              context: [
+                                {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                }
+                              ],
+                              assessment: [
+                                {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                }
+                              ],
+                              plan: [
+                                {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                }
+                              ],
+                              followUps: [],
+                              priorInstances: [] // TODO: 04-30-24 add the source issue to the prior instances
                             });
-                          }
-                        }}
-                      />
-                    ))}
-                  </div>
+                            return newCAPData;
+                          });
+                        }
+                      }}
+                    />
+                  ))}
                 </div>
               </div>
 
-              {/* Tracked Practices */}
               {/* Current Issues */}
-              <div className="w-full">
-                {/* Practice Cards */}
-                <div className="mb-5">
-                  <div className="flex flex-row items-center border-b border-black mb-2">
-                    <h1 className="font-bold text-2xl mb-2">
-                      Tracked Practice Gaps
-                    </h1>
-                    <button
-                      className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-2 py-2 h-8 rounded-full ml-2 mb-2"
-                      onClick={() => {
-                        setShowPracticeGaps(!showPracticeGaps);
-                      }}
-                    >
-                      {showPracticeGaps
-                        ? 'Hide practice gap details'
-                        : 'Show practice gap details'}
-                    </button>
-                  </div>
-                  <p className="italic mb-2">
-                    Connect a practice gap to an issue by dragging it onto the
-                    issue. Edit a practice gap by clicking on its title or
-                    description.
+              <div className="w-1/2 ml-2 mb-5">
+                {/* Section title and description */}
+                <div className="flex flex-col">
+                  <h1 className="font-bold text-2xl border-b border-black mb-2">
+                    Current Issues
+                  </h1>
+                  <p className="italic text-sm mb-2">
+                    Click on an issue to edit it&apos;s CAP notes. Drag a Last
+                    Week Issue or a note onto the last card to create a new
+                    issue.
                   </p>
+                </div>
 
-                  {/* Active Practices */}
-                  <div className="grid grid-cols-2 gap-1 grid-flow-row row-auto">
-                    {/* tracked practices */}
-                    {capData.trackedPractices
-                      .filter((practice) => {
-                        return (
-                          !practice.practiceInactive &&
-                          !practice.practiceArchived
+                {/* This week's issues */}
+                <div className="flex flex-row gap-1 flex-nowrap overflow-auto">
+                  {/* Default card for the scratch space */}
+                  <CurrWeekIssueCard
+                    key="issue-card-this-weeks-notes"
+                    issueId="this-weeks-notes"
+                    issue={null}
+                    selectedIssue={selectedIssue}
+                    setSelectedIssue={setSelectedIssue}
+                    editable={false}
+                    onAddIssue={() => {
+                      return;
+                    }}
+                    onDeleteIssue={() => {
+                      return;
+                    }}
+                  />
+
+                  {/* Current Issues */}
+                  {capData.currentIssues.map((currIssue) => (
+                    <CurrWeekIssueCard
+                      key={`issue-card-${currIssue.id}`}
+                      issueId={currIssue.id}
+                      issue={currIssue}
+                      selectedIssue={selectedIssue}
+                      setSelectedIssue={setSelectedIssue}
+                      onAddIssue={() => {
+                        return;
+                      }}
+                      onDeleteIssue={(issueId) => {
+                        // confirm if the user wants to delete the issue
+                        if (
+                          !confirm(
+                            `Are you sure you want to delete, "${currIssue.title}"? This cannot be undone.`
+                          )
+                        ) {
+                          return;
+                        }
+
+                        // reset the selected issue
+                        // delete the issue
+                        let issuesToUpdate = capData.currentIssues;
+                        let issueIndex = issuesToUpdate.findIndex(
+                          (i) => i.id === issueId
                         );
-                      })
-                      .map((practice) => (
-                        <PracticeCard
-                          key={`issue-card-${practice.id}`}
-                          issueId={practice.id}
-                          title={practice.title}
-                          description={practice.description}
-                          date={practice.date}
-                          lastUpdated={practice.lastUpdated}
-                          priorInstances={practice.prevIssues}
-                          issueIsResolved={false}
-                          showPracticeGaps={showPracticeGaps}
-                          onResolved={(e) => {
-                            // confirm if the user wants to resolve the issue
-                            if (
-                              !confirm(
-                                `Are you sure you want mark, "${practice.title}", as resolved?`
-                              )
-                            ) {
-                              return;
-                            }
+                        issuesToUpdate.splice(issueIndex, 1);
 
-                            // resolve the issue
-                            let practiceToUpdate = capData.trackedPractices;
-                            let practiceIndex = practiceToUpdate.findIndex(
-                              (i) => i.id === practice.id
-                            );
-                            practiceToUpdate[practiceIndex].practiceInactive =
-                              true;
-                            practiceToUpdate[practiceIndex].lastUpdated =
-                              longDate(new Date());
-                            setCAPData((prevData) => ({
-                              ...prevData,
-                              trackedPractices: practiceToUpdate
-                            }));
-                          }}
-                          onArchive={(e) => {
-                            // confirm if the user wants to archive the issue
-                            if (
-                              !confirm(
-                                `Are you sure you want to archive, "${practice.title}"? This cannot be undone.`
-                              )
-                            ) {
-                              return;
-                            }
-
-                            // archive the issue
-                            let practiceToUpdate = capData.trackedPractices;
-                            let practiceIndex = practiceToUpdate.findIndex(
-                              (i) => i.id === practice.id
-                            );
-                            practiceToUpdate[practiceIndex].practiceArchived =
-                              true;
-                            practiceToUpdate[practiceIndex].lastUpdated =
-                              longDate(new Date());
-                            setCAPData((prevData) => ({
-                              ...prevData,
-                              trackedPractices: practiceToUpdate
-                            }));
-                          }}
-                          onEdit={(field, edits) => {
-                            // update the practice with the edits
-                            let practiceToUpdate = capData.trackedPractices;
-                            let practiceIndex = practiceToUpdate.findIndex(
-                              (i) => i.id === practice.id
-                            );
-                            practiceToUpdate[practiceIndex][field] = edits;
-                            practiceToUpdate[practiceIndex].lastUpdated =
-                              longDate(new Date());
-                            setCAPData((prevData) => ({
-                              ...prevData,
-                              trackedPractices: practiceToUpdate
-                            }));
-                          }}
-                          onDrag={(sourcePracticeId, targetCurrentIssueId) => {
-                            // find index of the source practice
-                            let sourcePracticeIndex =
-                              capData.trackedPractices.findIndex(
-                                (practice) => practice.id === sourcePracticeId
-                              );
-                            let sourcePractice =
-                              capData.trackedPractices[sourcePracticeIndex];
-
-                            // find the target issue index
-                            let targetIssueIndex =
-                              capData.currentIssues.findIndex(
-                                (issue) => issue.id === targetCurrentIssueId
-                              );
-                            let targetIssue =
-                              capData.currentIssues[targetIssueIndex];
-
-                            // update state
-                            setCAPData((prevCapData) => {
-                              let newCAPData = { ...prevCapData };
-
-                              // attach practice to targetIssue as an assessment
-                              let newAssessment = {
-                                id: new mongoose.Types.ObjectId().toString(),
-                                type: 'note',
-                                context: [],
-                                value: `[practice gap] ${sourcePractice.title}`
-                              };
-
-                              // check if last assessment is blank before adding
-                              if (
-                                targetIssue.assessment.length === 1 &&
-                                targetIssue.assessment[0].value.trim() === ''
-                              ) {
-                                newCAPData.currentIssues[
-                                  targetIssueIndex
-                                ].assessment = [newAssessment];
-                              } // check if the last assessment is blank
-                              else if (
-                                newCAPData.currentIssues[
-                                  targetIssueIndex
-                                ].assessment[
-                                  newCAPData.currentIssues[targetIssueIndex]
-                                    .assessment.length - 1
-                                ].value.trim() === ''
-                              ) {
-                                newCAPData.currentIssues[
-                                  targetIssueIndex
-                                ].assessment[
-                                  newCAPData.currentIssues[targetIssueIndex]
-                                    .assessment.length - 1
-                                ] = newAssessment;
-                              } else {
-                                newCAPData.currentIssues[
-                                  targetIssueIndex
-                                ].assessment.push(newAssessment);
-                              }
-
-                              // update the last updated timestamp
-                              newCAPData.currentIssues[
-                                targetIssueIndex
-                              ].lastUpdated = longDate(new Date());
-
-                              // attach the current issue as an instance to the practice
-                              let newIssueInstance = {
-                                id: targetIssue.id,
-                                title: targetIssue.title,
-                                date: targetIssue.date,
-                                lastUpdated: targetIssue.lastUpdated
-                              };
-                              newCAPData.trackedPractices[
-                                sourcePracticeIndex
-                              ].prevIssues.push(targetIssue);
-
-                              // return the new data
-                              return newCAPData;
-                            });
-                          }}
-                        />
-                      ))}
-
-                    {/* practice card for new practice gaps */}
-                    <PracticeCard
-                      key="issue-card-add-practice"
-                      issueId="add-practice"
-                      title="Add practice"
-                      description="Notes from SIG"
-                      date={noteInfo.sigDate}
-                      lastUpdated={noteInfo.lastUpdated}
-                      issueIsResolved={false}
-                      onAddPractice={(practiceTitle) => {
-                        // create a new practice
-                        let newPractice = {
-                          id: new mongoose.Types.ObjectId().toString(),
-                          title: practiceTitle,
-                          description: '',
-                          date: longDate(new Date()),
-                          lastUpdated: longDate(new Date()),
-                          practiceInactive: false,
-                          practiceArchived: false,
-                          prevIssues: []
-                        };
-
-                        setCAPData((prevCapData) => {
-                          let newCAPData = { ...prevCapData };
-                          newCAPData.trackedPractices.push(newPractice);
-                          return newCAPData;
+                        setCAPData((prevData) => {
+                          // TODO: 05-06-24: creates a race condition if the current issue is is highlighted when being deleted
+                          setSelectedIssue('this-weeks-notes');
+                          return {
+                            ...prevData,
+                            currentIssues: issuesToUpdate
+                          };
                         });
                       }}
+                      onTitleEdit={(newTitle) => {
+                        // update the title of the issue
+                        let issuesToUpdate = capData.currentIssues;
+                        let issueIndex = issuesToUpdate.findIndex(
+                          (i) => i.id === currIssue.id
+                        );
+                        issuesToUpdate[issueIndex].title = newTitle;
+                        setCAPData((prevData) => ({
+                          ...prevData,
+                          currentIssues: issuesToUpdate
+                        }));
+                      }}
                     />
-                  </div>
+                  ))}
+
+                  {/* Create a new issue for the week */}
+                  <CurrWeekIssueCard
+                    key="issue-card-add-practice"
+                    issueId="add-practice"
+                    issue={null}
+                    selectedIssue={selectedIssue}
+                    setSelectedIssue={setSelectedIssue}
+                    onAddIssue={(newIssueTitle) => {
+                      // create a new issue for the current week
+                      let newIssueForWeek = {
+                        id: new mongoose.Types.ObjectId().toString(),
+                        title: newIssueTitle,
+                        date: longDate(new Date(noteInfo.sigDate)),
+                        lastUpdated: longDate(new Date()),
+                        context: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        assessment: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        plan: [
+                          {
+                            id: new mongoose.Types.ObjectId().toString(),
+                            type: 'note',
+                            context: [],
+                            value: ''
+                          }
+                        ],
+                        followUps: [],
+                        priorInstances: []
+                      };
+
+                      setCAPData((prevCapData) => {
+                        let newCAPData = { ...prevCapData };
+                        newCAPData.currentIssues.push(newIssueForWeek);
+                        return newCAPData;
+                      });
+                    }}
+                    onDeleteIssue={() => {
+                      return;
+                    }}
+                  />
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Current issues and note space */}
-            <div className="flex flex-col col-span-1 ml-7">
-              <div className="">
-                {/* Current Issues */}
-                <div className="w-full">
-                  {/* Practice Cards */}
-                  <div className="mb-5">
-                    <div className="h-8 mb-3">
-                      <h1 className="font-bold text-2xl border-b border-black ">
-                        Current Issues
-                      </h1>
-                    </div>
-                    <p className="italic mb-2">
-                      Click on an issue to edit it&apos;s CAP notes; clicking it
-                      again will switch you back to your scratch space. New
-                      practices can be created using typing in the last cell or
-                      by dragging a Past Issue onto it.
+          {/* Placeholder div to push down the non-fixed portion */}
+          <div className="h-[25vh]" />
+
+          {/* Note Space */}
+          <div className="flex flex-col h-[65vh] overflow-auto">
+            {/* show either the CAP note section for scratch space or current issues, or the summary interface for last week's issue */}
+            {/* TODO: should check if the issue id is in the current issues or past issues */}
+            <div className="">
+              {selectedIssue !== null &&
+              selectedIssue !== 'this-weeks-notes' ? (
+                capData.currentIssues.findIndex(
+                  (practice) => practice.id === selectedIssue
+                ) !== -1 ? (
+                  // Selected issue is a current week issue
+                  <>
+                    {/* TODO: title should change based on what practice is selected */}
+                    {/* TODO: for issues, allow the title to be edited */}
+                    {/* TODO: once this uses the same schema as the regular notes, then the code can be compressed */}
+                    <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
+                      {capData.currentIssues.findIndex(
+                        (practice) => practice.id === selectedIssue
+                      ) !== -1 &&
+                        capData.currentIssues[
+                          capData.currentIssues.findIndex(
+                            (practice) => practice.id === selectedIssue
+                          )
+                        ].title}
+                    </h1>
+
+                    <p className="italic text-sm">
+                      Use the space below to add notes for the selected issue.
                     </p>
 
-                    {/* This week's issues */}
-                    <div className="grid grid-cols-3 gap-1 grid-flow-row row-auto">
-                      {/* issue card for this week's notes */}
-                      {/* <IssueCard
-                        key="issue-card-this-week"
-                        issueId="this-weeks-notes"
-                        issue={null}
-                        selectedIssue={selectedIssue}
-                        setSelectedIssue={setSelectedIssue}
-                        onAddIssue={() => {
-                          return;
-                        }}
-                        onDeleteIssue={() => {
-                          return;
-                        }}
-                      /> */}
+                    <p className="italic text-sm text-slate-500 mb-2">
+                      Press Shift-Enter to add a new text block and
+                      Shift-Backspace to delete current block. Press Tab to move
+                      to next block, and Shift-Tab to move to previous block.
+                    </p>
 
-                      {/* tracked practices */}
-                      {/* TODO: 04-30-24 -- practice cards should only show the practice. as used here, these should be issue cards */}
-                      {capData.currentIssues.map((currIssue) => (
-                        <IssueCard
-                          key={`issue-card-${currIssue.id}`}
-                          issueId={currIssue.id}
-                          issue={currIssue}
-                          selectedIssue={selectedIssue}
-                          setSelectedIssue={setSelectedIssue}
-                          onAddIssue={() => {
-                            return;
-                          }}
-                          onDeleteIssue={(issueId) => {
-                            // confirm if the user wants to delete the issue
-                            if (
-                              !confirm(
-                                `Are you sure you want to delete, "${currIssue.title}"? This cannot be undone.`
-                              )
-                            ) {
-                              return;
-                            }
-
-                            // reset the selected issue
-                            // delete the issue
-                            let issuesToUpdate = capData.currentIssues;
-                            let issueIndex = issuesToUpdate.findIndex(
-                              (i) => i.id === issueId
-                            );
-                            issuesToUpdate.splice(issueIndex, 1);
-
-                            setCAPData((prevData) => {
-                              setSelectedIssue('this-weeks-notes');
-                              return {
-                                ...prevData,
-                                currentIssues: issuesToUpdate
-                              };
-                            });
-                          }}
-                          onTitleEdit={(newTitle) => {
-                            // update the title of the issue
-                            let issuesToUpdate = capData.currentIssues;
-                            let issueIndex = issuesToUpdate.findIndex(
-                              (i) => i.id === currIssue.id
-                            );
-                            issuesToUpdate[issueIndex].title = newTitle;
-                            setCAPData((prevData) => ({
-                              ...prevData,
-                              currentIssues: issuesToUpdate
-                            }));
-                          }}
-                        />
-                      ))}
-
-                      {/* practice card for new issues */}
-                      <IssueCard
-                        key="issue-card-add-practice"
-                        issueId="add-practice"
-                        issue={null}
-                        selectedIssue={selectedIssue}
-                        setSelectedIssue={setSelectedIssue}
-                        onAddIssue={(newIssueTitle) => {
-                          // create a new issue for the current week
-                          let newIssueForWeek = {
-                            id: new mongoose.Types.ObjectId().toString(),
-                            title: newIssueTitle,
-                            date: longDate(new Date(noteInfo.sigDate)),
-                            lastUpdated: longDate(new Date()),
-                            context: [
-                              {
-                                id: new mongoose.Types.ObjectId().toString(),
-                                type: 'note',
-                                context: [],
-                                value: ''
-                              }
-                            ],
-                            assessment: [
-                              {
-                                id: new mongoose.Types.ObjectId().toString(),
-                                type: 'note',
-                                context: [],
-                                value: ''
-                              }
-                            ],
-                            plan: [
-                              {
-                                id: new mongoose.Types.ObjectId().toString(),
-                                type: 'note',
-                                context: [],
-                                value: ''
-                              }
-                            ],
-                            followUps: [],
-                            priorInstances: []
-                          };
-
-                          setCAPData((prevCapData) => {
-                            let newCAPData = { ...prevCapData };
-                            newCAPData.currentIssues.push(newIssueForWeek);
-                            return newCAPData;
-                          });
-                        }}
-                        onDeleteIssue={() => {
-                          return;
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Note Space */}
-                <div className="w-full">
-                  {/* Notes during SIG */}
-                  {/* Create a section for each component of the SOAP notes */}
-                  {/* resizing textbox: https://css-tricks.com/the-cleanest-trick-for-autogrowing-textareas/ */}
-                  {/* show either the regular note section or the note pane */}
-                  <div>
-                    {selectedIssue !== null &&
-                    selectedIssue !== 'this-weeks-notes' ? (
-                      <>
-                        {/* TODO: title should change based on what practice is selected */}
-                        {/* TODO: for issues, allow the title to be edited */}
-                        {/* TODO: once this uses the same schema as the regular notes, then the code can be compressed */}
-                        <h1 className="font-bold text-2xl border-b border-black mb-3">
-                          {capData.currentIssues.findIndex(
+                    <CurrWeekIssuePane
+                      issueId={selectedIssue}
+                      capData={capData}
+                      setCAPData={setCAPData} // TODO: this needs to be per issue
+                      capSections={issueSections}
+                      showPracticeGaps={showPracticeGaps}
+                      setShowPracticeGaps={setShowPracticeGaps}
+                      autocompleteTriggersOptions={autocompleteTriggersOptions}
+                    />
+                  </>
+                ) : (
+                  // Selected issue is a last week issue
+                  <>
+                    <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
+                      {capData.pastIssues.findIndex(
+                        (issue) => issue.id === selectedIssue
+                      ) !== -1 &&
+                        capData.pastIssues[
+                          capData.pastIssues.findIndex(
                             (practice) => practice.id === selectedIssue
-                          ) !== -1 &&
-                            capData.currentIssues[
-                              capData.currentIssues.findIndex(
-                                (practice) => practice.id === selectedIssue
-                              )
-                            ].title}
-                        </h1>
-                        <IssuePane
-                          issueId={selectedIssue}
-                          capData={capData}
-                          setCAPData={setCAPData} // TODO: this needs to be per issue
-                          capSections={issueSections}
-                          autocompleteTriggersOptions={
-                            autocompleteTriggersOptions
-                          }
-                        />
-                      </>
-                    ) : (
-                      <div>
-                        <h1 className="font-bold text-2xl border-b border-black mb-3">
-                          Scratch Space to Take Notes
-                        </h1>
+                          )
+                        ].title}
+                    </h1>
 
-                        {/* TODO: show only for the default note; for issues, replace with an editable description */}
-                        <p className="italic">
-                          Use the space below to scratch notes during SIG
-                          meeting. Attach notes to Current Issues by dragging
-                          them onto the cards above, or create an issue by using
-                          the last card.
-                        </p>
+                    <p className="italic text-sm">
+                      Use the space below to add notes for the selected issue.
+                    </p>
 
-                        {/* Create section for each part of the CAP notes */}
-                        {notetakingSections.map((section) => (
-                          <div className="w-full mb-4" key={section.name}>
-                            <h1 className="font-bold text-xl">
-                              {section.title}
-                            </h1>
-                            {section.name === 'plan' && (
-                              <h2 className="text-sm color-grey">
-                                Add practices for CAP notes to follow-up on by
-                                typing, &quot;[&quot; and selecting from the
-                                autocomplete options. These will be sent to the
-                                students&apos; project channel before the next
-                                practice opportunity, or after SIG for
-                                self-practice.
-                              </h2>
-                            )}
+                    <p className="italic text-sm text-slate-500 mb-2">
+                      Press Shift-Enter to add a new text block and
+                      Shift-Backspace to delete current block. Press Tab to move
+                      to next block, and Shift-Tab to move to previous block.
+                    </p>
 
-                            <div className="flex">
-                              {/* Notetaking area */}
-                              <div className="flex-auto">
-                                {/* each section's lines of notes in it's own chunk*/}
-                                {/* TODO: turn this into a component so draggable can be used */}
-                                {/* TODO: think about how to add an empty block if there's no notes yet */}
-                                {/* One way is to have a placeholder block so the same code can be used; if the last block is deleted, then automatically add another with a placeholder text */}
-                                {capData[section.name].map((line) => (
-                                  <NoteBlock
-                                    key={line.id}
-                                    noteSection={section.name}
-                                    noteId={line.id}
-                                    noteContent={line}
-                                    onKeyDown={(e) => {
-                                      // stop default behavior of enter key if both enter and shift are pressed
-                                      if (e.key === 'Enter' && e.shiftKey) {
-                                        e.preventDefault();
-                                      }
-                                    }}
-                                    onKeyUp={(e) => {
-                                      // store id of new line so it can be focused on
-                                      let newLineId;
+                    <LastWeekIssuePane
+                      issueId={selectedIssue}
+                      capData={capData}
+                      setCAPData={setCAPData} // TODO: this needs to be per issue
+                      capSections={issueSections}
+                    />
+                  </>
+                )
+              ) : (
+                <div>
+                  <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
+                    Scratch Space
+                  </h1>
 
-                                      // check for shift-enter to add a new line
-                                      if (e.key === 'Enter' && e.shiftKey) {
-                                        // add new line underneath the current line
-                                        setCAPData((prevCAPData) => {
-                                          let newCAPData = { ...prevCAPData };
-                                          let lineIndex = newCAPData[
-                                            section.name
-                                          ].findIndex((l) => l.id === line.id);
+                  {/* TODO: show only for the default note; for issues, replace with an editable description */}
+                  <p className="italic text-sm">
+                    Use the space below to scratch notes during SIG meeting.
+                    Attach notes to Current Issues by dragging them onto the
+                    cards above, or create an issue by using the last card.
+                  </p>
 
-                                          // check if the current line is empty
-                                          if (
-                                            lineIndex ===
-                                            newCAPData[section.name].length - 1
-                                          ) {
-                                            // don't add a new line if the current line is empty
-                                            if (
-                                              newCAPData[section.name][
-                                                lineIndex
-                                              ].value.trim() === ''
-                                            ) {
-                                              newLineId =
-                                                newCAPData[section.name][
-                                                  lineIndex
-                                                ].id;
-                                              return newCAPData;
-                                            }
-                                          }
-                                          // check if the next line is empty
-                                          else if (
-                                            lineIndex + 1 <
-                                            newCAPData[section.name].length
-                                          ) {
-                                            // don't add a new line if the next line is already an empty block
-                                            if (
-                                              newCAPData[section.name][
-                                                lineIndex + 1
-                                              ].value.trim() === ''
-                                            ) {
-                                              newLineId =
-                                                newCAPData[section.name][
-                                                  lineIndex + 1
-                                                ].id;
-                                              return newCAPData;
-                                            }
-                                          }
+                  <p className="italic text-sm text-slate-500 mb-2">
+                    Press Shift-Enter to add a new text block and
+                    Shift-Backspace to delete current block. Press Tab to move
+                    to next block, and Shift-Tab to move to previous block.
+                  </p>
 
-                                          // otherwise, add to the list
-                                          newLineId =
-                                            new mongoose.Types.ObjectId().toString();
-                                          newCAPData[section.name].splice(
-                                            lineIndex + 1,
-                                            0,
-                                            {
-                                              id: newLineId,
-                                              type: 'note',
-                                              context: [],
-                                              value: ''
-                                            }
-                                          );
-                                          return newCAPData;
-                                        });
+                  {/* Create section for each part of the CAP notes */}
+                  {notetakingSections.map((section) => (
+                    <div className="w-full mb-4" key={section.name}>
+                      <h1 className="font-bold text-xl">{section.title}</h1>
+                      {section.name === 'plan' && (
+                        <h2 className="text-sm italic color-grey">
+                          Add practices for CAP notes to follow-up on by typing,
+                          &quot;[&quot; and selecting from the autocomplete
+                          options. These will be sent to the students&apos;
+                          project channel before the next practice opportunity,
+                          or after SIG for self-practice.
+                        </h2>
+                      )}
 
-                                        // TODO: 04-23-24 this causes a race condition where the new line is not yet rendered
-                                        // could be fixed with a callback: https://github.com/the-road-to-learn-react/use-state-with-callback#usage
-                                        // set focus to added line if not undefined
-                                        // if (newLineId !== undefined) {
-                                        //   document.getElementById(newLineId).focus();
-                                        // }
-                                      }
-                                    }}
-                                    // TODO: this only handles when user unfocues on the line, not when the line is actively being edited
-                                    onChange={(edits) => {
-                                      // before attempting a save, check if the line is identical to the previous line (both trimmed)
-                                      edits = edits.trim();
-                                      if (edits === line.value.trim()) {
-                                        return;
-                                      }
+                      <div className="flex">
+                        {/* Notetaking area */}
+                        <div className="flex-auto">
+                          {/* each section's lines of notes in it's own chunk*/}
+                          {/* TODO: turn this into a component so draggable can be used */}
+                          {/* TODO: think about how to add an empty block if there's no notes yet */}
+                          {/* One way is to have a placeholder block so the same code can be used; if the last block is deleted, then automatically add another with a placeholder text */}
+                          {capData[section.name].map((line) => (
+                            <NoteBlock
+                              key={line.id}
+                              noteSection={section.name}
+                              noteId={line.id}
+                              noteContent={line}
+                              onKeyDown={(e) => {
+                                // stop default behavior of enter key if enter + shift OR shift + backspace are pressed
+                                if (
+                                  (e.key === 'Enter' && e.shiftKey) ||
+                                  ((e.key === 'Backspace' ||
+                                    e.key === 'Delete') &&
+                                    e.shiftKey)
+                                ) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              onKeyUp={(e) => {
+                                // store id of new line so it can be focused on
+                                let newLineId;
 
-                                      // save edits to the correct line
-                                      setCAPData((prevCAPData) => {
-                                        // get the current data and correct line that was changed
-                                        let newCAPData = { ...prevCAPData };
-                                        let lineIndex = newCAPData[
-                                          section.name
-                                        ].findIndex((l) => l.id === line.id);
+                                // check for shift-enter to add a new line
+                                if (e.key === 'Enter' && e.shiftKey) {
+                                  // add new line underneath the current line
+                                  setCAPData((prevCAPData) => {
+                                    let newCAPData = { ...prevCAPData };
+                                    let lineIndex = newCAPData[
+                                      section.name
+                                    ].findIndex((l) => l.id === line.id);
 
+                                    // check if the current line is empty
+                                    if (
+                                      lineIndex ===
+                                      newCAPData[section.name].length - 1
+                                    ) {
+                                      // don't add a new line if the current line is empty
+                                      if (
                                         newCAPData[section.name][
                                           lineIndex
-                                        ].value = edits;
-
-                                        return newCAPData;
-                                      });
-                                    }}
-                                    onDragToIssue={(
-                                      issueId,
-                                      noteSection,
-                                      noteBlock
-                                    ) => {
-                                      // check that the content is not empty before allowing drag
-                                      if (noteBlock.value.trim() === '') {
-                                        return;
-                                      }
-
-                                      // map note content into the correct section
-                                      let editsToIssue = {
-                                        context:
-                                          noteSection === 'context'
-                                            ? [noteBlock]
-                                            : [
-                                                {
-                                                  id: new mongoose.Types.ObjectId().toString(),
-                                                  type: 'note',
-                                                  context: [],
-                                                  value: ''
-                                                }
-                                              ],
-                                        assessment:
-                                          noteSection === 'assessment'
-                                            ? [noteBlock]
-                                            : [
-                                                {
-                                                  id: new mongoose.Types.ObjectId().toString(),
-                                                  type: 'note',
-                                                  context: [],
-                                                  value: ''
-                                                }
-                                              ],
-                                        plan:
-                                          noteSection === 'plan'
-                                            ? [noteBlock]
-                                            : [
-                                                {
-                                                  id: new mongoose.Types.ObjectId().toString(),
-                                                  type: 'note',
-                                                  context: [],
-                                                  value: ''
-                                                }
-                                              ]
-                                      };
-
-                                      // create a new issue add issue
-                                      if (
-                                        issueId === 'add-practice' ||
-                                        issueId === 'this-weeks-notes'
+                                        ].value.trim() === ''
                                       ) {
-                                        // create a new issue
-                                        let newIssue = {
-                                          id: new mongoose.Types.ObjectId().toString(),
-                                          title: noteBlock.value
-                                            .trim()
-                                            .replace(/<\/?[^>]+(>|$)/g, ''),
-                                          date: longDate(
-                                            new Date(noteInfo.sigDate)
-                                          ),
-                                          lastUpdated: longDate(new Date()),
-                                          context: editsToIssue['context'],
-                                          assessment:
-                                            editsToIssue['assessment'],
-                                          plan: editsToIssue['plan'],
-                                          priorInstances: []
-                                        };
-
-                                        setCAPData((prevCapData) => {
-                                          let newCAPData = { ...prevCapData };
-                                          newCAPData.currentIssues.push(
-                                            newIssue
-                                          );
-                                          return newCAPData;
-                                        });
-
-                                        issueId = newIssue.id;
+                                        newLineId =
+                                          newCAPData[section.name][lineIndex]
+                                            .id;
+                                        return newCAPData;
                                       }
-                                      // otherwise, add data to the practice
-                                      else {
-                                        // find the practice
-                                        let issueIndex =
-                                          capData.currentIssues.findIndex(
-                                            (practice) =>
-                                              practice.id === issueId
-                                          );
-                                        let issueInstance =
-                                          capData.currentIssues[issueIndex];
-
-                                        // create a new issue instance for the issue if it doesn't exist
-                                        if (issueInstance === null) {
-                                          // if the current instance doesn't exist, intialize it with the additions from the notetaking space
-                                          issueInstance = {
-                                            id: new mongoose.Types.ObjectId().toString(),
-                                            date: longDate(
-                                              new Date(noteInfo.sigDate)
-                                            ),
-                                            lastUpdated: longDate(new Date()),
-                                            context: editsToIssue['context'],
-                                            assessment: editsToIssue['summary'],
-                                            plan: editsToIssue['plan'],
-                                            followUps: [],
-                                            priorInstances: []
-                                          };
-                                        } else {
-                                          // if the current instance exists, check if the new additions are empty
-                                          if (
-                                            issueInstance['context'].length ===
-                                              1 &&
-                                            issueInstance['context'][0]
-                                              .value === ''
-                                          ) {
-                                            issueInstance.context =
-                                              editsToIssue['context'];
-                                          } else {
-                                            // otherwise, add the additions to the current instance
-                                            issueInstance.context =
-                                              issueInstance.context.concat(
-                                                editsToIssue['context']
-                                              );
-                                          }
-
-                                          // repeat for assessment
-                                          if (
-                                            issueInstance['assessment']
-                                              .length === 1 &&
-                                            issueInstance['assessment'][0]
-                                              .value === ''
-                                          ) {
-                                            issueInstance.assessment =
-                                              editsToIssue['assessment'];
-                                          } else {
-                                            // otherwise, add the additions to the current instance
-                                            issueInstance.assessment =
-                                              issueInstance.assessment.concat(
-                                                editsToIssue['assessment']
-                                              );
-                                          }
-
-                                          // repeat for plan
-                                          if (
-                                            issueInstance['plan'].length ===
-                                              1 &&
-                                            issueInstance['plan'][0].value ===
-                                              ''
-                                          ) {
-                                            issueInstance.plan =
-                                              editsToIssue['plan'];
-                                          } else {
-                                            // otherwise, add the additions to the current instance
-                                            issueInstance.plan =
-                                              issueInstance.plan.concat(
-                                                editsToIssue['plan']
-                                              );
-                                          }
-
-                                          // update the last updated date
-                                          issueInstance.lastUpdated = longDate(
-                                            new Date()
-                                          );
-                                        }
-
-                                        // update state variable
-                                        setCAPData((prevCAPData) => {
-                                          let newCAPData = { ...prevCAPData };
-                                          newCAPData.currentIssues[issueIndex] =
-                                            issueInstance;
-                                          newCAPData.currentIssues[
-                                            issueIndex
-                                          ].lastUpdated = longDate(new Date());
-
-                                          return newCAPData;
-                                        });
-
-                                        issueId =
-                                          capData.currentIssues[issueIndex].id;
+                                    }
+                                    // check if the next line is empty
+                                    else if (
+                                      lineIndex + 1 <
+                                      newCAPData[section.name].length
+                                    ) {
+                                      // don't add a new line if the next line is already an empty block
+                                      if (
+                                        newCAPData[section.name][
+                                          lineIndex + 1
+                                        ].value.trim() === ''
+                                      ) {
+                                        newLineId =
+                                          newCAPData[section.name][
+                                            lineIndex + 1
+                                          ].id;
+                                        return newCAPData;
                                       }
+                                    }
 
-                                      // remove note block that was dragged into the issue
-                                      setCAPData((prevCAPData) => {
-                                        let newSoapData = { ...prevCAPData };
+                                    // otherwise, add to the list
+                                    newLineId =
+                                      new mongoose.Types.ObjectId().toString();
+                                    newCAPData[section.name].splice(
+                                      lineIndex + 1,
+                                      0,
+                                      {
+                                        id: newLineId,
+                                        type: 'note',
+                                        context: [],
+                                        value: ''
+                                      }
+                                    );
+                                    return newCAPData;
+                                  });
 
-                                        // remove the note block from the edited section
-                                        newSoapData[noteSection] = newSoapData[
-                                          noteSection
-                                        ].filter(
-                                          (line) => line.id !== noteBlock.id
-                                        );
+                                  // TODO: 04-23-24 this causes a race condition where the new line is not yet rendered
+                                  // could be fixed with a callback: https://github.com/the-road-to-learn-react/use-state-with-callback#usage
+                                  // set focus to added line if not undefined
+                                  // if (newLineId !== undefined) {
+                                  //   document.getElementById(newLineId).focus();
+                                  // }
+                                } else if (
+                                  (e.key === 'Backspace' ||
+                                    e.key === 'Delete') &&
+                                  e.shiftKey
+                                ) {
+                                  // remove line
+                                  // add new line underneath the current line
+                                  setCAPData((prevCAPData) => {
+                                    let newCAPData = { ...prevCAPData };
 
-                                        // if the section is empty, add a new empty block
-                                        if (
-                                          newSoapData[noteSection].length === 0
-                                        ) {
-                                          newSoapData[noteSection].push({
+                                    // find that line that was edited in the current instance of the practice
+                                    let lineIndex = newCAPData[
+                                      section.name
+                                    ].findIndex((l) => l.id === line.id);
+
+                                    // remove line
+                                    newCAPData[section.name] = newCAPData[
+                                      section.name
+                                    ].filter((l) => l.id !== line.id);
+
+                                    // if the section is empty, add a new empty block
+                                    if (newCAPData[section.name].length === 0) {
+                                      newCAPData[section.name].push({
+                                        id: new mongoose.Types.ObjectId().toString(),
+                                        type: 'note',
+                                        context: [],
+                                        value: ''
+                                      });
+                                    }
+
+                                    return newCAPData;
+                                  });
+                                }
+                              }}
+                              onChange={(edits) => {
+                                // before attempting a save, check if the line is identical to the previous line (both trimmed)
+                                edits = edits.trim();
+                                if (edits === line.value.trim()) {
+                                  return;
+                                }
+
+                                // save edits to the correct line
+                                setCAPData((prevCAPData) => {
+                                  // get the current data and correct line that was changed
+                                  let newCAPData = { ...prevCAPData };
+                                  let lineIndex = newCAPData[
+                                    section.name
+                                  ].findIndex((l) => l.id === line.id);
+
+                                  newCAPData[section.name][lineIndex].value =
+                                    edits;
+
+                                  return newCAPData;
+                                });
+                              }}
+                              onDragToIssue={(
+                                issueId,
+                                noteSection,
+                                noteBlock
+                              ) => {
+                                // check that the content is not empty before allowing drag
+                                if (noteBlock.value.trim() === '') {
+                                  return;
+                                }
+
+                                // map note content into the correct section
+                                let editsToIssue = {
+                                  context:
+                                    noteSection === 'context'
+                                      ? [noteBlock]
+                                      : [
+                                          {
                                             id: new mongoose.Types.ObjectId().toString(),
                                             type: 'note',
                                             context: [],
                                             value: ''
+                                          }
+                                        ],
+                                  assessment:
+                                    noteSection === 'assessment'
+                                      ? [noteBlock]
+                                      : [
+                                          {
+                                            id: new mongoose.Types.ObjectId().toString(),
+                                            type: 'note',
+                                            context: [],
+                                            value: ''
+                                          }
+                                        ],
+                                  plan:
+                                    noteSection === 'plan'
+                                      ? [noteBlock]
+                                      : [
+                                          {
+                                            id: new mongoose.Types.ObjectId().toString(),
+                                            type: 'note',
+                                            context: [],
+                                            value: ''
+                                          }
+                                        ]
+                                };
+
+                                // create a new issue add issue
+                                if (
+                                  issueId === 'add-practice' ||
+                                  issueId === 'this-weeks-notes'
+                                ) {
+                                  // create a new issue
+                                  let newIssue = {
+                                    id: new mongoose.Types.ObjectId().toString(),
+                                    title: noteBlock.value
+                                      .trim()
+                                      .replace(/<\/?[^>]+(>|$)/g, ''),
+                                    date: longDate(new Date(noteInfo.sigDate)),
+                                    lastUpdated: longDate(new Date()),
+                                    context: editsToIssue['context'],
+                                    assessment: editsToIssue['assessment'],
+                                    plan: editsToIssue['plan'],
+                                    priorInstances: []
+                                  };
+
+                                  setCAPData((prevCapData) => {
+                                    let newCAPData = { ...prevCapData };
+                                    newCAPData.currentIssues.push(newIssue);
+                                    return newCAPData;
+                                  });
+
+                                  issueId = newIssue.id;
+                                }
+                                // otherwise, add data to the practice
+                                else {
+                                  // find the practice
+                                  let issueIndex =
+                                    capData.currentIssues.findIndex(
+                                      (practice) => practice.id === issueId
+                                    );
+                                  let issueInstance =
+                                    capData.currentIssues[issueIndex];
+
+                                  // create a new issue instance for the issue if it doesn't exist
+                                  if (issueInstance === null) {
+                                    // if the current instance doesn't exist, intialize it with the additions from the notetaking space
+                                    issueInstance = {
+                                      id: new mongoose.Types.ObjectId().toString(),
+                                      date: longDate(
+                                        new Date(noteInfo.sigDate)
+                                      ),
+                                      lastUpdated: longDate(new Date()),
+                                      context: editsToIssue['context'],
+                                      assessment: editsToIssue['summary'],
+                                      plan: editsToIssue['plan'],
+                                      followUps: [],
+                                      priorInstances: []
+                                    };
+                                  } else {
+                                    // if the current instance exists, check if the new additions are empty
+                                    if (
+                                      issueInstance['context'].length === 1 &&
+                                      issueInstance['context'][0].value === ''
+                                    ) {
+                                      issueInstance.context =
+                                        editsToIssue['context'];
+                                    } else {
+                                      // otherwise, add the additions to the current instance
+                                      issueInstance.context =
+                                        issueInstance.context.concat(
+                                          editsToIssue['context']
+                                        );
+                                    }
+
+                                    // repeat for assessment
+                                    if (
+                                      issueInstance['assessment'].length ===
+                                        1 &&
+                                      issueInstance['assessment'][0].value ===
+                                        ''
+                                    ) {
+                                      issueInstance.assessment =
+                                        editsToIssue['assessment'];
+                                    } else {
+                                      // otherwise, add the additions to the current instance
+                                      issueInstance.assessment =
+                                        issueInstance.assessment.concat(
+                                          editsToIssue['assessment']
+                                        );
+                                    }
+
+                                    // repeat for plan
+                                    if (
+                                      issueInstance['plan'].length === 1 &&
+                                      issueInstance['plan'][0].value === ''
+                                    ) {
+                                      issueInstance.plan = editsToIssue['plan'];
+                                    } else {
+                                      // otherwise, add the additions to the current instance
+                                      issueInstance.plan =
+                                        issueInstance.plan.concat(
+                                          editsToIssue['plan']
+                                        );
+                                    }
+
+                                    // update the last updated date
+                                    issueInstance.lastUpdated = longDate(
+                                      new Date()
+                                    );
+                                  }
+
+                                  // update state variable
+                                  setCAPData((prevCAPData) => {
+                                    let newCAPData = { ...prevCAPData };
+                                    newCAPData.currentIssues[issueIndex] =
+                                      issueInstance;
+                                    newCAPData.currentIssues[
+                                      issueIndex
+                                    ].lastUpdated = longDate(new Date());
+
+                                    return newCAPData;
+                                  });
+
+                                  issueId =
+                                    capData.currentIssues[issueIndex].id;
+                                }
+
+                                // remove note block that was dragged into the issue
+                                setCAPData((prevCAPData) => {
+                                  let newSoapData = { ...prevCAPData };
+
+                                  // remove the note block from the edited section
+                                  newSoapData[noteSection] = newSoapData[
+                                    noteSection
+                                  ].filter((line) => line.id !== noteBlock.id);
+
+                                  // if the section is empty, add a new empty block
+                                  if (newSoapData[noteSection].length === 0) {
+                                    newSoapData[noteSection].push({
+                                      id: new mongoose.Types.ObjectId().toString(),
+                                      type: 'note',
+                                      context: [],
+                                      value: ''
+                                    });
+                                  }
+                                  return newSoapData;
+                                });
+                              }}
+                            />
+                          ))}
+
+                          {section.name === 'assessment' && (
+                            <div className="w-full">
+                              {/* Practice Cards */}
+                              <div className="mb-5">
+                                <div className="flex flex-row items-center">
+                                  <h1 className="font-bold text-lg">
+                                    Tracked Practice Gaps
+                                  </h1>
+                                  <button
+                                    className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1 h-6 rounded-full ml-2"
+                                    onClick={() => {
+                                      setShowPracticeGaps(!showPracticeGaps);
+                                    }}
+                                  >
+                                    {showPracticeGaps
+                                      ? 'Hide details'
+                                      : 'Show details'}
+                                  </button>
+                                </div>
+                                <p className="italic text-sm mb-2">
+                                  Drag a practice onto the assessment to add it
+                                  to the current issue. Edit a practice gap by
+                                  clicking on its title or description.
+                                </p>
+
+                                {/* Active Practices */}
+                                <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
+                                  {/* tracked practices */}
+                                  {capData.trackedPractices
+                                    .filter((practice) => {
+                                      return (
+                                        !practice.practiceInactive &&
+                                        !practice.practiceArchived
+                                      );
+                                    })
+                                    .map((practice) => (
+                                      <PracticeGapCard
+                                        key={`issue-card-${practice.id}`}
+                                        issueId={practice.id}
+                                        title={practice.title}
+                                        description={practice.description}
+                                        lastUpdated={practice.lastUpdated}
+                                        priorInstances={practice.prevIssues}
+                                        issueIsResolved={false}
+                                        showPracticeGaps={showPracticeGaps}
+                                        onResolved={(e) => {
+                                          // confirm if the user wants to resolve the issue
+                                          if (
+                                            !confirm(
+                                              `Are you sure you want mark, "${practice.title}", as resolved?`
+                                            )
+                                          ) {
+                                            return;
+                                          }
+
+                                          // resolve the issue
+                                          let practiceToUpdate =
+                                            capData.trackedPractices;
+                                          let practiceIndex =
+                                            practiceToUpdate.findIndex(
+                                              (i) => i.id === practice.id
+                                            );
+                                          practiceToUpdate[
+                                            practiceIndex
+                                          ].practiceInactive = true;
+                                          practiceToUpdate[
+                                            practiceIndex
+                                          ].lastUpdated = longDate(new Date());
+                                          setCAPData((prevData) => ({
+                                            ...prevData,
+                                            trackedPractices: practiceToUpdate
+                                          }));
+                                        }}
+                                        onArchive={(e) => {
+                                          // confirm if the user wants to archive the issue
+                                          if (
+                                            !confirm(
+                                              `Are you sure you want to archive, "${practice.title}"? This cannot be undone.`
+                                            )
+                                          ) {
+                                            return;
+                                          }
+
+                                          // archive the issue
+                                          let practiceToUpdate =
+                                            capData.trackedPractices;
+                                          let practiceIndex =
+                                            practiceToUpdate.findIndex(
+                                              (i) => i.id === practice.id
+                                            );
+                                          practiceToUpdate[
+                                            practiceIndex
+                                          ].practiceArchived = true;
+                                          practiceToUpdate[
+                                            practiceIndex
+                                          ].lastUpdated = longDate(new Date());
+                                          setCAPData((prevData) => ({
+                                            ...prevData,
+                                            trackedPractices: practiceToUpdate
+                                          }));
+                                        }}
+                                        onEdit={(field, edits) => {
+                                          // update the practice with the edits
+                                          let practiceToUpdate =
+                                            capData.trackedPractices;
+                                          let practiceIndex =
+                                            practiceToUpdate.findIndex(
+                                              (i) => i.id === practice.id
+                                            );
+                                          practiceToUpdate[practiceIndex][
+                                            field
+                                          ] = edits;
+                                          practiceToUpdate[
+                                            practiceIndex
+                                          ].lastUpdated = longDate(new Date());
+                                          setCAPData((prevData) => ({
+                                            ...prevData,
+                                            trackedPractices: practiceToUpdate
+                                          }));
+                                        }}
+                                        onDrag={(
+                                          sourcePracticeId,
+                                          targetCurrentIssueId
+                                        ) => {
+                                          // find index of the source practice
+                                          let sourcePracticeIndex =
+                                            capData.trackedPractices.findIndex(
+                                              (practice) =>
+                                                practice.id === sourcePracticeId
+                                            );
+                                          let sourcePractice =
+                                            capData.trackedPractices[
+                                              sourcePracticeIndex
+                                            ];
+
+                                          // find the target issue index
+                                          let targetIssueIndex =
+                                            capData.currentIssues.findIndex(
+                                              (issue) =>
+                                                issue.id ===
+                                                targetCurrentIssueId
+                                            );
+                                          let targetIssue =
+                                            capData.currentIssues[
+                                              targetIssueIndex
+                                            ];
+
+                                          // update state
+                                          setCAPData((prevCapData) => {
+                                            let newCAPData = { ...prevCapData };
+
+                                            // attach practice to targetIssue as an assessment
+                                            let newAssessment = {
+                                              id: new mongoose.Types.ObjectId().toString(),
+                                              type: 'note',
+                                              context: [],
+                                              value: `[practice gap] ${sourcePractice.title}`
+                                            };
+
+                                            // check if last assessment is blank before adding
+                                            if (
+                                              targetIssue.assessment.length ===
+                                                1 &&
+                                              targetIssue.assessment[0].value.trim() ===
+                                                ''
+                                            ) {
+                                              newCAPData.currentIssues[
+                                                targetIssueIndex
+                                              ].assessment = [newAssessment];
+                                            } // check if the last assessment is blank
+                                            else if (
+                                              newCAPData.currentIssues[
+                                                targetIssueIndex
+                                              ].assessment[
+                                                newCAPData.currentIssues[
+                                                  targetIssueIndex
+                                                ].assessment.length - 1
+                                              ].value.trim() === ''
+                                            ) {
+                                              newCAPData.currentIssues[
+                                                targetIssueIndex
+                                              ].assessment[
+                                                newCAPData.currentIssues[
+                                                  targetIssueIndex
+                                                ].assessment.length - 1
+                                              ] = newAssessment;
+                                            } else {
+                                              newCAPData.currentIssues[
+                                                targetIssueIndex
+                                              ].assessment.push(newAssessment);
+                                            }
+
+                                            // update the last updated timestamp
+                                            newCAPData.currentIssues[
+                                              targetIssueIndex
+                                            ].lastUpdated = longDate(
+                                              new Date()
+                                            );
+
+                                            // attach the current issue as an instance to the practice
+                                            let newIssueInstance = {
+                                              id: targetIssue.id,
+                                              title: targetIssue.title,
+                                              date: targetIssue.date,
+                                              lastUpdated:
+                                                targetIssue.lastUpdated
+                                            };
+                                            newCAPData.trackedPractices[
+                                              sourcePracticeIndex
+                                            ].prevIssues.push(targetIssue);
+
+                                            // return the new data
+                                            return newCAPData;
                                           });
-                                        }
-                                        return newSoapData;
+                                        }}
+                                      />
+                                    ))}
+
+                                  {/* practice card for new practice gaps */}
+                                  <PracticeGapCard
+                                    key="issue-card-add-practice"
+                                    issueId="add-practice"
+                                    title="Add practice"
+                                    description="Notes from SIG"
+                                    lastUpdated={noteInfo.lastUpdated}
+                                    issueIsResolved={false}
+                                    onAddPractice={(practiceTitle) => {
+                                      // create a new practice
+                                      let newPractice = {
+                                        id: new mongoose.Types.ObjectId().toString(),
+                                        title: practiceTitle,
+                                        description: '',
+                                        date: longDate(new Date()),
+                                        lastUpdated: longDate(new Date()),
+                                        practiceInactive: false,
+                                        practiceArchived: false,
+                                        prevIssues: []
+                                      };
+
+                                      setCAPData((prevCapData) => {
+                                        let newCAPData = { ...prevCapData };
+                                        newCAPData.trackedPractices.push(
+                                          newPractice
+                                        );
+                                        return newCAPData;
                                       });
                                     }}
                                   />
-                                ))}
-
-                                {/* Add helper text on how to use the plan section */}
-                                {section.name === 'plan' && (
-                                  <>
-                                    <div className="italic text-slate-400">
-                                      Press Shift-Enter to add a new text block
-                                      and Shift-Backspace to delete current
-                                      block. Press Tab to move to next block,
-                                      and Shift-Tab to move to previous block.
-                                    </div>
-                                    <div className="text-sm text-gray-700 italic mt-2">
-                                      <h2 className="font-bold">
-                                        Practice follow-ups
-                                      </h2>
-                                      <div className="grid grid-cols-2 gap-y-1 w-2/3">
-                                        <p>
-                                          [plan]: stories, deliverables, or
-                                          tasks to add to the student&apos;s
-                                          sprint
-                                        </p>
-                                        <p>
-                                          [help]: work with a peer or mentor on
-                                          practice
-                                        </p>
-                                        <p>
-                                          [reflect]: reflect on a situation if
-                                          it comes up
-                                        </p>
-                                        <p>
-                                          [self-work]: work activity for student
-                                          to do on their own
-                                        </p>
-                                      </div>
-
-                                      <h2 className="font-bold mt-4">
-                                        Include additional info using:
-                                      </h2>
-                                      <div className="grid grid-cols-2 gap-y-1 w-2/3">
-                                        {/* what (practice), who, where / when, how */}
-                                        <p>
-                                          w/[person, person]: person(s) who the
-                                          practice should be done with
-                                        </p>
-                                        <p>
-                                          @[venue]: specific venue to do the
-                                          practice; CAP will follow-up at the
-                                          next one.
-                                        </p>
-                                        <p>
-                                          rep/[representation]: representation
-                                          to use for practice (e.g., canvas
-                                          section; sketch of a journey map;
-                                          reflection question(s))
-                                        </p>
-                                      </div>
-                                      <br></br>
-                                    </div>
-                                  </>
-                                )}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          )}
+
+                          {/* Add helper text on how to use the plan section */}
+                          {section.name === 'plan' && (
+                            <>
+                              <div className="text-sm text-gray-700 italic mt-2 flex flex-row">
+                                {/* Kinds of practice agents */}
+                                <div className="mr-2 align-top basis-1/4">
+                                  <h2 className="font-bold">
+                                    Issue follow-ups
+                                  </h2>
+                                  <div>
+                                    <p>
+                                      <span className="font-semibold">
+                                        [plan]:
+                                      </span>{' '}
+                                      stories, deliverables, or tasks to add to
+                                      sprint log
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        [help]:
+                                      </span>{' '}
+                                      work with a peer or mentor on practice
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="mr-6 align-top basis-1/4">
+                                  <h2 className="font-bold">&nbsp;</h2>
+                                  <div>
+                                    <p>
+                                      <span className="font-semibold">
+                                        [reflect]:
+                                      </span>{' '}
+                                      reflect on a situation if it comes up
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        [self-work]:
+                                      </span>{' '}
+                                      work activity for student to do on their
+                                      own
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {/* Additional info to attach */}
+                                <div className="mr-2 align-top basis-1/4">
+                                  <h2 className="font-bold">
+                                    Include additional info with...
+                                  </h2>
+                                  <div>
+                                    {/* what (practice), who, where / when, how */}
+                                    <p>
+                                      <span className="font-semibold">
+                                        w/[person, person]:
+                                      </span>{' '}
+                                      who the practice should be done with
+                                    </p>
+                                    <p>
+                                      <span className="font-semibold">
+                                        @[venue]:
+                                      </span>{' '}
+                                      specific venue to do the practice; CAP
+                                      will follow-up at the next one.
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="align-top basis-1/4">
+                                  <h2 className="font-bold">&nbsp;</h2>
+                                  <div>
+                                    {/* what (practice), who, where / when, how */}
+                                    <p>
+                                      <span className="font-semibold">
+                                        rep/[representation]:
+                                      </span>{' '}
+                                      representation to use for practice (e.g.,
+                                      canvas section; sketch of a journey map;
+                                      reflection question(s))
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </DndProvider>
@@ -1391,81 +1510,81 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     sprintPoints = ['unable to fetch sprint points'];
   }
 
-  /**
-   * get active issues from OS
-   */
-  let activeIssues;
-  try {
-    const res = await fetch(
-      `${
-        process.env.ORCH_ENGINE
-      }/activeIssues/fetchActiveIssuesForProject?${new URLSearchParams({
-        projectName: currentCAPNote.project
-      })}`
-    );
-    activeIssues = await res.json();
-  } catch (err) {
-    console.error(err);
-  }
+  // /**
+  //  * get active issues from OS
+  //  */
+  // let activeIssues;
+  // try {
+  //   const res = await fetch(
+  //     `${
+  //       process.env.ORCH_ENGINE
+  //     }/activeIssues/fetchActiveIssuesForProject?${new URLSearchParams({
+  //       projectName: currentCAPNote.project
+  //     })}`
+  //   );
+  //   activeIssues = await res.json();
+  // } catch (err) {
+  //   console.error(err);
+  // }
 
-  // TODO: 03-03-24 -- see if I can filter out actionable followups and get some context separately
-  // get only issues and follow-ups for next SIG
-  const triggeredScripts = activeIssues
-    .filter(
-      (issue) =>
-        !issue.name.includes('actionable follow-up') ||
-        (issue.name.includes('actionable follow-up') &&
-          (issue.name.includes('morning of next SIG') ||
-            issue.name.includes('at next SIG')))
-    )
-    .map((script) => {
-      return {
-        name: script.name,
-        type: script.name.includes('follow-up') ? 'follow-up' : 'issue',
-        strategies: script.computed_strategies[0].outlet_args.message
-      };
-    });
+  // // TODO: 03-03-24 -- see if I can filter out actionable followups and get some context separately
+  // // get only issues and follow-ups for next SIG
+  // const triggeredScripts = activeIssues
+  //   .filter(
+  //     (issue) =>
+  //       !issue.name.includes('actionable follow-up') ||
+  //       (issue.name.includes('actionable follow-up') &&
+  //         (issue.name.includes('morning of next SIG') ||
+  //           issue.name.includes('at next SIG')))
+  //   )
+  //   .map((script) => {
+  //     return {
+  //       name: script.name,
+  //       type: script.name.includes('follow-up') ? 'follow-up' : 'issue',
+  //       strategies: script.computed_strategies[0].outlet_args.message
+  //     };
+  //   });
 
-  // add active issues to SOAP notes
-  for (let script of triggeredScripts) {
-    let scriptType = '';
-    switch (script.type) {
-      case 'follow-up':
-        scriptType = 'follow-up';
-        break;
-      case 'practice':
-        scriptType = 'practice';
-        break;
-      case 'issue':
-      default:
-        scriptType = 'detected issue';
-    }
-    let title =
-      scriptType == 'follow-up'
-        ? `[${scriptType}] ${script.strategies}`
-        : `[${scriptType}] ${script.name} - ${script.strategies}`;
-    let titleIndex = capNoteInfo.context.findIndex(
-      (line) => line.value === title
-    );
+  // // add active issues to SOAP notes
+  // for (let script of triggeredScripts) {
+  //   let scriptType = '';
+  //   switch (script.type) {
+  //     case 'follow-up':
+  //       scriptType = 'follow-up';
+  //       break;
+  //     case 'practice':
+  //       scriptType = 'practice';
+  //       break;
+  //     case 'issue':
+  //     default:
+  //       scriptType = 'detected issue';
+  //   }
+  //   let title =
+  //     scriptType == 'follow-up'
+  //       ? `[${scriptType}] ${script.strategies}`
+  //       : `[${scriptType}] ${script.name} - ${script.strategies}`;
+  //   let titleIndex = capNoteInfo.context.findIndex(
+  //     (line) => line.value === title
+  //   );
 
-    if (titleIndex === -1) {
-      capNoteInfo.context.push({
-        id: new mongoose.Types.ObjectId().toString(),
-        type: 'script',
-        context: [],
-        value: title
-      });
-    }
-  }
+  //   if (titleIndex === -1) {
+  //     capNoteInfo.context.push({
+  //       id: new mongoose.Types.ObjectId().toString(),
+  //       type: 'script',
+  //       context: [],
+  //       value: title
+  //     });
+  //   }
+  // }
 
-  // sort context notes by [detected issues] first
-  capNoteInfo.context.sort((a, b) => {
-    if (a.type === 'script' && b.type !== 'script') {
-      return -1;
-    } else {
-      return 1;
-    }
-  });
+  // // sort context notes by [detected issues] first
+  // capNoteInfo.context.sort((a, b) => {
+  //   if (a.type === 'script' && b.type !== 'script') {
+  //     return -1;
+  //   } else {
+  //     return 1;
+  //   }
+  // });
 
   // setup the page with the data from the database
   // - list of tracked practices and when they last occurred
