@@ -194,24 +194,24 @@ export default function PracticeGapCard({
               {showPracticeGaps && priorInstances && (
                 <div className="flex flex-col">
                   <h3 className="mt-4 font-medium border-b border-black">
-                    Project issues that had this this practice gap in the past:
+                    Past issues with this practice gap:
                   </h3>
 
                   {priorInstances.map((instance, idx) => (
                     <div key={idx} className="flex flex-col">
-                      <h4 className="mt-1 text-normal font-normal">
-                        {instance.title}
+                      <h4 className="mt-1 text-sm font-semibold">
+                        {instance.title} | {shortDate(new Date(instance.date))}
                       </h4>
-                      <span className="text-xs">
-                        {shortDate(new Date(instance.date))}
-                      </span>
-                      {instance.plan.map((plan, idx) => (
-                        <div key={idx} className="text-xs">
-                          <div className="w-11/12">
-                            <p>{plan.value}</p>
+                      <div className="w-full">
+                        <h3 className="text-sm">Context from instance</h3>
+                        {instance.context.map((context, idx) => (
+                          <div key={idx} className="text-xs">
+                            {context.value.trim() !== '' && (
+                              <p>- {context.value}</p>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   ))}
 
