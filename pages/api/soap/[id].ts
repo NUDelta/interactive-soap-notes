@@ -118,6 +118,18 @@ export default async function handler(req, res) {
 
         // if we have practice agents, create their scripts
         if (Object.keys(practiceAgents).length > 0) {
+          // update cap note with the followups
+          for (let issueIndex in capNote.currentIssues) {
+            let issue = capNote.currentIssues[issueIndex];
+            if (issue.title in practiceAgents) {
+              let allFollowups = practiceAgents[issue.title].map((agent) => {
+                return agent.followUpObject;
+              });
+              capNote.currentIssues[issueIndex].followUps = allFollowups;
+            }
+          }
+          await capNote.save();
+
           // create each agent
           // TODO: create pre studio message
           // TODO: create any plan follow-up messages
@@ -202,8 +214,6 @@ export default async function handler(req, res) {
         //   }
         // }
 
-        // resave with updated activeIssueIds
-        await capNote.save();
         res.status(200).json({ success: true, data: capNote, error: null });
       } catch (error) {
         console.error(
