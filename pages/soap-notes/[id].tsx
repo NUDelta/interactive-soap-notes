@@ -357,7 +357,7 @@ export default function SOAPNote({
                   </h1>
                   <p className="italic text-sm mb-2">
                     {capData.pastIssues.length > 0
-                      ? 'Click on an issue to view it&apos;s assessments and follow-up outcomes.'
+                      ? "Click on an issue to view it's assessments and follow-up outcomes."
                       : 'No issues from the past week.'}
                   </p>
                 </div>
