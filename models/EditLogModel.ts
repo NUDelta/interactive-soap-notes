@@ -6,7 +6,7 @@ export interface EditLogStruct {
   edits: string;
 }
 
-const EditLogSchema = new mongoose.Schema<EditLogStruct>({
+const EditLog = new mongoose.Schema<EditLogStruct>({
   date: {
     type: Date,
     required: true
@@ -21,6 +21,5 @@ const EditLogSchema = new mongoose.Schema<EditLogStruct>({
   }
 });
 
-export default (mongoose.models
-  .EditLogSchema as mongoose.Model<EditLogStruct>) ||
-  mongoose.model('EditLog', EditLogSchema);
+export default (mongoose.models.EditLog as mongoose.Model<EditLogStruct>) ||
+  mongoose.model('EditLog', EditLog);
