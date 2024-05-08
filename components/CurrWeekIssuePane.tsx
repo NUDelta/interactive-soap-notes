@@ -642,7 +642,7 @@ export default function CurrWeekIssuePane({
                     <div className="text-sm text-gray-700 italic mt-2 flex flex-row">
                       {/* Kinds of practice agents */}
                       <div className="mr-2 align-top basis-1/4">
-                        <h2 className="font-bold">Practice follow-ups</h2>
+                        <h2 className="font-bold">Issue follow-ups</h2>
                         <div>
                           <p>
                             <span className="font-semibold">[plan]:</span>{' '}

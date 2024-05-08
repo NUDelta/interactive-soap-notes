@@ -21,6 +21,7 @@ import NoteBlock from '../../components/NoteBlock';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import LastWeekIssueCard from '../../components/LastWeekIssueCard';
+import LastWeekIssuePane from '../../components/LastWeekIssuePane';
 
 export default function SOAPNote({
   capNoteInfo,
@@ -369,9 +370,8 @@ export default function SOAPNote({
                       issueId={lastWeekIssue.id}
                       title={lastWeekIssue.title}
                       date={lastWeekIssue.date}
-                      followUps={lastWeekIssue.followUps}
-                      showLastWeeksIssues={showLastWeeksIssues}
-                      setShowLastWeeksIssues={setShowLastWeeksIssues}
+                      selectedIssue={selectedIssue}
+                      setSelectedIssue={setSelectedIssue}
                       onDrag={(sourceIssueId, targetIssueId) => {
                         // find index of the source issue
                         let sourceIssueIndex = capData.pastIssues.findIndex(
@@ -578,41 +578,77 @@ export default function SOAPNote({
             <div className="">
               {selectedIssue !== null &&
               selectedIssue !== 'this-weeks-notes' ? (
-                <>
-                  {/* TODO: title should change based on what practice is selected */}
-                  {/* TODO: for issues, allow the title to be edited */}
-                  {/* TODO: once this uses the same schema as the regular notes, then the code can be compressed */}
-                  <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
-                    {capData.currentIssues.findIndex(
-                      (practice) => practice.id === selectedIssue
-                    ) !== -1 &&
-                      capData.currentIssues[
-                        capData.currentIssues.findIndex(
-                          (practice) => practice.id === selectedIssue
-                        )
-                      ].title}
-                  </h1>
+                capData.currentIssues.findIndex(
+                  (practice) => practice.id === selectedIssue
+                ) !== -1 ? (
+                  // Selected issue is a current week issue
+                  <>
+                    {/* TODO: title should change based on what practice is selected */}
+                    {/* TODO: for issues, allow the title to be edited */}
+                    {/* TODO: once this uses the same schema as the regular notes, then the code can be compressed */}
+                    <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
+                      {capData.currentIssues.findIndex(
+                        (practice) => practice.id === selectedIssue
+                      ) !== -1 &&
+                        capData.currentIssues[
+                          capData.currentIssues.findIndex(
+                            (practice) => practice.id === selectedIssue
+                          )
+                        ].title}
+                    </h1>
 
-                  <p className="italic text-sm">
-                    Use the space below to add notes for the selected issue.
-                  </p>
+                    <p className="italic text-sm">
+                      Use the space below to add notes for the selected issue.
+                    </p>
 
-                  <p className="italic text-sm text-slate-500 mb-2">
-                    Press Shift-Enter to add a new text block and
-                    Shift-Backspace to delete current block. Press Tab to move
-                    to next block, and Shift-Tab to move to previous block.
-                  </p>
+                    <p className="italic text-sm text-slate-500 mb-2">
+                      Press Shift-Enter to add a new text block and
+                      Shift-Backspace to delete current block. Press Tab to move
+                      to next block, and Shift-Tab to move to previous block.
+                    </p>
 
-                  <CurrWeekIssuePane
-                    issueId={selectedIssue}
-                    capData={capData}
-                    setCAPData={setCAPData} // TODO: this needs to be per issue
-                    capSections={issueSections}
-                    showPracticeGaps={showPracticeGaps}
-                    setShowPracticeGaps={setShowPracticeGaps}
-                    autocompleteTriggersOptions={autocompleteTriggersOptions}
-                  />
-                </>
+                    <CurrWeekIssuePane
+                      issueId={selectedIssue}
+                      capData={capData}
+                      setCAPData={setCAPData} // TODO: this needs to be per issue
+                      capSections={issueSections}
+                      showPracticeGaps={showPracticeGaps}
+                      setShowPracticeGaps={setShowPracticeGaps}
+                      autocompleteTriggersOptions={autocompleteTriggersOptions}
+                    />
+                  </>
+                ) : (
+                  // Selected issue is a last week issue
+                  <>
+                    <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
+                      {capData.pastIssues.findIndex(
+                        (issue) => issue.id === selectedIssue
+                      ) !== -1 &&
+                        capData.pastIssues[
+                          capData.pastIssues.findIndex(
+                            (practice) => practice.id === selectedIssue
+                          )
+                        ].title}
+                    </h1>
+
+                    <p className="italic text-sm">
+                      Use the space below to add notes for the selected issue.
+                    </p>
+
+                    <p className="italic text-sm text-slate-500 mb-2">
+                      Press Shift-Enter to add a new text block and
+                      Shift-Backspace to delete current block. Press Tab to move
+                      to next block, and Shift-Tab to move to previous block.
+                    </p>
+
+                    <LastWeekIssuePane
+                      issueId={selectedIssue}
+                      capData={capData}
+                      setCAPData={setCAPData} // TODO: this needs to be per issue
+                      capSections={issueSections}
+                    />
+                  </>
+                )
               ) : (
                 <div>
                   <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
@@ -1248,7 +1284,7 @@ export default function SOAPNote({
                                 {/* Kinds of practice agents */}
                                 <div className="mr-2 align-top basis-1/4">
                                   <h2 className="font-bold">
-                                    Practice follow-ups
+                                    Issue follow-ups
                                   </h2>
                                   <div>
                                     <p>

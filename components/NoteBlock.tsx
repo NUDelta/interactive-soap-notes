@@ -15,7 +15,8 @@ export default function NoteBlock({
   onKeyDown,
   onKeyUp,
   onChange,
-  onDragToIssue
+  onDragToIssue,
+  editable = true
 }): JSX.Element {
   // ref to the note block's content so state changes don't trigger a re-render
   const blockContent = useRef(noteContent.value);
@@ -206,6 +207,7 @@ export default function NoteBlock({
           <ContentEditable
             id={noteId}
             html={blockContent.current}
+            disabled={!editable}
             onChange={(e) => {
               // update ref with new content
               blockContent.current = e.target.value;
