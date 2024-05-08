@@ -122,6 +122,7 @@ export default async function handler(req, res) {
           for (let issueIndex in capNote.currentIssues) {
             let issue = capNote.currentIssues[issueIndex];
             if (issue.title in practiceAgents) {
+              // TODO: this overwrites any changes to followups that were made
               let allFollowups = practiceAgents[issue.title].map((agent) => {
                 return agent.followUpObject;
               });
@@ -140,6 +141,8 @@ export default async function handler(req, res) {
             practiceAgents,
             orgObjs
           );
+
+          console.log('postSigScript:', postSigScript);
 
           // console.log(postSigScript);
           // console.log(
@@ -292,17 +295,20 @@ function createPostSigMessage(noteId, projName, practiceAgents, orgObjs) {
   strategy +=
     '---\\n' +
     "Let your mentor know if you have any challenges in doing these practices. I'll remind you about opportunities to practice later in the week (e.g., mysore, pair research).";
+  strategy = strategy.replace(/[\""]/g, '\\"');
 
   // create the function to actually deliver the message
   let strategyFunction = async function () {
     return await this.messagePeople({
-      message: 'strategyTextToReplace',
-      people: 'peopleToMessage',
+      message: strategyTextToReplace,
+      people: peopleToMessage,
       opportunity: async function () {
         return await this.thisAfternoon('currDate', 'timezone');
       }.toString()
     });
   }.toString();
+
+  console.log(strategyFunction);
 
   strategyFunction = strategyFunction.replace(
     'currDate',
@@ -312,11 +318,11 @@ function createPostSigMessage(noteId, projName, practiceAgents, orgObjs) {
 
   // TODO: REMOVE HARD CODING
   strategyFunction = strategyFunction.replace(
-    "'peopleToMessage'",
+    'peopleToMessage',
     `[${orgObjs.project.students.map((student) => `"${student.name}"`).join(',')}, "Kapil Garg"]`
   );
   strategyFunction = strategyFunction.replace(
-    "'strategyTextToReplace'",
+    'strategyTextToReplace',
     '"' + strategy + '"'
   );
 
