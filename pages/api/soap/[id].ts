@@ -100,7 +100,7 @@ export default async function handler(req, res) {
                 outcome: {
                   didHappen: false,
                   deliverableLink: null,
-                  reflection: reflectionQuestions.map((q) => {
+                  reflections: reflectionQuestions.map((q) => {
                     return { prompt: q.prompt, response: '' };
                   })
                 }
