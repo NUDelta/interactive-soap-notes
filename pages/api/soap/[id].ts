@@ -116,50 +116,53 @@ export default async function handler(req, res) {
           }
         }
 
-        // create each agent
-        // TODO: create pre studio message
-        // TODO: create any plan follow-up messages
-        // TODO: create a help-seeking agent
-        let postSigScript = createPostSigMessage(
-          id,
-          req.body.project,
-          practiceAgents,
-          orgObjs
-        );
+        // if we have practice agents, create their scripts
+        if (Object.keys(practiceAgents).length > 0) {
+          // create each agent
+          // TODO: create pre studio message
+          // TODO: create any plan follow-up messages
+          // TODO: create a help-seeking agent
+          let postSigScript = createPostSigMessage(
+            id,
+            req.body.project,
+            practiceAgents,
+            orgObjs
+          );
 
-        // console.log(postSigScript);
-        // console.log(
-        //   'strat function',
-        //   postSigScript.strategyToEnact.strategy_function
-        // );
-        // console.log(
-        //   'attempt eval',
-        //   eval(postSigScript.strategyToEnact.strategy_function)
-        // );
+          // console.log(postSigScript);
+          // console.log(
+          //   'strat function',
+          //   postSigScript.strategyToEnact.strategy_function
+          // );
+          // console.log(
+          //   'attempt eval',
+          //   eval(postSigScript.strategyToEnact.strategy_function)
+          // );
 
-        // attempt to create an active issue in OS
-        const osRes = await fetch(
-          `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(postSigScript)
+          // attempt to create an active issue in OS
+          const osRes = await fetch(
+            `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(postSigScript)
+            }
+          );
+
+          // if successful, update the activeIssueId in the practice
+          if (osRes.status === 200) {
+            console.log(
+              `Successfully created active issue for post-sig in OS for ${capNote.project}`,
+              await osRes.json()
+            );
+          } else {
+            console.error(
+              `Error in creating active issue for ${capNote.project} in OS:`,
+              await osRes.json()
+            );
           }
-        );
-
-        // if successful, update the activeIssueId in the practice
-        if (osRes.status === 200) {
-          console.log(
-            `Successfully created active issue for post-sig in OS for ${capNote.project}`,
-            await osRes.json()
-          );
-        } else {
-          console.error(
-            `Error in creating active issue for ${capNote.project} in OS:`,
-            await osRes.json()
-          );
         }
 
         // TODO: update with practice agents
