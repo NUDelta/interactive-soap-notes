@@ -221,7 +221,7 @@ export default function NoteBlock({
           />
         </div>
 
-        {noteSection === 'plan' && (
+        {/* {noteSection === 'plan' && (
           <div className="ml-[40px]">
             {parsePracticeFollowup(blockContent.current)
               .notificationsToStudents && (
@@ -244,7 +244,7 @@ export default function NoteBlock({
               </p>
             )}
           </div>
-        )}
+        )} */}
       </div>
     </>
   );
