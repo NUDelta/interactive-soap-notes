@@ -149,7 +149,7 @@ export default function LastWeekIssuePane({
             {/* Split Pane in half with assesments on 1/3 */}
             <div className="w-full flex flex-row">
               <div className="w-1/3 flex flex-col mr-6">
-                <h1 className="font-bold text-lg">Assessments for Issue</h1>
+                <h1 className="font-bold text-base">Assessments for Issue</h1>
                 {/* Assessments on Last Week's Issues */}
                 <div className="mb-2">
                   {selectedLastWeekIssue['assessment'] &&
@@ -189,13 +189,15 @@ export default function LastWeekIssuePane({
               {/* Show practice gaps linked to issue */}
               <div className="w-full">
                 <div>
-                  <h1 className="font-bold text-lg">Practice Gaps for Issue</h1>
+                  <h1 className="font-bold text-base">
+                    Practice Gaps for Issue
+                  </h1>
                 </div>
 
                 <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
                   {relevantPractices.length !== 0 && (
                     <>
-                      {/* TODO: 05-07-24: show the details of the practice gap */}
+                      {/* TODO: NOT EDITABLE */}
                       {relevantPractices.map((practice) => (
                         <PracticeGapCard
                           key={`issue-card-${practice.id}`}
@@ -233,7 +235,7 @@ export default function LastWeekIssuePane({
 
             {/* Follow-up objects on the remaining */}
             <div className="w-full">
-              <h1 className="font-bold text-lg">Follow-Up Outcomes</h1>
+              <h1 className="font-bold text-base">Follow-Up Outcomes</h1>
               {/* Show practice follow-ups */}
               {!isLoading &&
               practiceOutcome !== null &&
@@ -343,11 +345,13 @@ export default function LastWeekIssuePane({
 
             {/* Context notetaking space */}
             <div className="w-full mt-4">
-              <h1 className="font-bold text-xl">{section.title}</h1>
-              <p className="text-sm italic">
-                Note anything from the issue follow-ups above. Notes taken here
-                will be stored in the Scratch Space.
-              </p>
+              <div className="mb-1">
+                <h1 className="font-bold text-base">{section.title}</h1>
+                <p className="text-xs italic">
+                  Note anything from the issue follow-ups above. Notes taken
+                  here will be stored in the Scratch Space.
+                </p>
+              </div>
 
               <div className="flex">
                 <div className="flex-auto">

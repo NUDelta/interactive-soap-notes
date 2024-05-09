@@ -126,19 +126,18 @@ export default function CurrWeekIssueCard({
           <>
             {/* Large plus icon in center of square */}
             <div className="p-2 flex flex-col w-3/4 h-full mx-auto my-auto items-center justify-center">
-              <h2 className="text-base font-bold items-center">
-                <p className="text-sm text-center italic">
-                  Scratch space for this week&apos;s notes
-                </p>
-              </h2>
+              <p className="text-sm font-semibold text-center italic">
+                Scratch space for this week&apos;s notes
+              </p>
             </div>
           </>
         ) : isAddPractice ? (
           <>
             {/* Large plus icon in center of square */}
             <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
+              {/* TODO: switch this to a contenteditable div so it can auto resize */}
               <textarea
-                className="w-full h-3/4 text-sm"
+                className="w-full h-3/4 text-sm flex-none"
                 placeholder="Type a new issue here..."
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
@@ -163,32 +162,28 @@ export default function CurrWeekIssueCard({
                   }
                 }}
               ></textarea>
-              <h2 className="text-base font-bold items-center">
-                <p className="text-sm text-center italic">
-                  {newIssue.trim() === ''
-                    ? 'or drag a note onto this block'
-                    : "hit 'Enter' to add new issue"}
-                </p>
+              <h2 className="text-sm font-bold italic text-center items-center">
+                {newIssue.trim() === ''
+                  ? 'or drag a note onto this block'
+                  : "hit 'Enter' to add new issue"}
               </h2>
             </div>
           </>
         ) : (
           <>
             {/* Issue title */}
-            <div className="p-2 mb-2 w-full flex flex-col">
-              <div className="w-full h-16 flex flex-row mb-2">
-                <ContentEditable
-                  id={`title-${issueId}`}
-                  html={titleRef.current}
-                  onChange={(e) => {
-                    titleRef.current = e.target.value;
-                    onTitleEdit(
-                      e.target.value.trim().replace(/<\/?[^>]+(>|$)/g, '')
-                    );
-                  }}
-                  className={`p-0.5 mr-2 flex-none w-full empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-base font-bold rounded-lg`}
-                />
-              </div>
+            <div className="p-1 mb-2 w-full flex flex-col">
+              <ContentEditable
+                id={`title-${issueId}`}
+                html={titleRef.current}
+                onChange={(e) => {
+                  titleRef.current = e.target.value.trim();
+                  onTitleEdit(
+                    e.target.value.trim().replace(/<\/?[^>]+(>|$)/g, '')
+                  );
+                }}
+                className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-sm font-semibold rounded-lg`}
+              />
 
               <div className="flex flex-row items-center">
                 {/* Missing strategies */}
@@ -203,8 +198,6 @@ export default function CurrWeekIssueCard({
                       </h3>
                     )}
                 </div>
-
-                {/* TODO: 05-07-24 move this to the bottom right */}
                 <div className="float-right">
                   {!isThisWeek && (
                     <TrashIcon

@@ -27,15 +27,15 @@ export default function CurrWeekIssuePane({
   return (
     <div className="mb-5">
       {currIssue && (
-        <div className="flex flex-wrap w-full overflow-y-scroll overscroll-y-auto">
+        <div className="flex flex-wrap w-full overflow-auto">
           <div className="w-full">
             {/* TODO: this is hella jank and a shit load of repeated code */}
             {/* show if there is a current instance */}
             {capSections.map((section) => (
-              <div className={`w-full`} key={section.name}>
-                <h1 className="font-bold text-lg">{section.title}</h1>
+              <div className="w-full mb-1" key={section.name}>
+                <h1 className="text-base font-bold">{section.title}</h1>
                 {section.name === 'plan' && (
-                  <p className="text-sm">
+                  <p className="text-xs italic color-grey">
                     Add practices for CAP notes to follow-up on by typing,
                     &quot;[&quot; and selecting from the autocomplete options.
                     These will be sent to the students&apos; project channel
@@ -413,9 +413,9 @@ export default function CurrWeekIssuePane({
                 {section.name === 'assessment' && (
                   <div className="w-full">
                     {/* Practice Cards */}
-                    <div className="mb-5">
+                    <div className="mb-3">
                       <div className="flex flex-row items-center">
-                        <h1 className="font-bold text-lg">
+                        <h1 className="text-base font-semibold">
                           Tracked Practice Gaps
                         </h1>
                         <button
@@ -427,7 +427,7 @@ export default function CurrWeekIssuePane({
                           {showPracticeGaps ? 'Hide details' : 'Show details'}
                         </button>
                       </div>
-                      <p className="italic text-sm mb-2">
+                      <p className="italic text-xs mb-1">
                         Drag a practice onto the assessment to add it to the
                         current issue. Edit a practice gap by clicking on its
                         title or description.
@@ -639,7 +639,7 @@ export default function CurrWeekIssuePane({
                 {/* Add helper text on how to use the plan section */}
                 {section.name === 'plan' && (
                   <>
-                    <div className="text-sm text-gray-700 italic mt-2 flex flex-row">
+                    <div className="text-xs text-gray-700 italic mt-2 flex flex-row">
                       {/* Kinds of practice agents */}
                       <div className="mr-2 align-top basis-1/4">
                         <h2 className="font-bold">Issue follow-ups</h2>

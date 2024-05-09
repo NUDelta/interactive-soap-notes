@@ -257,9 +257,9 @@ export default function SOAPNote({
       </Head>
 
       {/* Header info for SOAP note */}
-      <div className="w-11/12 mx-auto mt-3">
+      <div className="w-full mx-auto mt-2 pr-3 pl-3">
         {/* Back, title, and last updated */}
-        <div className="flex flex-row items-center flex-nowrap mb-4">
+        <div className="flex flex-row items-center flex-nowrap mb-2">
           {/* Back button */}
           <div className="mr-2">
             <Link href="/">
@@ -273,19 +273,19 @@ export default function SOAPNote({
 
           {/* Title */}
           <div className="mr-2">
-            <h1 className="font-bold text-3xl mb-1">
+            <h1 className="font-bold text-lg">
               {noteInfo.project} | {noteInfo.sigDate}
             </h1>
           </div>
 
           {/* Save status */}
           {/* Three states of saved: (1) saved without error; (2) saving; (3) save attemped but error */}
-          <div className="flex flex-row">
+          <div className="flex flex-row items-center">
             {/* Saved successfully */}
             {!isSaving && saveError === null ? (
               <>
-                <CheckCircleIcon className="w-6 h-6 mr-0.5 text-green-600" />
-                <h2 className="font-bold text-base text-green-600">
+                <CheckCircleIcon className="w-5 h-5 mr-0.5 text-green-600" />
+                <h2 className="font-semibold text-lg text-green-600">
                   Notes last saved on {noteInfo.lastUpdated}
                 </h2>
               </>
@@ -296,8 +296,10 @@ export default function SOAPNote({
             {/* Saving */}
             {isSaving ? (
               <>
-                <ArrowPathIcon className="animate-spin w-6 h-6 mr-0.5 text-blue-600" />
-                <h2 className="font-bold text-base text-blue-600">Saving...</h2>
+                <ArrowPathIcon className="animate-spin w-5 h-5 mr-0.5 text-blue-600" />
+                <h2 className="font-semibold text-lg text-blue-600">
+                  Saving...
+                </h2>
               </>
             ) : (
               <></>
@@ -307,9 +309,9 @@ export default function SOAPNote({
             {!isSaving && saveError !== null ? (
               <>
                 <Tooltip content={saveError} placement="bottom">
-                  <ExclamationCircleIcon className="w-6 h-6 mr-0.5 text-red-600" />
+                  <ExclamationCircleIcon className="w-5 h-5 mr-0.5 text-red-600" />
                 </Tooltip>
-                <h2 className="font-bold text-base text-red-600">
+                <h2 className="font-semibold text-lg text-red-600">
                   Error in saving notes (Last saved: {noteInfo.lastUpdated})
                 </h2>
               </>
@@ -346,16 +348,16 @@ export default function SOAPNote({
         <DndProvider backend={HTML5Backend}>
           {/* Past issues and tracked practices fixed to top of page */}
           {/* TODO: 05-06-24: maybe add a hide and show button so mentor can recover vertical space when done browsing past issues */}
-          <div className="fixed w-11/12">
+          <div className="fixed w-full">
             <div className="flex flex-row mr-7">
               {/* Past Issues */}
               <div className="w-1/2 mr-2 mb-5">
                 {/* Section title and description */}
                 <div className="flex flex-col">
-                  <h1 className="font-bold text-2xl border-b border-black mb-2">
+                  <h1 className="text-base font-bold border-b border-black">
                     Last Week&apos;s Issues
                   </h1>
-                  <p className="italic text-sm mb-2">
+                  <p className="italic text-sm mb-1">
                     {capData.pastIssues.length > 0
                       ? "Click on an issue to view it's assessments and follow-up outcomes."
                       : 'No issues from the past week.'}
@@ -430,7 +432,7 @@ export default function SOAPNote({
               <div className="w-1/2 ml-2 mb-5">
                 {/* Section title and description */}
                 <div className="flex flex-col">
-                  <h1 className="font-bold text-2xl border-b border-black mb-2">
+                  <h1 className="text-base font-bold border-b border-black">
                     Current Issues
                   </h1>
                   <p className="italic text-sm mb-2">
@@ -574,7 +576,7 @@ export default function SOAPNote({
           {/* Note Space */}
           <div className="flex flex-col h-[65vh] overflow-auto">
             {/* show either the CAP note section for scratch space or current issues, or the summary interface for last week's issue */}
-            {/* TODO: should check if the issue id is in the current issues or past issues */}
+            {/* TODO: theres way too much repetitive code here. I think you could define a state variable to simplify the conditions and have them used for the content rather than the entire DOM */}
             <div className="">
               {selectedIssue !== null &&
               selectedIssue !== 'this-weeks-notes' ? (
@@ -586,7 +588,7 @@ export default function SOAPNote({
                     {/* TODO: title should change based on what practice is selected */}
                     {/* TODO: for issues, allow the title to be edited */}
                     {/* TODO: once this uses the same schema as the regular notes, then the code can be compressed */}
-                    <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
+                    <h1 className="text-base font-bold border-b border-black mb-1 bg-white sticky top-0">
                       {capData.currentIssues.findIndex(
                         (practice) => practice.id === selectedIssue
                       ) !== -1 &&
@@ -597,11 +599,11 @@ export default function SOAPNote({
                         ].title}
                     </h1>
 
-                    <p className="italic text-sm">
+                    <p className="italic text-xs">
                       Use the space below to add notes for the selected issue.
                     </p>
 
-                    <p className="italic text-sm text-slate-500 mb-2">
+                    <p className="italic text-xs text-slate-500 mb-2">
                       Press Shift-Enter to add a new text block and
                       Shift-Backspace to delete current block. Press Tab to move
                       to next block, and Shift-Tab to move to previous block.
@@ -620,7 +622,7 @@ export default function SOAPNote({
                 ) : (
                   // Selected issue is a last week issue
                   <>
-                    <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
+                    <h1 className="text-base font-bold border-b border-black mb-1 bg-white sticky top-0">
                       {capData.pastIssues.findIndex(
                         (issue) => issue.id === selectedIssue
                       ) !== -1 &&
@@ -631,11 +633,11 @@ export default function SOAPNote({
                         ].title}
                     </h1>
 
-                    <p className="italic text-sm">
+                    <p className="italic text-xs">
                       Use the space below to add notes for the selected issue.
                     </p>
 
-                    <p className="italic text-sm text-slate-500 mb-2">
+                    <p className="italic text-xs text-slate-500 mb-2">
                       Press Shift-Enter to add a new text block and
                       Shift-Backspace to delete current block. Press Tab to move
                       to next block, and Shift-Tab to move to previous block.
@@ -651,18 +653,18 @@ export default function SOAPNote({
                 )
               ) : (
                 <div>
-                  <h1 className="font-bold text-2xl border-b border-black mb-3 bg-white sticky top-0">
+                  <h1 className="text-base font-bold border-b border-black mb-1 bg-white sticky top-0">
                     Scratch Space
                   </h1>
 
                   {/* TODO: show only for the default note; for issues, replace with an editable description */}
-                  <p className="italic text-sm">
+                  <p className="italic text-xs">
                     Use the space below to scratch notes during SIG meeting.
                     Attach notes to Current Issues by dragging them onto the
                     cards above, or create an issue by using the last card.
                   </p>
 
-                  <p className="italic text-sm text-slate-500 mb-2">
+                  <p className="italic text-xs text-slate-500 mb-2">
                     Press Shift-Enter to add a new text block and
                     Shift-Backspace to delete current block. Press Tab to move
                     to next block, and Shift-Tab to move to previous block.
@@ -670,16 +672,16 @@ export default function SOAPNote({
 
                   {/* Create section for each part of the CAP notes */}
                   {notetakingSections.map((section) => (
-                    <div className="w-full mb-4" key={section.name}>
-                      <h1 className="font-bold text-xl">{section.title}</h1>
+                    <div className="w-full mb-1" key={section.name}>
+                      <h1 className="text-base font-bold">{section.title}</h1>
                       {section.name === 'plan' && (
-                        <h2 className="text-sm italic color-grey">
+                        <p className="text-xs italic color-grey">
                           Add practices for CAP notes to follow-up on by typing,
                           &quot;[&quot; and selecting from the autocomplete
                           options. These will be sent to the students&apos;
                           project channel before the next practice opportunity,
                           or after SIG for self-practice.
-                        </h2>
+                        </p>
                       )}
 
                       <div className="flex">
@@ -1027,9 +1029,9 @@ export default function SOAPNote({
                           {section.name === 'assessment' && (
                             <div className="w-full">
                               {/* Practice Cards */}
-                              <div className="mb-5">
+                              <div className="mb-3">
                                 <div className="flex flex-row items-center">
-                                  <h1 className="font-bold text-lg">
+                                  <h1 className="text-base font-semibold">
                                     Tracked Practice Gaps
                                   </h1>
                                   <button
@@ -1043,7 +1045,7 @@ export default function SOAPNote({
                                       : 'Show details'}
                                   </button>
                                 </div>
-                                <p className="italic text-sm mb-2">
+                                <p className="italic text-xs mb-1">
                                   Drag a practice onto the assessment to add it
                                   to the current issue. Edit a practice gap by
                                   clicking on its title or description.
@@ -1280,7 +1282,7 @@ export default function SOAPNote({
                           {/* Add helper text on how to use the plan section */}
                           {section.name === 'plan' && (
                             <>
-                              <div className="text-sm text-gray-700 italic mt-2 flex flex-row">
+                              <div className="text-xs text-gray-700 italic mt-2 flex flex-row">
                                 {/* Kinds of practice agents */}
                                 <div className="mr-2 align-top basis-1/4">
                                   <h2 className="font-bold">

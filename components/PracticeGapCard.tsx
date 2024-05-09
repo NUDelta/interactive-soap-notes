@@ -71,7 +71,7 @@ export default function PracticeGapCard({
             {/* Large plus icon in center of square */}
             <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
               <textarea
-                className="w-full h-3/4 text-base"
+                className="w-full h-3/4 text-sm"
                 placeholder="Type a new practice and hit enter..."
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
@@ -96,56 +96,36 @@ export default function PracticeGapCard({
                   }
                 }}
               ></textarea>
-              <h2 className="text-base font-bold items-center">
-                <span className="text-sm italic">
-                  {newPractice.trim() === ''
-                    ? 'or drag a note from the right onto this block'
-                    : "hit 'Enter' to add practice gap"}
-                </span>
+              <h2 className="text-sm font-bold italic items-center">
+                {newPractice.trim() === ''
+                  ? 'or drag a note onto this block'
+                  : "hit 'Enter' to add practice gap"}
               </h2>
             </div>
           </>
         ) : (
           <>
-            <div className="p-2 mb-1 w-full flex flex-col">
+            <div className="p-1 mb-1 w-full flex flex-col">
               <div className="flex flex-row">
                 {/* Issue title */}
-                <div className="w-11/12">
-                  <ContentEditable
-                    id={`title-${issueId}`}
-                    html={titleRef.current}
-                    onChange={(e) => {
-                      titleRef.current = e.target.value;
-                      onEdit('title', e.target.value);
-                    }}
-                    className={`p-0.5 flex-none w-full empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg text-base font-semibold`}
-                  />
-                </div>
+                <ContentEditable
+                  id={`title-${issueId}`}
+                  html={titleRef.current}
+                  onChange={(e) => {
+                    titleRef.current = e.target.value;
+                    onEdit('title', e.target.value);
+                  }}
+                  className={`p-0.5 break-words w-11/12 flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg text-sm font-semibold`}
+                />
 
                 {/* Resolve and archive buttons */}
-                {!isThisWeek && !isAddPractice ? (
-                  <div className="flex flex-row">
-                    {!issueIsResolved ? (
-                      <>
-                        <div>
-                          <CheckBadgeIcon
-                            onClick={(e) => onResolved(e)}
-                            className="ml-2 h-8 text-gray-600 hover:text-green-600"
-                          />
-                        </div>
-                        {/* <div>
-                          <ArchiveBoxIcon
-                            onClick={(e) => onArchive(e)}
-                            className="ml-2 h-8 text-gray-600 hover:text-red-600"
-                          />
-                        </div> */}
-                      </>
-                    ) : (
-                      <></>
-                    )}
+                {!isThisWeek && !isAddPractice && !issueIsResolved && (
+                  <div>
+                    <CheckBadgeIcon
+                      onClick={(e) => onResolved(e)}
+                      className="h-8 text-gray-600 hover:text-green-600"
+                    />
                   </div>
-                ) : (
-                  <></>
                 )}
 
                 {/* Show / hide details */}
@@ -173,8 +153,8 @@ export default function PracticeGapCard({
                 </div> */}
               </div>
 
-              <div className="text-xs mb-2">
-                <h3 className="mt-1 font-medium">
+              <div className="mb-2">
+                <h3 className="text-xs font-medium">
                   Last noticed: {lastUpdated}
                 </h3>
               </div>

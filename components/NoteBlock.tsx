@@ -184,22 +184,22 @@ export default function NoteBlock({
         <div className="flex flex-row">
           {/* drag handle on left side */}
           <div
-            className={`flex items-center fill-slate-200 stroke-slate-200 mr-1 ${opacity}`}
+            className={`flex items-center fill-slate-200 stroke-slate-200 ${opacity}`}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="stroke-slate-400 h-8"
+              className="h-6 stroke-slate-400"
               viewBox="0 0 24 24"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <circle cx="12" cy="12" r="1"></circle>
-              <circle cx="12" cy="5" r="1"></circle>
-              <circle cx="12" cy="19" r="1"></circle>
-              <circle cx="20" cy="12" r="1"></circle>
-              <circle cx="20" cy="5" r="1"></circle>
-              <circle cx="20" cy="19" r="1"></circle>
+              <circle cx="8" cy="12" r="0.5"></circle>
+              <circle cx="8" cy="5" r="0.5"></circle>
+              <circle cx="8" cy="19" r="0.5"></circle>
+              <circle cx="16" cy="12" r="0.5"></circle>
+              <circle cx="16" cy="5" r="0.5"></circle>
+              <circle cx="16" cy="19" r="0.5"></circle>
             </svg>
           </div>
 
@@ -217,7 +217,7 @@ export default function NoteBlock({
             }}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
-            className={`p-2 flex-initial basis-full text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
+            className={`py-1 break-words flex-initial basis-full text-sm text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
           />
         </div>
 
