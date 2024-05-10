@@ -63,15 +63,15 @@ export default function PracticeGapCard({
   return (
     <div
       ref={drag}
-      className={`flex-none basis-1/4 border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
+      className={`flex-none basis-1/6 border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
     >
       <div className={`w-full h-full`}>
         {isAddPractice ? (
           <>
-            {/* Large plus icon in center of square */}
-            <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
+            {/* Add practice card */}
+            <div className="p-1 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
               <textarea
-                className="w-full h-3/4 text-sm"
+                className="w-full h-3/4 text-xs"
                 placeholder="Type a new practice and hit enter..."
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
@@ -96,7 +96,7 @@ export default function PracticeGapCard({
                   }
                 }}
               ></textarea>
-              <h2 className="text-sm font-bold italic items-center">
+              <h2 className="text-xs font-bold italic items-center">
                 {newPractice.trim() === ''
                   ? 'or drag a note onto this block'
                   : "hit 'Enter' to add practice gap"}
@@ -105,7 +105,8 @@ export default function PracticeGapCard({
           </>
         ) : (
           <>
-            <div className="p-1 mb-1 w-full flex flex-col">
+            {/* Tracked Practice Gaps */}
+            <div className="p-1 w-full flex flex-col">
               <div className="flex flex-row">
                 {/* Issue title */}
                 <ContentEditable
@@ -115,7 +116,7 @@ export default function PracticeGapCard({
                     titleRef.current = e.target.value;
                     onEdit('title', e.target.value);
                   }}
-                  className={`p-0.5 break-words w-11/12 flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg text-sm font-semibold`}
+                  className={`p-0.5 break-words w-11/12 flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-md text-xs font-semibold`}
                 />
 
                 {/* Resolve and archive buttons */}
@@ -123,7 +124,7 @@ export default function PracticeGapCard({
                   <div>
                     <CheckBadgeIcon
                       onClick={(e) => onResolved(e)}
-                      className="h-8 text-gray-600 hover:text-green-600"
+                      className="ml-1 h-6 text-gray-600 hover:text-green-600"
                     />
                   </div>
                 )}
@@ -153,27 +154,31 @@ export default function PracticeGapCard({
                 </div> */}
               </div>
 
-              <div className="mb-2">
-                <h3 className="text-xs font-medium">
-                  Last noticed: {lastUpdated}
-                </h3>
-              </div>
+              {showPracticeGaps && (
+                <div className="mb-2">
+                  <h3 className="text-xs font-medium">
+                    Last noticed: {lastUpdated}
+                  </h3>
+                </div>
+              )}
 
               {/* Issue description */}
-              <ContentEditable
-                id={`description-${issueId}`}
-                html={descriptionRef.current}
-                onChange={(e) => {
-                  descriptionRef.current = e.target.value;
-                  onEdit('description', e.target.value);
-                }}
-                className={`p-0.5 text-sm flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-lg`}
-              />
+              {showPracticeGaps && (
+                <ContentEditable
+                  id={`description-${issueId}`}
+                  html={descriptionRef.current}
+                  onChange={(e) => {
+                    descriptionRef.current = e.target.value;
+                    onEdit('description', e.target.value);
+                  }}
+                  className={`p-0.5 text-xs flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-md`}
+                />
+              )}
 
               {/* Prior instances */}
               {showPracticeGaps && priorInstances && (
                 <div className="flex flex-col">
-                  <h3 className="mt-4 font-medium border-b border-black">
+                  <h3 className="mt-4 text-sm font-medium border-b border-black">
                     Past issues with this practice gap:
                   </h3>
 
@@ -197,7 +202,7 @@ export default function PracticeGapCard({
 
                   {priorInstances.length === 0 && (
                     <div>
-                      <h4 className="italic">
+                      <h4 className="text-xs italic">
                         No issues have this practice gap attached
                       </h4>
                     </div>

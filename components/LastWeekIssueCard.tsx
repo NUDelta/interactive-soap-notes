@@ -55,7 +55,7 @@ export default function LastWeekIssueCard({
           {/* Issue title */}
           <div className="p-2 mb-1 w-full flex flex-col">
             <div className="flex flex-row">
-              <h2 className="text-sm font-semibold flex-auto">
+              <h2 className="text-xs font-semibold flex-auto">
                 {title.length > 100
                   ? title.substring(0, 100 - 3) + '...'
                   : title.trim() === ''

@@ -261,7 +261,7 @@ export default function SOAPNote({
         {/* Back, title, and last updated */}
         <div className="flex flex-row items-center flex-nowrap mb-2">
           {/* Back button */}
-          <div className="mr-2">
+          <div className="mr-1">
             <Link href="/">
               <Tooltip content="Back to all notes" placement="bottom">
                 <h3 className="text-lg font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">
@@ -1036,11 +1036,11 @@ export default function SOAPNote({
                               {/* Practice Cards */}
                               <div className="mb-3">
                                 <div className="flex flex-row items-center">
-                                  <h1 className="text-base font-semibold">
+                                  <h1 className="text-sm font-semibold">
                                     Tracked Practice Gaps
                                   </h1>
                                   <button
-                                    className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1 h-6 rounded-full ml-2"
+                                    className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-semibold px-2 h-5 rounded-full ml-1"
                                     onClick={() => {
                                       setShowPracticeGaps(!showPracticeGaps);
                                     }}

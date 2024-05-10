@@ -137,7 +137,7 @@ export default function CurrWeekIssueCard({
             <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
               {/* TODO: switch this to a contenteditable div so it can auto resize */}
               <textarea
-                className="w-full h-3/4 text-sm flex-none"
+                className="w-full h-3/4 text-xs flex-none"
                 placeholder="Type a new issue here..."
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
@@ -162,7 +162,7 @@ export default function CurrWeekIssueCard({
                   }
                 }}
               ></textarea>
-              <h2 className="text-sm font-bold italic text-center items-center">
+              <h2 className="text-xs font-bold italic text-center items-center">
                 {newIssue.trim() === ''
                   ? 'or drag a note onto this block'
                   : "hit 'Enter' to add new issue"}
@@ -182,7 +182,7 @@ export default function CurrWeekIssueCard({
                     e.target.value.trim().replace(/<\/?[^>]+(>|$)/g, '')
                   );
                 }}
-                className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-sm font-semibold rounded-lg`}
+                className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-xs font-semibold rounded-lg`}
               />
 
               <div className="flex flex-row items-center">
@@ -201,7 +201,7 @@ export default function CurrWeekIssueCard({
                 <div className="float-right">
                   {!isThisWeek && (
                     <TrashIcon
-                      className={`h-8 text-slate-600`}
+                      className={`h-6 text-slate-600`}
                       onClick={() => {
                         onDeleteIssue(issueId);
                       }}

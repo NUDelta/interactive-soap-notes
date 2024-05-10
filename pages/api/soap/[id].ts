@@ -239,6 +239,7 @@ export default async function handler(req, res) {
 }
 
 function createPostSigMessage(noteId, projName, practiceAgents, orgObjs) {
+  // TODO: this should be the note of THE SIG, not the current date -- otherwise, it'll recreate the issue unnecessarily
   let currDate = new Date();
   let weekFromCurrDate = new Date(currDate.getTime());
   weekFromCurrDate.setDate(weekFromCurrDate.getDate() + 7);
@@ -596,6 +597,7 @@ const computeReflectionQuestions = (plan) => {
   return reflectionQuestions;
 };
 
+// TODO: include Plan text that doesn't have an agent tag associated with it BUT not messages that don't have anything OR have an agent tag without the agent info
 const parsePracticeText = (practice) => {
   // split the practice text into [practice] and content
   let [practiceTag, content] = practice.match(/\[(.*?)\]\s*(.*)/).slice(1);
