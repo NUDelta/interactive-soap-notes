@@ -63,7 +63,7 @@ export default function PracticeGapCard({
   return (
     <div
       ref={drag}
-      className={`flex-none basis-1/4 border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
+      className={`flex-none basis-1/4 border shadow p-1 ${opacity} ${isAddPractice ? 'border-2 border-dashed shadow-none' : 'border hover:bg-blue-100'}`}
     >
       <div className={`w-full h-full`}>
         {isAddPractice ? (

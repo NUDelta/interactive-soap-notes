@@ -39,7 +39,7 @@ export default function LastWeekIssueCard({
   return (
     <div
       ref={drag}
-      className={`basis-1/3 shrink-0 border-2 p-1 ${selectedIssue === issueId && 'bg-blue-200'} border hover:bg-blue-100 ${opacity}`}
+      className={`basis-1/3 shrink-0 p-1 border shadow ${selectedIssue === issueId && 'bg-blue-200'} hover:bg-blue-100 ${opacity}`}
       onClick={() => {
         setIsSelected(!isSelected);
         if (issueId === selectedIssue) {

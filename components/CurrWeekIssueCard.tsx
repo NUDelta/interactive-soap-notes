@@ -105,7 +105,7 @@ export default function CurrWeekIssueCard({
   return (
     <div
       ref={ref}
-      className={`basis-1/3 shrink-0 border-2 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
+      className={`basis-1/3 shrink-0 border shadow p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-2 border-dashed shadow-none' : 'hover:bg-blue-100'} ${opacity}`}
       onClick={() => {
         if (!isAddPractice && !isThisWeek) {
           setIsSelected(!isSelected);

@@ -179,7 +179,7 @@ export default function NoteBlock({
     <>
       <div
         ref={drag}
-        className="border flex flex-col items-left align-middle mb-2 w-full"
+        className="border shadow flex flex-col items-left align-middle mb-2 w-full"
       >
         <div className="flex flex-row">
           {/* drag handle on left side */}

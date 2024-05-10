@@ -245,7 +245,7 @@ export default function LastWeekIssuePane({
                     return (
                       <div
                         key={practice.practice}
-                        className="w-full mb-4 p-2 border"
+                        className="w-full mb-4 p-2 border shadow"
                       >
                         <h2 className="text-sm font-semibold border-b border-black ">
                           {practice.practice}
