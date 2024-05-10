@@ -148,7 +148,7 @@ export default function LastWeekIssuePane({
           <div className="flex flex-wrap w-full overflow-y-scroll overscroll-y-auto">
             {/* Split Pane in half with assesments on 1/3 */}
             <div className="w-full flex flex-row">
-              <div className="w-1/3 flex flex-col mr-6">
+              <div className="w-1/2 flex flex-col mr-6">
                 <h1 className="font-bold text-base">Assessments for Issue</h1>
                 {/* Assessments on Last Week's Issues */}
                 <div className="mb-2">
@@ -179,7 +179,7 @@ export default function LastWeekIssuePane({
                       </>
                     ))}
                   {nonEmptyAssessmentLength == 0 && (
-                    <div className="italic">
+                    <div className="text-xs italic">
                       No assessments written for issue
                     </div>
                   )}
@@ -187,7 +187,7 @@ export default function LastWeekIssuePane({
               </div>
 
               {/* Show practice gaps linked to issue */}
-              <div className="w-full">
+              <div className="w-1/2">
                 <div>
                   <h1 className="font-bold text-base">
                     Practice Gaps for Issue
@@ -225,7 +225,7 @@ export default function LastWeekIssuePane({
                     </>
                   )}
                   {relevantPractices.length === 0 && (
-                    <div className="italic">
+                    <div className="text-xs italic">
                       No practice gaps linked to this issue.
                     </div>
                   )}
@@ -339,12 +339,14 @@ export default function LastWeekIssuePane({
                   })}
                 </div>
               ) : (
-                <div className="italic">No follow-up outcomes to show.</div>
+                <div className="text-xs italic">
+                  No follow-up outcomes to show.
+                </div>
               )}
             </div>
 
             {/* Context notetaking space */}
-            <div className="w-full mt-4">
+            {/* <div className="w-full mt-4">
               <div className="mb-1">
                 <h1 className="font-bold text-base">{section.title}</h1>
                 <p className="text-xs italic">
@@ -665,7 +667,7 @@ export default function LastWeekIssuePane({
                   ))}
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </>
       )}

@@ -637,17 +637,6 @@ export default function SOAPNote({
                           )
                         ].title}
                     </h1>
-
-                    <p className="italic text-xs">
-                      Use the space below to add notes for the selected issue.
-                    </p>
-
-                    <p className="italic text-xs text-slate-500 mb-2">
-                      Press Shift-Enter to add a new text block and
-                      Shift-Backspace to delete current block. Press Tab to move
-                      to next block, and Shift-Tab to move to previous block.
-                    </p>
-
                     <LastWeekIssuePane
                       issueId={selectedIssue}
                       capData={capData}
