@@ -105,7 +105,7 @@ export default function CurrWeekIssueCard({
   return (
     <div
       ref={ref}
-      className={`basis-1/4 shrink-0 border-4 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
+      className={`basis-1/3 shrink-0 border-2 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'} ${opacity}`}
       onClick={() => {
         if (!isAddPractice && !isThisWeek) {
           setIsSelected(!isSelected);
@@ -172,7 +172,7 @@ export default function CurrWeekIssueCard({
         ) : (
           <>
             {/* Issue title */}
-            <div className="p-1 mb-2 w-full flex flex-col">
+            <div className="p-1 w-full flex flex-col">
               <ContentEditable
                 id={`title-${issueId}`}
                 html={titleRef.current}
@@ -182,32 +182,30 @@ export default function CurrWeekIssueCard({
                     e.target.value.trim().replace(/<\/?[^>]+(>|$)/g, '')
                   );
                 }}
-                className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-xs font-semibold rounded-lg`}
+                className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
               />
 
-              <div className="flex flex-row items-center">
+              <div className="flex flex-row items-center w-full">
                 {/* Missing strategies */}
-                <div className="w-11/12">
-                  {issue &&
-                    !issue.plan.some((currPlan) => {
-                      return currPlan.value.trim() !== '';
-                    }) && (
-                      <h3 className="mt-2 text-xs font-medium text-red-500 flex flex-row items-center">
-                        <ExclamationTriangleIcon className="h-6 mr-1" />
-                        Missing strategies
-                      </h3>
-                    )}
-                </div>
-                <div className="float-right">
-                  {!isThisWeek && (
-                    <TrashIcon
-                      className={`h-6 text-slate-600`}
-                      onClick={() => {
-                        onDeleteIssue(issueId);
-                      }}
-                    />
+                {issue &&
+                  !issue.plan.some((currPlan) => {
+                    return currPlan.value.trim() !== '';
+                  }) && (
+                    <>
+                      <ExclamationTriangleIcon className="h-5 mr-1 text-red-500" />
+                      <div className="text-xs font-medium text-red-500">
+                        Missing follow-up plan
+                      </div>
+                    </>
                   )}
-                </div>
+                {!isThisWeek && (
+                  <TrashIcon
+                    className={`h-5 text-slate-600 ml-auto`}
+                    onClick={() => {
+                      onDeleteIssue(issueId);
+                    }}
+                  />
+                )}
               </div>
             </div>
           </>

@@ -145,7 +145,7 @@ export default function LastWeekIssuePane({
     <div className="mb-5">
       {selectedLastWeekIssue && (
         <>
-          <div className="flex flex-wrap w-full overflow-y-scroll overscroll-y-auto">
+          <div className="flex flex-wrap w-full">
             {/* Split Pane in half with assesments on 1/3 */}
             <div className="w-full flex flex-row">
               <div className="w-1/2 flex flex-col mr-6">

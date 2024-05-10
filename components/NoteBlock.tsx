@@ -217,7 +217,7 @@ export default function NoteBlock({
             }}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
-            className={`py-1 break-words flex-initial basis-full text-sm text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
+            className={`py-1 break-words flex-initial basis-full text-xs text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
           />
         </div>
 

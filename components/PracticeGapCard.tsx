@@ -63,7 +63,7 @@ export default function PracticeGapCard({
   return (
     <div
       ref={drag}
-      className={`flex-none basis-1/6 border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
+      className={`flex-none basis-1/4 border-4 p-1 ${opacity} ${isAddPractice ? 'border-dashed' : 'border hover:bg-blue-100'}`}
     >
       <div className={`w-full h-full`}>
         {isAddPractice ? (
@@ -116,7 +116,7 @@ export default function PracticeGapCard({
                     titleRef.current = e.target.value;
                     onEdit('title', e.target.value);
                   }}
-                  className={`p-0.5 break-words w-11/12 flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-md text-xs font-semibold`}
+                  className={`p-0.5 break-words w-11/12 flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-md text-xs font-normal`}
                 />
 
                 {/* Resolve and archive buttons */}

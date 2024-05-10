@@ -39,7 +39,7 @@ export default function LastWeekIssueCard({
   return (
     <div
       ref={drag}
-      className={`basis-1/4 shrink-0 border-4 p-1 ${selectedIssue === issueId && 'bg-blue-200'} border hover:bg-blue-100 ${opacity}`}
+      className={`basis-1/3 shrink-0 border-2 p-1 ${selectedIssue === issueId && 'bg-blue-200'} border hover:bg-blue-100 ${opacity}`}
       onClick={() => {
         setIsSelected(!isSelected);
         if (issueId === selectedIssue) {
@@ -53,19 +53,19 @@ export default function LastWeekIssueCard({
       <div className={`w-full h-full`}>
         <>
           {/* Issue title */}
-          <div className="p-2 mb-1 w-full flex flex-col">
-            <div className="flex flex-row">
-              <h2 className="text-xs font-semibold flex-auto">
-                {title.length > 100
-                  ? title.substring(0, 100 - 3) + '...'
-                  : title.trim() === ''
-                    ? 'click to enter title'
-                    : title}
-              </h2>
+          <div className="p-1 w-full flex flex-col">
+            <h2 className="text-xs font-semibold mb-auto">
+              {title.length > 100
+                ? title.substring(0, 100 - 3) + '...'
+                : title.trim() === ''
+                  ? 'click to enter title'
+                  : title}
+            </h2>
+            <h1 className="text-xs italic mt-auto">Last week issue</h1>
 
-              {/* Show / hide issue */}
-              {/* TODO: buggy since it doesn't update the parent state properly */}
-              {/* <div>
+            {/* Show / hide issue */}
+            {/* TODO: buggy since it doesn't update the parent state properly */}
+            {/* <div>
                 {showLastWeeksIssues && shouldShow ? (
                   <EyeSlashIcon
                     className={`h-10 text-slate-600`}
@@ -89,11 +89,6 @@ export default function LastWeekIssueCard({
                   </>
                 )}
               </div> */}
-            </div>
-
-            {/* <div className="text-xs">
-              <h3 className="mt-1 font-medium">Updated: {date}</h3>
-            </div> */}
 
             {/* TODO: 05-07-24 maybe show that there are missing deliverables */}
           </div>
