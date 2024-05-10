@@ -600,7 +600,12 @@ export default function SOAPNote({
                     </h1>
 
                     <p className="italic text-xs">
-                      Use the space below to add notes for the selected issue.
+                      Write notes about selected issue below. Context and
+                      Assessment notes are private to you.{' '}
+                      <span className="font-semibold">
+                        The Issue Title above and Plan notes will be shared with
+                        students.
+                      </span>
                     </p>
 
                     <p className="italic text-xs text-slate-500 mb-2">
