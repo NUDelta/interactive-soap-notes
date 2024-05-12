@@ -2,7 +2,11 @@ import mongoose from 'mongoose';
 
 export interface EditLogStruct {
   date: Date;
-  note: string;
+  project: string;
+  sig: string;
+  objectEditedType: string;
+  objectEdited: mongoose.Schema.Types.ObjectId;
+  original: string;
   edits: string;
 }
 
@@ -11,9 +15,27 @@ const EditLog = new mongoose.Schema<EditLogStruct>({
     type: Date,
     required: true
   },
-  note: {
+  project: {
     type: String,
     required: true
+  },
+  sig: {
+    type: String,
+    required: true
+  },
+  objectEditedType: {
+    type: String,
+    enum: ['CAPNote', 'IssueObject', 'PracticeGapObject'],
+    default: 'CAPNote'
+  },
+  objectEdited: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
+  original: {
+    type: String,
+    required: true,
+    default: ''
   },
   edits: {
     type: String,

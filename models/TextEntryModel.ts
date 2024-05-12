@@ -7,6 +7,9 @@ export interface TextEntryStruct {
 }
 
 interface ContextObj {
+  contextType: [
+    'issue' | 'practice' | 'follow-up' | 'note' | 'script' | 'other'
+  ];
   description: string;
   value: string;
 }
@@ -19,6 +22,11 @@ export const TextEntrySchema = new mongoose.Schema<TextEntryStruct>({
   context: {
     type: [
       {
+        contextType: {
+          type: String,
+          enum: ['issue', 'practice', 'follow-up', 'note', 'script', 'other'],
+          default: 'other'
+        },
         description: String,
         value: String
       }

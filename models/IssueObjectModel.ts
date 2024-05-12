@@ -8,7 +8,10 @@ import {
 export interface IssueObjectStruct {
   title: string;
   date: Date;
+  project: string;
+  sig: string;
   lastUpdated: Date;
+  isDeleted: boolean;
   context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
@@ -25,9 +28,22 @@ export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
     type: Date,
     required: true
   },
+  project: {
+    type: String,
+    required: true
+  },
+  sig: {
+    type: String,
+    required: true
+  },
   lastUpdated: {
     type: Date,
     required: true
+  },
+  isDeleted: {
+    type: Boolean,
+    required: true,
+    default: false
   },
   context: {
     type: [TextEntrySchema],
@@ -47,3 +63,7 @@ export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
     default: []
   }
 });
+
+export default (mongoose.models
+  .IssueObject as mongoose.Model<IssueObjectStruct>) ||
+  mongoose.model('IssueObject', IssueObjectSchema);

@@ -1,14 +1,5 @@
 import mongoose from 'mongoose';
 import { TextEntrySchema, TextEntryStruct } from './TextEntryModel';
-import {
-  PracticeObjectSchema,
-  PracticeObjectStruct
-} from './PracticeObjectModel';
-import { IssueObjectSchema, IssueObjectStruct } from './IssueObjectModel';
-// import {
-//   FollowUpObjectSchema,
-//   FollowUpObjectStruct
-// } from './FollowUpObjectModel';
 
 export interface CAPStruct {
   project: string;
@@ -20,9 +11,9 @@ export interface CAPStruct {
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
   // followUps: FollowUpObjectStruct[];
-  pastIssues: IssueObjectStruct[];
-  currentIssues: IssueObjectStruct[];
-  trackedPractices: PracticeObjectStruct[];
+  pastIssues: [mongoose.Schema.Types.ObjectId];
+  currentIssues: [mongoose.Schema.Types.ObjectId];
+  trackedPractices: [mongoose.Schema.Types.ObjectId];
 }
 
 const CAPNote = new mongoose.Schema<CAPStruct>({
@@ -46,13 +37,28 @@ const CAPNote = new mongoose.Schema<CAPStruct>({
     type: String,
     required: true
   },
+  // TODO: CAP won't be used in the future, but keeping for now so I don't have to migrate
   context: [TextEntrySchema],
   assessment: [TextEntrySchema],
   plan: [TextEntrySchema],
-  // followUps: [FollowUpObjectSchema],
-  pastIssues: [IssueObjectSchema],
-  currentIssues: [IssueObjectSchema],
-  trackedPractices: [PracticeObjectSchema]
+  pastIssues: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'IssueObject'
+    }
+  ],
+  currentIssues: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'IssueObject'
+    }
+  ],
+  trackedPractices: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'PracticeGapObject'
+    }
+  ]
 });
 
 export default (mongoose.models.CAPNote as mongoose.Model<CAPStruct>) ||
