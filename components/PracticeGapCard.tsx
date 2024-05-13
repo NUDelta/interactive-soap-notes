@@ -61,6 +61,7 @@ export default function PracticeGapCard({
 
   // TODO: 04-30-24 -- see this example for drag and drop https://codesandbox.io/p/sandbox/github/react-dnd/react-dnd/tree/gh-pages/examples_js/04-sortable/simple?file=%2Fsrc%2FCard.js%3A69%2C18&from-embed=
   return (
+    // TODO: the basis needs to be configurable.
     <div
       ref={drag}
       className={`flex-none basis-1/4 border shadow p-1 ${opacity} ${isAddPractice ? 'border-2 border-dashed shadow-none' : 'border hover:bg-blue-100'}`}
