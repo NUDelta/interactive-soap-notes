@@ -7,7 +7,7 @@ export interface FollowUpObjectStruct {
     practice: string;
     opportunity: string;
     person: string;
-    reflectionQuestions: string[];
+    reflectionQuestions: ReflectionQuestion[];
   };
   outcome: {
     didHappen: boolean;
@@ -20,6 +20,7 @@ export interface FollowUpObjectStruct {
 interface ReflectionQuestion {
   prompt: string;
   responseType: string;
+  forDidPractice: boolean;
 }
 
 interface FollowUpReflection {
@@ -35,6 +36,11 @@ const ReflectionQuestionSchema = new mongoose.Schema<ReflectionQuestion>({
   responseType: {
     type: String,
     required: true
+  },
+  forDidPractice: {
+    type: Boolean,
+    required: true,
+    default: true
   }
 });
 

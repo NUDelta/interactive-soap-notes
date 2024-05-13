@@ -11,7 +11,9 @@ export interface IssueObjectStruct {
   project: string;
   sig: string;
   lastUpdated: Date;
-  isDeleted: boolean;
+  wasDeleted: boolean;
+  wasMerged: boolean;
+  mergeTarget: mongoose.Types.ObjectId;
   context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
@@ -40,10 +42,20 @@ export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
     type: Date,
     required: true
   },
-  isDeleted: {
+  wasDeleted: {
     type: Boolean,
     required: true,
     default: false
+  },
+  wasMerged: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  mergeTarget: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'IssueObject',
+    default: null
   },
   context: {
     type: [TextEntrySchema],

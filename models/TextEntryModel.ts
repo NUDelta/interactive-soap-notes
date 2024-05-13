@@ -4,6 +4,7 @@ export interface TextEntryStruct {
   type: 'note' | 'script' | 'follow-up';
   context: ContextObj[];
   value: string;
+  html: string;
 }
 
 interface ContextObj {
@@ -34,6 +35,10 @@ export const TextEntrySchema = new mongoose.Schema<TextEntryStruct>({
     required: true
   },
   value: {
+    type: String,
+    required: true
+  },
+  html: {
     type: String,
     required: true
   }

@@ -36,7 +36,7 @@ export default async function handler(req, res) {
         });
       }
       break;
-    case 'PUT': // update CAP note of [id] with edits
+    case 'PUT': // update CAP note of [id] with edits // TODO: all this should be doing is updating the note, not the issue content (that will be on separate routes)
       try {
         const capNote = await updateCAPNote(id, req.body);
         if (!capNote) {
@@ -60,6 +60,7 @@ export default async function handler(req, res) {
         );
         const orgObjs = await orgObjRes.json();
 
+        // TODO: all this should get moved into a route for issues
         // create practice agents for all plans
         let practiceAgents = {};
         for (let issueIndex in capNote.currentIssues) {
@@ -79,6 +80,7 @@ export default async function handler(req, res) {
               continue;
             }
 
+            // TODO: before replacing questions, should check if any outcomes already have content (if so, don't overwrite it)
             // get the reflection questions for the plan
             let reflectionQuestions = computeReflectionQuestions(plan);
 
@@ -529,6 +531,11 @@ function parseFollowUpPlans(soapId, projName, venue, strategy) {
   return newActiveIssue;
 }
 
+/**
+ * Creates reflection questions for student to do after a plan.
+ * @param plan
+ * @returns
+ */
 const computeReflectionQuestions = (plan) => {
   // get reflection questions based on the plan entry
   let reflectionQuestions = [];

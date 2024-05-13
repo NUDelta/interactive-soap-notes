@@ -58,5 +58,5 @@ export const PracticeGapObjectSchema =
   });
 
 export default (mongoose.models
-  .PracticGapObject as mongoose.Model<PracticeGapObjectStruct>) ||
+  .PracticeGapObject as mongoose.Model<PracticeGapObjectStruct>) ||
   mongoose.model('PracticeGapObject', PracticeGapObjectSchema);
