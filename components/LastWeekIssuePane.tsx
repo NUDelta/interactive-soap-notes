@@ -116,7 +116,7 @@ export default function LastWeekIssuePane({
       })
       .map((followUp) => {
         return {
-          practice: followUp.practice,
+          practice: followUp.parsedPractice.practice,
           didHappen: followUp.outcome.didHappen,
           deliverable: followUp.practice.includes('[reflect]')
             ? null

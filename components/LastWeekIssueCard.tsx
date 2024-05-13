@@ -61,7 +61,9 @@ export default function LastWeekIssueCard({
                   ? 'click to enter title'
                   : title}
             </h2>
-            <h1 className="text-xs italic mt-auto">Last week issue</h1>
+            <h1 className="text-xs italic mt-auto">
+              Tracked from last coaching meeting
+            </h1>
 
             {/* Show / hide issue */}
             {/* TODO: buggy since it doesn't update the parent state properly */}
