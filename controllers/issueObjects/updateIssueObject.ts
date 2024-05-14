@@ -6,12 +6,24 @@ import {
 } from '../editLog/createEditLogEntry';
 
 export const updateIssueObject = async (issueObject: object) => {
+  // remove any CAP notes that are blank before saving
+  let newIssueObject = { ...issueObject };
+  newIssueObject['context'] = newIssueObject['context'].filter(
+    (entry) => entry.value.trim() !== ''
+  );
+  newIssueObject['assessment'] = newIssueObject['assessment'].filter(
+    (entry) => entry.value.trim() !== ''
+  );
+  newIssueObject['plan'] = newIssueObject['plan'].filter(
+    (entry) => entry.value.trim() !== ''
+  );
+
   await dbConnect();
-  let issueObjectId = issueObject['id'];
+  let issueObjectId = newIssueObject['id'];
   let originalIssueObject = await IssueObjectModel.findById(issueObjectId);
   let updatedIssueObject = await IssueObjectModel.findByIdAndUpdate(
     issueObjectId,
-    issueObject,
+    newIssueObject,
     {
       runValidators: true,
       new: true,

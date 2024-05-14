@@ -2,8 +2,7 @@ import dbConnect from '../../lib/dbConnect';
 import EditLogModel, { EditLogStruct } from '../../models/EditLogModel';
 
 export const createEditLogEntry = async (editLog: object) => {
-  // TODO: this doesn't work for issues because new objectIds are being generated for each note block on re-render
-  // check that origianl and edits are different before saving
+  // check that original and edits are different before saving
   if (editLog['original'] === editLog['edits']) {
     return null;
   }

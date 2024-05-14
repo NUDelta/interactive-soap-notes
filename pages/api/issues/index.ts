@@ -24,7 +24,7 @@ export default async function handler(
   } = req;
 
   switch (method) {
-    //TODO: remove any CAP notes that are blank before saving
+    // TODO: something about the plans is re-generating the ids
     case 'POST':
       let issueObjects: IssueObjectStruct[] = req.body.data;
 
