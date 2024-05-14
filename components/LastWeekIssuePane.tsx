@@ -149,8 +149,8 @@ export default function LastWeekIssuePane({
                 })
         };
       });
-
-    getYellKeysForAllDeliverables(practiceOutcome);
+    // getYellKeysForAllDeliverables(practiceOutcome);
+    setPracticeOutcome(practiceOutcome);
   }, [selectedLastWeekIssue.followUps]);
 
   return (
@@ -241,7 +241,16 @@ export default function LastWeekIssuePane({
 
             {/* Follow-up objects on the remaining */}
             <div className="w-full">
-              <h1 className="font-bold text-base">Follow-Up Outcomes</h1>
+              <div className="mb-1">
+                <h1 className="font-bold text-base">Follow-Up Outcomes</h1>
+                <h2 className="text-sm italic">
+                  Text in{' '}
+                  <span className="text-green-600 font-semibold">green</span>{' '}
+                  are responses from the students(s). Text in{' '}
+                  <span className="text-rose-600 font-semibold">red</span>{' '}
+                  indicates missing reflections or documents.
+                </h2>
+              </div>
               {/* Show practice follow-ups */}
               {!isLoading &&
               practiceOutcome !== null &&
