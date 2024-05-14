@@ -254,72 +254,73 @@ export default function CAPNote({
   }, [pastIssuesData, currentIssuesData]);
 
   // // listen for changes in pastIssue or currentIssue state and do debounced saves to database
-  // useEffect(() => {
-  //   // don't save on first load
-  //   if (firstLoadPracticeGaps.current) {
-  //     firstLoadPracticeGaps.current = false;
-  //     return;
-  //   }
+  useEffect(() => {
+    // don't save on first load
+    if (firstLoadPracticeGaps.current) {
+      firstLoadPracticeGaps.current = false;
+      return;
+    }
 
-  //   setIsSaving(true);
-  //   const timeOutId = setTimeout(async () => {
-  //     console.log('saving practice gaps');
-  //     // hold a last updated timestamp
-  //     const lastUpdated = new Date();
+    setIsSaving(true);
+    const timeOutId = setTimeout(async () => {
+      let practiceGapsToSave = practiceGapData.map((practiceGap) => {
+        return structuredClone({
+          id: practiceGap.id,
+          title: practiceGap.title,
+          date: practiceGap.date,
+          project: practiceGap.project,
+          sig: practiceGap.sig,
+          description: practiceGap.description,
+          lastUpdated: practiceGap.lastUpdated,
+          practiceInactive: practiceGap.practiceInactive,
+          practiceArchived: practiceGap.practiceArchived,
+          prevIssues: practiceGap.prevIssues.map((issue) => issue.id)
+        });
+      });
 
-  //     // // create a clone of the data to save
-  //     // let dataToSave = structuredClone({
-  //     //   project: noteInfo.project,
-  //     //   date: noteInfo.sigDate,
-  //     //   lastUpdated: lastUpdated,
-  //     //   sigName: noteInfo.sigName,
-  //     //   sigAbbreviation: noteInfo.sigAbbreviation,
-  //     //   context: noteInfo.context ?? [],
-  //     //   assessment: noteInfo.assessment ?? [],
-  //     //   plan: noteInfo.plan ?? [],
-  //     //   pastIssues: noteInfo.pastIssues ?? [],
-  //     //   currentIssues: noteInfo.currentIssues ?? [],
-  //     //   trackedPractices: noteInfo.trackedPractices ?? []
-  //     // });
+      try {
+        // make request to save the data to the database
+        const res = await fetch(`/api/practice-gaps/`, {
+          method: 'POST',
+          body: JSON.stringify({
+            data: [...practiceGapsToSave]
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const output = await res.json();
 
-  //     // // make request to save the data to the database
-  //     // try {
-  //     //   const res = await fetch(`/api/soap/${noteInfo.id}`, {
-  //     //     method: 'PUT',
-  //     //     body: JSON.stringify(dataToSave),
-  //     //     headers: {
-  //     //       'Content-Type': 'application/json'
-  //     //     }
-  //     //   });
-  //     //   const output = await res.json();
+        // if there's an error, throw an exception
+        if (!res.ok) {
+          throw new Error(
+            `Error from server when saving practice gaps: ${output.error}`
+          );
+        }
 
-  //     //   // if there's an error, throw an exception
-  //     //   if (!res.ok) {
-  //     //     throw new Error(`Error from server: ${output.error}`);
-  //     //   }
+        // otherwise, update the local data without a revalidation
+        if (output.data !== null) {
+          mutate(`/api/practice-gaps/`, output.data, false);
+        }
 
-  //     //   // otherwise, update the local data without a revalidation
-  //     //   if (output.data !== null) {
-  //     //     mutate(`/api/soap/${noteInfo.id}`, output.data, false);
-  //     //   }
+        // update the noteInfo with the new list of practice gaps
+        setNoteInfo((prevNoteInfo) => ({
+          ...prevNoteInfo,
+          trackedPractices: output.data.map((practice) => practice._id)
+        }));
 
-  //     //   // update the last updated timestamp for the note
-  //     //   setNoteInfo((prevNoteInfo) => ({
-  //     //     ...prevNoteInfo,
-  //     //     lastUpdated: longDate(lastUpdated, true)
-  //     //   }));
+        // if there's no error, clear the error state
+        setSaveError(null);
+      } catch (err) {
+        // if there's an error, set the error state
+        console.error('Error in saving PracticeGapObjects: ', err);
+        setSaveError(err.message);
+      }
 
-  //     //   // if there's no error, clear the error state
-  //     //   setSaveError(null);
-  //     // } catch (err) {
-  //     //   // if there's an error, set the error state
-  //     //   console.error('Error in saving CAP note: ', err);
-  //     //   setSaveError(err.message);
-  //     // }
-  // // NOTE: normally we'd reset the saving indicator here, but since this calls setNoteInfo and that has useEffect that also saves, we'll just have it reset there
-  //   }, 1000);
-  //   return () => clearTimeout(timeOutId);
-  // }, [practiceGapData]);
+      // NOTE: normally we'd reset the saving indicator here, but since this calls setNoteInfo and that has useEffect that also saves, we'll just have it reset there
+    }, 1000);
+    return () => clearTimeout(timeOutId);
+  }, [practiceGapData]);
 
   // return the page
   return (
