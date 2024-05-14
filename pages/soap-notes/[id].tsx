@@ -500,7 +500,6 @@ export default function CAPNote({
 
                 <div className="w-full h-[66vh] overflow-auto">
                   {/* Practice Cards */}
-                  {/* TODO: allow for selecting hide gaps, show gaps, show gap details with a single button: https://flowbite.com/docs/components/tabs/ */}
                   <div className="mb-3">
                     {/* Active Practices */}
                     <div className="grid grid-cols-3 gap-2 overflow-auto">
@@ -521,7 +520,7 @@ export default function CAPNote({
                             practiceGap={practiceGap}
                             practiceGapsData={practiceGapData}
                             setPracticeGapsData={setPracticeGapData}
-                            showPracticeGaps={true}
+                            showPracticeGaps={'Show Gaps with Details'}
                             setShowPracticeGaps={setShowPracticeGaps}
                             currentIssuesData={currentIssuesData}
                             setCurrentIssuesData={setCurrentIssuesData}
@@ -538,7 +537,7 @@ export default function CAPNote({
                         practiceGap={null}
                         practiceGapsData={practiceGapData}
                         setPracticeGapsData={setPracticeGapData}
-                        showPracticeGaps={true}
+                        showPracticeGaps={'Show Gaps with Details'}
                         setShowPracticeGaps={setShowPracticeGaps}
                         currentIssuesData={currentIssuesData}
                         setCurrentIssuesData={setCurrentIssuesData}
@@ -555,9 +554,6 @@ export default function CAPNote({
                 (issue) => issue.id === selectedIssue
               ) !== -1 && (
                 <>
-                  {/* TODO: title should change based on what practice is selected */}
-                  {/* TODO: for issues, allow the title to be edited */}
-                  {/* TODO: once this uses the same schema as the regular notes, then the code can be compressed */}
                   <h1 className="text-base font-bold border-b border-black mb-1 bg-white sticky top-0">
                     {currentIssuesData.findIndex(
                       (practice) => practice.id === selectedIssue

@@ -44,7 +44,7 @@ export default function CurrWeekIssuePane({
   ];
 
   // state variable for showing practice gaps
-  const [showPracticeGaps, setShowPracticeGaps] = useState(false);
+  const [showPracticeGaps, setShowPracticeGaps] = useState('Hide Gaps');
 
   return (
     <div className="mb-5">
@@ -437,20 +437,44 @@ export default function CurrWeekIssuePane({
                         <h1 className="text-sm font-semibold">
                           Tracked Self-Regulation Gaps
                         </h1>
-                        <button
-                          className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1 h-6 rounded-full ml-2"
-                          onClick={() => {
-                            setShowPracticeGaps(!showPracticeGaps);
-                          }}
-                        >
-                          {showPracticeGaps ? 'Hide details' : 'Show details'}
-                        </button>
+                        <ul className="flex flex-wrap text-xs font-medium text-center text-gray-500 dark:text-gray-400 ml-2">
+                          <li
+                            className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            onClick={() => {
+                              setShowPracticeGaps('Hide Gaps');
+                            }}
+                          >
+                            Hide Gaps
+                          </li>
+                          <li
+                            className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            onClick={() => {
+                              setShowPracticeGaps('Show Gaps');
+                            }}
+                          >
+                            Show Gaps
+                          </li>
+                          <li
+                            className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            onClick={() => {
+                              setShowPracticeGaps('Show Gaps with Details');
+                            }}
+                          >
+                            Show Gaps with Details
+                          </li>
+                        </ul>
                       </div>
-                      <p className="italic text-xs mb-1">
-                        Drag a practice onto the assessment to add it to the
-                        current issue. Edit a practice gap by clicking on its
-                        title or description.
-                      </p>
+                      {showPracticeGaps !== 'Hide Gaps' ? (
+                        <p className="italic text-xs mb-1">
+                          Drag a practice onto the assessment to add it to the
+                          current issue. Edit a practice gap by clicking on its
+                          title or description.
+                        </p>
+                      ) : (
+                        <p className="italic text-xs mb-1">
+                          Click above to show self-regulation gaps.
+                        </p>
+                      )}
 
                       {/* Active Practices Gaps */}
                       <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
