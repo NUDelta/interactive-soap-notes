@@ -14,7 +14,10 @@ import { htmlToText } from '../../lib/helperFns';
 const convertTimestampToDate = (timestamp, timezone) => {
   // convert timestamp from date and timezone into utc
   let date = new Date(timestamp);
-  return date;
+  let timezonedDate = new Date(
+    date.toLocaleString('en-US', { timeZone: timezone })
+  );
+  return timezonedDate;
 };
 
 // helper function to convert text entry objects
