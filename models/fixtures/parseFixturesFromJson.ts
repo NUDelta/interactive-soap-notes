@@ -3,6 +3,7 @@ import dbConnect from '../../lib/dbConnect';
 import CAPNoteModel, { CAPStruct } from '../CAPNoteModel';
 import IssueObjectModel from '../IssueObjectModel';
 import PracticeGapObjectModel from '../PracticeGapObjectModel';
+import { htmlToText } from '../../lib/helperFns';
 
 /**
  *
@@ -29,7 +30,7 @@ const convertTextEntry = (textEntry) => {
         value: contextEntry.value
       };
     }),
-    value: textEntry.value,
+    value: htmlToText(textEntry.value).trim(),
     html: textEntry.value
   };
 };
@@ -78,11 +79,11 @@ export const parseFixturesFromJson = async (fixtures) => {
     // convert tracked practices and save if they don't exist in the database
     const convertToPracticeGapObject = (practice) => {
       return {
-        title: practice.title,
+        title: htmlToText(practice.title).trim(),
         date: convertTimestampToDate(practice.date['$date'], 'America/Chicago'),
         project: fixture.project,
         sig: fixture.sigName,
-        description: practice.description,
+        description: htmlToText(practice.description).trim(),
         lastUpdated: convertTimestampToDate(
           practice.lastUpdated['$date'],
           'America/Chicago'
@@ -135,7 +136,7 @@ export const parseFixturesFromJson = async (fixtures) => {
           .replace('[practice gap]', '')
           .trim();
         let foundPractice = trackedPractices.find((practice) => {
-          return practice.title === assessmentValue;
+          return practice.title.trim() === assessmentValue;
         });
 
         // update the practice gap context if found
@@ -150,7 +151,7 @@ export const parseFixturesFromJson = async (fixtures) => {
       });
 
       return {
-        title: issue.title,
+        title: htmlToText(issue.title).trim(),
         date: convertTimestampToDate(issue.date['$date'], 'America/Chicago'),
         project: fixture.project,
         sig: fixture.sigName,
@@ -174,14 +175,14 @@ export const parseFixturesFromJson = async (fixtures) => {
             practice: followUp.practice,
             parsedPractice: {
               id: new mongoose.Types.ObjectId().toString(),
-              practice: followUp.parsedPractice.practice,
+              practice: htmlToText(followUp.parsedPractice.practice).trim(),
               opportunity: followUp.parsedPractice.opportunity,
               person: followUp.parsedPractice.person,
               reflectionQuestions:
                 followUp.parsedPractice.reflectionQuestions.map(
                   (reflection) => {
                     return {
-                      prompt: reflection.prompt,
+                      prompt: htmlToText(reflection.prompt).trim(),
                       responseType: reflection.responseType,
                       forDidPractice: true
                     };
@@ -196,13 +197,13 @@ export const parseFixturesFromJson = async (fixtures) => {
               reflections: [
                 followUp.outcome.reflections.map((reflection) => {
                   return {
-                    prompt: reflection.prompt,
+                    prompt: htmlToText(reflection.prompt).trim(),
                     response: reflection.response
                   };
                 }),
                 followUp.outcome.reflections.map((reflection) => {
                   return {
-                    prompt: reflection.prompt,
+                    prompt: htmlToText(reflection.prompt).trim(),
                     response: reflection.response
                   };
                 })
@@ -252,21 +253,20 @@ export const parseFixturesFromJson = async (fixtures) => {
     }
 
     // now we have to go back and update all trackedPractices with prevIssues
-    /**
-     * "prevIssues": [
-        {
-     */
     for (const practice of trackedPractices) {
       // get the corresponding fixture
       let parsedPractice = fixture.trackedPractices.find((trackedPractice) => {
-        return trackedPractice.title === practice.title;
+        return (
+          htmlToText(trackedPractice.title).trim() ===
+          htmlToText(practice.title).trim()
+        );
       });
 
       if (parsedPractice !== undefined) {
         // get any issues that are in the prevIssues array
         let prevIssueTitles = parsedPractice.prevIssues.map((prevIssue) => {
           if (prevIssue !== undefined) {
-            return prevIssue.title;
+            return htmlToText(prevIssue.title).trim();
           }
         });
 
