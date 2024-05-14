@@ -73,7 +73,7 @@ export default function LastWeekIssueCard({
         setIsSelected(!isSelected);
         if (issueId === selectedIssue) {
           // set default to this week's notes
-          setSelectedIssue('this-weeks-notes');
+          setSelectedIssue(null);
         } else {
           setSelectedIssue(issueId);
         }
