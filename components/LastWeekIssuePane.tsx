@@ -169,7 +169,7 @@ export default function LastWeekIssuePane({
                       <>
                         {line.value.trim() !== '' && (
                           <NoteBlock
-                            key={line.id}
+                            key={`note-block-from-lastweekpane-${line.id}`}
                             noteSection={'assessment'}
                             noteId={line.id}
                             noteContent={line}
@@ -262,6 +262,7 @@ export default function LastWeekIssuePane({
                           <div className="w-full">
                             <p className="text-sm font-semibold">
                               Did this happen?{' '}
+                              {/* TODO: make this a check or X */}
                               <span
                                 className={`font-normal ${practice.didHappen ? 'text-green-600' : 'text-rose-600'}`}
                               >
@@ -282,7 +283,8 @@ export default function LastWeekIssuePane({
                                       rel="noreferrer"
                                       className="text-blue-600 underline font-normal"
                                     >
-                                      Link to deliverable
+                                      Link to deliverable{' '}
+                                      {/* TODO: make this a link icon with 'deliverable' or 'no deliverable' */}
                                     </a>
                                     {practice.yellkey == null ? (
                                       <></>

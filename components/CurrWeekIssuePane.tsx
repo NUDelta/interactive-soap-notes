@@ -72,7 +72,7 @@ export default function CurrWeekIssuePane({
                     {/* TODO: 04-23-24 -- current issues need to be initialized with an empty block and checked if there's an empty block before adding to it  */}
                     {currIssue[section.name].map((line) => (
                       <NoteBlock
-                        key={line.id}
+                        key={`note-block-from-issuepane-${line.id}`}
                         noteSection={section.name}
                         noteId={line.id}
                         noteContent={line}
