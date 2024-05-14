@@ -7,7 +7,7 @@ export interface TextEntryStruct {
   html: string;
 }
 
-interface ContextObj {
+export interface ContextObj {
   contextType: [
     'issue' | 'practice' | 'follow-up' | 'note' | 'script' | 'other'
   ];

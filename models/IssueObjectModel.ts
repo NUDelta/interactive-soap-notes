@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { TextEntrySchema, TextEntryStruct } from './TextEntryModel';
 import {
   FollowUpObjectStruct,
@@ -13,12 +13,12 @@ export interface IssueObjectStruct {
   lastUpdated: Date;
   wasDeleted: boolean;
   wasMerged: boolean;
-  mergeTarget: mongoose.Types.ObjectId;
+  mergeTarget: Types.ObjectId | null;
   context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
   followUps: FollowUpObjectStruct[];
-  priorInstances: IssueObjectStruct[];
+  priorInstances: string[];
 }
 
 export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
@@ -53,7 +53,7 @@ export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
     default: false
   },
   mergeTarget: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId || null,
     ref: 'IssueObject',
     default: null
   },

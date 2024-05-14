@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import dbConnect from '../../lib/dbConnect';
-import CAPNoteModel from '../CAPNoteModel';
+import CAPNoteModel, { CAPStruct } from '../CAPNoteModel';
 import IssueObjectModel from '../IssueObjectModel';
 import PracticeGapObjectModel from '../PracticeGapObjectModel';
 
@@ -42,8 +42,14 @@ export const parseFixturesFromJson = async (fixtures) => {
   // hold all issue objects for later
   let allIssueObjects = [];
 
+  // sort fixtures by lastUpdated date
+  // this is to prevent overwriting of issues and practices with older data (e.g., if a practice is updated in a later fixture, we want to keep the latest data)
+  fixtures.sort((a, b) => {
+    return a.lastUpdated['$date'] - b.lastUpdated['$date'];
+  });
+
   // loop through the fixtures and parse them
-  fixtures.forEach((fixture) => {
+  for (const fixture of fixtures) {
     // store note date
     let noteDate = convertTimestampToDate(
       fixture.date['$date'],
@@ -55,7 +61,7 @@ export const parseFixturesFromJson = async (fixtures) => {
     );
 
     // create a new CAP note object to hold everything
-    let newCAPNote = new CAPNoteModel({
+    let newCAPNote: CAPStruct = new CAPNoteModel({
       project: fixture.project,
       date: noteDate,
       lastUpdated: lastUpdated,
@@ -69,42 +75,81 @@ export const parseFixturesFromJson = async (fixtures) => {
       trackedPractices: []
     });
 
-    // parse context
-    let context = [];
-    fixture.context.forEach((contextEntry) => {
-      context.push({
-        id: new mongoose.Types.ObjectId().toString(),
-        type: 'note',
-        context: contextEntry.context,
-        value: contextEntry.value
-      });
+    // convert tracked practices and save if they don't exist in the database
+    const convertToPracticeGapObject = (practice) => {
+      return {
+        title: practice.title,
+        date: convertTimestampToDate(practice.date['$date'], 'America/Chicago'),
+        project: fixture.project,
+        sig: fixture.sigName,
+        description: practice.description,
+        lastUpdated: convertTimestampToDate(
+          practice.lastUpdated['$date'],
+          'America/Chicago'
+        ),
+        practiceInactive: practice.practiceInactive,
+        practiceArchived: practice.practiceArchived,
+        prevIssues: []
+      };
+    };
+
+    let parsedTrackedPractice = fixture.trackedPractices.map((practice) => {
+      return convertToPracticeGapObject(practice);
     });
 
-    // parse assessment
-    let assessment = [];
-    fixture.assessment.forEach((assessmentEntry) => {
-      assessment.push({
-        id: new mongoose.Types.ObjectId().toString(),
-        type: 'note',
-        context: assessmentEntry.context,
-        value: assessmentEntry.value
+    for (const practice of parsedTrackedPractice) {
+      let foundPractice = await PracticeGapObjectModel.findOne({
+        title: practice.title,
+        sig: practice.sig,
+        project: practice.project
       });
-    });
 
-    // parse plan
-    let plan = [];
-    fixture.plan.forEach((planEntry) => {
-      plan.push({
-        id: new mongoose.Types.ObjectId().toString(),
-        type: 'note',
-        context: planEntry.context,
-        value: planEntry.value
-      });
-    });
+      if (!foundPractice) {
+        await new PracticeGapObjectModel(practice).save();
+      } else {
+        // check if the current practice has a newer timestamp than the older one
+        if (practice.lastUpdated > foundPractice.lastUpdated) {
+          await PracticeGapObjectModel.findOneAndUpdate(
+            {
+              title: practice.title,
+              sig: practice.sig,
+              project: practice.project
+            },
+            practice,
+            { upsert: true }
+          );
+        }
+      }
+    }
 
-    // past issues into new objects.
+    // past issues into new objects, while also linking any of their assessments to tracked practices
+    let trackedPractices = await PracticeGapObjectModel.find({});
     const convertToIssueObject = (issue) => {
-      return new IssueObjectModel({
+      // special case: if the content of an assessment in an issue (minus [practice gap]) matches a practice gap by title, link it in its context by id
+      let newAssessments = issue.assessment.map((assessmentEntry) => {
+        return convertTextEntry(assessmentEntry);
+      });
+      newAssessments = newAssessments.map((assessmentEntry) => {
+        // get the assessment value without [practice gap]
+        let assessmentValue = assessmentEntry.value
+          .replace('[practice gap]', '')
+          .trim();
+        let foundPractice = trackedPractices.find((practice) => {
+          return practice.title === assessmentValue;
+        });
+
+        // update the practice gap context if found
+        if (foundPractice) {
+          assessmentEntry.context.push({
+            contextType: 'practice',
+            description: `assessment attached from practice gap: ${foundPractice.title}`,
+            value: foundPractice.title
+          });
+        }
+        return assessmentEntry;
+      });
+
+      return {
         title: issue.title,
         date: convertTimestampToDate(issue.date['$date'], 'America/Chicago'),
         project: fixture.project,
@@ -113,15 +158,13 @@ export const parseFixturesFromJson = async (fixtures) => {
           issue.lastUpdated['$date'],
           'America/Chicago'
         ),
-        isDeleted: false,
-        isMerged: false,
+        wasDeleted: false,
+        wasMerged: false,
         mergeTarget: null,
         context: issue.context.map((contextEntry) => {
           return convertTextEntry(contextEntry);
         }),
-        assessment: issue.assessment.map((assessmentEntry) => {
-          return convertTextEntry(assessmentEntry);
-        }),
+        assessment: newAssessments,
         plan: issue.plan.map((planEntry) => {
           return convertTextEntry(planEntry);
         }),
@@ -168,98 +211,96 @@ export const parseFixturesFromJson = async (fixtures) => {
           };
         }),
         priorInstances: []
-      });
-    };
-
-    let pastIssues = fixture.pastIssues.map((issue) => {
-      return convertToIssueObject(issue);
-    });
-    let currentIssues = fixture.currentIssues.map((issue) => {
-      return convertToIssueObject(issue);
-    });
-    allIssueObjects = allIssueObjects.concat(pastIssues, currentIssues);
-
-    // convert tracked practices
-    const convertToPracticeGapObject = (practice, allIssues) => {
-      const findIssueIdByTitle = (title, issues) => {
-        let foundIssue = allIssues.find((issue) => {
-          return issue.title === title;
-        });
-
-        console.log('foundIssue', foundIssue);
-
-        return foundIssue ? foundIssue._id : null;
       };
-
-      return new PracticeGapObjectModel({
-        title: practice.title,
-        date: convertTimestampToDate(practice.date['$date'], 'America/Chicago'),
-        project: fixture.project,
-        sig: fixture.sigName,
-        description: practice.description,
-        lastUpdated: convertTimestampToDate(
-          practice.date['$date'],
-          'America/Chicago'
-        ),
-        isInactive: practice.practiceInactive,
-        isArchived: practice.practiceArchived,
-        prevIssues: practice.prevIssues.map((issue) => {
-          return findIssueIdByTitle(issue.title, allIssues);
-        })
-      });
     };
 
-    let trackedPractices = fixture.trackedPractices.map((practice) => {
-      return convertToPracticeGapObject(practice, allIssueObjects);
+    let parsedPastIssues = fixture.pastIssues.map((issue) => {
+      return convertToIssueObject(issue);
     });
+    let parsedCurrentIssues = fixture.currentIssues.map((issue) => {
+      return convertToIssueObject(issue);
+    });
+    allIssueObjects = allIssueObjects.concat(
+      parsedPastIssues,
+      parsedCurrentIssues
+    );
 
     // save issues and tracked practice if they don't exist in the database
     // if they do exist, update the object
-    pastIssues.forEach(async (issue) => {
-      let foundIssue = await IssueObjectModel.findOne({ id: issue.id }).exec();
+    for (const issue of allIssueObjects) {
+      let foundIssue = await IssueObjectModel.findOne({
+        title: issue.title,
+        project: issue.project,
+        sig: issue.sig
+      });
       if (!foundIssue) {
-        await issue.save();
+        await new IssueObjectModel(issue).save();
       } else {
-        await IssueObjectModel.findOneAndUpdate(
-          {
-            id: issue.id
-          },
-          issue,
-          { new: true }
-        );
+        // check if the current issue has a newer timestamp than the older one
+        if (issue.lastUpdated > foundIssue.lastUpdated) {
+          await IssueObjectModel.findOneAndUpdate(
+            {
+              title: issue.title,
+              project: issue.project,
+              sig: issue.sig
+            },
+            issue,
+            { upsert: true }
+          );
+        }
       }
-    });
+    }
 
-    currentIssues.forEach(async (issue) => {
-      let foundIssue = await IssueObjectModel.findOne({ id: issue.id }).exec();
-      if (!foundIssue) {
-        await issue.save();
-      } else {
-        await IssueObjectModel.findOneAndUpdate(
-          {
-            id: issue.id
-          },
-          issue,
-          { new: true }
-        );
-      }
-    });
+    // now we have to go back and update all trackedPractices with prevIssues
+    /**
+     * "prevIssues": [
+        {
+     */
+    for (const practice of trackedPractices) {
+      // get the corresponding fixture
+      let parsedPractice = fixture.trackedPractices.find((trackedPractice) => {
+        return trackedPractice.title === practice.title;
+      });
 
-    trackedPractices.forEach(async (practice) => {
-      let foundPractice = await PracticeGapObjectModel.findOne({
-        id: practice.id
-      }).exec();
-      if (!foundPractice) {
-        await practice.save();
-      } else {
-        await PracticeGapObjectModel.findOneAndUpdate(
-          {
-            id: practice.id
-          },
-          practice,
-          { new: true }
-        );
+      if (parsedPractice !== undefined) {
+        // get any issues that are in the prevIssues array
+        let prevIssueTitles = parsedPractice.prevIssues.map((prevIssue) => {
+          if (prevIssue !== undefined) {
+            return prevIssue.title;
+          }
+        });
+
+        for (const prevIssueTitle of prevIssueTitles) {
+          let issueId = await IssueObjectModel.findOne({
+            title: prevIssueTitle,
+            project: fixture.project,
+            sig: fixture.sigName
+          });
+          if (issueId) {
+            await PracticeGapObjectModel.findOneAndUpdate(
+              {
+                title: practice.title,
+                sig: practice.sig,
+                project: practice.project
+              },
+              { $push: { prevIssues: issueId } },
+              { upsert: true }
+            );
+          }
+        }
       }
+    }
+
+    // get the past issues and current issues from the database
+    let pastIssues = await IssueObjectModel.find({
+      title: { $in: parsedPastIssues.map((issue) => issue.title) },
+      project: fixture.project,
+      sig: fixture.sigName
+    });
+    let currentIssues = await IssueObjectModel.find({
+      title: { $in: parsedCurrentIssues.map((issue) => issue.title) },
+      project: fixture.project,
+      sig: fixture.sigName
     });
 
     // add everything to the new CAP note
@@ -278,13 +319,19 @@ export const parseFixturesFromJson = async (fixtures) => {
     newCAPNote.currentIssues = currentIssues.map((issue) => {
       return issue._id;
     });
-    newCAPNote.trackedPractices = trackedPractices.map((practice) => {
-      return practice._id;
-    });
+    newCAPNote.trackedPractices = trackedPractices
+      .filter((practice) => {
+        return parsedTrackedPractice.find((parsedPractice) => {
+          return practice.title === parsedPractice.title;
+        });
+      })
+      .map((practice) => {
+        return practice._id;
+      });
 
     // add the new CAP note to the parsed fixtures array
     parsedFixtures.push(newCAPNote);
-  });
+  }
 
   await dbConnect();
   return await CAPNoteModel.insertMany(parsedFixtures);

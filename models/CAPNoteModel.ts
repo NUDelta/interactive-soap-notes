@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { TextEntrySchema, TextEntryStruct } from './TextEntryModel';
 
 export interface CAPStruct {
@@ -10,10 +10,9 @@ export interface CAPStruct {
   context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
-  // followUps: FollowUpObjectStruct[];
-  pastIssues: [mongoose.Schema.Types.ObjectId];
-  currentIssues: [mongoose.Schema.Types.ObjectId];
-  trackedPractices: [mongoose.Schema.Types.ObjectId];
+  pastIssues: Types.ObjectId[];
+  currentIssues: Types.ObjectId[];
+  trackedPractices: Types.ObjectId[];
 }
 
 const CAPNote = new mongoose.Schema<CAPStruct>({

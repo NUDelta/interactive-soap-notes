@@ -1,5 +1,4 @@
-import mongoose from 'mongoose';
-import { IssueObjectStruct, IssueObjectSchema } from './IssueObjectModel';
+import mongoose, { Types } from 'mongoose';
 
 export interface PracticeGapObjectStruct {
   title: string;
@@ -10,7 +9,7 @@ export interface PracticeGapObjectStruct {
   lastUpdated: Date;
   practiceInactive: boolean; // whether the practice has temporarily been resolved
   practiceArchived: boolean; // whether practice should be permanently archived
-  prevIssues: mongoose.Types.ObjectId[]; // issues that have this practice gap
+  prevIssues: Types.ObjectId[]; // issues that have this practice gap
 }
 
 export const PracticeGapObjectSchema =
