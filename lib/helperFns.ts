@@ -35,3 +35,51 @@ export const shortDate = (date: Date) => {
     day: 'numeric'
   });
 };
+
+/**
+ * Helper function to serialize dates in an object.
+ * @param object object that has date fields to serialize.
+ * @returns
+ */
+export const serializeDates = (object) => {
+  return {
+    ...object,
+    date: typeof object.date === 'string' ? object.date : longDate(object.date),
+    lastUpdated:
+      typeof object.lastUpdated === 'string'
+        ? object.lastUpdated
+        : longDate(object.lastUpdated)
+  };
+};
+
+/**
+ * Helper function to escape HTML characters in a string.
+ * From: https://stackoverflow.com/a/6234804
+ * @param unsafe string to escape HTML characters in.
+ * @returns string with HTML characters escaped.
+ */
+export const textToHtml = (unsafe) => {
+  return unsafe
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+};
+
+/**
+ * Helper function to convert HTML to plain text.
+ * @param html string to convert to plain text.
+ * @returns string plain text.
+ */
+export const htmlToText = (html) => {
+  // replace html entities with their character and tags
+  return html
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&gt;/g, '>')
+    .replace(/&lt;/g, '<')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/<[^>]*>/g, '');
+};

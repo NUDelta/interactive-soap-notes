@@ -4,28 +4,78 @@
 import ExclamationTriangleIcon from '@heroicons/react/24/outline/ExclamationTriangleIcon';
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import ContentEditable from 'react-contenteditable';
+import { createNewIssueObject } from '../controllers/issueObjects/createIssueObject';
+import { htmlToText, longDate, serializeDates } from '../lib/helperFns';
 
 export default function CurrWeekIssueCard({
+  project,
+  sig,
+  date,
   issueId,
   issue,
   selectedIssue,
   setSelectedIssue,
-  onAddIssue = undefined,
-  onDeleteIssue,
-  editable = true,
-  onTitleEdit
+  currentIssuesData,
+  setCurrentIssuesData
 }): JSX.Element {
+  // onAddIssue is a function that adds a new issue to the current issues
+  const onAddIssue = (newIssueTitle) => {
+    let newIssueForWeek = serializeDates(
+      createNewIssueObject(newIssueTitle, project, sig, date, [], true)
+    );
+    setCurrentIssuesData((prevData) => {
+      return [...prevData, newIssueForWeek];
+    });
+  };
+
+  // onDeleteIssue is a function that sets the issue as deleted
+  const onDeleteIssue = () => {
+    // confirm if the user wants to delete the issue
+    if (
+      !confirm(
+        `Are you sure you want to delete, "${issue.title}"? This cannot be undone.`
+      )
+    ) {
+      return;
+    }
+
+    // set the issue as deleted by updating the wasDeleted flag
+    setCurrentIssuesData((prevData) => {
+      let issuesToUpdate = [...prevData];
+      let issueIndex = issuesToUpdate.findIndex((i) => i.id === issueId);
+      issuesToUpdate[issueIndex].lastUpdated = longDate(new Date());
+      issuesToUpdate[issueIndex].wasDeleted = true;
+      return issuesToUpdate;
+    });
+
+    // check if this issue was selected
+    if (selectedIssue === issueId) {
+      setSelectedIssue(null);
+    }
+  };
+
+  // onTitleEdit is a function that updates the title of the issue
+  const onTitleEdit = (value) => {
+    setCurrentIssuesData((prevData) => {
+      let issuesToUpdate = [...prevData];
+      let issueIndex = issuesToUpdate.findIndex((i) => i.id === issueId);
+      issuesToUpdate[issueIndex].title = value;
+      return issuesToUpdate;
+    });
+  };
+
+  // TODO: 05-13-24 -- add a drag to notes and onto another issue card
   // init variables for the view
   const title = issue === null ? '' : issue.title;
   const lastUpdated = issue === null ? '' : issue.lastUpdated;
 
-  // special cases for this week's notes and add practice
+  // special cases for this week's notes and add issue
   const isThisWeek = issueId === 'this-weeks-notes';
-  const isAddPractice = issueId === 'add-practice';
+  const isAddIssue = issueId === 'add-issue';
 
   // store selected state for card
   const [isSelected, setIsSelected] = useState(false);
@@ -59,11 +109,9 @@ export default function CurrWeekIssueCard({
     () => ({
       // TODO: 04-30-24 -- allow dropping of note block and practice
       // what kinds of draggable items can be accepted into the issue
-      accept: isAddPractice
+      accept: isAddIssue
         ? [DragTypes.NOTE_BLOCK, DragTypes.PAST_ISSUE]
-        : editable
-          ? [DragTypes.NOTE_BLOCK, DragTypes.PRACTICE]
-          : [],
+        : [DragTypes.NOTE_BLOCK, DragTypes.PRACTICE],
 
       // info for target item the draggable element is trying to be added to
       drop: () => ({
@@ -83,7 +131,7 @@ export default function CurrWeekIssueCard({
 
   const [{ opacity }, drag] = useDrag(
     () => ({
-      type: isThisWeek || isAddPractice ? '' : DragTypes.CURRENT_ISSUE,
+      type: isAddIssue ? '' : DragTypes.CURRENT_ISSUE,
       item: { issueId },
       end(item, monitor) {
         const dropResult = monitor.getDropResult();
@@ -105,66 +153,59 @@ export default function CurrWeekIssueCard({
   return (
     <div
       ref={ref}
-      className={`basis-1/3 shrink-0 border shadow p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddPractice ? 'border-2 border-dashed shadow-none' : 'hover:bg-blue-100'} ${opacity}`}
+      className={`basis-1/3 shrink-0 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddIssue ? 'border-2 border-dashed shadow-none' : 'border-4 shadow hover:border-4 hover:border-blue-300 hover:shadow-none'} ${opacity}`}
       onClick={() => {
-        if (!isAddPractice && !isThisWeek) {
+        if (!isAddIssue) {
           setIsSelected(!isSelected);
           if (issueId === selectedIssue) {
             // set default to this week's notes
-            setSelectedIssue('this-weeks-notes');
+            setSelectedIssue(null);
           } else {
             setSelectedIssue(issueId);
           }
-        } else if (isThisWeek) {
-          setSelectedIssue('this-weeks-notes');
+        } else {
+          setSelectedIssue(null);
         }
       }}
     >
       <div className={`w-full h-full`}>
         {/* Navigation to scratch space */}
-        {isThisWeek ? (
-          <>
-            {/* Large plus icon in center of square */}
-            <div className="p-2 flex flex-col w-3/4 h-full mx-auto my-auto items-center justify-center">
-              <p className="text-sm font-semibold text-center italic">
-                Scratch space for this week&apos;s notes
-              </p>
-            </div>
-          </>
-        ) : isAddPractice ? (
+        {isAddIssue ? (
           <>
             {/* Large plus icon in center of square */}
             <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
-              {/* TODO: switch this to a contenteditable div so it can auto resize */}
-              <textarea
-                className="w-full h-3/4 text-xs flex-none"
-                placeholder="Type a new issue here..."
+              <ContentEditable
+                id={`title-${issueId}`}
+                html={titleRef.current}
                 onKeyUp={(e) => {
                   if (e.key === 'Enter') {
                     // check if blank first
-                    let input = e.target.value.trim();
+                    let input = titleRef.current;
                     if (input === '') {
                       return;
                     }
 
-                    // add new practice
+                    // add new issue and clear the text area
                     onAddIssue(input);
-
-                    // clear the textarea
-                    e.target.value = '';
+                    titleRef.current = '';
                   }
 
-                  setNewIssue(e.target.value);
+                  // set state holding issue to empty if enter was pressed, otherwise the current text
+                  setNewIssue(titleRef.current);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                   }
                 }}
-              ></textarea>
+                onChange={(e) => {
+                  titleRef.current = htmlToText(e.target.value);
+                }}
+                className={`p-1 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Describe_an_item_of_concern...'] empty:before:italic empty:before:text-slate-500 border text-xs font-normal rounded-lg`}
+              />
               <h2 className="text-xs font-bold italic text-center items-center">
-                {newIssue.trim() === ''
-                  ? 'or drag a note onto this block'
+                {newIssue === ''
+                  ? 'or drag onto this block'
                   : "hit 'Enter' to add new issue"}
               </h2>
             </div>
@@ -182,9 +223,10 @@ export default function CurrWeekIssueCard({
                     e.target.value.trim().replace(/<\/?[^>]+(>|$)/g, '')
                   );
                 }}
-                className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
+                className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Describe_concern_you_observed...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
               />
 
+              {/* TODO: 05-14-24 -- change this to show if practices are being tracked for the issue, rather than missing, since the top space can also be scratch */}
               <div className="flex flex-row items-center w-full">
                 {/* Missing strategies */}
                 {issue &&
@@ -202,7 +244,7 @@ export default function CurrWeekIssueCard({
                   <TrashIcon
                     className={`h-5 text-slate-600 ml-auto`}
                     onClick={() => {
-                      onDeleteIssue(issueId);
+                      onDeleteIssue();
                     }}
                   />
                 )}

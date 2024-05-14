@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { DragTypes } from '../controllers/draggable/dragTypes';
+import { createNewIssueObject } from '../controllers/issueObjects/createIssueObject';
 
 export default function LastWeekIssueCard({
   issueId,
@@ -11,10 +12,38 @@ export default function LastWeekIssueCard({
   date,
   selectedIssue,
   setSelectedIssue,
-  onDrag
+  pastIssuesData,
+  setPastIssuesData,
+  currentIssuesData,
+  setCurrentIssuesData
 }): JSX.Element {
   // store selected state for card
   const [isSelected, setIsSelected] = useState(false);
+
+  const onDrag = (sourceIssueId, targetIssueId) => {
+    // find index of the source issue
+    let sourceIssueIndex = pastIssuesData.findIndex(
+      (issue) => issue.id === sourceIssueId
+    );
+    let sourcePastIssue = pastIssuesData[sourceIssueIndex];
+
+    // check that the targetIssueId is add-practice
+    if (targetIssueId === 'add-practice') {
+      // create a new issue
+      setCurrentIssuesData((prevCurrentIssuesData) => {
+        let newIssue = createNewIssueObject(
+          sourcePastIssue.title,
+          sourcePastIssue.project,
+          sourcePastIssue.sig,
+          date,
+          [sourcePastIssue.id]
+        );
+
+        let newCurrentIssuesData = [...prevCurrentIssuesData, newIssue];
+        return newCurrentIssuesData;
+      });
+    }
+  };
 
   // drag and drop functionality
   const [{ opacity }, drag] = useDrag(
@@ -22,7 +51,7 @@ export default function LastWeekIssueCard({
       type: DragTypes.PAST_ISSUE,
       item: { issueId },
       end(item, monitor) {
-        const dropResult = monitor.getDropResult();
+        const dropResult = monitor.getDropResult() as { issue: string };
 
         // see if the note was dropped into an issue
         if (item && dropResult) {
@@ -39,7 +68,7 @@ export default function LastWeekIssueCard({
   return (
     <div
       ref={drag}
-      className={`basis-1/3 shrink-0 p-1 border shadow ${selectedIssue === issueId && 'bg-blue-200'} hover:bg-blue-100 ${opacity}`}
+      className={`basis-1/3 shrink-0 p-1 border shadow ${selectedIssue === issueId && 'bg-blue-200'} border-4 shadow hover:border-4 hover:border-blue-300 hover:shadow-none ${opacity}`}
       onClick={() => {
         setIsSelected(!isSelected);
         if (issueId === selectedIssue) {
@@ -61,7 +90,9 @@ export default function LastWeekIssueCard({
                   ? 'click to enter title'
                   : title}
             </h2>
-            <h1 className="text-xs italic mt-auto">Last week issue</h1>
+            <h1 className="text-xs italic mt-auto">
+              Tracked from last coaching meeting
+            </h1>
 
             {/* Show / hide issue */}
             {/* TODO: buggy since it doesn't update the parent state properly */}

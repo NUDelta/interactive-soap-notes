@@ -6,6 +6,7 @@ import { useDrag } from 'react-dnd';
 import { useRef } from 'react';
 import ContentEditable from 'react-contenteditable';
 import { DragTypes } from '../controllers/draggable/dragTypes';
+import { htmlToText } from '../lib/helperFns';
 
 // TODO: add a note section and onDragToIssue function
 export default function NoteBlock({
@@ -213,7 +214,7 @@ export default function NoteBlock({
               blockContent.current = e.target.value;
 
               // save note changes
-              onChange(e.target.value);
+              onChange(e.target.value, htmlToText(e.target.value));
             }}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
