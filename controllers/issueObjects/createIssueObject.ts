@@ -19,7 +19,7 @@ export const createNewIssueObject = (
     date: currentDate,
     project: project,
     sig: sig,
-    lastUpdated: currentDate,
+    lastUpdated: new Date(),
     wasDeleted: false,
     wasMerged: false,
     mergeTarget: null,

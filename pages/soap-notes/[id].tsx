@@ -3,7 +3,7 @@ import type { GetServerSideProps } from 'next';
 import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
-import mongoose from 'mongoose';
+import mongoose, { set } from 'mongoose';
 import { mutate } from 'swr';
 
 // helper components
@@ -40,6 +40,7 @@ export default function CAPNote({
 }): JSX.Element {
   // have state for cap note data
   const [noteInfo, setNoteInfo] = useState(capNoteInfo);
+  const [lastUpdated, setLastUpdated] = useState(capNoteInfo.lastUpdated);
 
   // hold data state for issues and practices
   // see here for updating arrays in state variables: https://react.dev/learn/updating-arrays-in-state#updating-objects-inside-arrays
@@ -58,13 +59,15 @@ export default function CAPNote({
   const [saveError, setSaveError] = useState(null);
 
   // hold a ref that checks if first load
-  const firstLoad = useRef(true);
+  const firstLoadNoteInfo = useRef(true);
+  const firstLoadIssues = useRef(true);
+  const firstLoadPracticeGaps = useRef(true);
 
-  // listen for changes in state and do debounced saves to database
+  // listen for changes in noteInfo state and do debounced saves to database
   useEffect(() => {
     // don't save on first load
-    if (firstLoad.current) {
-      firstLoad.current = false;
+    if (firstLoadNoteInfo.current) {
+      firstLoadNoteInfo.current = false;
       return;
     }
 
@@ -110,10 +113,7 @@ export default function CAPNote({
         }
 
         // update the last updated timestamp for the note
-        setNoteInfo((prevNoteInfo) => ({
-          ...prevNoteInfo,
-          lastUpdated: longDate(lastUpdated, true)
-        }));
+        setLastUpdated(longDate(lastUpdated, true));
 
         // if there's no error, clear the error state
         setSaveError(null);
@@ -129,6 +129,197 @@ export default function CAPNote({
 
     return () => clearTimeout(timeOutId);
   }, [noteInfo]);
+
+  // listen for changes in pastIssue or currentIssue state and do debounced saves to database
+  useEffect(() => {
+    // don't save on first load
+    if (firstLoadIssues.current) {
+      firstLoadIssues.current = false;
+      return;
+    }
+
+    setIsSaving(true);
+    const timeOutId = setTimeout(async () => {
+      // create a list of objects to save
+      let pastIssuesToSave = pastIssuesData.map((issue) => {
+        return structuredClone({
+          id: issue.id,
+          title: issue.title,
+          date: issue.date,
+          project: issue.project,
+          sig: issue.sig,
+          lastUpdated: issue.lastUpdated,
+          wasDeleted: issue.wasDeleted,
+          wasMerged: issue.wasMerged,
+          mergeTarget: issue.mergeTarget,
+          context: issue.context,
+          assessment: issue.assessment,
+          plan: issue.plan,
+          followUps: issue.followUps,
+          priorInstances: issue.priorInstances
+        });
+      });
+      let currentIssuesToSave = currentIssuesData.map((issue) => {
+        return structuredClone({
+          id: issue.id,
+          title: issue.title,
+          date: issue.date,
+          project: issue.project,
+          sig: issue.sig,
+          lastUpdated: issue.lastUpdated,
+          wasDeleted: issue.wasDeleted,
+          wasMerged: issue.wasMerged,
+          mergeTarget: issue.mergeTarget,
+          context: issue.context,
+          assessment: issue.assessment,
+          plan: issue.plan,
+          followUps: issue.followUps,
+          priorInstances: issue.priorInstances
+        });
+      });
+
+      // make request to save the data to the database
+      try {
+        // make one request to save the past issues
+        const pastIssueRes = await fetch(`/api/issues/`, {
+          method: 'POST',
+          body: JSON.stringify({
+            data: [...pastIssuesToSave],
+            updateType: 'past'
+            // TODO: maybe include the noteInfo in the request -- useful for parsing followups
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const pastIssueOutput = await pastIssueRes.json();
+
+        // if there's an error, throw an exception
+        if (!pastIssueRes.ok) {
+          throw new Error(
+            `Error from server when saving past issues: ${pastIssueOutput.error}`
+          );
+        }
+
+        // otherwise, update the local data without a revalidation
+        if (pastIssueOutput.data !== null) {
+          mutate(`/api/issues/`, pastIssueOutput.data, false);
+        }
+
+        // make another request to save the current issues
+        const currentIssueRes = await fetch(`/api/issues/`, {
+          method: 'POST',
+          body: JSON.stringify({
+            data: [...currentIssuesToSave],
+            updateType: 'current'
+            // TODO: maybe include the noteInfo in the request -- useful for parsing followups
+          }),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const currentIssueOutput = await currentIssueRes.json();
+
+        // if there's an error, throw an exception
+        if (!currentIssueRes.ok) {
+          throw new Error(
+            `Error from server when saving current issues: ${currentIssueOutput.error}`
+          );
+        }
+
+        // otherwise, update the local data without a revalidation
+        if (currentIssueOutput.data !== null) {
+          mutate(`/api/issues/`, currentIssueOutput.data, false);
+        }
+
+        // update noteInfo with the new list of issues
+        setNoteInfo((prevNoteInfo) => ({
+          ...prevNoteInfo,
+          pastIssues: pastIssueOutput.data.map((issue) => issue._id),
+          currentIssues: currentIssueOutput.data.map((issue) => issue._id)
+        }));
+
+        // if there's no error, clear the error state
+        setSaveError(null);
+      } catch (err) {
+        // if there's an error, set the error state
+        console.error('Error in saving IssueObjects: ', err);
+        setSaveError(err.message);
+      }
+
+      // NOTE: normally we'd reset the saving indicator here, but since this calls setNoteInfo and that has useEffect that also saves, we'll just have it reset there
+    }, 1000);
+
+    return () => clearTimeout(timeOutId);
+  }, [pastIssuesData, currentIssuesData]);
+
+  // // listen for changes in pastIssue or currentIssue state and do debounced saves to database
+  // useEffect(() => {
+  //   // don't save on first load
+  //   if (firstLoadPracticeGaps.current) {
+  //     firstLoadPracticeGaps.current = false;
+  //     return;
+  //   }
+
+  //   setIsSaving(true);
+  //   const timeOutId = setTimeout(async () => {
+  //     console.log('saving practice gaps');
+  //     // hold a last updated timestamp
+  //     const lastUpdated = new Date();
+
+  //     // // create a clone of the data to save
+  //     // let dataToSave = structuredClone({
+  //     //   project: noteInfo.project,
+  //     //   date: noteInfo.sigDate,
+  //     //   lastUpdated: lastUpdated,
+  //     //   sigName: noteInfo.sigName,
+  //     //   sigAbbreviation: noteInfo.sigAbbreviation,
+  //     //   context: noteInfo.context ?? [],
+  //     //   assessment: noteInfo.assessment ?? [],
+  //     //   plan: noteInfo.plan ?? [],
+  //     //   pastIssues: noteInfo.pastIssues ?? [],
+  //     //   currentIssues: noteInfo.currentIssues ?? [],
+  //     //   trackedPractices: noteInfo.trackedPractices ?? []
+  //     // });
+
+  //     // // make request to save the data to the database
+  //     // try {
+  //     //   const res = await fetch(`/api/soap/${noteInfo.id}`, {
+  //     //     method: 'PUT',
+  //     //     body: JSON.stringify(dataToSave),
+  //     //     headers: {
+  //     //       'Content-Type': 'application/json'
+  //     //     }
+  //     //   });
+  //     //   const output = await res.json();
+
+  //     //   // if there's an error, throw an exception
+  //     //   if (!res.ok) {
+  //     //     throw new Error(`Error from server: ${output.error}`);
+  //     //   }
+
+  //     //   // otherwise, update the local data without a revalidation
+  //     //   if (output.data !== null) {
+  //     //     mutate(`/api/soap/${noteInfo.id}`, output.data, false);
+  //     //   }
+
+  //     //   // update the last updated timestamp for the note
+  //     //   setNoteInfo((prevNoteInfo) => ({
+  //     //     ...prevNoteInfo,
+  //     //     lastUpdated: longDate(lastUpdated, true)
+  //     //   }));
+
+  //     //   // if there's no error, clear the error state
+  //     //   setSaveError(null);
+  //     // } catch (err) {
+  //     //   // if there's an error, set the error state
+  //     //   console.error('Error in saving CAP note: ', err);
+  //     //   setSaveError(err.message);
+  //     // }
+  // // NOTE: normally we'd reset the saving indicator here, but since this calls setNoteInfo and that has useEffect that also saves, we'll just have it reset there
+  //   }, 1000);
+  //   return () => clearTimeout(timeOutId);
+  // }, [practiceGapData]);
 
   // return the page
   return (
@@ -174,7 +365,7 @@ export default function CAPNote({
               <>
                 <CheckCircleIcon className="w-5 h-5 mr-0.5 text-green-600" />
                 <h2 className="font-semibold text-base text-green-600">
-                  Notes last saved on {noteInfo.lastUpdated}
+                  Notes last saved on {lastUpdated}
                 </h2>
               </>
             ) : (
@@ -200,7 +391,7 @@ export default function CAPNote({
                   <ExclamationCircleIcon className="w-5 h-5 mr-0.5 text-red-600" />
                 </Tooltip>
                 <h2 className="font-semibold text-base text-red-600">
-                  Error in saving notes (Last saved: {noteInfo.lastUpdated})
+                  Error in saving notes (Last saved: {lastUpdated})
                 </h2>
               </>
             ) : (

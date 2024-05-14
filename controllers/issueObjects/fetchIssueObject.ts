@@ -20,6 +20,6 @@ export const fetchIssueObjectsByIds = async (ids: string[]) => {
   return await IssueObjectModel.find({ _id: { $in: ids } }).sort({
     sig: 1,
     project: 1,
-    date: -1
+    date: 1
   });
 };
