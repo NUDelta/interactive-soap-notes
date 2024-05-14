@@ -18,6 +18,7 @@ import { longDate, serializeDates, shortDate } from '../../lib/helperFns';
 import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
 import { fetchIssueObjectsByIds } from '../../controllers/issueObjects/fetchIssueObject';
 import { fetchProjectGapObjectsByIds } from '../../controllers/practiceGapObjects/fetchPracticeGapObject';
+import { createNewTextEntryBlock } from '../../controllers/textEntryBlock/createNewTextEntryBlock';
 
 // components
 import LastWeekIssueCard from '../../components/LastWeekIssueCard';
@@ -30,14 +31,12 @@ import PracticeGapCard from '../../components/PracticeGapCard';
 import ArrowPathIcon from '@heroicons/react/24/outline/ArrowPathIcon';
 import CheckCircleIcon from '@heroicons/react/24/outline/CheckCircleIcon';
 import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
-import { createNewTextEntryBlock } from '../../controllers/textEntryBlock/createNewTextEntryBlock';
 
 export default function CAPNote({
   capNoteInfo,
   lastWeekIssues,
   currentWeekIssues,
-  practiceGaps,
-  autocompleteTriggersOptions
+  practiceGaps
 }): JSX.Element {
   // have state for cap note data
   const [noteInfo, setNoteInfo] = useState(capNoteInfo);
@@ -61,24 +60,7 @@ export default function CAPNote({
   // hold a ref that checks if first load
   const firstLoad = useRef(true);
 
-  const issueSections = [
-    {
-      name: 'context',
-      title: 'Context: what are you hearing or seeing that’s bothering you? '
-    },
-    {
-      name: 'assessment',
-      title: 'Assessment: what is happening?'
-    },
-    {
-      name: 'plan',
-      title: 'Plan: what do we do about it?'
-    }
-  ];
-
   // listen for changes in state and do debounced saves to database
-  // listen to changes in noteInfo and save changes
-  // this should only be adding new issues to its list (by ID)
   useEffect(() => {
     // don't save on first load
     if (firstLoad.current) {
@@ -88,56 +70,10 @@ export default function CAPNote({
 
     setIsSaving(true);
     const timeOutId = setTimeout(async () => {
-      // make request to save the data to the database
-      // TODO: write middleware that converts the raw text into whatever components we need for the backend (e.g., scripts that are triggered; follow-ups that are scheduled)
-      // console.log('saving to database', soapData);
-
-      // TODO: parse the follow-up scripts into a request
-      // TODO: check if active issue is already in Orchestration Scripts before recreating
-      // split into lines
-      // TODO: make sure OS rejects poorly formed scripts -- doing this already, but make sure the user knows the script was rejected
-      // TODO: show when the script would execute
-
       // hold a last updated timestamp
       const lastUpdated = new Date();
 
-      // TODO: needs to be fixed for the new practice agents
-      // check if any lines have a [practice] tag
-      // for (let practice of capData.practices) {
-      //   // check if current instance is not null
-      //   if (practice.currentInstance === null) {
-      //     continue;
-      //   }
-
-      //   // parse follow-ups plans for each current issue instance
-      //   let lines = practice.currentInstance.plan;
-      //   let scripts = lines.filter((line) => line.value.includes('[practice]'));
-
-      //   // create objects for each script
-      //   let output = [];
-      //   for (let script of scripts) {
-      //     // check if the script is fully written before adding it to output
-      //     let splitFollowUp = script.split('[practice]')[1].split(':');
-      //     if (
-      //       splitFollowUp.length < 2 ||
-      //       splitFollowUp[1].trim() === '[follow-up to send]' ||
-      //       splitFollowUp[1].trim() === ''
-      //     ) {
-      //       continue;
-      //     } else {
-      //       let [venue, strategy] = splitFollowUp;
-      //       output.push({
-      //         practice: strategy.trim(),
-      //         opportunity: venue.trim(),
-      //         person: 'students',
-      //         activeIssueId: ''
-      //       });
-      //     }
-      //   }
-
-      //   practice.currentInstance.practices = output;
-      // }
-
+      // create a clone of the data to save
       let dataToSave = structuredClone({
         project: noteInfo.project,
         date: noteInfo.sigDate,
@@ -781,8 +717,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       capNoteInfo: capNoteInfo,
       lastWeekIssues,
       currentWeekIssues,
-      practiceGaps,
-      autocompleteTriggersOptions
+      practiceGaps
     }
   };
 };
