@@ -90,21 +90,15 @@ export default function PracticeGapCard({
     );
     let sourcePractice = practiceGapsData[sourcePracticeIndex];
 
-    // find the target issue index
-    let targetIssueIndex = currentIssuesData.findIndex(
-      (issue) => issue.id === targetCurrentIssueId
-    );
-    let targetIssue = currentIssuesData[targetIssueIndex];
-
-    // add practice gap to the issue
-    setPracticeGapsData((prevData) => {
-      let newPracticeGapsData = [...prevData];
-      newPracticeGapsData[sourcePracticeIndex].prevIssues.push(targetIssue);
-      return newPracticeGapsData;
-    });
-
     setCurrentIssuesData((prevData) => {
+      // find the target issue index
       let newCurrentIssuesData = [...prevData];
+      let targetIssueIndex = newCurrentIssuesData.findIndex(
+        (issue) => issue.id === targetCurrentIssueId
+      );
+      let targetIssue = newCurrentIssuesData[targetIssueIndex];
+
+      // add practice gap to the issue
       newCurrentIssuesData[targetIssueIndex].assessment.push(
         createNewTextEntryBlock(
           'note',
@@ -114,6 +108,14 @@ export default function PracticeGapCard({
         )
       );
       newCurrentIssuesData[targetIssueIndex].lastUpdated = longDate(new Date());
+
+      // add issue to practice gap
+      setPracticeGapsData((prevData) => {
+        let newPracticeGapsData = [...prevData];
+        newPracticeGapsData[sourcePracticeIndex].prevIssues.push(targetIssue);
+        return newPracticeGapsData;
+      });
+
       return newCurrentIssuesData;
     });
   };
