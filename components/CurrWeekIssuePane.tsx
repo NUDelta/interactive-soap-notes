@@ -650,9 +650,11 @@ export default function CurrWeekIssuePane({
                       </div>
                       {showPracticeGaps !== 'Hide Gaps' ? (
                         <p className="italic text-xs mb-1">
-                          Drag a practice onto the assessment to add it to the
-                          current issue. Edit a practice gap by clicking on its
-                          title or description.
+                          As you assess what is happening, consider if there are
+                          general gaps in the student&apos;s self-regulation
+                          skills, beyond the current issue. Drag a practice onto
+                          the assessment to add it to the current issue. Edit a
+                          practice gap by clicking on its title or description.
                         </p>
                       ) : (
                         <p className="italic text-xs mb-1">
