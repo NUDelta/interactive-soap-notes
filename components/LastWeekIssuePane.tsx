@@ -1,29 +1,38 @@
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import { longDate } from '../lib/helperFns';
-
+import { htmlToText } from '../lib/helperFns';
 import NoteBlock from './NoteBlock';
-import mongoose from 'mongoose';
 import PracticeGapCard from './PracticeGapCard';
 import { useEffect, useState } from 'react';
+import LinkIcon from '@heroicons/react/24/outline/LinkIcon';
+import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
+import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
 
 export default function LastWeekIssuePane({
   issueId,
-  capData,
-  setCAPData,
-  capSections
+  noteInfo,
+  currentIssuesData,
+  setCurrentIssuesData,
+  pastIssuesData,
+  setPastIssuesData,
+  practiceGapData,
+  setPracticeGapData
 }): JSX.Element {
-  // get the cap context section
-  let section = capSections.find((section) => section.name === 'context');
+  // state variable for showing practice gaps
+  const [showPracticeGaps, setShowPracticeGaps] = useState(
+    'Show Gaps with Details'
+  );
 
   // get the issue from soapData with the given issueId
-  const issueIndex = capData.pastIssues.findIndex(
-    (issue) => issue.id === issueId
-  );
-  const selectedLastWeekIssue = capData.pastIssues[issueIndex];
+  const issueIndex = pastIssuesData.findIndex((issue) => issue.id === issueId);
+  const selectedLastWeekIssue = pastIssuesData[issueIndex];
   let priorInstances = [];
   if (selectedLastWeekIssue && selectedLastWeekIssue.priorInstances) {
     priorInstances = selectedLastWeekIssue.priorInstances;
   }
+
+  // get the practice gaps linked to the issue by checking each practice gap's prevIssues to see if issueId is in it
+  let relevantPracticeGaps = practiceGapData.filter((practiceGap) => {
+    return practiceGap.prevIssues.some((prevIssue) => prevIssue.id === issueId);
+  });
 
   // check if there are any assessments
   let nonEmptyAssessmentLength =
@@ -32,27 +41,6 @@ export default function LastWeekIssuePane({
           (line) => line.value.trim() !== ''
         ).length
       : 0;
-
-  let relevantPractices = capData.trackedPractices.filter((practice) => {
-    return (
-      !practice.practiceInactive &&
-      !practice.practiceArchived &&
-      selectedLastWeekIssue['assessment'].some((assessment) => {
-        return assessment.value
-          .trim()
-          .toLowerCase()
-          .replace(/&nbsp;/g, '')
-          .replace(/&amp;/g, '&')
-          .includes(
-            practice.title
-              .trim()
-              .toLowerCase()
-              .replace(/&nbsp;/g, '')
-              .replace(/&amp;/g, '&')
-          );
-      })
-    );
-  });
 
   // compute and store practice outcome for the last
   const [practiceOutcome, setPracticeOutcome] = useState(null);
@@ -108,20 +96,130 @@ export default function LastWeekIssuePane({
       setPracticeOutcome(updatedPracticeOutcome);
     };
 
+    const getOrgObjects = async (practiceOutcome, projectName) => {
+      let sprintData = null;
+      try {
+        const sprintDataRes = await fetch('/api/studio-api', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            projectName: projectName,
+            noteDate: selectedLastWeekIssue.date
+          })
+        });
+
+        // if the status is not 200, throw an error
+        if (sprintDataRes.status !== 200) {
+          throw new Error('Error in fetching sprint data');
+        }
+
+        sprintData = (await sprintDataRes.json()).data;
+      } catch (error) {
+        console.error('Error in fetching org objects', error);
+      }
+
+      // attach org objects to each practice outcome
+      let newPracticeOutcome = {
+        practices: practiceOutcome,
+        projectData: sprintData === null ? null : sprintData.projectData,
+        sprintData: sprintData === null ? null : sprintData.processData,
+        currentSprint: null
+      };
+
+      // get the current sprint if sprintData and projectData are not null
+      if (
+        newPracticeOutcome.sprintData !== null &&
+        newPracticeOutcome.projectData !== null
+      ) {
+        let currentSprint =
+          newPracticeOutcome.projectData.sprint_log.sprints.find(
+            (sprint) => sprint.name === newPracticeOutcome.sprintData.name
+          );
+        newPracticeOutcome.currentSprint = currentSprint;
+      }
+
+      console.log('newPracticeOutcome', newPracticeOutcome);
+
+      setPracticeOutcome(newPracticeOutcome);
+    };
+
+    // TODO: this should all be in the parsed practice model so it doesn't have to be computed
+    // get practice type
+    const getPracticeType = (practice) => {
+      if (practice.includes('[reflect]')) {
+        return {
+          practice: practice.replace('[reflect]', ''),
+          introText: 'Reflect on your own:',
+          type: 'reflect'
+        };
+      } else if (practice.includes('[plan]')) {
+        return {
+          practice: practice.replace('[plan]', ''),
+          introText: 'Update your :',
+          type: 'plan'
+        };
+      } else if (practice.includes('[self-work]')) {
+        return {
+          practice: practice.replace('[self-work]', ''),
+          introText: 'On your own, try to:',
+          type: 'self-work'
+        };
+      } else if (practice.includes('[help]')) {
+        if (practice.includes('mysore')) {
+          return {
+            practice: practice.replace('[help]', ''),
+            introText: 'At Mysore:',
+            type: 'help'
+          };
+        } else if (practice.includes('pair research')) {
+          return {
+            practice: practice.replace('[help]', ''),
+            introText: 'At Pair Research:',
+            type: 'help'
+          };
+        }
+
+        // TODO: handle multiple people
+
+        return {
+          practice: practice.replace('[help]', ''),
+          introText: 'Get help on:',
+          type: 'help'
+        };
+      }
+
+      return null;
+    };
+
     // get the last prior instance, if provided
     // prior instances are ordered by date, so the first one is the most recent
     let practiceOutcome = selectedLastWeekIssue.followUps
-      .filter((followup) => {
-        return !followup.practice.includes('[plan]');
-      })
       .map((followUp) => {
+        // if didHappen is false, show the first set of reflections; else, show the second set
+        let didHappen = followUp.outcome.didHappen;
+        let relevantReflections = didHappen
+          ? followUp.outcome.reflections[1]
+          : followUp.outcome.reflections[0];
+
+        // practice type info
+        let parsedPractice = getPracticeType(followUp.practice);
+        if (parsedPractice === null) {
+          console.error('Invalid practice type', followUp.practice);
+          return null;
+        }
+
         return {
-          practice: followUp.practice,
+          practice: htmlToText(parsedPractice.practice).trim(),
+          introText: parsedPractice.introText.trim(),
+          type: parsedPractice.type,
           didHappen: followUp.outcome.didHappen,
           deliverable: followUp.practice.includes('[reflect]')
             ? null
             : followUp.outcome.deliverableLink,
-          reflections: followUp.outcome.reflections
+          deliverableNotes: followUp.outcome.deliverableNotes,
+          reflections: relevantReflections
             .filter((reflection) => {
               return (
                 !reflection.prompt.includes(
@@ -136,19 +234,21 @@ export default function LastWeekIssuePane({
               };
             })
         };
-      });
+      })
+      .filter((followup) => followup !== null);
 
-    getYellKeysForAllDeliverables(practiceOutcome);
-  }, [selectedLastWeekIssue.followUps]);
+    // getYellKeysForAllDeliverables(practiceOutcome);
+    getOrgObjects(practiceOutcome, noteInfo.project);
+  }, [selectedLastWeekIssue, noteInfo]);
 
   return (
     <div className="mb-5">
       {selectedLastWeekIssue && (
         <>
-          <div className="flex flex-wrap w-full overflow-y-scroll overscroll-y-auto">
+          <div className="flex flex-wrap w-full">
             {/* Split Pane in half with assesments on 1/3 */}
             <div className="w-full flex flex-row">
-              <div className="w-1/3 flex flex-col mr-6">
+              <div className="w-1/4 flex flex-col mr-6">
                 <h1 className="font-bold text-base">Assessments for Issue</h1>
                 {/* Assessments on Last Week's Issues */}
                 <div className="mb-2">
@@ -157,7 +257,7 @@ export default function LastWeekIssuePane({
                       <>
                         {line.value.trim() !== '' && (
                           <NoteBlock
-                            key={line.id}
+                            key={`note-block-from-lastweekpane-${line.id}`}
                             noteSection={'assessment'}
                             noteId={line.id}
                             noteContent={line}
@@ -179,54 +279,88 @@ export default function LastWeekIssuePane({
                       </>
                     ))}
                   {nonEmptyAssessmentLength == 0 && (
-                    <div className="italic">
-                      No assessments written for issue
+                    <div className="text-xs italic">
+                      No assessments written for issue.
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Show practice gaps linked to issue */}
-              <div className="w-full">
-                <div>
+              <div className="w-3/4">
+                <div className="flex flex-row items-center">
                   <h1 className="font-bold text-base">
-                    Practice Gaps for Issue
+                    Self-Regulation Gaps for Issue
                   </h1>
+                  {/* Toggle for details */}
+                  {relevantPracticeGaps.length !== 0 && (
+                    <ul className="flex flex-wrap text-xs font-medium text-center text-gray-500 dark:text-gray-400 ml-2">
+                      <li
+                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                        onClick={() => {
+                          setShowPracticeGaps('Hide Gaps');
+                        }}
+                      >
+                        Hide Gaps
+                      </li>
+                      <li
+                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                        onClick={() => {
+                          setShowPracticeGaps('Show Gaps');
+                        }}
+                      >
+                        Show Gaps
+                      </li>
+                      <li
+                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                        onClick={() => {
+                          setShowPracticeGaps('Show Gaps with Details');
+                        }}
+                      >
+                        Show Gaps with Details
+                      </li>
+                    </ul>
+                  )}
                 </div>
 
+                {/* Self-Regulation Gaps for Issue */}
                 <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
-                  {relevantPractices.length !== 0 && (
-                    <>
-                      {/* TODO: NOT EDITABLE */}
-                      {relevantPractices.map((practice) => (
-                        <PracticeGapCard
-                          key={`issue-card-${practice.id}`}
-                          issueId={practice.id}
-                          title={practice.title}
-                          description={practice.description}
-                          lastUpdated={practice.lastUpdated}
-                          priorInstances={practice.prevIssues}
-                          issueIsResolved={false}
-                          showPracticeGaps={false}
-                          onResolved={(e) => {
-                            return;
-                          }}
-                          onArchive={(e) => {
-                            return;
-                          }}
-                          onEdit={(e) => {
-                            return;
-                          }}
-                          onDrag={(e) => {
-                            return;
-                          }}
-                        />
-                      ))}
-                    </>
-                  )}
-                  {relevantPractices.length === 0 && (
-                    <div className="italic">
-                      No practice gaps linked to this issue.
+                  {/* Show gaps if they are there and not hidden */}
+                  {relevantPracticeGaps.length > 0 &&
+                    showPracticeGaps !== 'Hide Gaps' && (
+                      <>
+                        {relevantPracticeGaps.map((practiceGap) => (
+                          <PracticeGapCard
+                            key={`issue-card-${practiceGap.id}`}
+                            project={noteInfo.project}
+                            sig={noteInfo.sigName}
+                            date={noteInfo.sigDate}
+                            practiceGapId={practiceGap.id}
+                            practiceGap={practiceGap}
+                            practiceGapsData={practiceGapData}
+                            setPracticeGapsData={setPracticeGapData}
+                            currentIssuesData={currentIssuesData}
+                            setCurrentIssuesData={setCurrentIssuesData}
+                            showPracticeGaps={showPracticeGaps}
+                            setShowPracticeGaps={setShowPracticeGaps}
+                            className="flex-none basis-1/3"
+                          />
+                        ))}
+                      </>
+                    )}
+
+                  {/* Show gaps if gaps there, but hidden */}
+                  {relevantPracticeGaps.length > 0 &&
+                    showPracticeGaps === 'Hide Gaps' && (
+                      <div className="text-xs italic">
+                        Click above to show self-regulation gaps.
+                      </div>
+                    )}
+
+                  {/* No gaps to show */}
+                  {relevantPracticeGaps.length === 0 && (
+                    <div className="text-xs italic">
+                      No self-regulation gaps linked to this issue.
                     </div>
                   )}
                 </div>
@@ -235,50 +369,194 @@ export default function LastWeekIssuePane({
 
             {/* Follow-up objects on the remaining */}
             <div className="w-full">
-              <h1 className="font-bold text-base">Follow-Up Outcomes</h1>
+              <div className="mb-1">
+                <h1 className="font-bold text-base">Follow-Up Outcomes</h1>
+                <h2 className="text-sm italic">
+                  Text in{' '}
+                  <span className="text-green-600 font-semibold">green</span>{' '}
+                  are responses from the students(s). Text in{' '}
+                  <span className="text-rose-600 font-semibold">red</span>{' '}
+                  indicates missing reflections or documents.
+                </h2>
+              </div>
               {/* Show practice follow-ups */}
               {!isLoading &&
               practiceOutcome !== null &&
-              practiceOutcome.length > 0 ? (
-                <div className="flex flex-row gap-2">
-                  {practiceOutcome.map((practice) => {
-                    return (
-                      <div
-                        key={practice.practice}
-                        className="w-full mb-4 p-2 border"
-                      >
-                        <h2 className="text-sm font-semibold border-b border-black ">
-                          {practice.practice}
-                        </h2>
+              practiceOutcome.practices !== null &&
+              practiceOutcome.practices.length > 0 ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {/* show plan follow-ups as a single card */}
+                  {practiceOutcome.practices.filter((practice) => {
+                    return practice.type === 'plan';
+                  }).length > 0 && (
+                    <div
+                      key="plan-follow-up"
+                      className="w-full p-2 border shadow"
+                    >
+                      {/* Plan Updating Practices */}
+                      <div className="mb-4">
+                        <div className="flex flex-row items-center text-xs font-normal border-b border-black">
+                          <div className="text-sm font-semibold mr-1">
+                            Plan Updating Practices
+                          </div>
+                          <LinkIcon className="h-4 stroke-2 mr-1 text-blue-600" />
+                          <a
+                            href={practiceOutcome.currentSprint.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            Sprint Log
+                          </a>
+                        </div>
 
-                        {/* { Did the practice happen? } */}
                         <div className="flex flex-wrap">
-                          <div className="w-full">
-                            <p className="text-sm font-semibold">
-                              Did this happen?{' '}
+                          {practiceOutcome.practices
+                            .filter((practice) => {
+                              return practice.type === 'plan';
+                            })
+                            .reduce((acc, practice) => {
+                              return [...acc, practice.practice];
+                            }, [])
+                            .map((practice) => {
+                              return (
+                                <div key={practice} className="w-full">
+                                  <p className="text-xs font-base">
+                                    - {practice}
+                                  </p>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
+
+                      {/* Stories and Deliverables */}
+                      <div className="w-full flex flex-col mb-2">
+                        <div className="w-full grid grid-cols-2 text-sm border-b border-black">
+                          <div>Prior Sprint Stories</div>
+                          <div>Prior Sprint Deliverables</div>
+                        </div>
+                        {practiceOutcome.currentSprint !== null && (
+                          <>
+                            {practiceOutcome.currentSprint.stories.map(
+                              (story, index) => {
+                                return (
+                                  <div
+                                    key={`sprint-story-${index}`}
+                                    className="w-full grid grid-cols-2 text-xs mb-2 leading-snug"
+                                  >
+                                    <div>{story.description}</div>
+                                    <div
+                                      className={`${story.deliverables === null && 'text-rose-600'}`}
+                                    >
+                                      {story.deliverables === null
+                                        ? 'No deliverable'
+                                        : story.deliverables}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      {/* Points */}
+                      <div className="w-full flex flex-col">
+                        <div className="w-full grid grid-cols-3 text-sm border-b border-black">
+                          <div>Student</div>
+                          <div>Points Committed</div>
+                          <div>Hours Spent</div>
+                        </div>
+                        {practiceOutcome.currentSprint !== null && (
+                          <>
+                            {practiceOutcome.currentSprint.points
+                              .filter((pointInfo) => {
+                                return pointInfo.name.trim() !== '';
+                              })
+                              .map((student, index) => {
+                                return (
+                                  <div
+                                    key={`sprint-points-${index}`}
+                                    className="w-full grid grid-cols-3 text-xs mb-2 leading-snug"
+                                  >
+                                    <div>{student.name}</div>
+                                    <div>
+                                      {Math.round(
+                                        student.pointsCommitted.total * 2
+                                      ) / 2}
+                                    </div>
+                                    <div>
+                                      {Math.round(
+                                        student.hoursSpent.total * 2
+                                      ) / 2}
+                                    </div>
+                                    {/* <div
+                                      className={`${student.deliverables === null && 'text-rose-600'}`}
+                                    >
+                                      {student.deliverables === null
+                                        ? 'No deliverable'
+                                        : student.deliverables}
+                                    </div> */}
+                                  </div>
+                                );
+                              })}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* show non plan follow-ups */}
+                  {practiceOutcome.practices
+                    .filter((practice) => {
+                      return practice.type !== 'plan';
+                    })
+                    .map((practice) => {
+                      return (
+                        <div
+                          key={practice.practice}
+                          className="w-full p-2 border shadow"
+                        >
+                          <h2 className="text-xs border-b border-black ">
+                            <span className="font-semibold">
+                              {practice.type}:
+                            </span>{' '}
+                            {practice.practice}
+                          </h2>
+
+                          {/* { Did the practice happen? } */}
+                          <div className="flex flex-wrap">
+                            <div className="w-full flex flex-row items-center text-xs font-normal">
+                              {practice.didHappen ? (
+                                <CheckBadgeIcon className="h-4 stroke-2 mr-1 text-green-600" />
+                              ) : (
+                                <ExclamationCircleIcon className="h-4 stroke-2 mr-1 text-rose-600" />
+                              )}
+
                               <span
                                 className={`font-normal ${practice.didHappen ? 'text-green-600' : 'text-rose-600'}`}
                               >
-                                {practice.didHappen ? 'Yes' : 'No'}
+                                {practice.didHappen
+                                  ? 'Practice Attempted'
+                                  : 'Practice Not Attempted'}
                               </span>
-                            </p>
-                          </div>
 
-                          {/* { Link to deliverable } */}
-                          {practice.deliverable !== null ? (
-                            <div className="w-full mt-1">
-                              <p className="text-sm font-semibold">
-                                {practice.deliverable !== '' ? (
-                                  <>
-                                    <a
-                                      href={practice.deliverable}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-blue-600 underline font-normal"
-                                    >
-                                      Link to deliverable
-                                    </a>
-                                    {practice.yellkey == null ? (
+                              {/* { Link to deliverable } */}
+                              {practice.deliverable !== null && (
+                                <div className="mx-auto">
+                                  {practice.deliverable !== '' ? (
+                                    <div className="flex flex-row items-center text-xs font-normal">
+                                      <LinkIcon className="h-4 stroke-2 mr-1 text-green-600" />
+                                      <a
+                                        href={practice.deliverable}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-blue-600 underline"
+                                      >
+                                        Deliverable{' '}
+                                      </a>
+                                      {/* {practice.yellkey == null ? (
                                       <></>
                                     ) : (
                                       <span className="font-semibold">
@@ -289,382 +567,77 @@ export default function LastWeekIssuePane({
                                         </span>
                                         {`)`}
                                       </span>
-                                    )}
-                                  </>
-                                ) : (
-                                  <span className="font-normal text-rose-600">
-                                    Deliverable not linked
-                                  </span>
-                                )}
-                              </p>
+                                    )} */}
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-row items-center text-rose-600 text-xs font-normal">
+                                      <LinkIcon className="h-4 stroke-2 mr-1" />
+                                      No deliverable link
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <></>
-                          )}
 
-                          {/* { Reflections } */}
-                          {practice.reflections.length > 0 ? (
-                            <div className="w-full mt-1">
-                              <h3 className="text-sm font-bold">
-                                Reflections:
-                              </h3>
-                              {practice.reflections.map((reflection) => {
-                                return (
-                                  <div
-                                    key={reflection.prompt}
-                                    className="w-full mb-2"
-                                  >
-                                    <h4 className="text-sm font-medium">
-                                      {reflection.prompt}
-                                    </h4>
-                                    {reflection.response === '' ? (
-                                      <p className="text-sm text-rose-600">
-                                        No response from student
-                                      </p>
-                                    ) : (
-                                      <p className="text-sm text-green-600">
-                                        {reflection.response}
-                                      </p>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <></>
-                          )}
+                            {/* Student's deliverable notes */}
+                            {practice.deliverableNotes !== null && (
+                              <div className="mt-0.5 text-xs">
+                                <div className="">
+                                  Student notes on deliverable:{' '}
+                                </div>
+                                <div className="">
+                                  <span className="text-green-600">
+                                    {practice.deliverableNotes}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* { Reflections } */}
+                            {practice.reflections.length > 0 ? (
+                              <div className="w-full mt-1">
+                                <h3 className="text-xs font-bold border-b">
+                                  Reflections
+                                </h3>
+                                {practice.reflections.map((reflection) => {
+                                  return (
+                                    <div
+                                      key={reflection.prompt}
+                                      className="w-full mb-2 text-xs"
+                                    >
+                                      <h4 className="font-medium">
+                                        {reflection.prompt}
+                                      </h4>
+                                      {reflection.response === '' ? (
+                                        <p className="text-rose-600">
+                                          No response from student
+                                        </p>
+                                      ) : (
+                                        <p className="text-green-600">
+                                          {reflection.response}
+                                        </p>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <></>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                </div>
+              ) : isLoading ? (
+                <div className="text-xs italic text-blue-400">
+                  Loading follow-up outcomes...
                 </div>
               ) : (
-                <div className="italic">No follow-up outcomes to show.</div>
-              )}
-            </div>
-
-            {/* Context notetaking space */}
-            <div className="w-full mt-4">
-              <div className="mb-1">
-                <h1 className="font-bold text-base">{section.title}</h1>
-                <p className="text-xs italic">
-                  Note anything from the issue follow-ups above. Notes taken
-                  here will be stored in the Scratch Space.
-                </p>
-              </div>
-
-              <div className="flex">
-                <div className="flex-auto">
-                  {capData[section.name].map((line) => (
-                    <NoteBlock
-                      key={line.id}
-                      noteSection={section.name}
-                      noteId={line.id}
-                      noteContent={line}
-                      onKeyDown={(e) => {
-                        // stop default behavior of enter key if enter + shift OR shift + backspace are pressed
-                        if (
-                          (e.key === 'Enter' && e.shiftKey) ||
-                          ((e.key === 'Backspace' || e.key === 'Delete') &&
-                            e.shiftKey)
-                        ) {
-                          e.preventDefault();
-                        }
-                      }}
-                      onKeyUp={(e) => {
-                        // store id of new line so it can be focused on
-                        let newLineId;
-
-                        // check for shift-enter to add a new line
-                        if (e.key === 'Enter' && e.shiftKey) {
-                          // add new line underneath the current line
-                          setCAPData((prevCAPData) => {
-                            let newCAPData = { ...prevCAPData };
-                            let lineIndex = newCAPData[section.name].findIndex(
-                              (l) => l.id === line.id
-                            );
-
-                            // check if the current line is empty
-                            if (
-                              lineIndex ===
-                              newCAPData[section.name].length - 1
-                            ) {
-                              // don't add a new line if the current line is empty
-                              if (
-                                newCAPData[section.name][
-                                  lineIndex
-                                ].value.trim() === ''
-                              ) {
-                                newLineId =
-                                  newCAPData[section.name][lineIndex].id;
-                                return newCAPData;
-                              }
-                            }
-                            // check if the next line is empty
-                            else if (
-                              lineIndex + 1 <
-                              newCAPData[section.name].length
-                            ) {
-                              // don't add a new line if the next line is already an empty block
-                              if (
-                                newCAPData[section.name][
-                                  lineIndex + 1
-                                ].value.trim() === ''
-                              ) {
-                                newLineId =
-                                  newCAPData[section.name][lineIndex + 1].id;
-                                return newCAPData;
-                              }
-                            }
-
-                            // otherwise, add to the list
-                            newLineId =
-                              new mongoose.Types.ObjectId().toString();
-                            newCAPData[section.name].splice(lineIndex + 1, 0, {
-                              id: newLineId,
-                              type: 'note',
-                              context: [],
-                              value: ''
-                            });
-                            return newCAPData;
-                          });
-
-                          // TODO: 04-23-24 this causes a race condition where the new line is not yet rendered
-                          // could be fixed with a callback: https://github.com/the-road-to-learn-react/use-state-with-callback#usage
-                          // set focus to added line if not undefined
-                          // if (newLineId !== undefined) {
-                          //   document.getElementById(newLineId).focus();
-                          // }
-                        } else if (
-                          (e.key === 'Backspace' || e.key === 'Delete') &&
-                          e.shiftKey
-                        ) {
-                          // remove line
-                          // add new line underneath the current line
-                          setCAPData((prevCAPData) => {
-                            let newCAPData = { ...prevCAPData };
-
-                            // find that line that was edited in the current instance of the practice
-                            let lineIndex = newCAPData[section.name].findIndex(
-                              (l) => l.id === line.id
-                            );
-
-                            // remove line
-                            newCAPData[section.name] = newCAPData[
-                              section.name
-                            ].filter((l) => l.id !== line.id);
-
-                            // if the section is empty, add a new empty block
-                            if (newCAPData[section.name].length === 0) {
-                              newCAPData[section.name].push({
-                                id: new mongoose.Types.ObjectId().toString(),
-                                type: 'note',
-                                context: [],
-                                value: ''
-                              });
-                            }
-
-                            return newCAPData;
-                          });
-                        }
-                      }}
-                      onChange={(edits) => {
-                        // before attempting a save, check if the line is identical to the previous line (both trimmed)
-                        edits = edits.trim();
-                        if (edits === line.value.trim()) {
-                          return;
-                        }
-
-                        // save edits to the correct line
-                        setCAPData((prevCAPData) => {
-                          // get the current data and correct line that was changed
-                          let newCAPData = { ...prevCAPData };
-                          let lineIndex = newCAPData[section.name].findIndex(
-                            (l) => l.id === line.id
-                          );
-
-                          newCAPData[section.name][lineIndex].value = edits;
-
-                          return newCAPData;
-                        });
-                      }}
-                      onDragToIssue={(issueId, noteSection, noteBlock) => {
-                        // check that the content is not empty before allowing drag
-                        if (noteBlock.value.trim() === '') {
-                          return;
-                        }
-
-                        // map note content into the correct section
-                        let editsToIssue = {
-                          context:
-                            noteSection === 'context'
-                              ? [noteBlock]
-                              : [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ],
-                          assessment:
-                            noteSection === 'assessment'
-                              ? [noteBlock]
-                              : [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ],
-                          plan:
-                            noteSection === 'plan'
-                              ? [noteBlock]
-                              : [
-                                  {
-                                    id: new mongoose.Types.ObjectId().toString(),
-                                    type: 'note',
-                                    context: [],
-                                    value: ''
-                                  }
-                                ]
-                        };
-
-                        // create a new issue add issue
-                        if (
-                          issueId === 'add-practice' ||
-                          issueId === 'this-weeks-notes'
-                        ) {
-                          // create a new issue
-                          let newIssue = {
-                            id: new mongoose.Types.ObjectId().toString(),
-                            title: noteBlock.value
-                              .trim()
-                              .replace(/<\/?[^>]+(>|$)/g, ''),
-                            date: longDate(new Date(noteInfo.sigDate)),
-                            lastUpdated: longDate(new Date()),
-                            context: editsToIssue['context'],
-                            assessment: editsToIssue['assessment'],
-                            plan: editsToIssue['plan'],
-                            priorInstances: []
-                          };
-
-                          setCAPData((prevCapData) => {
-                            let newCAPData = { ...prevCapData };
-                            newCAPData.currentIssues.push(newIssue);
-                            return newCAPData;
-                          });
-
-                          issueId = newIssue.id;
-                        }
-                        // otherwise, add data to the practice
-                        else {
-                          // find the practice
-                          let issueIndex = capData.currentIssues.findIndex(
-                            (practice) => practice.id === issueId
-                          );
-                          let issueInstance = capData.currentIssues[issueIndex];
-
-                          // create a new issue instance for the issue if it doesn't exist
-                          if (issueInstance === null) {
-                            // if the current instance doesn't exist, intialize it with the additions from the notetaking space
-                            issueInstance = {
-                              id: new mongoose.Types.ObjectId().toString(),
-                              date: longDate(new Date(noteInfo.sigDate)),
-                              lastUpdated: longDate(new Date()),
-                              context: editsToIssue['context'],
-                              assessment: editsToIssue['summary'],
-                              plan: editsToIssue['plan'],
-                              followUps: [],
-                              priorInstances: []
-                            };
-                          } else {
-                            // if the current instance exists, check if the new additions are empty
-                            if (
-                              issueInstance['context'].length === 1 &&
-                              issueInstance['context'][0].value === ''
-                            ) {
-                              issueInstance.context = editsToIssue['context'];
-                            } else {
-                              // otherwise, add the additions to the current instance
-                              issueInstance.context =
-                                issueInstance.context.concat(
-                                  editsToIssue['context']
-                                );
-                            }
-
-                            // repeat for assessment
-                            if (
-                              issueInstance['assessment'].length === 1 &&
-                              issueInstance['assessment'][0].value === ''
-                            ) {
-                              issueInstance.assessment =
-                                editsToIssue['assessment'];
-                            } else {
-                              // otherwise, add the additions to the current instance
-                              issueInstance.assessment =
-                                issueInstance.assessment.concat(
-                                  editsToIssue['assessment']
-                                );
-                            }
-
-                            // repeat for plan
-                            if (
-                              issueInstance['plan'].length === 1 &&
-                              issueInstance['plan'][0].value === ''
-                            ) {
-                              issueInstance.plan = editsToIssue['plan'];
-                            } else {
-                              // otherwise, add the additions to the current instance
-                              issueInstance.plan = issueInstance.plan.concat(
-                                editsToIssue['plan']
-                              );
-                            }
-
-                            // update the last updated date
-                            issueInstance.lastUpdated = longDate(new Date());
-                          }
-
-                          // update state variable
-                          setCAPData((prevCAPData) => {
-                            let newCAPData = { ...prevCAPData };
-                            newCAPData.currentIssues[issueIndex] =
-                              issueInstance;
-                            newCAPData.currentIssues[issueIndex].lastUpdated =
-                              longDate(new Date());
-
-                            return newCAPData;
-                          });
-
-                          issueId = capData.currentIssues[issueIndex].id;
-                        }
-
-                        // remove note block that was dragged into the issue
-                        setCAPData((prevCAPData) => {
-                          let newSoapData = { ...prevCAPData };
-
-                          // remove the note block from the edited section
-                          newSoapData[noteSection] = newSoapData[
-                            noteSection
-                          ].filter((line) => line.id !== noteBlock.id);
-
-                          // if the section is empty, add a new empty block
-                          if (newSoapData[noteSection].length === 0) {
-                            newSoapData[noteSection].push({
-                              id: new mongoose.Types.ObjectId().toString(),
-                              type: 'note',
-                              context: [],
-                              value: ''
-                            });
-                          }
-                          return newSoapData;
-                        });
-                      }}
-                    />
-                  ))}
+                <div className="text-xs italic">
+                  No follow-up outcomes to show.
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </>

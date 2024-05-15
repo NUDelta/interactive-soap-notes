@@ -4,9 +4,13 @@ export interface TextEntryStruct {
   type: 'note' | 'script' | 'follow-up';
   context: ContextObj[];
   value: string;
+  html: string;
 }
 
-interface ContextObj {
+export interface ContextObj {
+  contextType: [
+    'issue' | 'practice' | 'follow-up' | 'note' | 'script' | 'other'
+  ];
   description: string;
   value: string;
 }
@@ -19,6 +23,11 @@ export const TextEntrySchema = new mongoose.Schema<TextEntryStruct>({
   context: {
     type: [
       {
+        contextType: {
+          type: String,
+          enum: ['issue', 'practice', 'follow-up', 'note', 'script', 'other'],
+          default: 'other'
+        },
         description: String,
         value: String
       }
@@ -26,6 +35,10 @@ export const TextEntrySchema = new mongoose.Schema<TextEntryStruct>({
     required: true
   },
   value: {
+    type: String,
+    required: true
+  },
+  html: {
     type: String,
     required: true
   }

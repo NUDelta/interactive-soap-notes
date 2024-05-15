@@ -7,18 +7,20 @@ export interface FollowUpObjectStruct {
     practice: string;
     opportunity: string;
     person: string;
-    reflectionQuestions: string[];
+    reflectionQuestions: ReflectionQuestion[];
   };
   outcome: {
     didHappen: boolean;
     deliverableLink: string | null;
-    reflection: FollowUpReflection[];
+    deliverableNotes: string | null;
+    reflection: [FollowUpReflection[], FollowUpReflection[]]; // false for didHappen corresponds to questions in to 0, true to 1
   };
 }
 
 interface ReflectionQuestion {
   prompt: string;
   responseType: string;
+  forDidPractice: boolean;
 }
 
 interface FollowUpReflection {
@@ -34,6 +36,11 @@ const ReflectionQuestionSchema = new mongoose.Schema<ReflectionQuestion>({
   responseType: {
     type: String,
     required: true
+  },
+  forDidPractice: {
+    type: Boolean,
+    required: true,
+    default: true
   }
 });
 
@@ -76,10 +83,20 @@ const PracticeOutcomeSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  reflections: {
-    type: [FollowUpReflectionSchema],
-    required: true
-  }
+  deliverableNotes: {
+    type: String,
+    required: false
+  },
+  reflections: [
+    {
+      type: [FollowUpReflectionSchema],
+      required: true
+    },
+    {
+      type: [FollowUpReflectionSchema],
+      required: true
+    }
+  ]
 });
 
 export const FollowUpObjectSchema = new mongoose.Schema({

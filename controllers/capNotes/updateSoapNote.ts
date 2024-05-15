@@ -1,12 +1,16 @@
 import dbConnect from '../../lib/dbConnect';
-import { shortDate } from '../../lib/helperFns';
 import CAPNoteModel from '../../models/CAPNoteModel';
-import EditLogModel from '../../models/EditLogModel';
+import {
+  createEditLogEntry,
+  createEditLogObject
+} from '../editLog/createEditLogEntry';
 
 export const updateCAPNote = async (id: string, capNote: object) => {
   let capNoteUpdatedContent = parseCAPNotes(capNote);
 
+  // get the original CAP note
   await dbConnect();
+  let originalCAPNote = await CAPNoteModel.findById(id);
   let updatedCAPNote = await CAPNoteModel.findByIdAndUpdate(
     id,
     capNoteUpdatedContent,
@@ -17,12 +21,30 @@ export const updateCAPNote = async (id: string, capNote: object) => {
   );
 
   // add to the edit log
-  let newEditLog = new EditLogModel({
-    date: new Date(),
-    note: `${updatedCAPNote.project} | ${shortDate(updatedCAPNote.date)}`,
-    edits: JSON.stringify(capNote)
-  });
-  await newEditLog.save();
+  let newEditLogObject;
+  if (originalCAPNote === null) {
+    newEditLogObject = createEditLogObject(
+      updatedCAPNote.lastUpdated,
+      updatedCAPNote.project,
+      updatedCAPNote.sigName,
+      'CAPNote',
+      id,
+      originalCAPNote,
+      updatedCAPNote
+    );
+  } else {
+    newEditLogObject = createEditLogObject(
+      updatedCAPNote.lastUpdated,
+      updatedCAPNote.project,
+      updatedCAPNote.sigName,
+      'CAPNote',
+      id,
+      originalCAPNote,
+      updatedCAPNote
+    );
+  }
+
+  await createEditLogEntry(newEditLogObject);
 
   return updatedCAPNote;
 };

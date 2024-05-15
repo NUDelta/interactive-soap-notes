@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { TextEntrySchema, TextEntryStruct } from './TextEntryModel';
 import {
   FollowUpObjectStruct,
@@ -8,12 +8,17 @@ import {
 export interface IssueObjectStruct {
   title: string;
   date: Date;
+  project: string;
+  sig: string;
   lastUpdated: Date;
+  wasDeleted: boolean;
+  wasMerged: boolean;
+  mergeTarget: Types.ObjectId | null;
   context: TextEntryStruct[];
   assessment: TextEntryStruct[];
   plan: TextEntryStruct[];
   followUps: FollowUpObjectStruct[];
-  priorInstances: IssueObjectStruct[];
+  priorInstances: string[];
 }
 
 export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
@@ -25,9 +30,32 @@ export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
     type: Date,
     required: true
   },
+  project: {
+    type: String,
+    required: true
+  },
+  sig: {
+    type: String,
+    required: true
+  },
   lastUpdated: {
     type: Date,
     required: true
+  },
+  wasDeleted: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  wasMerged: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  mergeTarget: {
+    type: mongoose.Schema.Types.ObjectId || null,
+    ref: 'IssueObject',
+    default: null
   },
   context: {
     type: [TextEntrySchema],
@@ -47,3 +75,7 @@ export const IssueObjectSchema = new mongoose.Schema<IssueObjectStruct>({
     default: []
   }
 });
+
+export default (mongoose.models
+  .IssueObject as mongoose.Model<IssueObjectStruct>) ||
+  mongoose.model('IssueObject', IssueObjectSchema);

@@ -6,6 +6,7 @@ import { useDrag } from 'react-dnd';
 import { useRef } from 'react';
 import ContentEditable from 'react-contenteditable';
 import { DragTypes } from '../controllers/draggable/dragTypes';
+import { htmlToText } from '../lib/helperFns';
 
 // TODO: add a note section and onDragToIssue function
 export default function NoteBlock({
@@ -179,7 +180,8 @@ export default function NoteBlock({
     <>
       <div
         ref={drag}
-        className="border flex flex-col items-left align-middle mb-2 w-full"
+        className="border shadow flex flex-col items-left align-middle mb-2 w-full"
+        key={`note-block-${noteId}`}
       >
         <div className="flex flex-row">
           {/* drag handle on left side */}
@@ -213,38 +215,13 @@ export default function NoteBlock({
               blockContent.current = e.target.value;
 
               // save note changes
-              onChange(e.target.value);
+              onChange(e.target.value, htmlToText(e.target.value));
             }}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
-            className={`py-1 break-words flex-initial basis-full text-sm text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
+            className={`py-1 break-words flex-initial basis-full text-xs text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
           />
         </div>
-
-        {/* {noteSection === 'plan' && (
-          <div className="ml-[40px]">
-            {parsePracticeFollowup(blockContent.current)
-              .notificationsToStudents && (
-              <p className="text-sm text-indigo-800 italic">
-                After SIG:{' '}
-                {
-                  parsePracticeFollowup(blockContent.current)
-                    .notificationsToStudents
-                }
-              </p>
-            )}
-            {parsePracticeFollowup(blockContent.current)
-              .followUpAtNextMeeting && (
-              <p className="text-sm text-sky-800 italic">
-                For next SIG:{' '}
-                {
-                  parsePracticeFollowup(blockContent.current)
-                    .followUpAtNextMeeting
-                }
-              </p>
-            )}
-          </div>
-        )} */}
       </div>
     </>
   );
