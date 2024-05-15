@@ -544,18 +544,18 @@ export default function LastWeekIssuePane({
                                       >
                                         Deliverable{' '}
                                       </a>
-                                      {practice.yellkey == null ? (
-                                        <></>
-                                      ) : (
-                                        <span className="font-semibold">
-                                          {' '}
-                                          {`(yellkey: `}
-                                          <span className="text-indigo-600">
-                                            {practice.yellkey}
-                                          </span>
-                                          {`)`}
+                                      {/* {practice.yellkey == null ? (
+                                      <></>
+                                    ) : (
+                                      <span className="font-semibold">
+                                        {' '}
+                                        {`(yellkey: `}
+                                        <span className="text-indigo-600">
+                                          {practice.yellkey}
                                         </span>
-                                      )}
+                                        {`)`}
+                                      </span>
+                                    )} */}
                                     </div>
                                   ) : (
                                     <div className="flex flex-row items-center text-rose-600 text-xs font-normal">
@@ -566,6 +566,20 @@ export default function LastWeekIssuePane({
                                 </div>
                               )}
                             </div>
+
+                            {/* Student's deliverable notes */}
+                            {practice.deliverableNotes !== null && (
+                              <div className="mt-0.5 text-xs">
+                                <div className="">
+                                  Student notes on deliverable:{' '}
+                                </div>
+                                <div className="">
+                                  <span className="text-green-600">
+                                    {practice.deliverableNotes}
+                                  </span>
+                                </div>
+                              </div>
+                            )}
 
                             {/* { Reflections } */}
                             {practice.reflections.length > 0 ? (
