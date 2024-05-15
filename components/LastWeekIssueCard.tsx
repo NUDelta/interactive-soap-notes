@@ -21,12 +21,16 @@ export default function LastWeekIssueCard({
   // store selected state for card
   const [isSelected, setIsSelected] = useState(false);
 
-  const onDrag = (sourceIssueId, targetIssueId) => {
+  const onDrag = (sourceIssue, targetIssue) => {
+    let sourceIssueId = sourceIssue.id;
+    let targetIssueId = targetIssue.id;
+
     // find index of the source issue
     let sourceIssueIndex = pastIssuesData.findIndex(
       (issue) => issue.id === sourceIssueId
     );
     let sourcePastIssue = pastIssuesData[sourceIssueIndex];
+    console.log('sourcePastIssue:', sourcePastIssue);
 
     // check that the targetIssueId is add-practice
     if (targetIssueId === 'add-issue') {
@@ -50,13 +54,13 @@ export default function LastWeekIssueCard({
   const [{ opacity }, drag] = useDrag(
     () => ({
       type: DragTypes.PAST_ISSUE,
-      item: { issueId },
+      item: { id: issueId, type: 'LastWeekIssueObject' },
       end(item, monitor) {
         const dropResult = monitor.getDropResult() as { issue: string };
 
         // see if the note was dropped into an issue
         if (item && dropResult) {
-          onDrag(item.issueId, dropResult.issue);
+          onDrag(item, dropResult);
         }
       },
       collect: (monitor) => ({
