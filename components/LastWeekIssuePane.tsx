@@ -1,14 +1,26 @@
+import { htmlToText } from '../lib/helperFns';
 import NoteBlock from './NoteBlock';
 import PracticeGapCard from './PracticeGapCard';
 import { useEffect, useState } from 'react';
+import LinkIcon from '@heroicons/react/24/outline/LinkIcon';
+import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
+import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
 
 export default function LastWeekIssuePane({
   issueId,
+  noteInfo,
+  currentIssuesData,
+  setCurrentIssuesData,
   pastIssuesData,
   setPastIssuesData,
   practiceGapData,
   setPracticeGapData
 }): JSX.Element {
+  // state variable for showing practice gaps
+  const [showPracticeGaps, setShowPracticeGaps] = useState(
+    'Show Gaps with Details'
+  );
+
   // get the issue from soapData with the given issueId
   const issueIndex = pastIssuesData.findIndex((issue) => issue.id === issueId);
   const selectedLastWeekIssue = pastIssuesData[issueIndex];
@@ -17,6 +29,11 @@ export default function LastWeekIssuePane({
     priorInstances = selectedLastWeekIssue.priorInstances;
   }
 
+  // get the practice gaps linked to the issue by checking each practice gap's prevIssues to see if issueId is in it
+  let relevantPracticeGaps = practiceGapData.filter((practiceGap) => {
+    return practiceGap.prevIssues.some((prevIssue) => prevIssue.id === issueId);
+  });
+
   // check if there are any assessments
   let nonEmptyAssessmentLength =
     selectedLastWeekIssue !== undefined
@@ -24,32 +41,6 @@ export default function LastWeekIssuePane({
           (line) => line.value.trim() !== ''
         ).length
       : 0;
-
-  // TODO: 05-13-24 -- practices should be linked into context for a note block, and then shown here if they are linked to the assessment
-  let relevantPractices = practiceGapData.filter((practice) => {
-    return (
-      !practice.practiceInactive &&
-      !practice.practiceArchived &&
-      selectedLastWeekIssue['assessment'].some((assessment) => {
-        return assessment.value
-          .trim()
-          .toLowerCase()
-          .replace(/&nbsp;/g, '')
-          .replace(/&amp;/g, '&')
-          .includes(
-            practice.title
-              .trim()
-              .toLowerCase()
-              .replace(/&nbsp;/g, '')
-              .replace(/&amp;/g, '&')
-          );
-      })
-    );
-  });
-
-  console.log('selectedLastWeekIssue', selectedLastWeekIssue);
-  console.log('nonEmptyAssessmentLength', nonEmptyAssessmentLength);
-  console.log('relevantPractices', relevantPractices);
 
   // compute and store practice outcome for the last
   const [practiceOutcome, setPracticeOutcome] = useState(null);
@@ -105,53 +96,150 @@ export default function LastWeekIssuePane({
       setPracticeOutcome(updatedPracticeOutcome);
     };
 
+    const getOrgObjects = async (practiceOutcome, projectName) => {
+      let sprintData = null;
+      try {
+        const sprintDataRes = await fetch('/api/studio-api', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            projectName: projectName,
+            noteDate: noteInfo.sigDate
+          })
+        });
+
+        // if the status is not 200, throw an error
+        if (sprintDataRes.status !== 200) {
+          throw new Error('Error in fetching sprint data');
+        }
+
+        sprintData = (await sprintDataRes.json()).data;
+      } catch (error) {
+        console.error('Error in fetching org objects', error);
+      }
+
+      // attach org objects to each practice outcome
+      let newPracticeOutcome = {
+        practices: practiceOutcome,
+        projectData: sprintData === null ? null : sprintData.projectData,
+        sprintData: sprintData === null ? null : sprintData.processData,
+        currentSprint: null
+      };
+
+      // get the current sprint if sprintData and projectData are not null
+      if (
+        newPracticeOutcome.sprintData !== null &&
+        newPracticeOutcome.projectData !== null
+      ) {
+        let currentSprint =
+          newPracticeOutcome.projectData.sprint_log.sprints.find(
+            (sprint) => sprint.name === newPracticeOutcome.sprintData.name
+          );
+        newPracticeOutcome.currentSprint = currentSprint;
+      }
+
+      console.log('newPracticeOutcome', newPracticeOutcome);
+
+      setPracticeOutcome(newPracticeOutcome);
+    };
+
+    // TODO: this should all be in the parsed practice model so it doesn't have to be computed
+    // get practice type
+    const getPracticeType = (practice) => {
+      if (practice.includes('[reflect]')) {
+        return {
+          practice: practice.replace('[reflect]', ''),
+          introText: 'Reflect on your own:',
+          type: 'reflect'
+        };
+      } else if (practice.includes('[plan]')) {
+        return {
+          practice: practice.replace('[plan]', ''),
+          introText: 'Update your :',
+          type: 'plan'
+        };
+      } else if (practice.includes('[self-work]')) {
+        return {
+          practice: practice.replace('[self-work]', ''),
+          introText: 'On your own, try to:',
+          type: 'self-work'
+        };
+      } else if (practice.includes('[help]')) {
+        if (practice.includes('mysore')) {
+          return {
+            practice: practice.replace('[help]', ''),
+            introText: 'At Mysore:',
+            type: 'help'
+          };
+        } else if (practice.includes('pair research')) {
+          return {
+            practice: practice.replace('[help]', ''),
+            introText: 'At Pair Research:',
+            type: 'help'
+          };
+        }
+
+        // TODO: handle multiple people
+
+        return {
+          practice: practice.replace('[help]', ''),
+          introText: 'Get help on:',
+          type: 'help'
+        };
+      }
+
+      return null;
+    };
+
     // get the last prior instance, if provided
     // prior instances are ordered by date, so the first one is the most recent
     let practiceOutcome = selectedLastWeekIssue.followUps
-      .filter((followup) => {
-        return !followup.practice.includes('[plan]');
-      })
       .map((followUp) => {
+        // if didHappen is false, show the first set of reflections; else, show the second set
+        let didHappen = followUp.outcome.didHappen;
+        let relevantReflections = didHappen
+          ? followUp.outcome.reflections[1]
+          : followUp.outcome.reflections[0];
+
+        // practice type info
+        let parsedPractice = getPracticeType(followUp.practice);
+        if (parsedPractice === null) {
+          console.error('Invalid practice type', followUp.practice);
+          return null;
+        }
+
         return {
-          practice: followUp.parsedPractice.practice,
+          practice: htmlToText(parsedPractice.practice).trim(),
+          introText: parsedPractice.introText.trim(),
+          type: parsedPractice.type,
           didHappen: followUp.outcome.didHappen,
           deliverable: followUp.practice.includes('[reflect]')
             ? null
             : followUp.outcome.deliverableLink,
-          reflections: followUp.outcome.didHappen // TODO: lot of repetitive code
-            ? followUp.outcome.reflections[1]
-                .filter((reflection) => {
-                  return (
-                    !reflection.prompt.includes(
-                      'Share a link to any deliverable'
-                    ) && !reflection.prompt.includes('Did you do the')
-                  );
-                })
-                .map((reflection) => {
-                  return {
-                    prompt: reflection.prompt,
-                    response: reflection.response
-                  };
-                })
-            : followUp.outcome.reflections[0]
-                .filter((reflection) => {
-                  return (
-                    !reflection.prompt.includes(
-                      'Share a link to any deliverable'
-                    ) && !reflection.prompt.includes('Did you do the')
-                  );
-                })
-                .map((reflection) => {
-                  return {
-                    prompt: reflection.prompt,
-                    response: reflection.response
-                  };
-                })
+          deliverableNotes: followUp.outcome.deliverableNotes,
+          reflections: relevantReflections
+            .filter((reflection) => {
+              return (
+                !reflection.prompt.includes(
+                  'Share a link to any deliverable'
+                ) && !reflection.prompt.includes('Did you do the')
+              );
+            })
+            .map((reflection) => {
+              return {
+                prompt: reflection.prompt,
+                response: reflection.response
+              };
+            })
         };
-      });
+      })
+      .filter((followup) => followup !== null);
+
     // getYellKeysForAllDeliverables(practiceOutcome);
-    setPracticeOutcome(practiceOutcome);
-  }, [selectedLastWeekIssue.followUps]);
+    getOrgObjects(practiceOutcome, noteInfo.project);
+  }, [selectedLastWeekIssue, noteInfo]);
 
   return (
     <div className="mb-5">
@@ -200,39 +288,79 @@ export default function LastWeekIssuePane({
 
               {/* Show practice gaps linked to issue */}
               <div className="w-3/4">
-                <div>
+                <div className="flex flex-row items-center">
                   <h1 className="font-bold text-base">
-                    Practice Gaps for Issue
+                    Self-Regulation Gaps for Issue
                   </h1>
+                  {/* Toggle for details */}
+                  {relevantPracticeGaps.length !== 0 && (
+                    <ul className="flex flex-wrap text-xs font-medium text-center text-gray-500 dark:text-gray-400 ml-2">
+                      <li
+                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                        onClick={() => {
+                          setShowPracticeGaps('Hide Gaps');
+                        }}
+                      >
+                        Hide Gaps
+                      </li>
+                      <li
+                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                        onClick={() => {
+                          setShowPracticeGaps('Show Gaps');
+                        }}
+                      >
+                        Show Gaps
+                      </li>
+                      <li
+                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                        onClick={() => {
+                          setShowPracticeGaps('Show Gaps with Details');
+                        }}
+                      >
+                        Show Gaps with Details
+                      </li>
+                    </ul>
+                  )}
                 </div>
 
+                {/* Self-Regulation Gaps for Issue */}
                 <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
-                  {relevantPractices.length !== 0 && (
-                    <>
-                      {/* TODO: NOT EDITABLE */}
-                      {/* TODO: 05-14-24 should be able to minimize practice gaps */}
-                      {relevantPractices.map((practiceGap) => (
-                        <PracticeGapCard
-                          key={`issue-card-${practiceGap.id}`}
-                          // project={noteInfo.project}
-                          // sig={noteInfo.sigName}
-                          // date={noteInfo.sigDate}
-                          practiceGapId={practiceGap.id}
-                          practiceGap={practiceGap}
-                          practiceGapsData={practiceGapData}
-                          setPracticeGapsData={setPracticeGapData}
-                          showPracticeGaps={true}
-                          className="flex-none basis-1/3"
-                          // setShowPracticeGaps={setShowPracticeGaps}
-                          // currentIssuesData={currentIssuesData}
-                          // setCurrentIssuesData={setCurrentIssuesData}
-                        />
-                      ))}
-                    </>
-                  )}
-                  {relevantPractices.length === 0 && (
+                  {/* Show gaps if they are there and not hidden */}
+                  {relevantPracticeGaps.length > 0 &&
+                    showPracticeGaps !== 'Hide Gaps' && (
+                      <>
+                        {relevantPracticeGaps.map((practiceGap) => (
+                          <PracticeGapCard
+                            key={`issue-card-${practiceGap.id}`}
+                            project={noteInfo.project}
+                            sig={noteInfo.sigName}
+                            date={noteInfo.sigDate}
+                            practiceGapId={practiceGap.id}
+                            practiceGap={practiceGap}
+                            practiceGapsData={practiceGapData}
+                            setPracticeGapsData={setPracticeGapData}
+                            currentIssuesData={currentIssuesData}
+                            setCurrentIssuesData={setCurrentIssuesData}
+                            showPracticeGaps={showPracticeGaps}
+                            setShowPracticeGaps={setShowPracticeGaps}
+                            className="flex-none basis-1/3"
+                          />
+                        ))}
+                      </>
+                    )}
+
+                  {/* Show gaps if gaps there, but hidden */}
+                  {relevantPracticeGaps.length > 0 &&
+                    showPracticeGaps === 'Hide Gaps' && (
+                      <div className="text-xs italic">
+                        Click above to show self-regulation gaps.
+                      </div>
+                    )}
+
+                  {/* No gaps to show */}
+                  {relevantPracticeGaps.length === 0 && (
                     <div className="text-xs italic">
-                      No practice gaps linked to this issue.
+                      No self-regulation gaps linked to this issue.
                     </div>
                   )}
                 </div>
@@ -254,106 +382,230 @@ export default function LastWeekIssuePane({
               {/* Show practice follow-ups */}
               {!isLoading &&
               practiceOutcome !== null &&
-              practiceOutcome.length > 0 ? (
-                <div className="flex flex-row gap-2">
-                  {practiceOutcome.map((practice) => {
-                    return (
-                      <div
-                        key={practice.practice}
-                        className="w-full mb-4 p-2 border shadow"
-                      >
-                        <h2 className="text-sm font-semibold border-b border-black ">
-                          {practice.practice}
+              practiceOutcome.practices !== null &&
+              practiceOutcome.practices.length > 0 ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {/* show plan follow-ups as a single card */}
+                  {practiceOutcome.practices.filter((practice) => {
+                    return practice.type === 'plan';
+                  }).length > 0 && (
+                    <div
+                      key="plan-follow-up"
+                      className="w-full p-2 border shadow"
+                    >
+                      {/* Plan Updating Practices */}
+                      <div className="mb-4">
+                        <h2 className="text-sm font-semibold border-b border-black">
+                          Plan Updating Practices
                         </h2>
-
-                        {/* { Did the practice happen? } */}
                         <div className="flex flex-wrap">
-                          <div className="w-full">
-                            <p className="text-sm font-semibold">
-                              Did this happen?{' '}
-                              {/* TODO: make this a check or X */}
-                              <span
-                                className={`font-normal ${practice.didHappen ? 'text-green-600' : 'text-rose-600'}`}
-                              >
-                                {practice.didHappen ? 'Yes' : 'No'}
-                              </span>
-                            </p>
-                          </div>
+                          {practiceOutcome.practices
+                            .filter((practice) => {
+                              return practice.type === 'plan';
+                            })
+                            .reduce((acc, practice) => {
+                              return [...acc, practice.practice];
+                            }, [])
+                            .map((practice) => {
+                              return (
+                                <div key={practice} className="w-full">
+                                  <p className="text-xs font-base">
+                                    - {practice}
+                                  </p>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      </div>
 
-                          {/* { Link to deliverable } */}
-                          {practice.deliverable !== null ? (
-                            <div className="w-full mt-1">
-                              <p className="text-sm font-semibold">
-                                {practice.deliverable !== '' ? (
-                                  <>
-                                    <a
-                                      href={practice.deliverable}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      className="text-blue-600 underline font-normal"
-                                    >
-                                      Link to deliverable{' '}
-                                      {/* TODO: make this a link icon with 'deliverable' or 'no deliverable' */}
-                                    </a>
-                                    {practice.yellkey == null ? (
-                                      <></>
-                                    ) : (
-                                      <span className="font-semibold">
-                                        {' '}
-                                        {`(yellkey: `}
-                                        <span className="text-indigo-600">
-                                          {practice.yellkey}
-                                        </span>
-                                        {`)`}
-                                      </span>
-                                    )}
-                                  </>
-                                ) : (
-                                  <span className="font-normal text-rose-600">
-                                    Deliverable not linked
-                                  </span>
-                                )}
-                              </p>
-                            </div>
-                          ) : (
-                            <></>
-                          )}
-
-                          {/* { Reflections } */}
-                          {practice.reflections.length > 0 ? (
-                            <div className="w-full mt-1">
-                              <h3 className="text-sm font-bold">
-                                Reflections:
-                              </h3>
-                              {practice.reflections.map((reflection) => {
+                      {/* Stories and Deliverables */}
+                      <div className="w-full flex flex-col mb-2">
+                        <div className="w-full grid grid-cols-2 text-sm border-b border-black">
+                          <div>Prior Sprint Stories</div>
+                          <div>Prior Sprint Deliverables</div>
+                        </div>
+                        {practiceOutcome.currentSprint !== null && (
+                          <>
+                            {practiceOutcome.currentSprint.stories.map(
+                              (story, index) => {
                                 return (
                                   <div
-                                    key={reflection.prompt}
-                                    className="w-full mb-2"
+                                    key={`sprint-story-${index}`}
+                                    className="w-full grid grid-cols-2 text-xs mb-2 leading-snug"
                                   >
-                                    <h4 className="text-sm font-medium">
-                                      {reflection.prompt}
-                                    </h4>
-                                    {reflection.response === '' ? (
-                                      <p className="text-sm text-rose-600">
-                                        No response from student
-                                      </p>
-                                    ) : (
-                                      <p className="text-sm text-green-600">
-                                        {reflection.response}
-                                      </p>
-                                    )}
+                                    <div>{story.description}</div>
+                                    <div
+                                      className={`${story.deliverables === null && 'text-rose-600'}`}
+                                    >
+                                      {story.deliverables === null
+                                        ? 'No deliverable'
+                                        : story.deliverables}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            )}
+                          </>
+                        )}
+                      </div>
+
+                      {/* Points */}
+                      <div className="w-full flex flex-col">
+                        <div className="w-full grid grid-cols-3 text-sm border-b border-black">
+                          <div>Student</div>
+                          <div>Points Committed</div>
+                          <div>Hours Spent</div>
+                        </div>
+                        {practiceOutcome.currentSprint !== null && (
+                          <>
+                            {practiceOutcome.currentSprint.points
+                              .filter((pointInfo) => {
+                                return pointInfo.name.trim() !== '';
+                              })
+                              .map((student, index) => {
+                                return (
+                                  <div
+                                    key={`sprint-points-${index}`}
+                                    className="w-full grid grid-cols-3 text-xs mb-2 leading-snug"
+                                  >
+                                    <div>{student.name}</div>
+                                    <div>
+                                      {Math.round(
+                                        student.pointsCommitted.total * 2
+                                      ) / 2}
+                                    </div>
+                                    <div>
+                                      {Math.round(
+                                        student.hoursSpent.total * 2
+                                      ) / 2}
+                                    </div>
+                                    {/* <div
+                                      className={`${student.deliverables === null && 'text-rose-600'}`}
+                                    >
+                                      {student.deliverables === null
+                                        ? 'No deliverable'
+                                        : student.deliverables}
+                                    </div> */}
                                   </div>
                                 );
                               })}
-                            </div>
-                          ) : (
-                            <></>
-                          )}
-                        </div>
+                          </>
+                        )}
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
+
+                  {/* show non plan follow-ups */}
+                  {practiceOutcome.practices
+                    .filter((practice) => {
+                      return practice.type !== 'plan';
+                    })
+                    .map((practice) => {
+                      return (
+                        <div
+                          key={practice.practice}
+                          className="w-full p-2 border shadow"
+                        >
+                          <h2 className="text-xs border-b border-black ">
+                            <span className="font-semibold">
+                              {practice.type}:
+                            </span>{' '}
+                            {practice.practice}
+                          </h2>
+
+                          {/* { Did the practice happen? } */}
+                          <div className="flex flex-wrap">
+                            <div className="w-full flex flex-row items-center text-xs font-normal">
+                              {practice.didHappen ? (
+                                <CheckBadgeIcon className="h-4 stroke-2 mr-1 text-green-600" />
+                              ) : (
+                                <ExclamationCircleIcon className="h-4 stroke-2 mr-1 text-rose-600" />
+                              )}
+
+                              <span
+                                className={`font-normal ${practice.didHappen ? 'text-green-600' : 'text-rose-600'}`}
+                              >
+                                {practice.didHappen
+                                  ? 'Practice Attempted'
+                                  : 'Practice Not Attempted'}
+                              </span>
+
+                              {/* { Link to deliverable } */}
+                              {practice.deliverable !== null && (
+                                <div className="mx-auto">
+                                  {practice.deliverable !== '' ? (
+                                    <div className="flex flex-row items-center text-xs font-normal">
+                                      <LinkIcon className="h-4 stroke-2 mr-1 text-green-600" />
+                                      <a
+                                        href={practice.deliverable}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-blue-600 underline"
+                                      >
+                                        Deliverable{' '}
+                                      </a>
+                                      {practice.yellkey == null ? (
+                                        <></>
+                                      ) : (
+                                        <span className="font-semibold">
+                                          {' '}
+                                          {`(yellkey: `}
+                                          <span className="text-indigo-600">
+                                            {practice.yellkey}
+                                          </span>
+                                          {`)`}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-row items-center text-rose-600 text-xs font-normal">
+                                      <LinkIcon className="h-4 stroke-2 mr-1" />
+                                      No deliverable link
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* { Reflections } */}
+                            {practice.reflections.length > 0 ? (
+                              <div className="w-full mt-1">
+                                <h3 className="text-xs font-bold border-b">
+                                  Reflections
+                                </h3>
+                                {practice.reflections.map((reflection) => {
+                                  return (
+                                    <div
+                                      key={reflection.prompt}
+                                      className="w-full mb-2 text-xs"
+                                    >
+                                      <h4 className="font-medium">
+                                        {reflection.prompt}
+                                      </h4>
+                                      {reflection.response === '' ? (
+                                        <p className="text-rose-600">
+                                          No response from student
+                                        </p>
+                                      ) : (
+                                        <p className="text-green-600">
+                                          {reflection.response}
+                                        </p>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <></>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              ) : isLoading ? (
+                <div className="text-xs italic text-blue-400">
+                  Loading follow-up outcomes...
                 </div>
               ) : (
                 <div className="text-xs italic">

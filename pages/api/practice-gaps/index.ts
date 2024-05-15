@@ -51,8 +51,6 @@ export default async function handler(
         });
       }
     default:
-      console.log('running 400');
       return res.status(400).json({ msg: 'Route not found', success: false });
-      break;
   }
 }

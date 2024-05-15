@@ -617,6 +617,9 @@ export default function CAPNote({
                   <div className="w-full h-[66vh] overflow-auto">
                     <LastWeekIssuePane
                       issueId={selectedIssue}
+                      noteInfo={noteInfo}
+                      currentIssuesData={currentIssuesData}
+                      setCurrentIssuesData={setCurrentIssuesData}
                       pastIssuesData={pastIssuesData}
                       setPastIssuesData={setPastIssuesData}
                       practiceGapData={practiceGapData}
