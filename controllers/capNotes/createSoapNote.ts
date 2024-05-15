@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import dbConnect from '../../lib/dbConnect';
 import CAPNoteModel from '../../models/CAPNoteModel';
+import { createNewTextEntryBlock } from '../textEntryBlock/createNewTextEntryBlock';
 
 /**
  * Create a new CAP note given the project and date of the note.
@@ -55,30 +56,9 @@ export const createCAPNote = async (projectName: string, noteDate: Date) => {
       lastUpdated: noteDate,
       sigName: sigName,
       sigAbbreviation: sigAbbreviation,
-      context: [
-        {
-          id: new mongoose.Types.ObjectId().toString(),
-          type: 'note',
-          context: [],
-          value: ''
-        }
-      ],
-      assessment: [
-        {
-          id: new mongoose.Types.ObjectId().toString(),
-          type: 'note',
-          context: [],
-          value: ''
-        }
-      ],
-      plan: [
-        {
-          id: new mongoose.Types.ObjectId().toString(),
-          type: 'note',
-          context: [],
-          value: ''
-        }
-      ],
+      context: [createNewTextEntryBlock()],
+      assessment: [createNewTextEntryBlock()],
+      plan: [createNewTextEntryBlock()],
       pastIssues: pastIssues,
       currentIssues: [],
       trackedPractices: trackedPractices
