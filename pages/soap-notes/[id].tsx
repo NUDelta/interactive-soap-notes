@@ -185,8 +185,8 @@ export default function CAPNote({
           method: 'POST',
           body: JSON.stringify({
             data: [...pastIssuesToSave],
-            updateType: 'past'
-            // TODO: maybe include the noteInfo in the request -- useful for parsing followups
+            updateType: 'past',
+            noteInfo: noteInfo
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -211,8 +211,8 @@ export default function CAPNote({
           method: 'POST',
           body: JSON.stringify({
             data: [...currentIssuesToSave],
-            updateType: 'current'
-            // TODO: maybe include the noteInfo in the request -- useful for parsing followups
+            updateType: 'current',
+            noteInfo: noteInfo
           }),
           headers: {
             'Content-Type': 'application/json'

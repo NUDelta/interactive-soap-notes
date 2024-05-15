@@ -51,9 +51,10 @@ export default function NoteBlockForPlan({
       'canvas: user testing plan',
       'canvas: testing takeaways',
       'canvas: approach tree',
+      'canvas: 8-pack',
       'design: journey map',
       'design: storyboard',
-      'planning: slicing',
+      // 'planning: slicing',
       'planning: risk assessment',
       'write: __', // drafting a section
       'table: __',
