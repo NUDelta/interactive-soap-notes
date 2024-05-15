@@ -1,8 +1,8 @@
 /**
  * This component provides an issue card that summarizes the issue, when it was last updated, and the follow-up plans.
  */
-import React, { useState, useEffect, useRef } from 'react';
-import { useDrag, useDrop } from 'react-dnd';
+import React, { useState } from 'react';
+import { useDrag } from 'react-dnd';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import { createNewIssueObject } from '../controllers/issueObjects/createIssueObject';
 import CalendarIcon from '@heroicons/react/24/outline/CalendarIcon';
@@ -29,7 +29,7 @@ export default function LastWeekIssueCard({
     let sourcePastIssue = pastIssuesData[sourceIssueIndex];
 
     // check that the targetIssueId is add-practice
-    if (targetIssueId === 'add-practice') {
+    if (targetIssueId === 'add-issue') {
       // create a new issue
       setCurrentIssuesData((prevCurrentIssuesData) => {
         let newIssue = createNewIssueObject(
@@ -93,7 +93,7 @@ export default function LastWeekIssueCard({
             </h2>
 
             {/* TODO: 05-07-24 maybe show that there are missing deliverables */}
-            <div className="flex flex-row items-center text-2xs mt-2 text-blue-600">
+            <div className="flex flex-row items-center text-2xs font-medium mt-2 text-blue-600">
               <CalendarIcon className="h-4 mr-1" />
               Tracked from last SIG meeting
             </div>

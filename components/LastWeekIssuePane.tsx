@@ -280,7 +280,7 @@ export default function LastWeekIssuePane({
                     ))}
                   {nonEmptyAssessmentLength == 0 && (
                     <div className="text-xs italic">
-                      No assessments written for issue
+                      No assessments written for issue.
                     </div>
                   )}
                 </div>

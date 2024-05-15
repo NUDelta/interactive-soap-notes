@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import dbConnect from '../../lib/dbConnect';
 import IssueObjectModel from '../../models/IssueObjectModel';
 import {
@@ -20,6 +21,11 @@ export const updateIssueObject = async (issueObject: object) => {
 
   await dbConnect();
   let issueObjectId = newIssueObject['id'];
+
+  // check if issueObjectId is null or undefined
+  if (issueObjectId === null || issueObjectId === undefined) {
+    issueObjectId = new mongoose.Types.ObjectId().toString();
+  }
   let originalIssueObject = await IssueObjectModel.findById(issueObjectId);
   let updatedIssueObject = await IssueObjectModel.findByIdAndUpdate(
     issueObjectId,
@@ -56,7 +62,7 @@ export const updateIssueObject = async (issueObject: object) => {
       updatedIssueObject
     );
   }
-  await createEditLogEntry(newEditLogObject);
 
+  await createEditLogEntry(newEditLogObject);
   return updatedIssueObject;
 };

@@ -461,6 +461,8 @@ export default function CAPNote({
                             setSelectedIssue={setSelectedIssue}
                             currentIssuesData={currentIssuesData}
                             setCurrentIssuesData={setCurrentIssuesData}
+                            pastIssuesData={pastIssuesData}
+                            setPastIssuesData={setPastIssuesData}
                           />
                         ))}
 
@@ -476,6 +478,8 @@ export default function CAPNote({
                         setSelectedIssue={setSelectedIssue}
                         currentIssuesData={currentIssuesData}
                         setCurrentIssuesData={setCurrentIssuesData}
+                        pastIssuesData={pastIssuesData}
+                        setPastIssuesData={setPastIssuesData}
                       />
                     </div>
                   </div>
@@ -684,7 +688,13 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     currentCAPNote.currentIssues.map((issue) => issue._id)
   );
   let currentIssuesFlattened = currentIssues.map((issue) => {
-    return addPlaceholderLine(serializeDates(issue.toJSON(mongoIdFlattener)));
+    let flattenedData = addPlaceholderLine(
+      serializeDates(issue.toJSON(mongoIdFlattener))
+    );
+    flattenedData.priorInstances = issue.priorInstances.map((instance) => {
+      return instance.toString();
+    });
+    return flattenedData;
   });
 
   // get tracked practice for the current note

@@ -1,9 +1,9 @@
 /**
  * This component provides an issue card that summarizes the issue, when it was last updated, and the follow-up plans.
  */
-import ExclamationTriangleIcon from '@heroicons/react/24/outline/ExclamationTriangleIcon';
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
 import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
+import ArrowUturnLeftIcon from '@heroicons/react/24/outline/ArrowUturnLeftIcon';
 
 import React, { useState, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
@@ -21,7 +21,9 @@ export default function CurrWeekIssueCard({
   selectedIssue,
   setSelectedIssue,
   currentIssuesData,
-  setCurrentIssuesData
+  setCurrentIssuesData,
+  pastIssuesData,
+  setPastIssuesData
 }): JSX.Element {
   // onAddIssue is a function that adds a new issue to the current issues
   const onAddIssue = (newIssueTitle) => {
@@ -224,24 +226,43 @@ export default function CurrWeekIssueCard({
                     e.target.value.trim().replace(/<\/?[^>]+(>|$)/g, '')
                   );
                 }}
-                className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Describe_concern_you_observed...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
+                className={`p-0.5 mr-2 w-full min-h-16 mb-1 break-words flex-none empty:before:content-['Describe_concern_you_observed...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
               />
 
-              <div className="flex flex-row items-center w-full">
-                {/* Missing strategies */}
+              <div className="flex flex-col w-full">
+                {/* Show concern is linked from a past issue  */}
+                {issue && issue.priorInstances.length > 0 && (
+                  <div className="flex flex-row items-center mb-1">
+                    <ArrowUturnLeftIcon className="h-4 mr-1 text-blue-600" />
+                    <div className="text-2xs font-medium text-blue-600">
+                      Created from prior issue
+                      {/* <span className="italic">
+                        {
+                          pastIssuesData.find((pastIssue) => {
+                            return pastIssue.id === issue.priorInstances[0];
+                          }).title
+                        }
+                      </span> */}
+                    </div>
+                  </div>
+                )}
+
+                {/* System is tracking practices */}
                 {issue &&
                   issue.plan.some((currPlan) => {
                     return ['[plan]', '[self-work]', '[help]', '[reflect'].some(
                       (agent) => currPlan.value.trim().includes(agent)
                     );
                   }) && (
-                    <>
+                    <div className="flex flex-row items-center ">
                       <CheckBadgeIcon className="h-4 mr-1 text-green-600" />
                       <div className="text-2xs font-medium text-green-600">
                         Tracking follow-up plans
                       </div>
-                    </>
+                    </div>
                   )}
+
+                {/* Trash to remove concern */}
                 {!isThisWeek && (
                   <TrashIcon
                     className={`h-5 text-slate-600 ml-auto`}
