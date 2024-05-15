@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import { createNewIssueObject } from '../controllers/issueObjects/createIssueObject';
+import CalendarIcon from '@heroicons/react/24/outline/CalendarIcon';
 
 export default function LastWeekIssueCard({
   issueId,
@@ -90,9 +91,12 @@ export default function LastWeekIssueCard({
                   ? 'click to enter title'
                   : title}
             </h2>
-            <h1 className="text-xs italic mt-auto">
+
+            {/* TODO: 05-07-24 maybe show that there are missing deliverables */}
+            <div className="flex flex-row items-center text-2xs mt-2 text-blue-600">
+              <CalendarIcon className="h-4 mr-1" />
               Tracked from last SIG meeting
-            </h1>
+            </div>
 
             {/* Show / hide issue */}
             {/* TODO: buggy since it doesn't update the parent state properly */}
@@ -120,8 +124,6 @@ export default function LastWeekIssueCard({
                   </>
                 )}
               </div> */}
-
-            {/* TODO: 05-07-24 maybe show that there are missing deliverables */}
           </div>
         </>
       </div>

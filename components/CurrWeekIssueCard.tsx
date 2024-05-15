@@ -3,6 +3,7 @@
  */
 import ExclamationTriangleIcon from '@heroicons/react/24/outline/ExclamationTriangleIcon';
 import TrashIcon from '@heroicons/react/24/outline/TrashIcon';
+import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
 
 import React, { useState, useRef } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
@@ -213,7 +214,7 @@ export default function CurrWeekIssueCard({
         ) : (
           <>
             {/* Issue title */}
-            <div className="p-1 w-full flex flex-col">
+            <div className="w-full flex flex-col">
               <ContentEditable
                 id={`title-${issueId}`}
                 html={titleRef.current}
@@ -226,17 +227,18 @@ export default function CurrWeekIssueCard({
                 className={`p-0.5 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Describe_concern_you_observed...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
               />
 
-              {/* TODO: 05-14-24 -- change this to show if practices are being tracked for the issue, rather than missing, since the top space can also be scratch */}
               <div className="flex flex-row items-center w-full">
                 {/* Missing strategies */}
                 {issue &&
-                  !issue.plan.some((currPlan) => {
-                    return currPlan.value.trim() !== '';
+                  issue.plan.some((currPlan) => {
+                    return ['[plan]', '[self-work]', '[help]', '[reflect'].some(
+                      (agent) => currPlan.value.trim().includes(agent)
+                    );
                   }) && (
                     <>
-                      <ExclamationTriangleIcon className="h-5 mr-1 text-red-500" />
-                      <div className="text-xs font-medium text-red-500">
-                        Missing follow-up plan
+                      <CheckBadgeIcon className="h-4 mr-1 text-green-600" />
+                      <div className="text-2xs font-medium text-green-600">
+                        Tracking follow-up plans
                       </div>
                     </>
                   )}
