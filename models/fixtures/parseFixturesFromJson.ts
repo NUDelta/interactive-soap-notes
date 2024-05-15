@@ -40,6 +40,9 @@ const convertTextEntry = (textEntry) => {
 
 // UPDATED: parses data from 05-12-24 backup onwards
 export const parseFixturesFromJson = async (fixtures) => {
+  // start the connection to the database
+  await dbConnect();
+
   // create an array to hold the parsed fixtures
   let parsedFixtures = [];
 
@@ -335,7 +338,5 @@ export const parseFixturesFromJson = async (fixtures) => {
     // add the new CAP note to the parsed fixtures array
     parsedFixtures.push(newCAPNote);
   }
-
-  await dbConnect();
   return await CAPNoteModel.insertMany(parsedFixtures);
 };
