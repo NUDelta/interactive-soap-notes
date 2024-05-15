@@ -27,12 +27,13 @@ export const longDate = (
  * @param date JavaScript date object.
  * @returns string formatted date.
  */
-export const shortDate = (date: Date) => {
+export const shortDate = (date: Date, timezone: string = 'America/Chicago') => {
   return date.toLocaleDateString('en-us', {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
+    timeZone: timezone
   });
 };
 
