@@ -222,31 +222,6 @@ export default function NoteBlock({
             className={`py-1 break-words flex-initial basis-full text-xs text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
           />
         </div>
-
-        {/* {noteSection === 'plan' && (
-          <div className="ml-[40px]">
-            {parsePracticeFollowup(blockContent.current)
-              .notificationsToStudents && (
-              <p className="text-sm text-indigo-800 italic">
-                After SIG:{' '}
-                {
-                  parsePracticeFollowup(blockContent.current)
-                    .notificationsToStudents
-                }
-              </p>
-            )}
-            {parsePracticeFollowup(blockContent.current)
-              .followUpAtNextMeeting && (
-              <p className="text-sm text-sky-800 italic">
-                For next SIG:{' '}
-                {
-                  parsePracticeFollowup(blockContent.current)
-                    .followUpAtNextMeeting
-                }
-              </p>
-            )}
-          </div>
-        )} */}
       </div>
     </>
   );

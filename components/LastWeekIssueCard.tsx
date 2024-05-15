@@ -91,7 +91,7 @@ export default function LastWeekIssueCard({
                   : title}
             </h2>
             <h1 className="text-xs italic mt-auto">
-              Tracked from last coaching meeting
+              Tracked from last SIG meeting
             </h1>
 
             {/* Show / hide issue */}

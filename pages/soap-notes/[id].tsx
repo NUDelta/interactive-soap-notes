@@ -569,7 +569,7 @@ export default function CAPNote({
                       Write notes about selected issue below. Context and
                       Assessment notes are private to you.{' '}
                       <span className="font-semibold">
-                        The Issue Title above and Plan notes will be shared with
+                        The Title above and Plan notes will be shared with
                         students.
                       </span>
                     </p>

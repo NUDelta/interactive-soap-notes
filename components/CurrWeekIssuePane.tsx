@@ -6,6 +6,7 @@ import mongoose from 'mongoose';
 import PracticeGapCard from './PracticeGapCard';
 import { useState } from 'react';
 import { createNewTextEntryBlock } from '../controllers/textEntryBlock/createNewTextEntryBlock';
+import NoteBlockForPlan from './NoteBlockForPlan';
 
 export default function CurrWeekIssuePane({
   issueId,
@@ -57,11 +58,15 @@ export default function CurrWeekIssuePane({
                 <h1 className="text-base font-bold">{section.title}</h1>
                 {section.name === 'plan' && (
                   <p className="text-xs italic color-grey">
-                    Add practices for CAP notes to follow-up on by typing,
-                    &quot;[&quot; and selecting from the autocomplete options.
-                    These will be sent to the students&apos; project channel
-                    before the next practice opportunity, or after SIG for
-                    self-practice.
+                    Type <span className="font-bold">[</span> to add practices
+                    using the autocomplete options; add additional info with{' '}
+                    <span className="font-bold">w[</span>,
+                    <span className="font-bold">at[</span>, or{' '}
+                    <span className="font-bold">rep[</span> (details below).
+                    Practices are sent to the students after SIG, and before
+                    practice opportunities. Students will be asked to share
+                    practices deliverables and reflections before the next SIG
+                    meeting.
                   </p>
                 )}
 
@@ -69,363 +74,542 @@ export default function CurrWeekIssuePane({
                 <div className="flex">
                   {/* Notetaking area */}
                   <div className="flex-auto">
-                    {/* TODO: 04-23-24 -- current issues need to be initialized with an empty block and checked if there's an empty block before adding to it  */}
-                    {currIssue[section.name].map((line) => (
-                      <NoteBlock
-                        key={`note-block-from-issuepane-${line.id}`}
-                        noteSection={section.name}
-                        noteId={line.id}
-                        noteContent={line}
-                        onKeyDown={(e) => {
-                          // stop default behavior of enter key if enter + shift OR shift + backspace are pressed
-                          if (
-                            (e.key === 'Enter' && e.shiftKey) ||
-                            ((e.key === 'Backspace' || e.key === 'Delete') &&
-                              e.shiftKey)
-                          ) {
-                            e.preventDefault();
-                          }
-                        }}
-                        onKeyUp={(e) => {
-                          // store id of new line so it can be focused on
-                          let newLineId;
+                    {section.name !== 'plan' &&
+                      currIssue[section.name].map((line) => (
+                        <NoteBlock
+                          key={`note-block-from-issuepane-${line.id}`}
+                          noteSection={section.name}
+                          noteId={line.id}
+                          noteContent={line}
+                          onKeyDown={(e) => {
+                            // stop default behavior of enter key if enter + shift OR shift + backspace are pressed
+                            if (
+                              (e.key === 'Enter' && e.shiftKey) ||
+                              ((e.key === 'Backspace' || e.key === 'Delete') &&
+                                e.shiftKey)
+                            ) {
+                              e.preventDefault();
+                            }
+                          }}
+                          onKeyUp={(e) => {
+                            // store id of new line so it can be focused on
+                            let newLineId;
 
-                          // create a new object for the line
-                          let newLine = createNewTextEntryBlock(
-                            'note',
-                            [],
-                            '',
-                            '',
-                            true
-                          );
-
-                          // check for shift-enter to add a new line
-                          if (e.key === 'Enter' && e.shiftKey) {
-                            // add new line underneath the current line
-                            setCurrentIssuesData((prevCurrentIssuesData) => {
-                              let newCurrentIssuesData = [
-                                ...prevCurrentIssuesData
-                              ];
-
-                              // find that line that was edited in the current instance of the practice
-                              let lineIndex = newCurrentIssuesData[issueIndex][
-                                section.name
-                              ].findIndex((l) => l.id === line.id);
-
-                              // check if the current line is empty
-                              if (
-                                lineIndex ===
-                                newCurrentIssuesData[issueIndex][section.name]
-                                  .length -
-                                  1
-                              ) {
-                                // don't add a new line if the current line is empty
-                                if (
-                                  newCurrentIssuesData[issueIndex][
-                                    section.name
-                                  ][lineIndex].value.trim() === ''
-                                ) {
-                                  newLineId =
-                                    newCurrentIssuesData[issueIndex][
-                                      section.name
-                                    ][lineIndex].id;
-                                  return newCurrentIssuesData;
-                                }
-                              } else if (
-                                lineIndex + 1 <
-                                newCurrentIssuesData[issueIndex][section.name]
-                                  .length
-                              ) {
-                                // don't add a new line if the next line is already an empty block
-                                if (
-                                  newCurrentIssuesData[issueIndex][
-                                    section.name
-                                  ][lineIndex + 1].value.trim() === ''
-                                ) {
-                                  newLineId =
-                                    newCurrentIssuesData[issueIndex][
-                                      section.name
-                                    ][lineIndex + 1].id;
-                                  return newCurrentIssuesData;
-                                }
-                              }
-
-                              // otherwise, add to the list
-                              newLineId = newLine.id;
-                              newCurrentIssuesData[issueIndex][
-                                section.name
-                              ].splice(lineIndex + 1, 0, newLine);
-
-                              return newCurrentIssuesData;
-                            });
-
-                            // TODO: 04-23-24 this causes a race condition where the new line is not yet rendered
-                            // could be fixed with a callback: https://github.com/the-road-to-learn-react/use-state-with-callback#usage
-                            // have a useEffect just in the view component that sets the focus to the new line (with a didMount): https://stackoverflow.com/questions/56247433/how-to-use-setstate-callback-on-react-hooks
-                            // set focus to added line if not undefined
-                            // if (newLineId !== undefined) {
-                            //   document.getElementById(newLineId).focus();
-                            // }
-                          } else if (
-                            (e.key === 'Backspace' || e.key === 'Delete') &&
-                            e.shiftKey
-                          ) {
-                            // remove line
-                            // add new line underneath the current line
-                            setCurrentIssuesData((prevCurrentIssuesData) => {
-                              let newCurrentIssuesData = [
-                                ...prevCurrentIssuesData
-                              ];
-
-                              // find that line that was edited in the current instance of the practice
-                              let lineIndex = newCurrentIssuesData[issueIndex][
-                                section.name
-                              ].findIndex((l) => l.id === line.id);
-
-                              // remove line
-                              newCurrentIssuesData[issueIndex][section.name] =
-                                newCurrentIssuesData[issueIndex][
-                                  section.name
-                                ].filter((l) => l.id !== line.id);
-
-                              // if the section is empty, add a new empty block
-                              if (
-                                newCurrentIssuesData[issueIndex][section.name]
-                                  .length === 0
-                              ) {
-                                newCurrentIssuesData[issueIndex][
-                                  section.name
-                                ].push(newLine);
-                              }
-
-                              return newCurrentIssuesData;
-                            });
-                          }
-                        }}
-                        onChange={(htmlEdits, rawEdits) => {
-                          // before attempting a save, check if the line is identical to the previous line (both trimmed)
-                          rawEdits = rawEdits.trim();
-                          if (rawEdits === line.value.trim()) {
-                            return;
-                          }
-
-                          // save rawEdits to the correct line
-                          setCurrentIssuesData((prevCurrentIssuesData) => {
-                            // get the current data and correct line that was changed
-                            let newCurrentIssuesData = [
-                              ...prevCurrentIssuesData
-                            ];
-                            let lineIndex = newCurrentIssuesData[issueIndex][
-                              section.name
-                            ].findIndex((l) => l.id === line.id);
-
-                            // save html and raw edits
-                            newCurrentIssuesData[issueIndex][section.name][
-                              lineIndex
-                            ].html = htmlEdits;
-                            newCurrentIssuesData[issueIndex][section.name][
-                              lineIndex
-                            ].value = rawEdits;
-
-                            return newCurrentIssuesData;
-                          });
-                        }}
-                        onDragToIssue={(
-                          targetissueId,
-                          noteSection,
-                          noteBlock
-                        ) => {
-                          // check that the content is not empty before allowing drag
-                          if (noteBlock.value.trim() === '') {
-                            return;
-                          }
-
-                          // map note content into the correct section
-                          let editsToIssue = {
-                            context:
-                              noteSection === 'context'
-                                ? [noteBlock]
-                                : [
-                                    {
-                                      id: new mongoose.Types.ObjectId().toString(),
-                                      type: 'note',
-                                      context: [],
-                                      value: ''
-                                    }
-                                  ],
-                            assessment:
-                              noteSection === 'assessment'
-                                ? [noteBlock]
-                                : [
-                                    {
-                                      id: new mongoose.Types.ObjectId().toString(),
-                                      type: 'note',
-                                      context: [],
-                                      value: ''
-                                    }
-                                  ],
-                            plan:
-                              noteSection === 'plan'
-                                ? [noteBlock]
-                                : [
-                                    {
-                                      id: new mongoose.Types.ObjectId().toString(),
-                                      type: 'note',
-                                      context: [],
-                                      value: ''
-                                    }
-                                  ]
-                          };
-
-                          // TODO: 04-23-24 -- case: what if note is dragged from practice to week's notes?
-                          // create a new practice if the note is dragged into the add practice section
-                          if (targetissueId === 'add-practice') {
-                            // create a new issue
-                            let newIssue = {
-                              id: new mongoose.Types.ObjectId().toString(),
-                              title: noteBlock.value
-                                .trim()
-                                .replace(/<\/?[^>]+(>|$)/g, ''),
-                              date: longDate(new Date()),
-                              lastUpdated: longDate(new Date()),
-                              context: editsToIssue['context'],
-                              assessment: editsToIssue['assessment'],
-                              plan: editsToIssue['plan'],
-                              priorInstances: []
-                            };
-
-                            setCAPData((prevCapData) => {
-                              let newCAPData = { ...prevCapData };
-                              newcurrentIssuesData.push(newIssue);
-                              return newCAPData;
-                            });
-
-                            targetissueId = newIssue.id;
-                          } else if (targetissueId === 'this-weeks-notes') {
-                            // add the note to the general CAP note
-                            setCAPData((prevCAPData) => {
-                              let newCAPData = { ...prevCAPData };
-                              newCAPData[noteSection] =
-                                newCAPData[noteSection].concat(noteBlock);
-
-                              return newCAPData;
-                            });
-                          }
-                          // otherwise, add data to the issue =
-                          else {
-                            // find the practice and its issue instance
-                            let issueIndex = currentIssuesData.findIndex(
-                              (practice) => practice.id === targetissueId
+                            // create a new object for the line
+                            let newLine = createNewTextEntryBlock(
+                              'note',
+                              [],
+                              '',
+                              '',
+                              true
                             );
-                            let issueInstance = currentIssuesData[issueIndex];
 
-                            // create a new issue instance for the practice if it doesn't exist
-                            if (issueInstance === null) {
-                              // if the current instance doesn't exist, intialize it with the additions from the notetaking space
-                              issueInstance = {
-                                id: new mongoose.Types.ObjectId().toString(),
-                                date: longDate(new Date(new Date())),
-                                lastUpdated: longDate(new Date()),
-                                context: editsToIssue['context'],
-                                assessment: editsToIssue['summary'],
-                                plan: editsToIssue['plan'],
-                                followUps: [],
-                                priorInstances: []
-                              };
-                            } else {
-                              // if the current instance exists, check if the new additions are empty
-                              if (
-                                issueInstance['context'].length === 1 &&
-                                issueInstance['context'][0].value === ''
-                              ) {
-                                issueInstance.context = editsToIssue['context'];
-                              } else {
-                                // otherwise, add the additions to the current instance
-                                issueInstance.context =
-                                  issueInstance.context.concat(
-                                    editsToIssue['context']
-                                  );
-                              }
+                            // check for shift-enter to add a new line
+                            if (e.key === 'Enter' && e.shiftKey) {
+                              // add new line underneath the current line
+                              setCurrentIssuesData((prevCurrentIssuesData) => {
+                                let newCurrentIssuesData = [
+                                  ...prevCurrentIssuesData
+                                ];
 
-                              // repeat for assessment
-                              if (
-                                issueInstance['assessment'].length === 1 &&
-                                issueInstance['assessment'][0].value === ''
-                              ) {
-                                issueInstance.assessment =
-                                  editsToIssue['assessment'];
-                              } else {
-                                // otherwise, add the additions to the current instance
-                                issueInstance.assessment =
-                                  issueInstance.assessment.concat(
-                                    editsToIssue['assessment']
-                                  );
-                              }
-
-                              // repeat for plan
-                              if (
-                                issueInstance['plan'].length === 1 &&
-                                issueInstance['plan'][0].value === ''
-                              ) {
-                                issueInstance.plan = editsToIssue['plan'];
-                              } else {
-                                // otherwise, add the additions to the current instance
-                                issueInstance.plan = issueInstance.plan.concat(
-                                  editsToIssue['plan']
+                                // find that line that was edited in the current instance of the practice
+                                let lineIndex = newCurrentIssuesData[
+                                  issueIndex
+                                ][section.name].findIndex(
+                                  (l) => l.id === line.id
                                 );
-                              }
 
-                              // update the last updated date
-                              issueInstance.date = longDate(new Date());
+                                // check if the current line is empty
+                                if (
+                                  lineIndex ===
+                                  newCurrentIssuesData[issueIndex][section.name]
+                                    .length -
+                                    1
+                                ) {
+                                  // don't add a new line if the current line is empty
+                                  if (
+                                    newCurrentIssuesData[issueIndex][
+                                      section.name
+                                    ][lineIndex].value.trim() === ''
+                                  ) {
+                                    newLineId =
+                                      newCurrentIssuesData[issueIndex][
+                                        section.name
+                                      ][lineIndex].id;
+                                    return newCurrentIssuesData;
+                                  }
+                                } else if (
+                                  lineIndex + 1 <
+                                  newCurrentIssuesData[issueIndex][section.name]
+                                    .length
+                                ) {
+                                  // don't add a new line if the next line is already an empty block
+                                  if (
+                                    newCurrentIssuesData[issueIndex][
+                                      section.name
+                                    ][lineIndex + 1].value.trim() === ''
+                                  ) {
+                                    newLineId =
+                                      newCurrentIssuesData[issueIndex][
+                                        section.name
+                                      ][lineIndex + 1].id;
+                                    return newCurrentIssuesData;
+                                  }
+                                }
+
+                                // otherwise, add to the list
+                                newLineId = newLine.id;
+                                newCurrentIssuesData[issueIndex][
+                                  section.name
+                                ].splice(lineIndex + 1, 0, newLine);
+
+                                return newCurrentIssuesData;
+                              });
+
+                              // TODO: 04-23-24 this causes a race condition where the new line is not yet rendered
+                              // could be fixed with a callback: https://github.com/the-road-to-learn-react/use-state-with-callback#usage
+                              // have a useEffect just in the view component that sets the focus to the new line (with a didMount): https://stackoverflow.com/questions/56247433/how-to-use-setstate-callback-on-react-hooks
+                              // set focus to added line if not undefined
+                              // if (newLineId !== undefined) {
+                              //   document.getElementById(newLineId).focus();
+                              // }
+                            } else if (
+                              (e.key === 'Backspace' || e.key === 'Delete') &&
+                              e.shiftKey
+                            ) {
+                              // remove line
+                              // add new line underneath the current line
+                              setCurrentIssuesData((prevCurrentIssuesData) => {
+                                let newCurrentIssuesData = [
+                                  ...prevCurrentIssuesData
+                                ];
+
+                                // find that line that was edited in the current instance of the practice
+                                let lineIndex = newCurrentIssuesData[
+                                  issueIndex
+                                ][section.name].findIndex(
+                                  (l) => l.id === line.id
+                                );
+
+                                // remove line
+                                newCurrentIssuesData[issueIndex][section.name] =
+                                  newCurrentIssuesData[issueIndex][
+                                    section.name
+                                  ].filter((l) => l.id !== line.id);
+
+                                // if the section is empty, add a new empty block
+                                if (
+                                  newCurrentIssuesData[issueIndex][section.name]
+                                    .length === 0
+                                ) {
+                                  newCurrentIssuesData[issueIndex][
+                                    section.name
+                                  ].push(newLine);
+                                }
+
+                                return newCurrentIssuesData;
+                              });
+                            }
+                          }}
+                          onChange={(htmlEdits, rawEdits) => {
+                            // before attempting a save, check if the line is identical to the previous line (both trimmed)
+                            rawEdits = rawEdits.trim();
+                            if (rawEdits === line.value.trim()) {
+                              return;
                             }
 
-                            setCAPData((prevCAPData) => {
-                              let newCAPData = { ...prevCAPData };
-                              newcurrentIssuesData[issueIndex] = issueInstance;
-                              newcurrentIssuesData[issueIndex].lastUpdated =
-                                longDate(new Date());
+                            // save rawEdits to the correct line
+                            setCurrentIssuesData((prevCurrentIssuesData) => {
+                              // get the current data and correct line that was changed
+                              let newCurrentIssuesData = [
+                                ...prevCurrentIssuesData
+                              ];
+                              let lineIndex = newCurrentIssuesData[issueIndex][
+                                section.name
+                              ].findIndex((l) => l.id === line.id);
 
-                              return newCAPData;
+                              // save html and raw edits
+                              newCurrentIssuesData[issueIndex][section.name][
+                                lineIndex
+                              ].html = htmlEdits;
+                              newCurrentIssuesData[issueIndex][section.name][
+                                lineIndex
+                              ].value = rawEdits;
+
+                              return newCurrentIssuesData;
                             });
+                          }}
+                          onDragToIssue={(
+                            targetissueId,
+                            noteSection,
+                            noteBlock
+                          ) => {
+                            // check that the content is not empty before allowing drag
+                            if (noteBlock.value.trim() === '') {
+                              return;
+                            }
 
-                            targetissueId = currentIssuesData[issueIndex].id;
-                          }
+                            // map note content into the correct section
+                            let editsToIssue = {
+                              context:
+                                noteSection === 'context'
+                                  ? [noteBlock]
+                                  : [
+                                      {
+                                        id: new mongoose.Types.ObjectId().toString(),
+                                        type: 'note',
+                                        context: [],
+                                        value: ''
+                                      }
+                                    ],
+                              assessment:
+                                noteSection === 'assessment'
+                                  ? [noteBlock]
+                                  : [
+                                      {
+                                        id: new mongoose.Types.ObjectId().toString(),
+                                        type: 'note',
+                                        context: [],
+                                        value: ''
+                                      }
+                                    ],
+                              plan:
+                                noteSection === 'plan'
+                                  ? [noteBlock]
+                                  : [
+                                      {
+                                        id: new mongoose.Types.ObjectId().toString(),
+                                        type: 'note',
+                                        context: [],
+                                        value: ''
+                                      }
+                                    ]
+                            };
 
-                          // remove note block that was dragged into the issue from the practice it was dragged from
-                          setCAPData((prevCAPData) => {
-                            let newSoapData = { ...prevCAPData };
+                            // TODO: 04-23-24 -- case: what if note is dragged from practice to week's notes?
+                            // create a new practice if the note is dragged into the add practice section
+                            if (targetissueId === 'add-practice') {
+                              // create a new issue
+                              let newIssue = {
+                                id: new mongoose.Types.ObjectId().toString(),
+                                title: noteBlock.value
+                                  .trim()
+                                  .replace(/<\/?[^>]+(>|$)/g, ''),
+                                date: longDate(new Date()),
+                                lastUpdated: longDate(new Date()),
+                                context: editsToIssue['context'],
+                                assessment: editsToIssue['assessment'],
+                                plan: editsToIssue['plan'],
+                                priorInstances: []
+                              };
 
-                            // get the practiceIndex of the practice the block was dragged from
-                            let issueIndex =
-                              newSoapData.currentIssues.findIndex(
-                                (practice) => practice.id === issueId
+                              setCAPData((prevCapData) => {
+                                let newCAPData = { ...prevCapData };
+                                newcurrentIssuesData.push(newIssue);
+                                return newCAPData;
+                              });
+
+                              targetissueId = newIssue.id;
+                            } else if (targetissueId === 'this-weeks-notes') {
+                              // add the note to the general CAP note
+                              setCAPData((prevCAPData) => {
+                                let newCAPData = { ...prevCAPData };
+                                newCAPData[noteSection] =
+                                  newCAPData[noteSection].concat(noteBlock);
+
+                                return newCAPData;
+                              });
+                            }
+                            // otherwise, add data to the issue =
+                            else {
+                              // find the practice and its issue instance
+                              let issueIndex = currentIssuesData.findIndex(
+                                (practice) => practice.id === targetissueId
                               );
+                              let issueInstance = currentIssuesData[issueIndex];
 
-                            // remove the note block from the edited section
-                            newSoapData.currentIssues[issueIndex][noteSection] =
+                              // create a new issue instance for the practice if it doesn't exist
+                              if (issueInstance === null) {
+                                // if the current instance doesn't exist, intialize it with the additions from the notetaking space
+                                issueInstance = {
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  date: longDate(new Date(new Date())),
+                                  lastUpdated: longDate(new Date()),
+                                  context: editsToIssue['context'],
+                                  assessment: editsToIssue['summary'],
+                                  plan: editsToIssue['plan'],
+                                  followUps: [],
+                                  priorInstances: []
+                                };
+                              } else {
+                                // if the current instance exists, check if the new additions are empty
+                                if (
+                                  issueInstance['context'].length === 1 &&
+                                  issueInstance['context'][0].value === ''
+                                ) {
+                                  issueInstance.context =
+                                    editsToIssue['context'];
+                                } else {
+                                  // otherwise, add the additions to the current instance
+                                  issueInstance.context =
+                                    issueInstance.context.concat(
+                                      editsToIssue['context']
+                                    );
+                                }
+
+                                // repeat for assessment
+                                if (
+                                  issueInstance['assessment'].length === 1 &&
+                                  issueInstance['assessment'][0].value === ''
+                                ) {
+                                  issueInstance.assessment =
+                                    editsToIssue['assessment'];
+                                } else {
+                                  // otherwise, add the additions to the current instance
+                                  issueInstance.assessment =
+                                    issueInstance.assessment.concat(
+                                      editsToIssue['assessment']
+                                    );
+                                }
+
+                                // repeat for plan
+                                if (
+                                  issueInstance['plan'].length === 1 &&
+                                  issueInstance['plan'][0].value === ''
+                                ) {
+                                  issueInstance.plan = editsToIssue['plan'];
+                                } else {
+                                  // otherwise, add the additions to the current instance
+                                  issueInstance.plan =
+                                    issueInstance.plan.concat(
+                                      editsToIssue['plan']
+                                    );
+                                }
+
+                                // update the last updated date
+                                issueInstance.date = longDate(new Date());
+                              }
+
+                              setCAPData((prevCAPData) => {
+                                let newCAPData = { ...prevCAPData };
+                                newcurrentIssuesData[issueIndex] =
+                                  issueInstance;
+                                newcurrentIssuesData[issueIndex].lastUpdated =
+                                  longDate(new Date());
+
+                                return newCAPData;
+                              });
+
+                              targetissueId = currentIssuesData[issueIndex].id;
+                            }
+
+                            // remove note block that was dragged into the issue from the practice it was dragged from
+                            setCAPData((prevCAPData) => {
+                              let newSoapData = { ...prevCAPData };
+
+                              // get the practiceIndex of the practice the block was dragged from
+                              let issueIndex =
+                                newSoapData.currentIssues.findIndex(
+                                  (practice) => practice.id === issueId
+                                );
+
+                              // remove the note block from the edited section
                               newSoapData.currentIssues[issueIndex][
+                                noteSection
+                              ] = newSoapData.currentIssues[issueIndex][
                                 noteSection
                               ].filter((line) => line.id !== noteBlock.id);
 
-                            // if the section is empty, add a new empty block
+                              // if the section is empty, add a new empty block
+                              if (
+                                newSoapData.currentIssues[issueIndex][
+                                  noteSection
+                                ].length === 0
+                              ) {
+                                newSoapData.currentIssues[issueIndex][
+                                  noteSection
+                                ].push({
+                                  id: new mongoose.Types.ObjectId().toString(),
+                                  type: 'note',
+                                  context: [],
+                                  value: ''
+                                });
+                              }
+                              return newSoapData;
+                            });
+                          }}
+                        />
+                      ))}
+
+                    {/* custom block for plan */}
+                    {section.name === 'plan' &&
+                      currIssue[section.name].map((line) => (
+                        <NoteBlockForPlan
+                          key={`note-block-from-issuepane-${line.id}`}
+                          noteSection={section.name}
+                          noteId={line.id}
+                          noteContent={line}
+                          onKeyDown={(e) => {
+                            // stop default behavior of enter key if enter + shift OR shift + backspace are pressed
                             if (
-                              newSoapData.currentIssues[issueIndex][noteSection]
-                                .length === 0
+                              (e.key === 'Enter' && e.shiftKey) ||
+                              ((e.key === 'Backspace' || e.key === 'Delete') &&
+                                e.shiftKey)
                             ) {
-                              newSoapData.currentIssues[issueIndex][
-                                noteSection
-                              ].push({
-                                id: new mongoose.Types.ObjectId().toString(),
-                                type: 'note',
-                                context: [],
-                                value: ''
+                              e.preventDefault();
+                            }
+                          }}
+                          onKeyUp={(e) => {
+                            // store id of new line so it can be focused on
+                            let newLineId;
+
+                            // create a new object for the line
+                            let newLine = createNewTextEntryBlock(
+                              'note',
+                              [],
+                              '',
+                              '',
+                              true
+                            );
+
+                            // check for shift-enter to add a new line
+                            if (e.key === 'Enter' && e.shiftKey) {
+                              // add new line underneath the current line
+                              setCurrentIssuesData((prevCurrentIssuesData) => {
+                                let newCurrentIssuesData = [
+                                  ...prevCurrentIssuesData
+                                ];
+
+                                // find that line that was edited in the current instance of the practice
+                                let lineIndex = newCurrentIssuesData[
+                                  issueIndex
+                                ][section.name].findIndex(
+                                  (l) => l.id === line.id
+                                );
+
+                                // check if the current line is empty
+                                if (
+                                  lineIndex ===
+                                  newCurrentIssuesData[issueIndex][section.name]
+                                    .length -
+                                    1
+                                ) {
+                                  // don't add a new line if the current line is empty
+                                  if (
+                                    newCurrentIssuesData[issueIndex][
+                                      section.name
+                                    ][lineIndex].value.trim() === ''
+                                  ) {
+                                    newLineId =
+                                      newCurrentIssuesData[issueIndex][
+                                        section.name
+                                      ][lineIndex].id;
+                                    return newCurrentIssuesData;
+                                  }
+                                } else if (
+                                  lineIndex + 1 <
+                                  newCurrentIssuesData[issueIndex][section.name]
+                                    .length
+                                ) {
+                                  // don't add a new line if the next line is already an empty block
+                                  if (
+                                    newCurrentIssuesData[issueIndex][
+                                      section.name
+                                    ][lineIndex + 1].value.trim() === ''
+                                  ) {
+                                    newLineId =
+                                      newCurrentIssuesData[issueIndex][
+                                        section.name
+                                      ][lineIndex + 1].id;
+                                    return newCurrentIssuesData;
+                                  }
+                                }
+
+                                // otherwise, add to the list
+                                newLineId = newLine.id;
+                                newCurrentIssuesData[issueIndex][
+                                  section.name
+                                ].splice(lineIndex + 1, 0, newLine);
+
+                                return newCurrentIssuesData;
+                              });
+
+                              // TODO: 04-23-24 this causes a race condition where the new line is not yet rendered
+                              // could be fixed with a callback: https://github.com/the-road-to-learn-react/use-state-with-callback#usage
+                              // have a useEffect just in the view component that sets the focus to the new line (with a didMount): https://stackoverflow.com/questions/56247433/how-to-use-setstate-callback-on-react-hooks
+                              // set focus to added line if not undefined
+                              // if (newLineId !== undefined) {
+                              //   document.getElementById(newLineId).focus();
+                              // }
+                            } else if (
+                              (e.key === 'Backspace' || e.key === 'Delete') &&
+                              e.shiftKey
+                            ) {
+                              // remove line
+                              // add new line underneath the current line
+                              setCurrentIssuesData((prevCurrentIssuesData) => {
+                                let newCurrentIssuesData = [
+                                  ...prevCurrentIssuesData
+                                ];
+
+                                // find that line that was edited in the current instance of the practice
+                                let lineIndex = newCurrentIssuesData[
+                                  issueIndex
+                                ][section.name].findIndex(
+                                  (l) => l.id === line.id
+                                );
+
+                                // remove line
+                                newCurrentIssuesData[issueIndex][section.name] =
+                                  newCurrentIssuesData[issueIndex][
+                                    section.name
+                                  ].filter((l) => l.id !== line.id);
+
+                                // if the section is empty, add a new empty block
+                                if (
+                                  newCurrentIssuesData[issueIndex][section.name]
+                                    .length === 0
+                                ) {
+                                  newCurrentIssuesData[issueIndex][
+                                    section.name
+                                  ].push(newLine);
+                                }
+
+                                return newCurrentIssuesData;
                               });
                             }
-                            return newSoapData;
-                          });
-                        }}
-                      />
-                    ))}
+                          }}
+                          onChange={(htmlEdits, rawEdits) => {
+                            // before attempting a save, check if the line is identical to the previous line (both trimmed)
+                            rawEdits = rawEdits.trim();
+                            if (rawEdits === line.value.trim()) {
+                              return;
+                            }
+
+                            // save rawEdits to the correct line
+                            setCurrentIssuesData((prevCurrentIssuesData) => {
+                              // get the current data and correct line that was changed
+                              let newCurrentIssuesData = [
+                                ...prevCurrentIssuesData
+                              ];
+                              let lineIndex = newCurrentIssuesData[issueIndex][
+                                section.name
+                              ].findIndex((l) => l.id === line.id);
+
+                              // save html and raw edits
+                              newCurrentIssuesData[issueIndex][section.name][
+                                lineIndex
+                              ].html = htmlEdits;
+                              newCurrentIssuesData[issueIndex][section.name][
+                                lineIndex
+                              ].value = rawEdits;
+
+                              return newCurrentIssuesData;
+                            });
+                          }}
+                          onDragToIssue={undefined}
+                        />
+                      ))}
                   </div>
                 </div>
 
@@ -535,11 +719,12 @@ export default function CurrWeekIssuePane({
                         <div>
                           <p>
                             <span className="font-semibold">[plan]:</span>{' '}
-                            stories, deliverables, or tasks to add to sprint log
+                            stories, deliverables, or tasks to add to sprint
+                            log.
                           </p>
                           <p>
                             <span className="font-semibold">[help]:</span> work
-                            with a peer or mentor on practice
+                            with a peer or mentor on practice.
                           </p>
                         </div>
                       </div>
@@ -549,11 +734,11 @@ export default function CurrWeekIssuePane({
                         <div>
                           <p>
                             <span className="font-semibold">[reflect]:</span>{' '}
-                            reflect on a situation if it comes up
+                            reflect on a situation if it comes up.
                           </p>
                           <p>
                             <span className="font-semibold">[self-work]:</span>{' '}
-                            work activity for student to do on their own
+                            work activity for student to do on their own.
                           </p>
                         </div>
                       </div>
@@ -567,14 +752,18 @@ export default function CurrWeekIssuePane({
                           {/* what (practice), who, where / when, how */}
                           <p>
                             <span className="font-semibold">
-                              w/[person, person]:
+                              w[<span className="font-normal">person</span>]:
                             </span>{' '}
-                            who the practice should be done with
+                            start a DM with a person to do the practice.
                           </p>
                           <p>
-                            <span className="font-semibold">@[venue]:</span>{' '}
-                            specific venue to do the practice; CAP will
-                            follow-up at the next one.
+                            <span className="font-semibold">
+                              at[
+                              <span className="font-normal">opportunity</span>
+                              ]:
+                            </span>{' '}
+                            next opportunity to do practice at (e.g., mysore,
+                            pair research).
                           </p>
                         </div>
                       </div>
@@ -585,11 +774,16 @@ export default function CurrWeekIssuePane({
                           {/* what (practice), who, where / when, how */}
                           <p>
                             <span className="font-semibold">
-                              rep/[representation]:
+                              rep/[
+                              <span className="font-normal">
+                                representation
+                              </span>
+                              ]:
                             </span>{' '}
-                            representation to use for practice (e.g., canvas
-                            section; sketch of a journey map; reflection
-                            question(s))
+                            representation to use for practice, which will be
+                            included in strategy. Supports canvas, design, and
+                            planning learning modules; general writing, table,
+                            or diagram.
                           </p>
                         </div>
                       </div>
