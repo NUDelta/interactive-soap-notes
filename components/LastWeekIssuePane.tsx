@@ -106,7 +106,7 @@ export default function LastWeekIssuePane({
           },
           body: JSON.stringify({
             projectName: projectName,
-            noteDate: noteInfo.sigDate
+            noteDate: selectedLastWeekIssue.date
           })
         });
 
@@ -395,9 +395,21 @@ export default function LastWeekIssuePane({
                     >
                       {/* Plan Updating Practices */}
                       <div className="mb-4">
-                        <h2 className="text-sm font-semibold border-b border-black">
-                          Plan Updating Practices
-                        </h2>
+                        <div className="flex flex-row items-center text-xs font-normal border-b border-black">
+                          <div className="text-sm font-semibold mr-1">
+                            Plan Updating Practices
+                          </div>
+                          <LinkIcon className="h-4 stroke-2 mr-1 text-blue-600" />
+                          <a
+                            href={practiceOutcome.currentSprint.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            Sprint Log
+                          </a>
+                        </div>
+
                         <div className="flex flex-wrap">
                           {practiceOutcome.practices
                             .filter((practice) => {
