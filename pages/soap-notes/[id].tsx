@@ -253,7 +253,7 @@ export default function CAPNote({
     return () => clearTimeout(timeOutId);
   }, [pastIssuesData, currentIssuesData]);
 
-  // // listen for changes in pastIssue or currentIssue state and do debounced saves to database
+  // // listen for changes in practiceGapData state and do debounced saves to database
   useEffect(() => {
     // don't save on first load
     if (firstLoadPracticeGaps.current) {

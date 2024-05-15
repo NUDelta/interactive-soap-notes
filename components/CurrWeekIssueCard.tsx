@@ -113,14 +113,15 @@ export default function CurrWeekIssueCard({
       // TODO: 04-30-24 -- allow dropping of note block and practice
       // what kinds of draggable items can be accepted into the issue
       accept: isAddIssue
-        ? [DragTypes.NOTE_BLOCK, DragTypes.PAST_ISSUE]
-        : [DragTypes.NOTE_BLOCK, DragTypes.PRACTICE],
+        ? [DragTypes.PAST_ISSUE] // [DragTypes.NOTE_BLOCK, DragTypes.PAST_ISSUE]
+        : [DragTypes.PRACTICE], // [DragTypes.NOTE_BLOCK, DragTypes.PRACTICE],
 
       // info for target item the draggable element is trying to be added to
       drop: () => ({
         name: `${allowedDropEffect} to issue: ${title}`,
         allowedDropEffect,
-        issue: issueId
+        id: issueId,
+        type: 'CurrentWeekIssueObject'
       }),
       collect: (monitor) => ({
         isOver: monitor.isOver(),
@@ -135,7 +136,7 @@ export default function CurrWeekIssueCard({
   const [{ opacity }, drag] = useDrag(
     () => ({
       type: isAddIssue ? '' : DragTypes.CURRENT_ISSUE,
-      item: { issueId },
+      item: { id: issueId, type: 'CurrentWeekIssueObject' },
       end(item, monitor) {
         const dropResult = monitor.getDropResult();
 
@@ -155,7 +156,7 @@ export default function CurrWeekIssueCard({
 
   return (
     <div
-      // ref={ref}
+      ref={ref}
       className={`basis-1/3 shrink-0 p-1 ${selectedIssue === issueId && !isActive ? 'bg-blue-200' : backgroundColor} ${isAddIssue ? 'border-2 border-dashed shadow-none' : 'border-4 shadow hover:border-4 hover:border-blue-300 hover:shadow-none'} ${opacity}`}
       onClick={() => {
         if (!isAddIssue) {

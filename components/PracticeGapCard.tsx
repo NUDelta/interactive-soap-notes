@@ -9,6 +9,7 @@ import { htmlToText, longDate, shortDate } from '../lib/helperFns';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import ContentEditable from 'react-contenteditable';
 import { createNewPracticeGapObject } from '../controllers/practiceGapObjects/createPracticeGapObject';
+import { createNewTextEntryBlock } from '../controllers/textEntryBlock/createNewTextEntryBlock';
 
 export default function PracticeGapCard({
   project,
@@ -79,7 +80,10 @@ export default function PracticeGapCard({
     });
   };
 
-  const onDrag = () => (sourcePracticeId, targetCurrentIssueId) => {
+  const onDrag = (sourcePracticeGap, targetCurrentIssue) => {
+    let sourcePracticeId = sourcePracticeGap.id;
+    let targetCurrentIssueId = targetCurrentIssue.id;
+
     // find index of the source practice
     let sourcePracticeIndex = practiceGapsData.findIndex(
       (practice) => practice.id === sourcePracticeId
@@ -92,62 +96,26 @@ export default function PracticeGapCard({
     );
     let targetIssue = currentIssuesData[targetIssueIndex];
 
-    // TODO: 05-14-24 -- add the ability to drag a practice gap onto an issue
+    // add practice gap to the issue
+    setPracticeGapsData((prevData) => {
+      let newPracticeGapsData = [...prevData];
+      newPracticeGapsData[sourcePracticeIndex].prevIssues.push(targetIssue);
+      return newPracticeGapsData;
+    });
 
-    // update state
-    // setCAPData((prevCapData) => {
-    //   let newCAPData = {
-    //     ...prevCapData
-    //   };
-
-    //   // attach practice to targetIssue as an assessment
-    //   let newAssessment = {
-    //     id: new mongoose.Types.ObjectId().toString(),
-    //     type: 'note',
-    //     context: [],
-    //     value: `[practice gap] ${sourcePractice.title}`
-    //   };
-
-    //   // check if last assessment is blank before adding
-    //   if (
-    //     targetIssue.assessment.length === 1 &&
-    //     targetIssue.assessment[0].value.trim() === ''
-    //   ) {
-    //     newCAPData.currentIssues[targetIssueIndex].assessment = [newAssessment];
-    //   } // check if the last assessment is blank
-    //   else if (
-    //     newCAPData.currentIssues[targetIssueIndex].assessment[
-    //       newCAPData.currentIssues[targetIssueIndex].assessment.length - 1
-    //     ].value.trim() === ''
-    //   ) {
-    //     newCAPData.currentIssues[targetIssueIndex].assessment[
-    //       newCAPData.currentIssues[targetIssueIndex].assessment.length - 1
-    //     ] = newAssessment;
-    //   } else {
-    //     newCAPData.currentIssues[targetIssueIndex].assessment.push(
-    //       newAssessment
-    //     );
-    //   }
-
-    //   // update the last updated timestamp
-    //   newCAPData.currentIssues[targetIssueIndex].lastUpdated = longDate(
-    //     new Date()
-    //   );
-
-    //   // attach the current issue as an instance to the practice
-    //   let newIssueInstance = {
-    //     id: targetIssue.id,
-    //     title: targetIssue.title,
-    //     date: targetIssue.date,
-    //     lastUpdated: targetIssue.lastUpdated
-    //   };
-    //   newCAPData.trackedPractices[sourcePracticeIndex].prevIssues.push(
-    //     targetIssue
-    //   );
-
-    //   // return the new data
-    //   return newCAPData;
-    // });
+    setCurrentIssuesData((prevData) => {
+      let newCurrentIssuesData = [...prevData];
+      newCurrentIssuesData[targetIssueIndex].assessment.push(
+        createNewTextEntryBlock(
+          'note',
+          [],
+          `[practice gap] ${sourcePractice.title}`,
+          `[practice gap] ${sourcePractice.title}`
+        )
+      );
+      newCurrentIssuesData[targetIssueIndex].lastUpdated = longDate(new Date());
+      return newCurrentIssuesData;
+    });
   };
 
   // special case for adding a new practice gap
@@ -173,13 +141,13 @@ export default function PracticeGapCard({
   const [{ opacity }, drag] = useDrag(
     () => ({
       type: DragTypes.PRACTICE,
-      item: { issueId: practiceGapId },
+      item: { id: practiceGapId, type: 'PracticeGapObject' },
       end(item, monitor) {
         const dropResult = monitor.getDropResult();
 
         // see if the note was dropped into an issue
         if (item && dropResult) {
-          onDrag(item.issueId, dropResult.issue);
+          onDrag(item, dropResult);
         }
       },
       collect: (monitor) => ({
