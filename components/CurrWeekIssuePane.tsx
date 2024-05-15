@@ -239,11 +239,7 @@ export default function CurrWeekIssuePane({
                               return newCurrentIssuesData;
                             });
                           }}
-                          onDragToIssue={(
-                            targetissueId,
-                            noteSection,
-                            noteBlock
-                          ) => {
+                          onDragToIssue={(noteBlockItem, targetIssueItem) => {
                             // check that the content is not empty before allowing drag
                             if (noteBlock.value.trim() === '') {
                               return;

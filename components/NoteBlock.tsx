@@ -148,7 +148,7 @@ export default function NoteBlock({
   const [{ opacity }, drag] = useDrag(
     () => ({
       type: DragTypes.NOTE_BLOCK,
-      item: { noteId },
+      item: { id: noteId, noteSection: noteSection, type: 'NoteBlock' },
       end(item, monitor) {
         const dropResult = monitor.getDropResult();
 
@@ -159,13 +159,13 @@ export default function NoteBlock({
             dropResult.allowedDropEffect === dropResult.dropEffect;
 
           // if drop was allowed, then move the note to the issue
-          if (isDropAllowed) {
-            console.log(
-              `Note ${noteId} was dropped into issue ${dropResult.issue}. Moving "${noteContent.value}" to "${noteSection}" of issue ${dropResult.issue}`
-            );
+          onDragToIssue(item, dropResult);
+          // if (isDropAllowed) {
+          //   console.log(
+          //     `Note ${noteId} was dropped into issue ${dropResult.issue}. Moving "${noteContent.value}" to "${noteSection}" of issue ${dropResult.issue}`
+          //   );
 
-            onDragToIssue(dropResult.issue, noteSection, noteContent);
-          }
+          // }
         }
       },
       collect: (monitor) => ({

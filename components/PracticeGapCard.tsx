@@ -140,6 +140,8 @@ export default function PracticeGapCard({
 
   // TODO: 04-30-24 -- probably should allow dropping onto practice from issues
   // drag and drop functionality
+  // drag and drop functionality
+  const ref = useRef(null);
   const [{ opacity }, drag] = useDrag(
     () => ({
       type: DragTypes.PRACTICE,
