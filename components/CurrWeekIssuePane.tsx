@@ -45,7 +45,7 @@ export default function CurrWeekIssuePane({
   ];
 
   // state variable for showing practice gaps
-  const [showPracticeGaps, setShowPracticeGaps] = useState('Hide Gaps');
+  const [showPracticeGaps, setShowPracticeGaps] = useState('Show Gaps');
 
   return (
     <div className="mb-5">
