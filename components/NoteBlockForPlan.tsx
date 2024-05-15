@@ -44,21 +44,19 @@ export default function NoteBlockForPlan({
     'w[': studentNameSet,
     // working representations
     'rep[': [
-      'canvas: problem statement',
-      'canvas: design argument',
-      'canvas: interface argument',
-      'canvas: system argument',
-      'canvas: user testing plan',
-      'canvas: testing takeaways',
-      'canvas: approach tree',
-      'canvas: 8-pack',
-      'design: journey map',
-      'design: storyboard',
+      'problem statement',
+      'design argument',
+      'interface argument',
+      'system argument',
+      'user testing plan',
+      'testing takeaways',
+      'approach tree',
+      '8-pack',
+      'journey map',
+      'storyboard',
       // 'planning: slicing',
-      'planning: risk assessment',
-      'write: __', // drafting a section
-      'table: __',
-      'diagram: __'
+      'risk assessment',
+      'enter your own'
     ],
     'at[': ['mysore', 'pair research']
   };

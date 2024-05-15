@@ -367,10 +367,9 @@ export const parsePracticeText = (practice) => {
     let matches;
     let representations = [];
     while ((matches = pattern.exec(output.content)) !== null) {
-      let matchSplit = matches[1].split(':');
+      let matchSplit = matches[1];
       representations.push({
-        type: matchSplit[0].trim(),
-        name: matchSplit[1].trim()
+        name: matchSplit.trim()
       });
     }
     // remove the rep[] tags from the content, but keep the people's names
@@ -378,15 +377,26 @@ export const parsePracticeText = (practice) => {
 
     // add representations
     for (let rep of representations) {
-      output.representations.push(representationObjects[rep.name]);
+      // check if representation is in the representationObjects
+      if (representationObjects[rep.name]) {
+        let repName = rep.name;
 
-      // now replace the representations with actual links
-      output.content = output.content.replace(
-        `${rep.type}: ${rep.name}`,
-        `<${representationObjects[rep.name].link}|${rep.name}>`
-      );
+        output.representations.push(representationObjects[rep.name]);
+
+        // now replace the representations with actual links
+        output.content = output.content.replace(
+          `${repName}`,
+          `<${representationObjects[repName].link}|${repName}>`
+        );
+      } else {
+        // just replace the representation with the name
+        // TODO: this should be done before the rep[] tags are removed
+        output.content = output.content.replace(
+          `${rep.name}`,
+          `"${rep.name}" representation`
+        );
+      }
     }
-
     // TODO: special cases for no links
     // 'write: __', // drafting a section
     //   'table: __',
