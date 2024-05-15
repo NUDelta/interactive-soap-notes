@@ -774,7 +774,7 @@ export default function CurrWeekIssuePane({
                           {/* what (practice), who, where / when, how */}
                           <p>
                             <span className="font-semibold">
-                              rep/[
+                              rep[
                               <span className="font-normal">
                                 representation
                               </span>

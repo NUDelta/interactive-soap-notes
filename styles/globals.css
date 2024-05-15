@@ -13,3 +13,13 @@ textarea {
 body {
   overflow: hidden;
 }
+
+/* Customization to react-autocomplete-input */
+.react-autocomplete-input {
+  font-size: 12px !important;
+  margin-top: 0.5em !important;
+}
+
+.react-autocomplete-input > li {
+  padding: 5px !important;
+}
