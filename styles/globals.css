@@ -18,6 +18,8 @@ body {
 .react-autocomplete-input {
   font-size: 12px !important;
   margin-top: 0.5em !important;
+  /* grid: 1fr 1fr !important; */
+  todo: see if I can show this together;
 }
 
 .react-autocomplete-input > li {
