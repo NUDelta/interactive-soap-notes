@@ -6,17 +6,17 @@ export const createNewPracticeGapObject = (
   project: string,
   sig: string,
   description: string,
-  currentDate: Date = new Date(),
+  currentDate: string = new Date().toISOString(),
   priorIssues: Types.ObjectId[] = [],
   includeId: boolean = false
 ): PracticeGapObjectStruct => {
   let newPracticeGapObject: PracticeGapObjectStruct = {
     title: title,
-    date: currentDate,
+    date: new Date(currentDate),
     project: project,
     sig: sig,
     description: description,
-    lastUpdated: currentDate,
+    lastUpdated: new Date(currentDate),
     practiceInactive: false,
     practiceArchived: false,
     prevIssues: priorIssues

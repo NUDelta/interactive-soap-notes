@@ -334,7 +334,7 @@ export default function LastWeekIssuePane({
                             key={`issue-card-${practiceGap.id}`}
                             project={noteInfo.project}
                             sig={noteInfo.sigName}
-                            date={noteInfo.sigDate}
+                            date={new Date(noteInfo.sigDate).toISOString()}
                             practiceGapId={practiceGap.id}
                             practiceGap={practiceGap}
                             practiceGapsData={practiceGapData}

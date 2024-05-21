@@ -2,11 +2,26 @@ import Link from 'next/link';
 import { fetchAllCAPNotes } from '../controllers/capNotes/fetchCAPNotes';
 import Head from 'next/head';
 import { longDate, shortDate } from '../lib/helperFns';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Home({ sigs }): JSX.Element {
   // store state for each SIG on whether to show latest or all CAP notes
   const [showAllNotes, setShowAllNotes] = useState(false);
+
+  // use a state variable for sigs so dates can be updated to locale time
+  const [sigsState, setSigsState] = useState(sigs);
+  useEffect(() => {
+    setSigsState(
+      sigs.map((sig) => ({
+        ...sig,
+        capNotes: sig.capNotes.map((capNote) => ({
+          ...capNote,
+          date: shortDate(new Date(capNote.date)),
+          lastUpdated: longDate(new Date(capNote.lastUpdated))
+        }))
+      }))
+    );
+  }, []);
 
   return (
     <>
@@ -33,7 +48,7 @@ export default function Home({ sigs }): JSX.Element {
 
         <div className="w-full col-span-2">
           {/* List of SIGs */}
-          {sigs.map((sig, i) => (
+          {sigsState.map((sig, i) => (
             <div className="w-full mb-10" key={sig.abbreviation}>
               <div className="col-span-2">
                 <h2 className="font-bold text-xl border-b border-black mb-3">
@@ -55,7 +70,7 @@ export default function Home({ sigs }): JSX.Element {
                         <Link
                           href={`/soap-notes/${sig.abbreviation.toLowerCase()}_${encodeURIComponent(
                             capNote.project
-                          )}_${capNote.date}`}
+                          )}_${new Date(capNote.date).toISOString().split('T')[0]}`}
                         >
                           <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
                             {capNote.project}
@@ -107,8 +122,8 @@ export const getServerSideProps = async () => {
         capNotes: [
           {
             project: capNote.project,
-            date: shortDate(capNote.date),
-            lastUpdated: longDate(capNote.lastUpdated),
+            date: capNote.date.toISOString(),
+            lastUpdated: capNote.lastUpdated.toISOString(),
             isLatest
           }
         ]
@@ -117,8 +132,8 @@ export const getServerSideProps = async () => {
       // add the CAP note to the SIG's list of CAP notes
       acc[sigIndex].capNotes.push({
         project: capNote.project,
-        date: shortDate(capNote.date),
-        lastUpdated: longDate(capNote.lastUpdated),
+        date: capNote.date.toISOString(),
+        lastUpdated: capNote.lastUpdated.toISOString(),
         isLatest
       });
     }

@@ -28,7 +28,14 @@ export default function CurrWeekIssueCard({
   // onAddIssue is a function that adds a new issue to the current issues
   const onAddIssue = (newIssueTitle) => {
     let newIssueForWeek = serializeDates(
-      createNewIssueObject(newIssueTitle, project, sig, date, [], true)
+      createNewIssueObject(
+        newIssueTitle,
+        project,
+        sig,
+        new Date(date).toISOString(),
+        [],
+        true
+      )
     );
     setCurrentIssuesData((prevData) => {
       return [...prevData, newIssueForWeek];
@@ -50,7 +57,7 @@ export default function CurrWeekIssueCard({
     setCurrentIssuesData((prevData) => {
       let issuesToUpdate = [...prevData];
       let issueIndex = issuesToUpdate.findIndex((i) => i.id === issueId);
-      issuesToUpdate[issueIndex].lastUpdated = longDate(new Date());
+      issuesToUpdate[issueIndex].lastUpdated = new Date().toISOString();
       issuesToUpdate[issueIndex].wasDeleted = true;
       return issuesToUpdate;
     });
@@ -67,6 +74,7 @@ export default function CurrWeekIssueCard({
       let issuesToUpdate = [...prevData];
       let issueIndex = issuesToUpdate.findIndex((i) => i.id === issueId);
       issuesToUpdate[issueIndex].title = value;
+      issuesToUpdate[issueIndex].lastUpdated = new Date().toISOString();
       return issuesToUpdate;
     });
   };
@@ -182,9 +190,10 @@ export default function CurrWeekIssueCard({
                 id={`title-${issueId}`}
                 html={titleRef.current}
                 onKeyUp={(e) => {
+                  const issueTitle = htmlToText(titleRef.current).trim();
                   if (e.key === 'Enter') {
                     // check if blank first
-                    let input = titleRef.current;
+                    let input = issueTitle;
                     if (input === '') {
                       return;
                     }
@@ -195,7 +204,7 @@ export default function CurrWeekIssueCard({
                   }
 
                   // set state holding issue to empty if enter was pressed, otherwise the current text
-                  setNewIssue(titleRef.current);
+                  setNewIssue(issueTitle);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
@@ -203,7 +212,7 @@ export default function CurrWeekIssueCard({
                   }
                 }}
                 onChange={(e) => {
-                  titleRef.current = htmlToText(e.target.value);
+                  titleRef.current = e.target.value;
                 }}
                 className={`p-1 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Describe_an_item_of_concern...'] empty:before:italic empty:before:text-slate-500 border text-xs font-normal rounded-lg`}
               />
@@ -223,9 +232,7 @@ export default function CurrWeekIssueCard({
                 html={titleRef.current}
                 onChange={(e) => {
                   titleRef.current = e.target.value.trim();
-                  onTitleEdit(
-                    e.target.value.trim().replace(/<\/?[^>]+(>|$)/g, '')
-                  );
+                  onTitleEdit(htmlToText(e.target.value).trim());
                 }}
                 className={`p-0.5 mr-2 w-full min-h-16 mb-1 break-words flex-none empty:before:content-['Describe_concern_you_observed...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
               />

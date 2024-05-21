@@ -40,7 +40,7 @@ export default function LastWeekIssueCard({
           sourcePastIssue.title,
           sourcePastIssue.project,
           sourcePastIssue.sig,
-          date,
+          new Date().toISOString(),
           [sourcePastIssue.id]
         );
 

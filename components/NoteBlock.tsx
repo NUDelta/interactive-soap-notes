@@ -215,7 +215,10 @@ export default function NoteBlock({
               blockContent.current = e.target.value;
 
               // save note changes
-              onChange(e.target.value, htmlToText(e.target.value));
+              onChange(
+                blockContent.current,
+                htmlToText(blockContent.current).trim()
+              );
             }}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}

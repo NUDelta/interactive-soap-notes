@@ -59,96 +59,41 @@ export default function CAPNote({
   const [saveError, setSaveError] = useState(null);
 
   // hold a ref that checks if first load
-  const firstLoadNoteInfo = useRef(true);
-  const firstLoadIssues = useRef(true);
-  const firstLoadPracticeGaps = useRef(true);
+  const firstLoad = useRef(true);
 
-  // listen for changes in noteInfo state and do debounced saves to database
+  // on first load, set the dates for noteInfo to be localized to the timezone
+  useEffect(() => {
+    setNoteInfo((prevNoteInfo) => ({
+      ...prevNoteInfo,
+      sigDate: shortDate(new Date(prevNoteInfo.sigDate)),
+      lastUpdated: longDate(new Date(prevNoteInfo.lastUpdated))
+    }));
+
+    setLastUpdated(longDate(new Date(noteInfo.lastUpdated)));
+  }, []);
+
+  // listen for changes in pastIssue, currentIssue, or practiceGaps states and do debounced saves to database
   useEffect(() => {
     // don't save on first load
-    if (firstLoadNoteInfo.current) {
-      firstLoadNoteInfo.current = false;
+    if (firstLoad.current) {
+      firstLoad.current = false;
       return;
     }
 
     setIsSaving(true);
     const timeOutId = setTimeout(async () => {
-      // hold a last updated timestamp
-      const lastUpdated = new Date();
-
-      // create a clone of the data to save
-      let dataToSave = structuredClone({
-        project: noteInfo.project,
-        date: noteInfo.sigDate,
-        lastUpdated: lastUpdated,
-        sigName: noteInfo.sigName,
-        sigAbbreviation: noteInfo.sigAbbreviation,
-        context: noteInfo.context ?? [],
-        assessment: noteInfo.assessment ?? [],
-        plan: noteInfo.plan ?? [],
-        pastIssues: noteInfo.pastIssues ?? [],
-        currentIssues: noteInfo.currentIssues ?? [],
-        trackedPractices: noteInfo.trackedPractices ?? []
-      });
-
-      // make request to save the data to the database
-      try {
-        const res = await fetch(`/api/soap/${noteInfo.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(dataToSave),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        const output = await res.json();
-
-        // if there's an error, throw an exception
-        if (!res.ok) {
-          throw new Error(`Error from server: ${output.error}`);
-        }
-
-        // otherwise, update the local data without a revalidation
-        if (output.data !== null) {
-          mutate(`/api/soap/${noteInfo.id}`, output.data, false);
-        }
-
-        // update the last updated timestamp for the note
-        setLastUpdated(longDate(lastUpdated, true));
-
-        // if there's no error, clear the error state
-        setSaveError(null);
-      } catch (err) {
-        // if there's an error, set the error state
-        console.error('Error in saving CAP note: ', err);
-        setSaveError(err.message);
-      }
-
-      // saving is completed
-      setIsSaving(false);
-    }, 1000);
-
-    return () => clearTimeout(timeOutId);
-  }, [noteInfo]);
-
-  // listen for changes in pastIssue or currentIssue state and do debounced saves to database
-  useEffect(() => {
-    // don't save on first load
-    if (firstLoadIssues.current) {
-      firstLoadIssues.current = false;
-      return;
-    }
-
-    setIsSaving(true);
-    const timeOutId = setTimeout(async () => {
+      /**
+       * Start by saving the issues
+       */
       // create a list of objects to save
       let pastIssuesToSave = pastIssuesData.map((issue) => {
         return structuredClone({
           id: issue.id,
           title: issue.title,
-          date: issue.date,
+          date: new Date(issue.date).toISOString(),
           project: issue.project,
           sig: issue.sig,
-          lastUpdated: issue.lastUpdated,
+          lastUpdated: new Date(issue.lastUpdated).toISOString(),
           wasDeleted: issue.wasDeleted,
           wasMerged: issue.wasMerged,
           mergeTarget: issue.mergeTarget,
@@ -159,14 +104,15 @@ export default function CAPNote({
           priorInstances: issue.priorInstances
         });
       });
+
       let currentIssuesToSave = currentIssuesData.map((issue) => {
         return structuredClone({
           id: issue.id,
           title: issue.title,
-          date: issue.date,
+          date: new Date(issue.date).toISOString(),
           project: issue.project,
           sig: issue.sig,
-          lastUpdated: issue.lastUpdated,
+          lastUpdated: new Date(issue.lastUpdated).toISOString(),
           wasDeleted: issue.wasDeleted,
           wasMerged: issue.wasMerged,
           mergeTarget: issue.mergeTarget,
@@ -179,6 +125,11 @@ export default function CAPNote({
       });
 
       // make request to save the data to the database
+      let noteInfoWithUtc = {
+        ...noteInfo,
+        sigDate: new Date(noteInfo.sigDate).toISOString(),
+        lastUpdated: new Date(noteInfo.lastUpdated).toISOString()
+      };
       try {
         // make one request to save the past issues
         const pastIssueRes = await fetch(`/api/issues/`, {
@@ -186,7 +137,7 @@ export default function CAPNote({
           body: JSON.stringify({
             data: [...pastIssuesToSave],
             updateType: 'past',
-            noteInfo: noteInfo
+            noteInfo: noteInfoWithUtc
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -197,7 +148,7 @@ export default function CAPNote({
         // if there's an error, throw an exception
         if (!pastIssueRes.ok) {
           throw new Error(
-            `Error from server when saving past issues: ${pastIssueOutput.error}`
+            `Error from server when saving PastIssues: ${pastIssueOutput.error}`
           );
         }
 
@@ -212,7 +163,7 @@ export default function CAPNote({
           body: JSON.stringify({
             data: [...currentIssuesToSave],
             updateType: 'current',
-            noteInfo: noteInfo
+            noteInfo: noteInfoWithUtc
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -223,7 +174,7 @@ export default function CAPNote({
         // if there's an error, throw an exception
         if (!currentIssueRes.ok) {
           throw new Error(
-            `Error from server when saving current issues: ${currentIssueOutput.error}`
+            `Error from server when saving CurrentIssues: ${currentIssueOutput.error}`
           );
         }
 
@@ -232,55 +183,26 @@ export default function CAPNote({
           mutate(`/api/issues/`, currentIssueOutput.data, false);
         }
 
-        // update noteInfo with the new list of issues
-        setNoteInfo((prevNoteInfo) => ({
-          ...prevNoteInfo,
-          pastIssues: pastIssueOutput.data.map((issue) => issue._id),
-          currentIssues: currentIssueOutput.data.map((issue) => issue._id)
-        }));
-
-        // if there's no error, clear the error state
-        setSaveError(null);
-      } catch (err) {
-        // if there's an error, set the error state
-        console.error('Error in saving IssueObjects: ', err);
-        setSaveError(err.message);
-      }
-
-      // NOTE: normally we'd reset the saving indicator here, but since this calls setNoteInfo and that has useEffect that also saves, we'll just have it reset there
-    }, 1000);
-
-    return () => clearTimeout(timeOutId);
-  }, [pastIssuesData, currentIssuesData]);
-
-  // // listen for changes in practiceGapData state and do debounced saves to database
-  useEffect(() => {
-    // don't save on first load
-    if (firstLoadPracticeGaps.current) {
-      firstLoadPracticeGaps.current = false;
-      return;
-    }
-
-    setIsSaving(true);
-    const timeOutId = setTimeout(async () => {
-      let practiceGapsToSave = practiceGapData.map((practiceGap) => {
-        return structuredClone({
-          id: practiceGap.id,
-          title: practiceGap.title,
-          date: practiceGap.date,
-          project: practiceGap.project,
-          sig: practiceGap.sig,
-          description: practiceGap.description,
-          lastUpdated: practiceGap.lastUpdated,
-          practiceInactive: practiceGap.practiceInactive,
-          practiceArchived: practiceGap.practiceArchived,
-          prevIssues: practiceGap.prevIssues.map((issue) => issue.id)
+        /**
+         * Now save the practice gaps
+         */
+        let practiceGapsToSave = practiceGapData.map((practiceGap) => {
+          return structuredClone({
+            id: practiceGap.id,
+            title: practiceGap.title,
+            date: new Date(practiceGap.date).toISOString(),
+            project: practiceGap.project,
+            sig: practiceGap.sig,
+            description: practiceGap.description,
+            lastUpdated: practiceGap.lastUpdated,
+            practiceInactive: practiceGap.practiceInactive,
+            practiceArchived: practiceGap.practiceArchived,
+            prevIssues: practiceGap.prevIssues.map((issue) => issue.id)
+          });
         });
-      });
 
-      try {
         // make request to save the data to the database
-        const res = await fetch(`/api/practice-gaps/`, {
+        const practiceGapRes = await fetch(`/api/practice-gaps/`, {
           method: 'POST',
           body: JSON.stringify({
             data: [...practiceGapsToSave]
@@ -289,38 +211,92 @@ export default function CAPNote({
             'Content-Type': 'application/json'
           }
         });
-        const output = await res.json();
+        const practiceGapOutput = await practiceGapRes.json();
 
         // if there's an error, throw an exception
-        if (!res.ok) {
+        if (!practiceGapRes.ok) {
           throw new Error(
-            `Error from server when saving practice gaps: ${output.error}`
+            `Error from server when saving PracticeGaps: ${practiceGapOutput.error}`
           );
         }
 
         // otherwise, update the local data without a revalidation
-        if (output.data !== null) {
-          mutate(`/api/practice-gaps/`, output.data, false);
+        if (practiceGapOutput.data !== null) {
+          mutate(`/api/practice-gaps/`, practiceGapOutput.data, false);
         }
 
-        // update the noteInfo with the new list of practice gaps
+        /**
+         * Finally, update and save noteInfo
+         */
+        // hold a last updated timestamp
+        const lastUpdated = new Date().toISOString();
+
+        // create a clone of the data to save
+        let dataToSave = structuredClone({
+          project: noteInfo.project,
+          date: new Date(noteInfo.sigDate).toISOString(),
+          lastUpdated: lastUpdated,
+          sigName: noteInfo.sigName,
+          sigAbbreviation: noteInfo.sigAbbreviation,
+          context: noteInfo.context ?? [],
+          assessment: noteInfo.assessment ?? [],
+          plan: noteInfo.plan ?? [],
+          pastIssues: pastIssueOutput.data.map((issue) => issue._id),
+          currentIssues: currentIssueOutput.data.map((issue) => issue._id),
+          trackedPractices: practiceGapOutput.data.map(
+            (practice) => practice._id
+          )
+        });
+
+        // make request to save the data to the database
+        const capNoteInfoRes = await fetch(`/api/soap/${noteInfo.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(dataToSave),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const capNoteInfoOutput = await capNoteInfoRes.json();
+
+        // if there's an error, throw an exception
+        if (!capNoteInfoRes.ok) {
+          throw new Error(
+            `Error from server when saving CAPNote: ${capNoteInfoOutput.error}`
+          );
+        }
+
+        // otherwise, update the local data without a revalidation
+        if (capNoteInfoOutput.data !== null) {
+          mutate(`/api/soap/${noteInfo.id}`, capNoteInfoOutput.data, false);
+        }
+
+        // update the last updated timestamp for the note
+        setLastUpdated(longDate(new Date(lastUpdated), true));
+
+        // update the state variable for noteInfo
         setNoteInfo((prevNoteInfo) => ({
           ...prevNoteInfo,
-          trackedPractices: output.data.map((practice) => practice._id)
+          pastIssues: pastIssueOutput.data.map((issue) => issue._id),
+          currentIssues: currentIssueOutput.data.map((issue) => issue._id),
+          trackedPractices: practiceGapOutput.data.map(
+            (practice) => practice._id
+          )
         }));
 
         // if there's no error, clear the error state
         setSaveError(null);
       } catch (err) {
         // if there's an error, set the error state
-        console.error('Error in saving PracticeGapObjects: ', err);
+        console.error('Error in saving data: ', err);
         setSaveError(err.message);
       }
 
-      // NOTE: normally we'd reset the saving indicator here, but since this calls setNoteInfo and that has useEffect that also saves, we'll just have it reset there
+      // saving is completed
+      setIsSaving(false);
     }, 1000);
+
     return () => clearTimeout(timeOutId);
-  }, [practiceGapData]);
+  }, [pastIssuesData, currentIssuesData, practiceGapData]);
 
   // return the page
   return (
@@ -427,14 +403,14 @@ export default function CAPNote({
                     </p>
 
                     {/* Issues */}
-                    <div className="grid grid-cols-8 gap-2">
+                    <div className="grid grid-cols-6 gap-2">
                       {/* Last Week Issues */}
                       {pastIssuesData.map((lastWeekIssue) => (
                         <LastWeekIssueCard
                           key={`issue-card-${lastWeekIssue.id}`}
                           issueId={lastWeekIssue.id}
                           title={lastWeekIssue.title}
-                          date={lastWeekIssue.date}
+                          date={new Date(lastWeekIssue.date).toISOString()}
                           selectedIssue={selectedIssue}
                           setSelectedIssue={setSelectedIssue}
                           pastIssuesData={pastIssuesData}
@@ -454,7 +430,7 @@ export default function CAPNote({
                             key={`issue-card-${currIssue.id}`}
                             project={noteInfo.project}
                             sig={noteInfo.sigName}
-                            date={noteInfo.sigDate}
+                            date={new Date(noteInfo.sigDate).toISOString()}
                             issueId={currIssue.id}
                             issue={currIssue}
                             selectedIssue={selectedIssue}
@@ -471,7 +447,7 @@ export default function CAPNote({
                         key="issue-card-add-issue"
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={noteInfo.sigDate}
+                        date={new Date(noteInfo.sigDate).toISOString()}
                         issueId="add-issue"
                         issue={null}
                         selectedIssue={selectedIssue}
@@ -519,7 +495,7 @@ export default function CAPNote({
                             key={`issue-card-${practiceGap.id}`}
                             project={noteInfo.project}
                             sig={noteInfo.sigName}
-                            date={noteInfo.sigDate}
+                            date={new Date(noteInfo.sigDate).toISOString()}
                             practiceGapId={practiceGap.id}
                             practiceGap={practiceGap}
                             practiceGapsData={practiceGapData}
@@ -536,7 +512,7 @@ export default function CAPNote({
                         key="issue-card-add-practice"
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={noteInfo.sigDate}
+                        date={new Date(noteInfo.sigDate).toISOString()}
                         practiceGapId="add-practice"
                         practiceGap={null}
                         practiceGapsData={practiceGapData}
@@ -590,7 +566,7 @@ export default function CAPNote({
                         issueId={selectedIssue}
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={noteInfo.sigDate}
+                        date={new Date(noteInfo.sigDate).toISOString()}
                         currentIssuesData={currentIssuesData}
                         setCurrentIssuesData={setCurrentIssuesData}
                         practiceGapData={practiceGapData}
@@ -674,14 +650,20 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
    */
   // TODO: see how I can add type checking to this
   let currentCAPNote = await fetchCAPNote(sigAbbrev, project, date);
-  let currentCAPNoteFlattened = currentCAPNote.toJSON(mongoIdFlattener);
+  let currentCAPNoteFlattened = serializeDates(
+    currentCAPNote.toJSON(mongoIdFlattener)
+  );
 
   // get the issues for the current note
   let pastIssues = await fetchIssueObjectsByIds(
     currentCAPNote.pastIssues.map((issue) => issue._id)
   );
   let pastIssuesFlattened = pastIssues.map((issue) => {
-    return serializeDates(issue.toJSON(mongoIdFlattener));
+    let flattenedData = serializeDates(issue.toJSON(mongoIdFlattener));
+    flattenedData.priorInstances = issue.priorInstances.map((instance) => {
+      return instance.toString();
+    });
+    return flattenedData;
   });
 
   let currentIssues = await fetchIssueObjectsByIds(
@@ -712,7 +694,11 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
         trackedPractice.prevIssues.map((issue) => issue._id)
       )
     ).map((issue) => {
-      return serializeDates(issue.toJSON(mongoIdFlattener));
+      let flattenedData = serializeDates(issue.toJSON(mongoIdFlattener));
+      flattenedData.priorInstances = issue.priorInstances.map((instance) => {
+        return instance.toString();
+      });
+      return flattenedData;
     });
   }
 
@@ -722,8 +708,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     project: currentCAPNoteFlattened.project,
     sigName: currentCAPNoteFlattened.sigName,
     sigAbbreviation: currentCAPNoteFlattened.sigAbbreviation,
-    sigDate: shortDate(currentCAPNoteFlattened.date),
-    lastUpdated: longDate(currentCAPNoteFlattened.lastUpdated, true),
+    sigDate: currentCAPNoteFlattened.date,
+    lastUpdated: currentCAPNoteFlattened.lastUpdated,
     context: currentCAPNoteFlattened.context,
     assessment: currentCAPNoteFlattened.assessment,
     plan: currentCAPNoteFlattened.plan,
@@ -865,53 +851,17 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   const currentWeekIssues = currentIssuesFlattened;
   const practiceGaps = trackedPracticesFlattened;
 
-  // setup triggers and options for each section's text boxes
-  // TODO: have controllers that abstract this
-  const autocompleteTriggersOptions = {
-    summary: {},
-    context: {},
-    subjective: {},
-    objective: {},
-    assessment: {},
-    plan: {
-      // '[practice]': [
-      //   ' morning of office hours: ',
-      //   ' at office hours: ',
-      //   ' after SIG: ',
-      //   ' day after SIG: ',
-      //   ' morning of next SIG: ',
-      //   ' at next SIG: ',
-      //   ' morning of studio: ',
-      //   ' at studio: ',
-      //   ' after studio: '
-      // ],
-      // '[follow-up]': [' follow-up template at next SIG meeting']
-      // TODO: what are other kinds of self-regulation strategies / buckets
-      '[': ['plan]: ', 'help]: ', 'reflect]: ', 'self-work]: '],
-      'w/': ['mentor', 'peer', 'self'],
-      'rep/': [
-        'problem statement',
-        'design argument',
-        'interface argument',
-        'system argument',
-        'user testing plan',
-        'testing takeaways',
-        'approach tree',
-        'sketch a journey map / storyboard',
-        '', // empty string for no representation
-        'write: ',
-        'reflect on: '
-      ],
-      '@': ['mysore', 'pair research', 'office hours', 'sig']
-    }
-  };
-
-  // print before returning
-  console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 2));
-  console.log('lastWeekIssues', JSON.stringify(lastWeekIssues, null, 2));
-  console.log('currentWeekIssues', JSON.stringify(currentWeekIssues, null, 2));
-  console.log('practiceGaps', JSON.stringify(practiceGaps, null, 2));
-  console.log('autocompleteTriggersOptions', autocompleteTriggersOptions);
+  // print before returning if in development
+  const env = process.env.NODE_ENV;
+  if (env == 'development') {
+    console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 2));
+    console.log('lastWeekIssues', JSON.stringify(lastWeekIssues, null, 2));
+    console.log(
+      'currentWeekIssues',
+      JSON.stringify(currentWeekIssues, null, 2)
+    );
+    console.log('practiceGaps', JSON.stringify(practiceGaps, null, 2));
+  }
 
   return {
     props: {

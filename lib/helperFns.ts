@@ -17,8 +17,7 @@ export const longDate = (
     day: 'numeric',
     hour: 'numeric',
     minute: 'numeric',
-    second: includeSeconds ? 'numeric' : undefined,
-    timeZone: timezone
+    second: includeSeconds ? 'numeric' : undefined
   });
 };
 
@@ -32,8 +31,7 @@ export const shortDate = (date: Date, timezone: string = 'America/Chicago') => {
     weekday: 'short',
     year: 'numeric',
     month: 'short',
-    day: 'numeric',
-    timeZone: timezone
+    day: 'numeric'
   });
 };
 
@@ -45,11 +43,12 @@ export const shortDate = (date: Date, timezone: string = 'America/Chicago') => {
 export const serializeDates = (object) => {
   return {
     ...object,
-    date: typeof object.date === 'string' ? object.date : longDate(object.date),
+    date:
+      typeof object.date === 'string' ? object.date : object.date.toISOString(),
     lastUpdated:
       typeof object.lastUpdated === 'string'
         ? object.lastUpdated
-        : longDate(object.lastUpdated)
+        : object.lastUpdated.toISOString()
   };
 };
 
