@@ -34,7 +34,7 @@ export default function PracticeGapCard({
       project,
       sig,
       '',
-      date,
+      new Date(date).toISOString(),
       [],
       true
     );
@@ -63,7 +63,7 @@ export default function PracticeGapCard({
         (i) => i.id === practiceGapId
       );
       practiceToUpdate[practiceIndex].practiceInactive = true;
-      practiceToUpdate[practiceIndex].lastUpdated = longDate(new Date());
+      practiceToUpdate[practiceIndex].lastUpdated = new Date().toISOString();
       return practiceToUpdate;
     });
   };
@@ -75,7 +75,7 @@ export default function PracticeGapCard({
         (i) => i.id === practiceGapId
       );
       practiceToUpdate[practiceIndex][field] = edits;
-      practiceToUpdate[practiceIndex].lastUpdated = longDate(new Date());
+      practiceToUpdate[practiceIndex].lastUpdated = new Date().toISOString();
       return practiceToUpdate;
     });
   };
@@ -107,7 +107,8 @@ export default function PracticeGapCard({
           `[practice gap] ${sourcePractice.title}`
         )
       );
-      newCurrentIssuesData[targetIssueIndex].lastUpdated = longDate(new Date());
+      newCurrentIssuesData[targetIssueIndex].lastUpdated =
+        new Date().toISOString();
 
       // add issue to practice gap
       setPracticeGapsData((prevData) => {

@@ -28,7 +28,14 @@ export default function CurrWeekIssueCard({
   // onAddIssue is a function that adds a new issue to the current issues
   const onAddIssue = (newIssueTitle) => {
     let newIssueForWeek = serializeDates(
-      createNewIssueObject(newIssueTitle, project, sig, date, [], true)
+      createNewIssueObject(
+        newIssueTitle,
+        project,
+        sig,
+        new Date(date).toISOString(),
+        [],
+        true
+      )
     );
     setCurrentIssuesData((prevData) => {
       return [...prevData, newIssueForWeek];
@@ -50,7 +57,7 @@ export default function CurrWeekIssueCard({
     setCurrentIssuesData((prevData) => {
       let issuesToUpdate = [...prevData];
       let issueIndex = issuesToUpdate.findIndex((i) => i.id === issueId);
-      issuesToUpdate[issueIndex].lastUpdated = longDate(new Date());
+      issuesToUpdate[issueIndex].lastUpdated = new Date().toISOString();
       issuesToUpdate[issueIndex].wasDeleted = true;
       return issuesToUpdate;
     });
@@ -67,6 +74,7 @@ export default function CurrWeekIssueCard({
       let issuesToUpdate = [...prevData];
       let issueIndex = issuesToUpdate.findIndex((i) => i.id === issueId);
       issuesToUpdate[issueIndex].title = value;
+      issuesToUpdate[issueIndex].lastUpdated = new Date().toISOString();
       return issuesToUpdate;
     });
   };

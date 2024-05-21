@@ -15,20 +15,10 @@ export const createPostSigMessage = (
   practiceAgents,
   orgObjs
 ) => {
-  console.log('noteDate', noteDate);
   let currDate = new Date(noteDate);
-  currDate.setHours(currDate.getHours() + 5); // HACK FOR CHICAGO / UTC ISSUES: add 5 hours to avoid timezone issues
   let weekFromCurrDate = new Date(currDate.getTime());
   weekFromCurrDate.setDate(weekFromCurrDate.getDate() + 7);
   let timezone = 'America/Chicago';
-
-  // console.log(currDate.toUTCString(), weekFromCurrDate.toUTCString());
-  // console.log('orignal dates', currDate, weekFromCurrDate);
-  // console.log(
-  //   'new timezone dates',
-  //   convertTZ(currDate, timezone),
-  //   convertTZ(weekFromCurrDate, timezone)
-  // );
 
   let newActiveIssue = {
     scriptId: crypto
@@ -94,11 +84,9 @@ export const createPostSigMessage = (
     });
   }.toString();
 
-  console.log(strategyFunction);
-
   strategyFunction = strategyFunction.replace(
     'currDate',
-    currDate.toUTCString()
+    currDate.toISOString()
   );
   strategyFunction = strategyFunction.replace('timezone', timezone);
   strategyFunction = strategyFunction.replace(

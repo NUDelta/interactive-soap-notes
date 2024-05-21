@@ -7,9 +7,14 @@ import {
 
 export const updatePracticeGapObject = async (practiceGapObject: object) => {
   await dbConnect();
+
+  // get the original practice gap object
   let practiceGapObjectId = practiceGapObject['id'];
   let originalPracticeGapObject =
     await PracticeGapObjectModel.findById(practiceGapObjectId);
+
+  // update the practice gap object
+  // upsert: create a document if it doesn't exist
   let updatedPracticeGapObject = await PracticeGapObjectModel.findByIdAndUpdate(
     practiceGapObjectId,
     practiceGapObject,

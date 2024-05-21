@@ -295,8 +295,8 @@ export default function CurrWeekIssuePane({
                                 title: noteBlock.value
                                   .trim()
                                   .replace(/<\/?[^>]+(>|$)/g, ''),
-                                date: longDate(new Date()),
-                                lastUpdated: longDate(new Date()),
+                                date: new Date().toISOString(),
+                                lastUpdated: new Date().toISOString(),
                                 context: editsToIssue['context'],
                                 assessment: editsToIssue['assessment'],
                                 plan: editsToIssue['plan'],
@@ -333,8 +333,8 @@ export default function CurrWeekIssuePane({
                                 // if the current instance doesn't exist, intialize it with the additions from the notetaking space
                                 issueInstance = {
                                   id: new mongoose.Types.ObjectId().toString(),
-                                  date: longDate(new Date(new Date())),
-                                  lastUpdated: longDate(new Date()),
+                                  date: new Date().toISOString(),
+                                  lastUpdated: new Date().toISOString(),
                                   context: editsToIssue['context'],
                                   assessment: editsToIssue['summary'],
                                   plan: editsToIssue['plan'],
@@ -387,7 +387,7 @@ export default function CurrWeekIssuePane({
                                 }
 
                                 // update the last updated date
-                                issueInstance.date = longDate(new Date());
+                                issueInstance.date = new Date().toISOString();
                               }
 
                               setCAPData((prevCAPData) => {
@@ -395,7 +395,7 @@ export default function CurrWeekIssuePane({
                                 newcurrentIssuesData[issueIndex] =
                                   issueInstance;
                                 newcurrentIssuesData[issueIndex].lastUpdated =
-                                  longDate(new Date());
+                                  new Date().toISOString();
 
                                 return newCAPData;
                               });
@@ -677,7 +677,7 @@ export default function CurrWeekIssuePane({
                               key={`issue-card-${practiceGap.id}`}
                               project={project}
                               sig={sig}
-                              date={date}
+                              date={new Date(date).toISOString()}
                               practiceGapId={practiceGap.id}
                               practiceGap={practiceGap}
                               practiceGapsData={practiceGapData}
@@ -695,7 +695,7 @@ export default function CurrWeekIssuePane({
                           key="issue-card-add-practice"
                           project={project}
                           sig={sig}
-                          date={date}
+                          date={new Date(date).toISOString()}
                           practiceGapId="add-practice"
                           practiceGap={null}
                           practiceGapsData={practiceGapData}

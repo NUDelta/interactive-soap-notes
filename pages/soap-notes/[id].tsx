@@ -61,6 +61,17 @@ export default function CAPNote({
   // hold a ref that checks if first load
   const firstLoad = useRef(true);
 
+  // on first load, set the dates for noteInfo to be localized to the timezone
+  useEffect(() => {
+    setNoteInfo((prevNoteInfo) => ({
+      ...prevNoteInfo,
+      sigDate: shortDate(new Date(prevNoteInfo.sigDate)),
+      lastUpdated: longDate(new Date(prevNoteInfo.lastUpdated))
+    }));
+
+    setLastUpdated(longDate(new Date(noteInfo.lastUpdated)));
+  }, []);
+
   // listen for changes in pastIssue, currentIssue, or practiceGaps states and do debounced saves to database
   useEffect(() => {
     // don't save on first load
@@ -79,10 +90,10 @@ export default function CAPNote({
         return structuredClone({
           id: issue.id,
           title: issue.title,
-          date: issue.date,
+          date: new Date(issue.date).toISOString(),
           project: issue.project,
           sig: issue.sig,
-          lastUpdated: issue.lastUpdated,
+          lastUpdated: new Date(issue.lastUpdated).toISOString(),
           wasDeleted: issue.wasDeleted,
           wasMerged: issue.wasMerged,
           mergeTarget: issue.mergeTarget,
@@ -93,14 +104,15 @@ export default function CAPNote({
           priorInstances: issue.priorInstances
         });
       });
+
       let currentIssuesToSave = currentIssuesData.map((issue) => {
         return structuredClone({
           id: issue.id,
           title: issue.title,
-          date: issue.date,
+          date: new Date(issue.date).toISOString(),
           project: issue.project,
           sig: issue.sig,
-          lastUpdated: issue.lastUpdated,
+          lastUpdated: new Date(issue.lastUpdated).toISOString(),
           wasDeleted: issue.wasDeleted,
           wasMerged: issue.wasMerged,
           mergeTarget: issue.mergeTarget,
@@ -113,6 +125,11 @@ export default function CAPNote({
       });
 
       // make request to save the data to the database
+      let noteInfoWithUtc = {
+        ...noteInfo,
+        sigDate: new Date(noteInfo.sigDate).toISOString(),
+        lastUpdated: new Date(noteInfo.lastUpdated).toISOString()
+      };
       try {
         // make one request to save the past issues
         const pastIssueRes = await fetch(`/api/issues/`, {
@@ -120,7 +137,7 @@ export default function CAPNote({
           body: JSON.stringify({
             data: [...pastIssuesToSave],
             updateType: 'past',
-            noteInfo: noteInfo
+            noteInfo: noteInfoWithUtc
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -146,7 +163,7 @@ export default function CAPNote({
           body: JSON.stringify({
             data: [...currentIssuesToSave],
             updateType: 'current',
-            noteInfo: noteInfo
+            noteInfo: noteInfoWithUtc
           }),
           headers: {
             'Content-Type': 'application/json'
@@ -173,7 +190,7 @@ export default function CAPNote({
           return structuredClone({
             id: practiceGap.id,
             title: practiceGap.title,
-            date: practiceGap.date,
+            date: new Date(practiceGap.date).toISOString(),
             project: practiceGap.project,
             sig: practiceGap.sig,
             description: practiceGap.description,
@@ -212,12 +229,12 @@ export default function CAPNote({
          * Finally, update and save noteInfo
          */
         // hold a last updated timestamp
-        const lastUpdated = new Date();
+        const lastUpdated = new Date().toISOString();
 
         // create a clone of the data to save
         let dataToSave = structuredClone({
           project: noteInfo.project,
-          date: noteInfo.sigDate,
+          date: new Date(noteInfo.sigDate).toISOString(),
           lastUpdated: lastUpdated,
           sigName: noteInfo.sigName,
           sigAbbreviation: noteInfo.sigAbbreviation,
@@ -254,7 +271,7 @@ export default function CAPNote({
         }
 
         // update the last updated timestamp for the note
-        setLastUpdated(longDate(lastUpdated, true));
+        setLastUpdated(longDate(new Date(lastUpdated), true));
 
         // update the state variable for noteInfo
         setNoteInfo((prevNoteInfo) => ({
@@ -393,7 +410,7 @@ export default function CAPNote({
                           key={`issue-card-${lastWeekIssue.id}`}
                           issueId={lastWeekIssue.id}
                           title={lastWeekIssue.title}
-                          date={lastWeekIssue.date}
+                          date={new Date(lastWeekIssue.date).toISOString()}
                           selectedIssue={selectedIssue}
                           setSelectedIssue={setSelectedIssue}
                           pastIssuesData={pastIssuesData}
@@ -413,7 +430,7 @@ export default function CAPNote({
                             key={`issue-card-${currIssue.id}`}
                             project={noteInfo.project}
                             sig={noteInfo.sigName}
-                            date={noteInfo.sigDate}
+                            date={new Date(noteInfo.sigDate).toISOString()}
                             issueId={currIssue.id}
                             issue={currIssue}
                             selectedIssue={selectedIssue}
@@ -430,7 +447,7 @@ export default function CAPNote({
                         key="issue-card-add-issue"
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={noteInfo.sigDate}
+                        date={new Date(noteInfo.sigDate).toISOString()}
                         issueId="add-issue"
                         issue={null}
                         selectedIssue={selectedIssue}
@@ -478,7 +495,7 @@ export default function CAPNote({
                             key={`issue-card-${practiceGap.id}`}
                             project={noteInfo.project}
                             sig={noteInfo.sigName}
-                            date={noteInfo.sigDate}
+                            date={new Date(noteInfo.sigDate).toISOString()}
                             practiceGapId={practiceGap.id}
                             practiceGap={practiceGap}
                             practiceGapsData={practiceGapData}
@@ -495,7 +512,7 @@ export default function CAPNote({
                         key="issue-card-add-practice"
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={noteInfo.sigDate}
+                        date={new Date(noteInfo.sigDate).toISOString()}
                         practiceGapId="add-practice"
                         practiceGap={null}
                         practiceGapsData={practiceGapData}
@@ -549,7 +566,7 @@ export default function CAPNote({
                         issueId={selectedIssue}
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={noteInfo.sigDate}
+                        date={new Date(noteInfo.sigDate).toISOString()}
                         currentIssuesData={currentIssuesData}
                         setCurrentIssuesData={setCurrentIssuesData}
                         practiceGapData={practiceGapData}
@@ -633,14 +650,20 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
    */
   // TODO: see how I can add type checking to this
   let currentCAPNote = await fetchCAPNote(sigAbbrev, project, date);
-  let currentCAPNoteFlattened = currentCAPNote.toJSON(mongoIdFlattener);
+  let currentCAPNoteFlattened = serializeDates(
+    currentCAPNote.toJSON(mongoIdFlattener)
+  );
 
   // get the issues for the current note
   let pastIssues = await fetchIssueObjectsByIds(
     currentCAPNote.pastIssues.map((issue) => issue._id)
   );
   let pastIssuesFlattened = pastIssues.map((issue) => {
-    return serializeDates(issue.toJSON(mongoIdFlattener));
+    let flattenedData = serializeDates(issue.toJSON(mongoIdFlattener));
+    flattenedData.priorInstances = issue.priorInstances.map((instance) => {
+      return instance.toString();
+    });
+    return flattenedData;
   });
 
   let currentIssues = await fetchIssueObjectsByIds(
@@ -671,7 +694,11 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
         trackedPractice.prevIssues.map((issue) => issue._id)
       )
     ).map((issue) => {
-      return serializeDates(issue.toJSON(mongoIdFlattener));
+      let flattenedData = serializeDates(issue.toJSON(mongoIdFlattener));
+      flattenedData.priorInstances = issue.priorInstances.map((instance) => {
+        return instance.toString();
+      });
+      return flattenedData;
     });
   }
 
@@ -681,8 +708,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     project: currentCAPNoteFlattened.project,
     sigName: currentCAPNoteFlattened.sigName,
     sigAbbreviation: currentCAPNoteFlattened.sigAbbreviation,
-    sigDate: longDate(currentCAPNoteFlattened.date, true),
-    lastUpdated: longDate(currentCAPNoteFlattened.lastUpdated, true),
+    sigDate: currentCAPNoteFlattened.date,
+    lastUpdated: currentCAPNoteFlattened.lastUpdated,
     context: currentCAPNoteFlattened.context,
     assessment: currentCAPNoteFlattened.assessment,
     plan: currentCAPNoteFlattened.plan,

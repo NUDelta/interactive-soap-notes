@@ -208,7 +208,7 @@ export default async function handler(
             let postSigScript = createPostSigMessage(
               noteInfo.id,
               noteInfo.project,
-              new Date(noteInfo.sigDate),
+              new Date(noteInfo.sigDate).toISOString(),
               practiceAgents,
               orgObjs
             );

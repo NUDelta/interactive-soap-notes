@@ -9,14 +9,14 @@ export const createNewIssueObject = (
   title: string,
   project: string,
   sig: string,
-  currentDate: Date = new Date(),
+  currentDate: string = new Date().toISOString(),
   priorInstances: string[] = [],
   includeId: boolean = false
 ): IssueObjectStruct => {
   // TODO: create new CAP placeholder fields
   let newIssueObject: IssueObjectStruct = {
     title: title,
-    date: currentDate,
+    date: new Date(currentDate),
     project: project,
     sig: sig,
     lastUpdated: new Date(),
