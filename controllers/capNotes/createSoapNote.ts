@@ -45,13 +45,13 @@ export const createCAPNote = async (projectName: string, noteDate: Date) => {
     let pastIssues = [];
     let trackedPractices = [];
     if (previousCAPNote) {
-      // fetch all IssueObjects for pastIssues so we only keep the ones that weren't deleted
-      const pastIssueIds = previousCAPNote?.pastIssues;
+      // using the currentIssue ids from the prior note, fetch all those IssueObjects and only include ones where wasDeleted and wasMerged is false (i.e., the mentor didn't remove them after notetaking or consolidate it with another issue) as pastIssues
+      const pastIssueIds = previousCAPNote.currentIssues;
       const issueObjects = await IssueObjectModel.find({
         _id: { $in: pastIssueIds }
       });
       pastIssues = issueObjects
-        .filter((issue) => !issue.wasDeleted)
+        .filter((issue) => !issue.wasDeleted && !issue.wasMerged)
         .map((issue) => issue._id);
 
       // keep all tracked practices
