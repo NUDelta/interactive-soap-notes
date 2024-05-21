@@ -386,7 +386,7 @@ export default function CAPNote({
                     </p>
 
                     {/* Issues */}
-                    <div className="grid grid-cols-8 gap-2">
+                    <div className="grid grid-cols-6 gap-2">
                       {/* Last Week Issues */}
                       {pastIssuesData.map((lastWeekIssue) => (
                         <LastWeekIssueCard

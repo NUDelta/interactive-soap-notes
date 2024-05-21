@@ -104,7 +104,7 @@ export default function NoteBlockForPlan({
         className="border shadow flex flex-col items-left align-middle mb-2 w-full"
         key={`note-block-${noteId}`}
       >
-        <div className="flex flex-row h-12">
+        <div className="flex flex-row h-16">
           {/* drag handle on left side */}
           <div
             className={`flex items-center fill-slate-200 stroke-slate-200 ${opacity}`}
