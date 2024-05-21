@@ -824,53 +824,17 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   const currentWeekIssues = currentIssuesFlattened;
   const practiceGaps = trackedPracticesFlattened;
 
-  // setup triggers and options for each section's text boxes
-  // TODO: have controllers that abstract this
-  const autocompleteTriggersOptions = {
-    summary: {},
-    context: {},
-    subjective: {},
-    objective: {},
-    assessment: {},
-    plan: {
-      // '[practice]': [
-      //   ' morning of office hours: ',
-      //   ' at office hours: ',
-      //   ' after SIG: ',
-      //   ' day after SIG: ',
-      //   ' morning of next SIG: ',
-      //   ' at next SIG: ',
-      //   ' morning of studio: ',
-      //   ' at studio: ',
-      //   ' after studio: '
-      // ],
-      // '[follow-up]': [' follow-up template at next SIG meeting']
-      // TODO: what are other kinds of self-regulation strategies / buckets
-      '[': ['plan]: ', 'help]: ', 'reflect]: ', 'self-work]: '],
-      'w/': ['mentor', 'peer', 'self'],
-      'rep/': [
-        'problem statement',
-        'design argument',
-        'interface argument',
-        'system argument',
-        'user testing plan',
-        'testing takeaways',
-        'approach tree',
-        'sketch a journey map / storyboard',
-        '', // empty string for no representation
-        'write: ',
-        'reflect on: '
-      ],
-      '@': ['mysore', 'pair research', 'office hours', 'sig']
-    }
-  };
-
-  // print before returning
-  console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 2));
-  console.log('lastWeekIssues', JSON.stringify(lastWeekIssues, null, 2));
-  console.log('currentWeekIssues', JSON.stringify(currentWeekIssues, null, 2));
-  console.log('practiceGaps', JSON.stringify(practiceGaps, null, 2));
-  console.log('autocompleteTriggersOptions', autocompleteTriggersOptions);
+  // print before returning if in development
+  const env = process.env.NODE_ENV;
+  if (env == 'development') {
+    console.log('capNoteInfo', JSON.stringify(capNoteInfo, null, 2));
+    console.log('lastWeekIssues', JSON.stringify(lastWeekIssues, null, 2));
+    console.log(
+      'currentWeekIssues',
+      JSON.stringify(currentWeekIssues, null, 2)
+    );
+    console.log('practiceGaps', JSON.stringify(practiceGaps, null, 2));
+  }
 
   return {
     props: {
