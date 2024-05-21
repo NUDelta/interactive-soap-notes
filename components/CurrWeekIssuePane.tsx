@@ -32,7 +32,7 @@ export default function CurrWeekIssuePane({
   const capSections = [
     {
       name: 'context',
-      title: "Context: what are you hearing or seeing that's bothering you?"
+      title: 'Context: what are you observing related to this issue?'
     },
     {
       name: 'assessment',
