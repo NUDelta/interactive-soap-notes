@@ -59,87 +59,21 @@ export default function CAPNote({
   const [saveError, setSaveError] = useState(null);
 
   // hold a ref that checks if first load
-  const firstLoadNoteInfo = useRef(true);
-  const firstLoadIssues = useRef(true);
-  const firstLoadPracticeGaps = useRef(true);
+  const firstLoad = useRef(true);
 
-  // listen for changes in noteInfo state and do debounced saves to database
+  // listen for changes in pastIssue, currentIssue, or practiceGaps states and do debounced saves to database
   useEffect(() => {
     // don't save on first load
-    if (firstLoadNoteInfo.current) {
-      firstLoadNoteInfo.current = false;
+    if (firstLoad.current) {
+      firstLoad.current = false;
       return;
     }
 
     setIsSaving(true);
     const timeOutId = setTimeout(async () => {
-      // hold a last updated timestamp
-      const lastUpdated = new Date();
-
-      // create a clone of the data to save
-      let dataToSave = structuredClone({
-        project: noteInfo.project,
-        date: noteInfo.sigDate,
-        lastUpdated: lastUpdated,
-        sigName: noteInfo.sigName,
-        sigAbbreviation: noteInfo.sigAbbreviation,
-        context: noteInfo.context ?? [],
-        assessment: noteInfo.assessment ?? [],
-        plan: noteInfo.plan ?? [],
-        pastIssues: noteInfo.pastIssues ?? [],
-        currentIssues: noteInfo.currentIssues ?? [],
-        trackedPractices: noteInfo.trackedPractices ?? []
-      });
-
-      // make request to save the data to the database
-      try {
-        const res = await fetch(`/api/soap/${noteInfo.id}`, {
-          method: 'PUT',
-          body: JSON.stringify(dataToSave),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        const output = await res.json();
-
-        // if there's an error, throw an exception
-        if (!res.ok) {
-          throw new Error(`Error from server: ${output.error}`);
-        }
-
-        // otherwise, update the local data without a revalidation
-        if (output.data !== null) {
-          mutate(`/api/soap/${noteInfo.id}`, output.data, false);
-        }
-
-        // update the last updated timestamp for the note
-        setLastUpdated(longDate(lastUpdated, true));
-
-        // if there's no error, clear the error state
-        setSaveError(null);
-      } catch (err) {
-        // if there's an error, set the error state
-        console.error('Error in saving CAP note: ', err);
-        setSaveError(err.message);
-      }
-
-      // saving is completed
-      setIsSaving(false);
-    }, 1000);
-
-    return () => clearTimeout(timeOutId);
-  }, [noteInfo]);
-
-  // listen for changes in pastIssue or currentIssue state and do debounced saves to database
-  useEffect(() => {
-    // don't save on first load
-    if (firstLoadIssues.current) {
-      firstLoadIssues.current = false;
-      return;
-    }
-
-    setIsSaving(true);
-    const timeOutId = setTimeout(async () => {
+      /**
+       * Start by saving the issues
+       */
       // create a list of objects to save
       let pastIssuesToSave = pastIssuesData.map((issue) => {
         return structuredClone({
@@ -197,7 +131,7 @@ export default function CAPNote({
         // if there's an error, throw an exception
         if (!pastIssueRes.ok) {
           throw new Error(
-            `Error from server when saving past issues: ${pastIssueOutput.error}`
+            `Error from server when saving PastIssues: ${pastIssueOutput.error}`
           );
         }
 
@@ -223,7 +157,7 @@ export default function CAPNote({
         // if there's an error, throw an exception
         if (!currentIssueRes.ok) {
           throw new Error(
-            `Error from server when saving current issues: ${currentIssueOutput.error}`
+            `Error from server when saving CurrentIssues: ${currentIssueOutput.error}`
           );
         }
 
@@ -232,55 +166,26 @@ export default function CAPNote({
           mutate(`/api/issues/`, currentIssueOutput.data, false);
         }
 
-        // update noteInfo with the new list of issues
-        setNoteInfo((prevNoteInfo) => ({
-          ...prevNoteInfo,
-          pastIssues: pastIssueOutput.data.map((issue) => issue._id),
-          currentIssues: currentIssueOutput.data.map((issue) => issue._id)
-        }));
-
-        // if there's no error, clear the error state
-        setSaveError(null);
-      } catch (err) {
-        // if there's an error, set the error state
-        console.error('Error in saving IssueObjects: ', err);
-        setSaveError(err.message);
-      }
-
-      // NOTE: normally we'd reset the saving indicator here, but since this calls setNoteInfo and that has useEffect that also saves, we'll just have it reset there
-    }, 1000);
-
-    return () => clearTimeout(timeOutId);
-  }, [pastIssuesData, currentIssuesData]);
-
-  // // listen for changes in practiceGapData state and do debounced saves to database
-  useEffect(() => {
-    // don't save on first load
-    if (firstLoadPracticeGaps.current) {
-      firstLoadPracticeGaps.current = false;
-      return;
-    }
-
-    setIsSaving(true);
-    const timeOutId = setTimeout(async () => {
-      let practiceGapsToSave = practiceGapData.map((practiceGap) => {
-        return structuredClone({
-          id: practiceGap.id,
-          title: practiceGap.title,
-          date: practiceGap.date,
-          project: practiceGap.project,
-          sig: practiceGap.sig,
-          description: practiceGap.description,
-          lastUpdated: practiceGap.lastUpdated,
-          practiceInactive: practiceGap.practiceInactive,
-          practiceArchived: practiceGap.practiceArchived,
-          prevIssues: practiceGap.prevIssues.map((issue) => issue.id)
+        /**
+         * Now save the practice gaps
+         */
+        let practiceGapsToSave = practiceGapData.map((practiceGap) => {
+          return structuredClone({
+            id: practiceGap.id,
+            title: practiceGap.title,
+            date: practiceGap.date,
+            project: practiceGap.project,
+            sig: practiceGap.sig,
+            description: practiceGap.description,
+            lastUpdated: practiceGap.lastUpdated,
+            practiceInactive: practiceGap.practiceInactive,
+            practiceArchived: practiceGap.practiceArchived,
+            prevIssues: practiceGap.prevIssues.map((issue) => issue.id)
+          });
         });
-      });
 
-      try {
         // make request to save the data to the database
-        const res = await fetch(`/api/practice-gaps/`, {
+        const practiceGapRes = await fetch(`/api/practice-gaps/`, {
           method: 'POST',
           body: JSON.stringify({
             data: [...practiceGapsToSave]
@@ -289,38 +194,92 @@ export default function CAPNote({
             'Content-Type': 'application/json'
           }
         });
-        const output = await res.json();
+        const practiceGapOutput = await practiceGapRes.json();
 
         // if there's an error, throw an exception
-        if (!res.ok) {
+        if (!practiceGapRes.ok) {
           throw new Error(
-            `Error from server when saving practice gaps: ${output.error}`
+            `Error from server when saving PracticeGaps: ${practiceGapOutput.error}`
           );
         }
 
         // otherwise, update the local data without a revalidation
-        if (output.data !== null) {
-          mutate(`/api/practice-gaps/`, output.data, false);
+        if (practiceGapOutput.data !== null) {
+          mutate(`/api/practice-gaps/`, practiceGapOutput.data, false);
         }
 
-        // update the noteInfo with the new list of practice gaps
+        /**
+         * Finally, update and save noteInfo
+         */
+        // hold a last updated timestamp
+        const lastUpdated = new Date();
+
+        // create a clone of the data to save
+        let dataToSave = structuredClone({
+          project: noteInfo.project,
+          date: noteInfo.sigDate,
+          lastUpdated: lastUpdated,
+          sigName: noteInfo.sigName,
+          sigAbbreviation: noteInfo.sigAbbreviation,
+          context: noteInfo.context ?? [],
+          assessment: noteInfo.assessment ?? [],
+          plan: noteInfo.plan ?? [],
+          pastIssues: pastIssueOutput.data.map((issue) => issue._id),
+          currentIssues: currentIssueOutput.data.map((issue) => issue._id),
+          trackedPractices: practiceGapOutput.data.map(
+            (practice) => practice._id
+          )
+        });
+
+        // make request to save the data to the database
+        const capNoteInfoRes = await fetch(`/api/soap/${noteInfo.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(dataToSave),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        const capNoteInfoOutput = await capNoteInfoRes.json();
+
+        // if there's an error, throw an exception
+        if (!capNoteInfoRes.ok) {
+          throw new Error(
+            `Error from server when saving CAPNote: ${capNoteInfoOutput.error}`
+          );
+        }
+
+        // otherwise, update the local data without a revalidation
+        if (capNoteInfoOutput.data !== null) {
+          mutate(`/api/soap/${noteInfo.id}`, capNoteInfoOutput.data, false);
+        }
+
+        // update the last updated timestamp for the note
+        setLastUpdated(longDate(lastUpdated, true));
+
+        // update the state variable for noteInfo
         setNoteInfo((prevNoteInfo) => ({
           ...prevNoteInfo,
-          trackedPractices: output.data.map((practice) => practice._id)
+          pastIssues: pastIssueOutput.data.map((issue) => issue._id),
+          currentIssues: currentIssueOutput.data.map((issue) => issue._id),
+          trackedPractices: practiceGapOutput.data.map(
+            (practice) => practice._id
+          )
         }));
 
         // if there's no error, clear the error state
         setSaveError(null);
       } catch (err) {
         // if there's an error, set the error state
-        console.error('Error in saving PracticeGapObjects: ', err);
+        console.error('Error in saving data: ', err);
         setSaveError(err.message);
       }
 
-      // NOTE: normally we'd reset the saving indicator here, but since this calls setNoteInfo and that has useEffect that also saves, we'll just have it reset there
+      // saving is completed
+      setIsSaving(false);
     }, 1000);
+
     return () => clearTimeout(timeOutId);
-  }, [practiceGapData]);
+  }, [pastIssuesData, currentIssuesData, practiceGapData]);
 
   // return the page
   return (
@@ -722,7 +681,7 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     project: currentCAPNoteFlattened.project,
     sigName: currentCAPNoteFlattened.sigName,
     sigAbbreviation: currentCAPNoteFlattened.sigAbbreviation,
-    sigDate: shortDate(currentCAPNoteFlattened.date),
+    sigDate: longDate(currentCAPNoteFlattened.date, true),
     lastUpdated: longDate(currentCAPNoteFlattened.lastUpdated, true),
     context: currentCAPNoteFlattened.context,
     assessment: currentCAPNoteFlattened.assessment,
