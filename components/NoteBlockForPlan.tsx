@@ -137,7 +137,7 @@ export default function NoteBlockForPlan({
               onKeyDown={onKeyDown}
               onChange={(value) => {
                 setBlockContent(value);
-                onChange(value, htmlToText(value));
+                onChange(value, htmlToText(value).trim());
               }}
               className={`h-full px-1 py-1 border-none rounded-none leading-normal flex-initial basis-full text-xs text-wrap break-words placeholder:italic placeholder:text-slate-400`}
             />

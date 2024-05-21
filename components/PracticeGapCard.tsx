@@ -177,9 +177,10 @@ export default function PracticeGapCard({
                     id={`title-${practiceGapId}`}
                     html={titleRef.current}
                     onKeyUp={(e) => {
+                      const practiceTitle = htmlToText(titleRef.current).trim();
                       if (e.key === 'Enter') {
                         // check if blank first
-                        let input = titleRef.current;
+                        let input = practiceTitle;
                         if (input === '') {
                           return;
                         }
@@ -190,7 +191,7 @@ export default function PracticeGapCard({
                       }
 
                       // set state holding issue to empty if enter was pressed, otherwise the current text
-                      setNewPractice(titleRef.current);
+                      setNewPractice(practiceTitle);
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -198,7 +199,7 @@ export default function PracticeGapCard({
                       }
                     }}
                     onChange={(e) => {
-                      titleRef.current = htmlToText(e.target.value);
+                      titleRef.current = e.target.value;
                     }}
                     className={`p-1 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Describe_the_recurring_gap_in_self\-regulation_skill...'] empty:before:italic empty:before:text-slate-500 border text-xs font-normal rounded-lg`}
                   />
@@ -219,8 +220,8 @@ export default function PracticeGapCard({
                       id={`title-${practiceGapId}`}
                       html={titleRef.current}
                       onChange={(e) => {
-                        titleRef.current = htmlToText(e.target.value);
-                        onEdit('title', titleRef.current);
+                        titleRef.current = e.target.value;
+                        onEdit('title', htmlToText(titleRef.current).trim());
                       }}
                       className={`p-0.5 break-words w-11/12 empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-md text-xs font-normal`}
                     />
@@ -242,8 +243,11 @@ export default function PracticeGapCard({
                       id={`description-${practiceGapId}`}
                       html={descriptionRef.current}
                       onChange={(e) => {
-                        descriptionRef.current = htmlToText(e.target.value);
-                        onEdit('description', e.target.value);
+                        descriptionRef.current = e.target.value;
+                        onEdit(
+                          'description',
+                          htmlToText(descriptionRef.current).trim()
+                        );
                       }}
                       className={`p-0.5 text-xs mt-2 flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-md`}
                     />
