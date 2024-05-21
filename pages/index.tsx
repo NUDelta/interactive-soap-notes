@@ -2,11 +2,29 @@ import Link from 'next/link';
 import { fetchAllCAPNotes } from '../controllers/capNotes/fetchCAPNotes';
 import Head from 'next/head';
 import { longDate, shortDate } from '../lib/helperFns';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { DateTime } from 'luxon';
 
-export default function Home({ sigs }): JSX.Element {
+export default function Home({ notesForSigs }): JSX.Element {
   // store state for each SIG on whether to show latest or all CAP notes
   const [showAllNotes, setShowAllNotes] = useState(false);
+  const [sigs, setNotesForSigs] = useState(notesForSigs);
+
+  useEffect(() => {
+    // update dates to be human-readable and match local timezone
+    notesForSigs.forEach((sig) => {
+      sig.capNotes.forEach((capNote) => {
+        capNote.date = DateTime.fromISO(capNote.date).toLocaleString(
+          DateTime.DATE_FULL
+        );
+        capNote.lastUpdated = DateTime.fromISO(
+          capNote.lastUpdated
+        ).toLocaleString(DateTime.DATETIME_SHORT);
+      });
+    });
+
+    setNotesForSigs(notesForSigs);
+  }, []);
 
   return (
     <>
@@ -83,11 +101,15 @@ export const getServerSideProps = async () => {
   const capNotes = await fetchAllCAPNotes();
 
   // sort cap notes by date in descending order
-  capNotes.sort((a, b) => new Date(b.date) - new Date(a.date));
+  capNotes.sort(
+    (a, b) =>
+      DateTime.fromISO(b.date.toISOString()) -
+      DateTime.fromISO(a.date.toISOString())
+  );
 
   // get a list of SIGs from all CAP notes
   let haveNoteForProject = new Set();
-  const sigs = capNotes.reduce((acc, capNote) => {
+  const notesForSigs = capNotes.reduce((acc, capNote) => {
     // check if we have a note stored already for this project
     let isLatest = false;
     if (!haveNoteForProject.has(capNote.project)) {
@@ -107,8 +129,12 @@ export const getServerSideProps = async () => {
         capNotes: [
           {
             project: capNote.project,
-            date: shortDate(capNote.date),
-            lastUpdated: longDate(capNote.lastUpdated),
+            date: DateTime.fromISO(capNote.date.toISOString())
+              .setZone('utc')
+              .toISO(),
+            lastUpdated: DateTime.fromISO(capNote.lastUpdated.toISOString())
+              .setZone('utc')
+              .toISO(),
             isLatest
           }
         ]
@@ -117,8 +143,12 @@ export const getServerSideProps = async () => {
       // add the CAP note to the SIG's list of CAP notes
       acc[sigIndex].capNotes.push({
         project: capNote.project,
-        date: shortDate(capNote.date),
-        lastUpdated: longDate(capNote.lastUpdated),
+        date: DateTime.fromISO(capNote.date.toISOString())
+          .setZone('utc')
+          .toISO(),
+        lastUpdated: DateTime.fromISO(capNote.lastUpdated.toISOString())
+          .setZone('utc')
+          .toISO(),
         isLatest
       });
     }
@@ -127,6 +157,6 @@ export const getServerSideProps = async () => {
   }, []);
 
   return {
-    props: { sigs }
+    props: { notesForSigs }
   };
 };
