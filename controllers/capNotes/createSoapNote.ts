@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import dbConnect from '../../lib/dbConnect';
 import CAPNoteModel from '../../models/CAPNoteModel';
+import IssueObjectModel from '../../models/IssueObjectModel';
 import { createNewTextEntryBlock } from '../textEntryBlock/createNewTextEntryBlock';
 
 /**
@@ -44,7 +45,16 @@ export const createCAPNote = async (projectName: string, noteDate: Date) => {
     let pastIssues = [];
     let trackedPractices = [];
     if (previousCAPNote) {
-      pastIssues = previousCAPNote.currentIssues;
+      // fetch all IssueObjects for pastIssues so we only keep the ones that weren't deleted
+      const pastIssueIds = previousCAPNote?.pastIssues;
+      const issueObjects = await IssueObjectModel.find({
+        _id: { $in: pastIssueIds }
+      });
+      pastIssues = issueObjects
+        .filter((issue) => !issue.wasDeleted)
+        .map((issue) => issue._id);
+
+      // keep all tracked practices
       trackedPractices = previousCAPNote.trackedPractices;
     }
 
