@@ -42,6 +42,14 @@ export default function LastWeekIssuePane({
         ).length
       : 0;
 
+  // check if there are any context notes
+  let nonEmptyContextLength =
+    selectedLastWeekIssue !== undefined
+      ? selectedLastWeekIssue['context'].filter(
+          (line) => line.value.trim() !== ''
+        ).length
+      : 0;
+
   // compute and store practice outcome for the last
   const [practiceOutcome, setPracticeOutcome] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -249,6 +257,41 @@ export default function LastWeekIssuePane({
             {/* Split Pane in half with assesments on 1/3 */}
             <div className="w-full flex flex-row">
               <div className="w-1/4 flex flex-col mr-6">
+                <h1 className="font-bold text-base">Context for Issue</h1>
+                {/* Context notes on Last Week's Issues */}
+                <div className="mb-2">
+                  {selectedLastWeekIssue['context'] &&
+                    selectedLastWeekIssue['context'].map((line) => (
+                      <>
+                        {line.value.trim() !== '' && (
+                          <NoteBlock
+                            key={`note-block-from-lastweekpane-${line.id}`}
+                            noteSection={'context'}
+                            noteId={line.id}
+                            noteContent={line}
+                            editable={false}
+                            onKeyDown={() => {
+                              return;
+                            }}
+                            onKeyUp={() => {
+                              return;
+                            }}
+                            onChange={() => {
+                              return;
+                            }}
+                            onDragToIssue={() => {
+                              return;
+                            }}
+                          />
+                        )}
+                      </>
+                    ))}
+                  {nonEmptyContextLength == 0 && (
+                    <div className="text-xs italic">
+                      No context notes written for issue.
+                    </div>
+                  )}
+                </div>
                 <h1 className="font-bold text-base">Assessments for Issue</h1>
                 {/* Assessments on Last Week's Issues */}
                 <div className="mb-2">
