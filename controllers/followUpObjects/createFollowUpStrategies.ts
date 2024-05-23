@@ -15,10 +15,9 @@ export const createPostSigMessage = (
   practiceAgents,
   orgObjs
 ) => {
-  let currDate = new Date(noteDate);
-  let weekFromCurrDate = new Date(currDate.getTime());
+  let noteDateJS = new Date(noteDate);
+  let weekFromCurrDate = new Date(noteDateJS.getTime());
   weekFromCurrDate.setDate(weekFromCurrDate.getDate() + 7);
-  let timezone = 'America/Chicago';
 
   let newActiveIssue = {
     scriptId: crypto
@@ -27,7 +26,7 @@ export const createPostSigMessage = (
       .digest('hex')
       .slice(0, 24),
     scriptName: `plan follow-up after SIG for ${projName}`,
-    dateTriggered: currDate,
+    dateTriggered: noteDateJS,
     expiryTime: weekFromCurrDate,
     shouldRepeat: false,
     issueTarget: {
@@ -79,16 +78,15 @@ export const createPostSigMessage = (
       message: strategyTextToReplace,
       people: peopleToMessage,
       opportunity: async function () {
-        return await this.thisAfternoon('currDate', 'timezone');
+        return await this.hoursAfter('currDate', 1);
       }.toString()
     });
   }.toString();
 
   strategyFunction = strategyFunction.replace(
     'currDate',
-    currDate.toISOString()
+    new Date().toISOString() // use the current timestamp so it's sent 1 hour after editing is complete
   );
-  strategyFunction = strategyFunction.replace('timezone', timezone);
   strategyFunction = strategyFunction.replace(
     'peopleToMessage',
     `[${orgObjs.project.students.map((student) => `"${student.name}"`).join(',')}]`
