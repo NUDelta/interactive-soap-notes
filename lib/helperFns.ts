@@ -83,3 +83,16 @@ export const htmlToText = (html) => {
     .replace(/&#039;/g, "'")
     .replace(/<[^>]*>/g, '');
 };
+
+/**
+ * Helper function to shorten text to a maximum length.
+ * @param text string to shorten.
+ * @param maxLength maximum length of the string.
+ * @returns string shortened text if longer than maxLength, else the original text.
+ */
+export const shortenText = (text: string, maxLength: number) => {
+  if (text.length > maxLength) {
+    return text.substring(0, maxLength) + '...';
+  }
+  return text;
+};

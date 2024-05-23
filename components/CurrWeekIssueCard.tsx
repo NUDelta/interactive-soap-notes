@@ -10,7 +10,12 @@ import { useDrag, useDrop } from 'react-dnd';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import ContentEditable from 'react-contenteditable';
 import { createNewIssueObject } from '../controllers/issueObjects/createIssueObject';
-import { htmlToText, longDate, serializeDates } from '../lib/helperFns';
+import {
+  htmlToText,
+  longDate,
+  serializeDates,
+  shortenText
+} from '../lib/helperFns';
 
 export default function CurrWeekIssueCard({
   project,
@@ -243,14 +248,16 @@ export default function CurrWeekIssueCard({
                   <div className="flex flex-row items-center mb-1">
                     <ArrowUturnLeftIcon className="h-4 mr-1 text-blue-600" />
                     <div className="text-2xs font-medium text-blue-600">
-                      Created from prior issue
-                      {/* <span className="italic">
-                        {
+                      Created from, &quot;
+                      <span className="italic">
+                        {shortenText(
                           pastIssuesData.find((pastIssue) => {
                             return pastIssue.id === issue.priorInstances[0];
-                          }).title
-                        }
-                      </span> */}
+                          }).title,
+                          50
+                        )}
+                      </span>
+                      &quot;
                     </div>
                   </div>
                 )}
