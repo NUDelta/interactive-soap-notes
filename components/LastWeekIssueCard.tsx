@@ -88,13 +88,7 @@ export default function LastWeekIssueCard({
         <>
           {/* Issue title */}
           <div className="p-1 w-full flex flex-col">
-            <h2 className="text-xs font-semibold mb-auto">
-              {title.length > 100
-                ? title.substring(0, 100 - 3) + '...'
-                : title.trim() === ''
-                  ? 'click to enter title'
-                  : title}
-            </h2>
+            <h2 className="text-xs font-semibold mb-auto">{title}</h2>
 
             {/* TODO: 05-07-24 maybe show that there are missing deliverables */}
             <div className="flex flex-row items-center text-2xs font-medium mt-2 text-blue-600">

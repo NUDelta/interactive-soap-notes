@@ -5,7 +5,7 @@ import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
 
 import React, { useState, useRef } from 'react';
 import { useDrag } from 'react-dnd';
-import { htmlToText, longDate, shortDate } from '../lib/helperFns';
+import { htmlToText, longDate, shortDate, shortenText } from '../lib/helperFns';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import ContentEditable from 'react-contenteditable';
 import { createNewPracticeGapObject } from '../controllers/practiceGapObjects/createPracticeGapObject';
@@ -259,22 +259,19 @@ export default function PracticeGapCard({
                     priorInstances && (
                       <div className="flex flex-col">
                         <h3 className="mt-4 text-xs font-medium border-b border-black">
-                          Past items of concern with this practice gap:
+                          Past items of concern with practice gap
                         </h3>
 
                         {priorInstances.map((instance, idx) => (
                           <div key={idx} className="flex flex-col mb-2">
                             <h2 className="mt-1 text-xs font-semibold">
-                              {instance.title} |{' '}
+                              {shortenText(instance.title, 50)} |{' '}
                               <span className="mt-1 text-2xs font-semibold">
                                 {shortDate(new Date(instance.date))}
                               </span>
                             </h2>
 
                             <div className="w-full">
-                              <h3 className="text-xs border-b">
-                                Context from issue
-                              </h3>
                               {instance.context.map((context, idx) => (
                                 <div key={idx} className="text-xs">
                                   {context.value.trim() !== '' && (

@@ -12,7 +12,12 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 // utilities
-import { longDate, serializeDates, shortDate } from '../../lib/helperFns';
+import {
+  longDate,
+  serializeDates,
+  shortDate,
+  shortenText
+} from '../../lib/helperFns';
 
 // data models and controllers
 import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
@@ -304,11 +309,10 @@ export default function CAPNote({
       {/* Set title of the page to be project name */}
       <Head>
         <title>
-          {`${
-            noteInfo.project.length > 15
-              ? noteInfo.project.substring(0, 15 - 3) + '...'
-              : noteInfo.project
-          } | ${new Date(noteInfo.sigDate).toLocaleString().split(',')[0]}`}
+          {`${shortenText(
+            noteInfo.project,
+            15
+          )} | ${new Date(noteInfo.sigDate).toLocaleString().split(',')[0]}`}
         </title>
       </Head>
 
@@ -528,7 +532,7 @@ export default function CAPNote({
               </div>
             )}
 
-            {/* if a last week issue is selected */}
+            {/* if a current week issue is selected */}
             {selectedIssue !== null &&
               currentIssuesData.findIndex(
                 (issue) => issue.id === selectedIssue
@@ -577,7 +581,7 @@ export default function CAPNote({
                 </>
               )}
 
-            {/* if a current week issue is selected */}
+            {/* if a last week issue is selected */}
             {selectedIssue !== null &&
               pastIssuesData.findIndex(
                 (issue) => issue.id === selectedIssue

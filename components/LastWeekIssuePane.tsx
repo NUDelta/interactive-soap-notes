@@ -17,9 +17,7 @@ export default function LastWeekIssuePane({
   setPracticeGapData
 }): JSX.Element {
   // state variable for showing practice gaps
-  const [showPracticeGaps, setShowPracticeGaps] = useState(
-    'Show Gaps with Details'
-  );
+  const [showPracticeGaps, setShowPracticeGaps] = useState('Show Gaps');
 
   // get the issue from soapData with the given issueId
   const issueIndex = pastIssuesData.findIndex((issue) => issue.id === issueId);
@@ -148,8 +146,6 @@ export default function LastWeekIssuePane({
         newPracticeOutcome.currentSprint = currentSprint;
       }
 
-      console.log('newPracticeOutcome', newPracticeOutcome);
-
       setPracticeOutcome(newPracticeOutcome);
     };
 
@@ -160,7 +156,7 @@ export default function LastWeekIssuePane({
         return {
           practice: practice.replace('[reflect]', ''),
           introText: 'Reflect on your own:',
-          type: 'reflect'
+          type: 'Reflect After Sprint:'
         };
       } else if (practice.includes('[plan]')) {
         return {
@@ -172,20 +168,20 @@ export default function LastWeekIssuePane({
         return {
           practice: practice.replace('[self-work]', ''),
           introText: 'On your own, try to:',
-          type: 'self-work'
+          type: 'Self-Work'
         };
       } else if (practice.includes('[help]')) {
         if (practice.includes('mysore')) {
           return {
             practice: practice.replace('[help]', ''),
             introText: 'At Mysore:',
-            type: 'help'
+            type: 'At Mysore'
           };
         } else if (practice.includes('pair research')) {
           return {
             practice: practice.replace('[help]', ''),
             introText: 'At Pair Research:',
-            type: 'help'
+            type: 'At Pair Research'
           };
         }
 
@@ -256,7 +252,10 @@ export default function LastWeekIssuePane({
           <div className="flex flex-wrap w-full">
             {/* Split Pane in half with assesments on 1/3 */}
             <div className="w-full flex flex-row">
-              <div className="w-1/4 flex flex-col mr-6">
+              <div className="w-1/3 flex flex-col mr-6">
+                <div className="text-xs italic mb-1">
+                  Below are your notes from the last SIG meeting.
+                </div>
                 <h1 className="font-bold text-base">Context for Issue</h1>
                 {/* Context notes on Last Week's Issues */}
                 <div className="mb-2">
@@ -330,7 +329,7 @@ export default function LastWeekIssuePane({
               </div>
 
               {/* Show practice gaps linked to issue */}
-              <div className="w-3/4">
+              <div className="w-2/3">
                 <div className="flex flex-row items-center">
                   <h1 className="font-bold text-base">
                     Self-Regulation Gaps for Issue
@@ -440,7 +439,7 @@ export default function LastWeekIssuePane({
                       <div className="mb-4">
                         <div className="flex flex-row items-center text-xs font-normal border-b border-black">
                           <div className="text-sm font-semibold mr-1">
-                            Plan Updating Practices
+                            Plan Updates You Suggested
                           </div>
                           <LinkIcon className="h-4 stroke-2 mr-1 text-blue-600" />
                           <a
@@ -476,8 +475,8 @@ export default function LastWeekIssuePane({
                       {/* Stories and Deliverables */}
                       <div className="w-full flex flex-col mb-2">
                         <div className="w-full grid grid-cols-2 text-sm border-b border-black">
-                          <div>Prior Sprint Stories</div>
-                          <div>Prior Sprint Deliverables</div>
+                          <div>Updated Sprint Stories</div>
+                          <div>Updated Sprint Deliverables</div>
                         </div>
                         {practiceOutcome.currentSprint !== null && (
                           <>
