@@ -686,7 +686,7 @@ export default function CurrWeekIssuePane({
                               setShowPracticeGaps={setShowPracticeGaps}
                               currentIssuesData={currentIssuesData}
                               setCurrentIssuesData={setCurrentIssuesData}
-                              className="flex-none basis-1/4"
+                              className={`flex-none ${showPracticeGaps === 'Show Gaps with Details' ? 'w-1/4' : 'w-1/6'}`}
                             />
                           ))}
 
@@ -704,7 +704,7 @@ export default function CurrWeekIssuePane({
                           setShowPracticeGaps={setShowPracticeGaps}
                           currentIssuesData={currentIssuesData}
                           setCurrentIssuesData={setCurrentIssuesData}
-                          className="flex-none basis-1/4"
+                          className="flex-none w-1/6"
                         />
                       </div>
                     </div>
