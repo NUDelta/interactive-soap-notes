@@ -386,9 +386,9 @@ export default function CAPNote({
           {/* Past issues and tracked practices fixed to top of page */}
           {/* TODO: 05-06-24: maybe add a hide and show button so mentor can recover vertical space when done browsing past issues */}
           <div className="fixed w-full">
-            <div className="flex flex-row mr-7">
+            <div className="flex flex-row mr-6">
               {/* All Issues */}
-              <div className="w-full ml-2 mb-5 h-[25vh]">
+              <div className="w-full mb-5 h-[25vh]">
                 {/* Section title and description */}
                 <div className="flex flex-col">
                   <h1 className="text-base font-bold border-b border-black">
