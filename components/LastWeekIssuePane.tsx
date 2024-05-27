@@ -1,4 +1,4 @@
-import { htmlToText } from '../lib/helperFns';
+import { htmlToText, longDate, shortDate } from '../lib/helperFns';
 import NoteBlock from './NoteBlock';
 import PracticeGapCard from './PracticeGapCard';
 import { useEffect, useState } from 'react';
@@ -144,6 +144,8 @@ export default function LastWeekIssuePane({
             (sprint) => sprint.name === newPracticeOutcome.sprintData.name
           );
         newPracticeOutcome.currentSprint = currentSprint;
+        newPracticeOutcome.currentSprint.lastUpdated =
+          newPracticeOutcome.projectData.sprint_log.lastUpdated;
       }
 
       setPracticeOutcome(newPracticeOutcome);
@@ -437,19 +439,30 @@ export default function LastWeekIssuePane({
                     >
                       {/* Plan Updating Practices */}
                       <div className="mb-4">
-                        <div className="flex flex-row items-center text-xs font-normal border-b border-black">
-                          <div className="text-sm font-semibold mr-1">
-                            Plan Updates You Suggested
+                        <div className="flex flex-col text-xs font-normal border-b border-black">
+                          <div className="text-sm font-semibold mr-2 mb-auto">
+                            Suggested Plan Updates
                           </div>
-                          <LinkIcon className="h-4 stroke-2 mr-1 text-blue-600" />
-                          <a
-                            href={practiceOutcome.currentSprint.url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-blue-600 underline"
-                          >
-                            Sprint Log
-                          </a>
+                          <div className="flex flex-row items-center">
+                            <LinkIcon className="h-3 stroke-2 mr-0.5 text-blue-600" />
+                            <a
+                              href={practiceOutcome.currentSprint.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-blue-600 underline mr-1"
+                            >
+                              Sprint Log
+                            </a>
+                            <span className="italic">
+                              (Last Updated:{' '}
+                              {longDate(
+                                new Date(
+                                  practiceOutcome.currentSprint.lastUpdated
+                                )
+                              )}
+                              )
+                            </span>
+                          </div>
                         </div>
 
                         <div className="flex flex-wrap">
