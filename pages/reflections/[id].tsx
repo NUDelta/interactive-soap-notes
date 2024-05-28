@@ -513,6 +513,17 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                     )
                   );
                 })}
+
+                {/* if no follow-up reflections asked for, specifically with only plans */}
+                {issue.followUps.every((followUp) => {
+                  return followUp.practice.includes('[plan]');
+                }) && (
+                  <div>
+                    <h3 className="text-sm italic font-medium">
+                      No reflections needed for this issue.
+                    </h3>
+                  </div>
+                )}
               </div>
             );
           })}
