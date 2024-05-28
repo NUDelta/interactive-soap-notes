@@ -158,7 +158,7 @@ export default function LastWeekIssuePane({
         return {
           practice: practice.replace('[reflect]', ''),
           introText: 'Reflect on your own:',
-          type: 'Reflect After Sprint:'
+          type: 'Reflect After Sprint'
         };
       } else if (practice.includes('[plan]')) {
         return {
@@ -192,7 +192,7 @@ export default function LastWeekIssuePane({
         return {
           practice: practice.replace('[help]', ''),
           introText: 'Get help on:',
-          type: 'help'
+          type: 'Help'
         };
       }
 
@@ -615,20 +615,24 @@ export default function LastWeekIssuePane({
                               </span>
 
                               {/* { Link to deliverable } */}
-                              {practice.deliverable !== null && (
-                                <div className="mx-auto">
-                                  {practice.deliverable !== '' ? (
-                                    <div className="flex flex-row items-center text-xs font-normal">
-                                      <LinkIcon className="h-4 stroke-2 mr-1 text-green-600" />
-                                      <a
-                                        href={practice.deliverable}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="text-blue-600 underline"
-                                      >
-                                        Deliverable{' '}
-                                      </a>
-                                      {/* {practice.yellkey == null ? (
+                              {
+                                practice.didHappen !== null &&
+                                practice.didHappen &&
+                                practice.deliverable !== null ? (
+                                  // Case 1: practice happened and deliverable was specified
+                                  <div className="mx-auto">
+                                    {practice.deliverable !== '' ? (
+                                      <div className="flex flex-row items-center text-xs font-normal">
+                                        <LinkIcon className="h-4 stroke-2 mr-1 text-green-600" />
+                                        <a
+                                          href={practice.deliverable}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="text-blue-600 underline"
+                                        >
+                                          Deliverable{' '}
+                                        </a>
+                                        {/* {practice.yellkey == null ? (
                                       <></>
                                     ) : (
                                       <span className="font-semibold">
@@ -640,30 +644,45 @@ export default function LastWeekIssuePane({
                                         {`)`}
                                       </span>
                                     )} */}
+                                      </div>
+                                    ) : (
+                                      <div className="flex flex-row items-center text-rose-600 text-xs font-normal">
+                                        <LinkIcon className="h-4 stroke-2 mr-1" />
+                                        No deliverable link
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  // Case 2: practice happened but no deliverable was specified
+                                  practice.didHappen &&
+                                  practice.type !== 'Reflect After Sprint' &&
+                                  practice.deliverable === null && (
+                                    <div className="mx-auto">
+                                      <div className="flex flex-row items-center text-rose-600 text-xs font-normal">
+                                        <LinkIcon className="h-4 stroke-2 mr-1" />
+                                        No deliverable link
+                                      </div>
                                     </div>
-                                  ) : (
-                                    <div className="flex flex-row items-center text-rose-600 text-xs font-normal">
-                                      <LinkIcon className="h-4 stroke-2 mr-1" />
-                                      No deliverable link
-                                    </div>
-                                  )}
-                                </div>
-                              )}
+                                  )
+                                )
+                                // Case 3: practice did not happen (do nothing)
+                              }
                             </div>
 
                             {/* Student's deliverable notes */}
-                            {practice.deliverableNotes !== null && (
-                              <div className="mt-0.5 text-xs">
-                                <div className="">
-                                  Student notes on deliverable:{' '}
+                            {practice.didHappen !== null &&
+                              practice.deliverableNotes !== null && (
+                                <div className="mt-0.5 text-xs">
+                                  <div className="">
+                                    Student notes on deliverable:{' '}
+                                  </div>
+                                  <div className="">
+                                    <span className="text-green-600">
+                                      {practice.deliverableNotes}
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="">
-                                  <span className="text-green-600">
-                                    {practice.deliverableNotes}
-                                  </span>
-                                </div>
-                              </div>
-                            )}
+                              )}
 
                             {/* { Reflections } */}
                             <div className="w-full mt-1">

@@ -124,7 +124,7 @@ export const computeReflectionQuestions = (parsedPractice) => {
       },
       {
         prompt:
-          'How did this reflection help you see how you currently practice and why that happens, and how your practices could change? What was helpful? What obstacles or concerns do you still have?',
+          'How did this reflection help you understand how you currently practice and why that happens, and how your practices could change? What was helpful? What obstacles or concerns do you still have?',
         responseType: 'string'
       }
     ];
@@ -154,7 +154,7 @@ export const computeReflectionQuestions = (parsedPractice) => {
     questionsIfNotDone = [
       {
         prompt:
-          "What prevented you from doing this work practice (e.g., didn't have time? Not important after addressing another risk?)? Why did this prevent you from doing it?",
+          "What prevented you from doing this work practice? Why did this prevent you from doing it? For example, didn't have time; not important after addressing another risk; etc.",
         responseType: 'string'
       },
       {
@@ -232,7 +232,7 @@ export const computeReflectionQuestions = (parsedPractice) => {
         },
         {
           prompt:
-            'Did anything prevent you from working on the suggested practice at Pair Research? If so, why? For example, did you activity to help plan a slice of a task that a peer could help with?',
+            'Did anything prevent you from working on the suggested practice at Pair Research? If so, why? For example, did you do the activity to help plan a slice of a task that a peer could help with?',
           responseType: 'string'
         }
       ];

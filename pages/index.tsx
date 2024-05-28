@@ -28,7 +28,7 @@ export default function Home({ sigs }): JSX.Element {
       <Head>
         <title>Home</title>
       </Head>
-      <div className="container m-auto w-3/4 h-dvh overflow-auto mt-3">
+      <div className="container m-auto w-11/12 h-dvh overflow-auto mt-3">
         <div className="mb-5">
           <h1 className="font-bold text-4xl">
             Welcome to Interactive CAP Notes
@@ -50,40 +50,59 @@ export default function Home({ sigs }): JSX.Element {
           {/* List of SIGs */}
           {sigsState.map((sig, i) => (
             <div className="w-full mb-10" key={sig.abbreviation}>
-              <div className="col-span-2">
-                <h2 className="font-bold text-xl border-b border-black mb-3">
+              {/* Header Info for each SIG */}
+              <div className="grid grid-cols-5 gap-y-5 auto-rows-auto w-full border-b border-black mb-3 font-bold text-xl">
+                <h2 className="col-span-2">
                   {sig.name} ({sig.abbreviation})
                 </h2>
-                {/* List of CAP Notes for a SIG */}
-                {/* TODO: 04-30-24 -- create a reflection page and link to it from here */}
-                {sig.capNotes
-                  .filter((capNote) => {
-                    // if show all, don't filter out anything; otherwise, only include the latest notes
-                    return showAllNotes ? true : capNote.isLatest;
-                  })
-                  .map((capNote) => (
-                    <div
-                      className="grid grid-cols-4 gap-y-5 auto-rows-auto w-full"
-                      key={`${capNote.project}-${capNote.date}`}
-                    >
-                      <div className="col-span-2">
-                        <Link
-                          href={`/soap-notes/${sig.abbreviation.toLowerCase()}_${encodeURIComponent(
-                            capNote.project
-                          )}_${new Date(capNote.date).toISOString().split('T')[0]}`}
-                        >
-                          <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
-                            {capNote.project}
-                          </h3>
-                        </Link>
-                      </div>
-                      <div className="col-span-1">{capNote.date}</div>
-                      <div className="col-span-1">
-                        Last Updated: {capNote.lastUpdated}
-                      </div>
-                    </div>
-                  ))}
+                <h2 className="col-span-1">Student Reflections</h2>
+                <h2 className="col-span-1">SIG Date</h2>
+                <h2 className="col-span-1">Last Updated</h2>
               </div>
+              {/* List of CAP Notes for a SIG */}
+              {sig.capNotes
+                .filter((capNote) => {
+                  // if show all, don't filter out anything; otherwise, only include the latest notes
+                  return showAllNotes ? true : capNote.isLatest;
+                })
+                .map((capNote) => (
+                  <div
+                    className="grid grid-cols-5 gap-y-5 auto-rows-auto w-full"
+                    key={`${capNote.project}-${capNote.date}`}
+                  >
+                    {/* Project Title and Link to CAP Note */}
+                    <div className="col-span-2">
+                      <Link
+                        href={`/soap-notes/${sig.abbreviation.toLowerCase()}_${encodeURIComponent(
+                          capNote.project
+                        )}_${new Date(capNote.date).toISOString().split('T')[0]}`}
+                      >
+                        <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                          {capNote.project}
+                        </h3>
+                      </Link>
+                    </div>
+
+                    {/* Link to Reflection */}
+                    <div className="col-span-1">
+                      <Link
+                        href={`/reflections/${sig.abbreviation.toLowerCase()}_${encodeURIComponent(
+                          capNote.project
+                        )}_${new Date(capNote.date).toISOString().split('T')[0]}`}
+                      >
+                        <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                          Reflection Page
+                        </h3>
+                      </Link>
+                    </div>
+
+                    {/* Date of CAP Note */}
+                    <div className="col-span-1">{capNote.date}</div>
+
+                    {/* Last Updated for CAP Note*/}
+                    <div className="col-span-1">{capNote.lastUpdated}</div>
+                  </div>
+                ))}
             </div>
           ))}
         </div>
@@ -98,7 +117,10 @@ export const getServerSideProps = async () => {
   const capNotes = await fetchAllCAPNotes();
 
   // sort cap notes by date in descending order
-  capNotes.sort((a, b) => new Date(b.date) - new Date(a.date));
+  capNotes.sort(
+    (a, b) =>
+      a.sigName.localeCompare(b.sigName) || new Date(b.date) - new Date(a.date)
+  );
 
   // get a list of SIGs from all CAP notes
   let haveNoteForProject = new Set();
