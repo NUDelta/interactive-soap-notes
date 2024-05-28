@@ -443,6 +443,10 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                               <h3 className="text-sm font-medium">
                                 Describe your deliverable
                               </h3>
+                              <h3 className="text-xs font-base italic">
+                                What should your mentor look at? What does this
+                                deliverable show?
+                              </h3>
 
                               {/* Text Area to describe deliverable */}
                               <textarea
