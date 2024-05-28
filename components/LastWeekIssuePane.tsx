@@ -203,11 +203,35 @@ export default function LastWeekIssuePane({
     // prior instances are ordered by date, so the first one is the most recent
     let practiceOutcome = selectedLastWeekIssue.followUps
       .map((followUp) => {
+        // if didHappen is null, don't have any relevantReflections
         // if didHappen is false, show the first set of reflections; else, show the second set
         let didHappen = followUp.outcome.didHappen;
-        let relevantReflections = didHappen
-          ? followUp.outcome.reflections[1]
-          : followUp.outcome.reflections[0];
+        let relevantReflections;
+        let filteredReflections;
+        if (didHappen === null) {
+          relevantReflections = null;
+          filteredReflections = null;
+        } else {
+          if (didHappen) {
+            relevantReflections = followUp.outcome.reflections[1];
+          } else if (!didHappen) {
+            relevantReflections = followUp.outcome.reflections[0];
+          }
+          filteredReflections = relevantReflections
+            .filter((reflection) => {
+              return (
+                !reflection.prompt.includes(
+                  'Share a link to any deliverable'
+                ) && !reflection.prompt.includes('Did you do the')
+              );
+            })
+            .map((reflection) => {
+              return {
+                prompt: reflection.prompt,
+                response: reflection.response
+              };
+            });
+        }
 
         // practice type info
         let parsedPractice = getPracticeType(followUp.practice);
@@ -225,20 +249,7 @@ export default function LastWeekIssuePane({
             ? null
             : followUp.outcome.deliverableLink,
           deliverableNotes: followUp.outcome.deliverableNotes,
-          reflections: relevantReflections
-            .filter((reflection) => {
-              return (
-                !reflection.prompt.includes(
-                  'Share a link to any deliverable'
-                ) && !reflection.prompt.includes('Did you do the')
-              );
-            })
-            .map((reflection) => {
-              return {
-                prompt: reflection.prompt,
-                response: reflection.response
-              };
-            })
+          reflections: filteredReflections
         };
       })
       .filter((followup) => followup !== null);
@@ -337,34 +348,35 @@ export default function LastWeekIssuePane({
                     Self-Regulation Gaps for Issue
                   </h1>
                   {/* Toggle for details */}
-                  {relevantPracticeGaps.length !== 0 && (
-                    <ul className="flex flex-wrap text-xs font-medium text-center text-gray-500 dark:text-gray-400 ml-2">
-                      <li
-                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
-                        onClick={() => {
-                          setShowPracticeGaps('Hide Gaps');
-                        }}
-                      >
-                        Hide Gaps
-                      </li>
-                      <li
-                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
-                        onClick={() => {
-                          setShowPracticeGaps('Show Gaps');
-                        }}
-                      >
-                        Show Gaps
-                      </li>
-                      <li
-                        className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
-                        onClick={() => {
-                          setShowPracticeGaps('Show Gaps with Details');
-                        }}
-                      >
-                        Show Gaps with Details
-                      </li>
-                    </ul>
-                  )}
+                  {relevantPracticeGaps !== null &&
+                    relevantPracticeGaps.length !== 0 && (
+                      <ul className="flex flex-wrap text-xs font-medium text-center text-gray-500 dark:text-gray-400 ml-2">
+                        <li
+                          className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          onClick={() => {
+                            setShowPracticeGaps('Hide Gaps');
+                          }}
+                        >
+                          Hide Gaps
+                        </li>
+                        <li
+                          className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          onClick={() => {
+                            setShowPracticeGaps('Show Gaps');
+                          }}
+                        >
+                          Show Gaps
+                        </li>
+                        <li
+                          className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          onClick={() => {
+                            setShowPracticeGaps('Show Gaps with Details');
+                          }}
+                        >
+                          Show Gaps with Details
+                        </li>
+                      </ul>
+                    )}
                 </div>
 
                 {/* Self-Regulation Gaps for Issue */}
@@ -583,18 +595,23 @@ export default function LastWeekIssuePane({
                           {/* { Did the practice happen? } */}
                           <div className="flex flex-wrap">
                             <div className="w-full flex flex-row items-center text-xs font-normal">
-                              {practice.didHappen ? (
+                              {/* If didHappen is null, then we have no response from the student; if it's true / false, then show whether student tried to do the practice */}
+                              {practice.didHappen === null ? (
+                                <ExclamationCircleIcon className="h-4 stroke-2 mr-1 text-rose-600" />
+                              ) : practice.didHappen ? (
                                 <CheckBadgeIcon className="h-4 stroke-2 mr-1 text-green-600" />
                               ) : (
                                 <ExclamationCircleIcon className="h-4 stroke-2 mr-1 text-rose-600" />
                               )}
 
                               <span
-                                className={`font-normal ${practice.didHappen ? 'text-green-600' : 'text-rose-600'}`}
+                                className={`font-normal ${practice.didHappen === null ? 'text-rose-600' : practice.didHappen ? 'text-green-600' : 'text-rose-600'}`}
                               >
-                                {practice.didHappen
-                                  ? 'Practice Attempted'
-                                  : 'Practice Not Attempted'}
+                                {practice.didHappen == null
+                                  ? 'No response from student(s)'
+                                  : practice.didHappen
+                                    ? 'Practice attempted'
+                                    : 'Practice not attempted'}
                               </span>
 
                               {/* { Link to deliverable } */}
@@ -649,36 +666,39 @@ export default function LastWeekIssuePane({
                             )}
 
                             {/* { Reflections } */}
-                            {practice.reflections.length > 0 ? (
-                              <div className="w-full mt-1">
-                                <h3 className="text-xs font-bold border-b">
-                                  Reflections
-                                </h3>
-                                {practice.reflections.map((reflection) => {
-                                  return (
-                                    <div
-                                      key={reflection.prompt}
-                                      className="w-full mb-2 text-xs"
-                                    >
-                                      <h4 className="font-medium">
-                                        {reflection.prompt}
-                                      </h4>
-                                      {reflection.response === '' ? (
-                                        <p className="text-rose-600">
-                                          No response from student
-                                        </p>
-                                      ) : (
-                                        <p className="text-green-600">
-                                          {reflection.response}
-                                        </p>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <></>
-                            )}
+                            <div className="w-full mt-1">
+                              {practice.reflections !== null &&
+                              practice.reflections.length > 0 ? (
+                                <>
+                                  <h3 className="text-xs font-bold border-b">
+                                    Reflections
+                                  </h3>
+                                  {practice.reflections.map((reflection) => {
+                                    return (
+                                      <div
+                                        key={reflection.prompt}
+                                        className="w-full mb-2 text-xs"
+                                      >
+                                        <h4 className="font-medium">
+                                          {reflection.prompt}
+                                        </h4>
+                                        {reflection.response === '' ? (
+                                          <p className="text-rose-600">
+                                            No response from student(s)
+                                          </p>
+                                        ) : (
+                                          <p className="text-green-600">
+                                            {reflection.response}
+                                          </p>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </>
+                              ) : (
+                                <></>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );

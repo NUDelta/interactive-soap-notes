@@ -114,7 +114,7 @@ export default async function handler(
                     ]
                   },
                   outcome: {
-                    didHappen: false,
+                    didHappen: null,
                     deliverableLink: null,
                     deliverableNotes: null,
                     reflections: [

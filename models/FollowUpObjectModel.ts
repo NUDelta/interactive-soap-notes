@@ -10,7 +10,7 @@ export interface FollowUpObjectStruct {
     reflectionQuestions: ReflectionQuestion[];
   };
   outcome: {
-    didHappen: boolean;
+    didHappen: boolean | null;
     deliverableLink: string | null;
     deliverableNotes: string | null;
     reflection: [FollowUpReflection[], FollowUpReflection[]]; // false for didHappen corresponds to questions in to 0, true to 1
@@ -77,15 +77,18 @@ const ParsedPracticeSchema = new mongoose.Schema({
 const PracticeOutcomeSchema = new mongoose.Schema({
   didHappen: {
     type: Boolean,
-    required: true
+    required: false,
+    default: null
   },
   deliverableLink: {
     type: String,
-    required: false
+    required: false,
+    default: null
   },
   deliverableNotes: {
     type: String,
-    required: false
+    required: false,
+    default: null
   },
   reflections: [
     {
