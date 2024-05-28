@@ -239,13 +239,13 @@ export default function CurrWeekIssueCard({
                   titleRef.current = e.target.value.trim();
                   onTitleEdit(htmlToText(e.target.value).trim());
                 }}
-                className={`p-0.5 mr-2 w-full min-h-16 mb-1 break-words flex-none empty:before:content-['Describe_concern_you_observed...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
+                className={`p-0.5 mr-2 w-full min-h-16 mb-0.5 break-words flex-none empty:before:content-['Describe_concern_you_observed...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
               />
 
               <div className="flex flex-col w-full">
                 {/* Show concern is linked from a past issue  */}
                 {issue && issue.priorInstances.length > 0 && (
-                  <div className="flex flex-row items-center mb-1">
+                  <div className="flex flex-row items-center mb-0.5">
                     <ArrowUturnLeftIcon className="h-4 mr-1 text-blue-600" />
                     <div className="text-2xs font-medium text-blue-600">
                       Created from, &quot;

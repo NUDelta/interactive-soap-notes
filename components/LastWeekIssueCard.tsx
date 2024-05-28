@@ -11,6 +11,7 @@ export default function LastWeekIssueCard({
   issueId,
   title,
   date,
+  noteDate,
   selectedIssue,
   setSelectedIssue,
   pastIssuesData,
@@ -40,7 +41,7 @@ export default function LastWeekIssueCard({
           sourcePastIssue.title,
           sourcePastIssue.project,
           sourcePastIssue.sig,
-          new Date().toISOString(),
+          new Date(noteDate).toISOString(),
           [sourcePastIssue.id]
         );
 

@@ -396,14 +396,13 @@ export default function CAPNote({
                   </h1>
                   <div className="h-[20vh] overflow-y-auto">
                     <p className="italic text-xs mb-2">
-                      Use this space to note any items of concern that you
-                      observe (e.g., project issues, practice gaps, comptencies
-                      to develop). Click on items tracked from last week to view
-                      their follow-up outcomes. Click on current items to edit
-                      it&apos;s CAP notes. Create new items by typing on the
-                      last card, or by dragging a tracked item to the box. Cards
-                      from this week can be dragged on top of each other to
-                      merge them, or into the CAP notes for a selected issue.
+                      Note any items of concern here (e.g., project issues,
+                      practice gaps, developing competencies). Click on items
+                      tracked from SIG to view follow-up outcomes. Click on
+                      current week items to edit it&apos;s CAP notes. Create new
+                      items by typing on the last card, or by dragging a prior
+                      week card on it.
+                      {/* Cards from this week can be dragged on top of each other to merge them, or into the CAP notes for a selected issue. */}
                     </p>
 
                     {/* Issues */}
@@ -415,6 +414,7 @@ export default function CAPNote({
                           issueId={lastWeekIssue.id}
                           title={lastWeekIssue.title}
                           date={new Date(lastWeekIssue.date).toISOString()}
+                          noteDate={new Date(noteInfo.sigDate).toISOString()}
                           selectedIssue={selectedIssue}
                           setSelectedIssue={setSelectedIssue}
                           pastIssuesData={pastIssuesData}
@@ -477,9 +477,9 @@ export default function CAPNote({
             {selectedIssue === null && (
               <div>
                 <h1 className="text-base font-bold italic border-b border-black mb-1 bg-white sticky top-0">
-                  Select an issue from above to view or edit notes. For
-                  reference as you coach, tracked gaps in students
-                  self-regulation skills are shown below.
+                  Select an issue from above to view or edit notes. Tracked gaps
+                  in students self-regulation skills are shown below, for
+                  reference.
                 </h1>
 
                 <div className="w-full h-[66vh] overflow-auto">
