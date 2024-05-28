@@ -361,12 +361,10 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                             <select
                               className={`w-1/4 bg-gray-50 border border-gray-300 text-sm font-bold rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2 py-1 ${
                                 followUp.outcome.didHappen === null
-                                  ? 'empty:border-red-600 text-gray-900'
-                                  : ''
-                              } ${
-                                followUp.outcome.didHappen
-                                  ? 'text-green-600'
-                                  : 'text-red-600'
+                                  ? 'empty:border-red-600 text-yellow-400'
+                                  : followUp.outcome.didHappen
+                                    ? 'text-green-600'
+                                    : 'text-red-600'
                               }`}
                               onChange={(e) => {
                                 let newValue = null;
