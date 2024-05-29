@@ -317,14 +317,14 @@ export default function CAPNote({
       </Head>
 
       {/* Header info for CAP note */}
-      <div className="w-full mx-auto mt-2 pr-3 pl-3">
+      <div className="mx-auto mt-2 w-full pl-3 pr-3">
         {/* Back, title, and last updated */}
-        <div className="flex flex-row items-center flex-nowrap">
+        <div className="flex flex-row flex-nowrap items-center">
           {/* Back button */}
           <div className="mr-1">
             <Link href="/">
               <Tooltip content="Back to all notes" placement="bottom">
-                <h3 className="text-base font-bold text-blue-400 hover:text-blue-500 visited:text-purple-600">
+                <h3 className="text-base font-bold text-blue-400 visited:text-purple-600 hover:text-blue-500">
                   &#8592;
                 </h3>
               </Tooltip>
@@ -333,7 +333,7 @@ export default function CAPNote({
 
           {/* Title */}
           <div className="mr-2">
-            <h1 className="font-bold text-base">
+            <h1 className="text-base font-bold">
               {noteInfo.project} | {noteInfo.sigDate}
             </h1>
           </div>
@@ -344,8 +344,8 @@ export default function CAPNote({
             {/* Saved successfully */}
             {!isSaving && saveError === null ? (
               <>
-                <CheckCircleIcon className="w-5 h-5 mr-0.5 text-green-600" />
-                <h2 className="font-semibold text-base text-green-600">
+                <CheckCircleIcon className="mr-0.5 h-5 w-5 text-green-600" />
+                <h2 className="text-base font-semibold text-green-600">
                   Notes last saved on {lastUpdated}
                 </h2>
               </>
@@ -356,8 +356,8 @@ export default function CAPNote({
             {/* Saving */}
             {isSaving ? (
               <>
-                <ArrowPathIcon className="animate-spin w-5 h-5 mr-0.5 text-blue-600" />
-                <h2 className="font-semibold text-base text-blue-600">
+                <ArrowPathIcon className="mr-0.5 h-5 w-5 animate-spin text-blue-600" />
+                <h2 className="text-base font-semibold text-blue-600">
                   Saving...
                 </h2>
               </>
@@ -369,9 +369,9 @@ export default function CAPNote({
             {!isSaving && saveError !== null ? (
               <>
                 <Tooltip content={saveError} placement="bottom">
-                  <ExclamationCircleIcon className="w-5 h-5 mr-0.5 text-red-600" />
+                  <ExclamationCircleIcon className="mr-0.5 h-5 w-5 text-red-600" />
                 </Tooltip>
-                <h2 className="font-semibold text-base text-red-600">
+                <h2 className="text-base font-semibold text-red-600">
                   Error in saving notes (Last saved: {lastUpdated})
                 </h2>
               </>
@@ -386,16 +386,16 @@ export default function CAPNote({
           {/* Past issues and tracked practices fixed to top of page */}
           {/* TODO: 05-06-24: maybe add a hide and show button so mentor can recover vertical space when done browsing past issues */}
           <div className="fixed w-full">
-            <div className="flex flex-row mr-6">
+            <div className="mr-6 flex flex-row">
               {/* All Issues */}
-              <div className="w-full mb-5 h-[25vh]">
+              <div className="mb-5 h-[25vh] w-full">
                 {/* Section title and description */}
                 <div className="flex flex-col">
-                  <h1 className="text-base font-bold border-b border-black">
+                  <h1 className="border-b border-black text-base font-bold">
                     Items of Concern
                   </h1>
                   <div className="h-[20vh] overflow-y-auto">
-                    <p className="italic text-xs mb-2">
+                    <p className="mb-2 text-xs italic">
                       Note any items of concern here (e.g., project issues,
                       practice gaps, developing competencies). Click on items
                       tracked from SIG to view follow-up outcomes. Click on
@@ -476,13 +476,13 @@ export default function CAPNote({
             {/* if no issue is selected */}
             {selectedIssue === null && (
               <div>
-                <h1 className="text-base font-bold italic border-b border-black mb-1 bg-white sticky top-0">
+                <h1 className="sticky top-0 mb-1 border-b border-black bg-white text-base font-bold italic">
                   Select an issue from above to view or edit notes. Tracked gaps
                   in students self-regulation skills are shown below, for
                   reference.
                 </h1>
 
-                <div className="w-full h-[66vh] overflow-auto">
+                <div className="h-[66vh] w-full overflow-auto">
                   {/* Practice Cards */}
                   <div className="mb-3">
                     {/* Active Practices */}
@@ -538,7 +538,7 @@ export default function CAPNote({
                 (issue) => issue.id === selectedIssue
               ) !== -1 && (
                 <>
-                  <h1 className="text-base font-bold border-b border-black mb-1 bg-white sticky top-0">
+                  <h1 className="sticky top-0 mb-1 border-b border-black bg-white text-base font-bold">
                     {currentIssuesData.findIndex(
                       (practice) => practice.id === selectedIssue
                     ) !== -1 &&
@@ -548,8 +548,8 @@ export default function CAPNote({
                         )
                       ].title}
                   </h1>
-                  <div className="w-full h-[66vh] overflow-auto">
-                    <p className="italic text-xs">
+                  <div className="h-[66vh] w-full overflow-auto">
+                    <p className="text-xs italic">
                       Write notes about selected issue below. Context and
                       Assessment notes are private to you.{' '}
                       <span className="font-semibold">
@@ -558,7 +558,7 @@ export default function CAPNote({
                       </span>
                     </p>
 
-                    <p className="italic text-xs text-slate-500 mb-2">
+                    <p className="mb-2 text-xs italic text-slate-500">
                       Press Shift-Enter to add a new text block and
                       Shift-Backspace to delete current block. Press Tab to move
                       to next block, and Shift-Tab to move to previous block.
@@ -587,7 +587,7 @@ export default function CAPNote({
                 (issue) => issue.id === selectedIssue
               ) !== -1 && ( // Selected issue is a last week issue
                 <>
-                  <h1 className="text-base font-bold border-b border-black mb-1 bg-white sticky top-0">
+                  <h1 className="sticky top-0 mb-1 border-b border-black bg-white text-base font-bold">
                     {pastIssuesData.findIndex(
                       (issue) => issue.id === selectedIssue
                     ) !== -1 &&
@@ -598,7 +598,7 @@ export default function CAPNote({
                       ].title}
                   </h1>
 
-                  <div className="w-full h-[66vh] overflow-auto">
+                  <div className="h-[66vh] w-full overflow-auto">
                     <LastWeekIssuePane
                       issueId={selectedIssue}
                       noteInfo={noteInfo}

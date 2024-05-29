@@ -262,14 +262,14 @@ export default function LastWeekIssuePane({
     <div className="mb-5">
       {selectedLastWeekIssue && (
         <>
-          <div className="flex flex-wrap w-full">
+          <div className="flex w-full flex-wrap">
             {/* Split Pane in half with assesments on 1/3 */}
-            <div className="w-full flex flex-row">
-              <div className="w-1/3 flex flex-col mr-6">
-                <div className="text-xs italic mb-1">
+            <div className="flex w-full flex-row">
+              <div className="mr-6 flex w-1/3 flex-col">
+                <div className="mb-1 text-xs italic">
                   Below are your notes from the last SIG meeting.
                 </div>
-                <h1 className="font-bold text-base">Context for Issue</h1>
+                <h1 className="text-base font-bold">Context for Issue</h1>
                 {/* Context notes on Last Week's Issues */}
                 <div className="mb-2">
                   {selectedLastWeekIssue['context'] &&
@@ -304,7 +304,7 @@ export default function LastWeekIssuePane({
                     </div>
                   )}
                 </div>
-                <h1 className="font-bold text-base">Assessments for Issue</h1>
+                <h1 className="text-base font-bold">Assessments for Issue</h1>
                 {/* Assessments on Last Week's Issues */}
                 <div className="mb-2">
                   {selectedLastWeekIssue['assessment'] &&
@@ -344,15 +344,15 @@ export default function LastWeekIssuePane({
               {/* Show practice gaps linked to issue */}
               <div className="w-2/3">
                 <div className="flex flex-row items-center">
-                  <h1 className="font-bold text-base">
+                  <h1 className="text-base font-bold">
                     Self-Regulation Gaps for Issue
                   </h1>
                   {/* Toggle for details */}
                   {relevantPracticeGaps !== null &&
                     relevantPracticeGaps.length !== 0 && (
-                      <ul className="flex flex-wrap text-xs font-medium text-center text-gray-500 dark:text-gray-400 ml-2">
+                      <ul className="ml-2 flex flex-wrap text-center text-xs font-medium text-gray-500 dark:text-gray-400">
                         <li
-                          className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                           onClick={() => {
                             setShowPracticeGaps('Hide Gaps');
                           }}
@@ -360,7 +360,7 @@ export default function LastWeekIssuePane({
                           Hide Gaps
                         </li>
                         <li
-                          className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                           onClick={() => {
                             setShowPracticeGaps('Show Gaps');
                           }}
@@ -368,7 +368,7 @@ export default function LastWeekIssuePane({
                           Show Gaps
                         </li>
                         <li
-                          className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                           onClick={() => {
                             setShowPracticeGaps('Show Gaps with Details');
                           }}
@@ -380,7 +380,7 @@ export default function LastWeekIssuePane({
                 </div>
 
                 {/* Self-Regulation Gaps for Issue */}
-                <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
+                <div className="flex flex-row flex-nowrap gap-2 overflow-auto">
                   {/* Show gaps if they are there and not hidden */}
                   {relevantPracticeGaps.length > 0 &&
                     showPracticeGaps !== 'Hide Gaps' && (
@@ -426,12 +426,12 @@ export default function LastWeekIssuePane({
             {/* Follow-up objects on the remaining */}
             <div className="w-full">
               <div className="mb-1">
-                <h1 className="font-bold text-base">Follow-Up Outcomes</h1>
+                <h1 className="text-base font-bold">Follow-Up Outcomes</h1>
                 <h2 className="text-sm italic">
                   Text in{' '}
-                  <span className="text-green-600 font-semibold">green</span>{' '}
+                  <span className="font-semibold text-green-600">green</span>{' '}
                   are responses from the students(s). Text in{' '}
-                  <span className="text-rose-600 font-semibold">red</span>{' '}
+                  <span className="font-semibold text-rose-600">red</span>{' '}
                   indicates missing reflections or documents.
                 </h2>
               </div>
@@ -447,21 +447,21 @@ export default function LastWeekIssuePane({
                   }).length > 0 && (
                     <div
                       key="plan-follow-up"
-                      className="w-full p-2 border shadow"
+                      className="w-full border p-2 shadow"
                     >
                       {/* Plan Updating Practices */}
                       <div className="mb-4">
-                        <div className="flex flex-col text-xs font-normal border-b border-black">
-                          <div className="text-sm font-semibold mr-2 mb-auto">
+                        <div className="flex flex-col border-b border-black text-xs font-normal">
+                          <div className="mb-auto mr-2 text-sm font-semibold">
                             Suggested Plan Updates
                           </div>
                           <div className="flex flex-row items-center">
-                            <LinkIcon className="h-3 stroke-2 mr-0.5 text-blue-600" />
+                            <LinkIcon className="mr-0.5 h-3 stroke-2 text-blue-600" />
                             <a
                               href={practiceOutcome.currentSprint.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-blue-600 underline mr-1"
+                              className="mr-1 text-blue-600 underline"
                             >
                               Sprint Log
                             </a>
@@ -488,7 +488,7 @@ export default function LastWeekIssuePane({
                             .map((practice) => {
                               return (
                                 <div key={practice} className="w-full">
-                                  <p className="text-xs font-base">
+                                  <p className="font-base text-xs">
                                     - {practice}
                                   </p>
                                 </div>
@@ -498,8 +498,8 @@ export default function LastWeekIssuePane({
                       </div>
 
                       {/* Stories and Deliverables */}
-                      <div className="w-full flex flex-col mb-2">
-                        <div className="w-full grid grid-cols-2 text-sm border-b border-black">
+                      <div className="mb-2 flex w-full flex-col">
+                        <div className="grid w-full grid-cols-2 border-b border-black text-sm">
                           <div>Updated Sprint Stories</div>
                           <div>Updated Sprint Deliverables</div>
                         </div>
@@ -510,7 +510,7 @@ export default function LastWeekIssuePane({
                                 return (
                                   <div
                                     key={`sprint-story-${index}`}
-                                    className="w-full grid grid-cols-2 text-xs mb-2 leading-snug"
+                                    className="mb-2 grid w-full grid-cols-2 text-xs leading-snug"
                                   >
                                     <div>{story.description}</div>
                                     <div
@@ -529,8 +529,8 @@ export default function LastWeekIssuePane({
                       </div>
 
                       {/* Points */}
-                      <div className="w-full flex flex-col">
-                        <div className="w-full grid grid-cols-3 text-sm border-b border-black">
+                      <div className="flex w-full flex-col">
+                        <div className="grid w-full grid-cols-3 border-b border-black text-sm">
                           <div>Student</div>
                           <div>Points Committed</div>
                           <div>Hours Spent</div>
@@ -545,7 +545,7 @@ export default function LastWeekIssuePane({
                                 return (
                                   <div
                                     key={`sprint-points-${index}`}
-                                    className="w-full grid grid-cols-3 text-xs mb-2 leading-snug"
+                                    className="mb-2 grid w-full grid-cols-3 text-xs leading-snug"
                                   >
                                     <div>{student.name}</div>
                                     <div>
@@ -583,9 +583,9 @@ export default function LastWeekIssuePane({
                       return (
                         <div
                           key={practice.practice}
-                          className="w-full p-2 border shadow"
+                          className="w-full border p-2 shadow"
                         >
-                          <h2 className="text-xs border-b border-black ">
+                          <h2 className="border-b border-black text-xs ">
                             <span className="font-semibold">
                               {practice.type}:
                             </span>{' '}
@@ -594,14 +594,14 @@ export default function LastWeekIssuePane({
 
                           {/* { Did the practice happen? } */}
                           <div className="flex flex-wrap">
-                            <div className="w-full flex flex-row items-center text-xs font-normal">
+                            <div className="flex w-full flex-row items-center text-xs font-normal">
                               {/* If didHappen is null, then we have no response from the student; if it's true / false, then show whether student tried to do the practice */}
                               {practice.didHappen === null ? (
-                                <ExclamationCircleIcon className="h-4 stroke-2 mr-1 text-rose-600" />
+                                <ExclamationCircleIcon className="mr-1 h-4 stroke-2 text-rose-600" />
                               ) : practice.didHappen ? (
-                                <CheckBadgeIcon className="h-4 stroke-2 mr-1 text-green-600" />
+                                <CheckBadgeIcon className="mr-1 h-4 stroke-2 text-green-600" />
                               ) : (
-                                <ExclamationCircleIcon className="h-4 stroke-2 mr-1 text-rose-600" />
+                                <ExclamationCircleIcon className="mr-1 h-4 stroke-2 text-rose-600" />
                               )}
 
                               <span
@@ -623,7 +623,7 @@ export default function LastWeekIssuePane({
                                   <div className="mx-auto">
                                     {practice.deliverable !== '' ? (
                                       <div className="flex flex-row items-center text-xs font-normal">
-                                        <LinkIcon className="h-4 stroke-2 mr-1 text-green-600" />
+                                        <LinkIcon className="mr-1 h-4 stroke-2 text-green-600" />
                                         <a
                                           href={practice.deliverable}
                                           target="_blank"
@@ -646,8 +646,8 @@ export default function LastWeekIssuePane({
                                     )} */}
                                       </div>
                                     ) : (
-                                      <div className="flex flex-row items-center text-rose-600 text-xs font-normal">
-                                        <LinkIcon className="h-4 stroke-2 mr-1" />
+                                      <div className="flex flex-row items-center text-xs font-normal text-rose-600">
+                                        <LinkIcon className="mr-1 h-4 stroke-2" />
                                         No deliverable link
                                       </div>
                                     )}
@@ -658,8 +658,8 @@ export default function LastWeekIssuePane({
                                   practice.type !== 'Reflect After Sprint' &&
                                   practice.deliverable === null && (
                                     <div className="mx-auto">
-                                      <div className="flex flex-row items-center text-rose-600 text-xs font-normal">
-                                        <LinkIcon className="h-4 stroke-2 mr-1" />
+                                      <div className="flex flex-row items-center text-xs font-normal text-rose-600">
+                                        <LinkIcon className="mr-1 h-4 stroke-2" />
                                         No deliverable link
                                       </div>
                                     </div>
@@ -685,18 +685,18 @@ export default function LastWeekIssuePane({
                               )}
 
                             {/* { Reflections } */}
-                            <div className="w-full mt-1">
+                            <div className="mt-1 w-full">
                               {practice.reflections !== null &&
                               practice.reflections.length > 0 ? (
                                 <>
-                                  <h3 className="text-xs font-bold border-b">
+                                  <h3 className="border-b text-xs font-bold">
                                     Reflections
                                   </h3>
                                   {practice.reflections.map((reflection) => {
                                     return (
                                       <div
                                         key={reflection.prompt}
-                                        className="w-full mb-2 text-xs"
+                                        className="mb-2 w-full text-xs"
                                       >
                                         <h4 className="font-medium">
                                           {reflection.prompt}

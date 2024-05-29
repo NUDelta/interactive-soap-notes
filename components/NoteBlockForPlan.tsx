@@ -101,10 +101,10 @@ export default function NoteBlockForPlan({
     <>
       <div
         ref={drag}
-        className="border shadow flex flex-col items-left align-middle mb-2 w-full"
+        className="items-left mb-2 flex w-full flex-col border align-middle shadow"
         key={`note-block-${noteId}`}
       >
-        <div className="flex flex-row h-16">
+        <div className="flex h-16 flex-row">
           {/* drag handle on left side */}
           <div
             className={`flex items-center fill-slate-200 stroke-slate-200 ${opacity}`}
@@ -139,7 +139,7 @@ export default function NoteBlockForPlan({
                 setBlockContent(value);
                 onChange(value, htmlToText(value).trim());
               }}
-              className={`h-full px-1 py-1 border-none rounded-none leading-normal flex-initial basis-full text-xs text-wrap break-words placeholder:italic placeholder:text-slate-400`}
+              className={`h-full flex-initial basis-full text-wrap break-words rounded-none border-none px-1 py-1 text-xs leading-normal placeholder:italic placeholder:text-slate-400`}
             />
           </div>
         </div>

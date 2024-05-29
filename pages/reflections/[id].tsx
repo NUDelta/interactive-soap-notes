@@ -233,15 +233,15 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
           )} | ${new Date(noteInfo.sigDate).toLocaleString().split(',')[0]}`}
         </title>
       </Head>
-      <div className="w-full h-dvh overflow-y-auto">
+      <div className="h-dvh w-full overflow-y-auto">
         {/* Header info for CAP note */}
-        <div className="w-10/12 mx-auto mt-2 pr-3 pl-3">
+        <div className="mx-auto mt-2 w-10/12 pl-3 pr-3">
           {/* Back, title, and last updated */}
-          <div className="flex flex-row items-center flex-nowrap mb-2">
+          <div className="mb-2 flex flex-row flex-nowrap items-center">
             {/* Back button */}
             <div className="mr-1">
               <Link href="/">
-                <h3 className="text-base font-bold text-blue-400 hover:text-blue-500 visited:text-purple-600">
+                <h3 className="text-base font-bold text-blue-400 visited:text-purple-600 hover:text-blue-500">
                   &#8592;
                 </h3>
               </Link>
@@ -249,7 +249,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
 
             {/* Title */}
             <div className="mr-2">
-              <h1 className="font-bold text-base">
+              <h1 className="text-base font-bold">
                 {noteInfo.project} | Pre-SIG Reflection -- {noteInfo.sigDate}
               </h1>
             </div>
@@ -260,8 +260,8 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
               {/* Saved successfully */}
               {!isSaving && saveError === null ? (
                 <>
-                  <CheckCircleIcon className="w-5 h-5 mr-0.5 text-green-600" />
-                  <h2 className="font-semibold text-base text-green-600">
+                  <CheckCircleIcon className="mr-0.5 h-5 w-5 text-green-600" />
+                  <h2 className="text-base font-semibold text-green-600">
                     Reflections Saved
                   </h2>
                 </>
@@ -272,8 +272,8 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
               {/* Saving */}
               {isSaving ? (
                 <>
-                  <ArrowPathIcon className="animate-spin w-5 h-5 mr-0.5 text-blue-600" />
-                  <h2 className="font-semibold text-base text-blue-600">
+                  <ArrowPathIcon className="mr-0.5 h-5 w-5 animate-spin text-blue-600" />
+                  <h2 className="text-base font-semibold text-blue-600">
                     Saving...
                   </h2>
                 </>
@@ -285,9 +285,9 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
               {!isSaving && saveError !== null ? (
                 <>
                   <Tooltip content={saveError} placement="bottom">
-                    <ExclamationCircleIcon className="w-5 h-5 mr-0.5 text-red-600" />
+                    <ExclamationCircleIcon className="mr-0.5 h-5 w-5 text-red-600" />
                   </Tooltip>
-                  <h2 className="font-semibold text-base text-red-600">
+                  <h2 className="text-base font-semibold text-red-600">
                     Error in saving notes (Last saved: {lastUpdated})
                   </h2>
                 </>
@@ -299,7 +299,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
           </div>
 
           {/* Reflection Instructions */}
-          <div className="w-full mx-auto">
+          <div className="mx-auto w-full">
             <p>
               Hi{' '}
               {noteInfo.students == null ? '' : noteInfo.students.join(' and ')}
@@ -314,7 +314,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                 scroll all the way down and answer all questions
               </span>
               ; any spaces highlighted in{' '}
-              <span className="text-red-600 font-bold">red</span> are
+              <span className="font-bold text-red-600">red</span> are
               incomplete.
             </p>
           </div>
@@ -324,9 +324,9 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
           {/* Reflections for each issue */}
           {pastIssuesData.map((issue, issueIndex) => {
             return (
-              <div key={issue.id} className="w-full mx-auto mt-3">
+              <div key={issue.id} className="mx-auto mt-3 w-full">
                 {/* Issue title and last updated */}
-                <div className="flex flex-row items-center text-lg font-bold border-b border-black">
+                <div className="flex flex-row items-center border-b border-black text-lg font-bold">
                   <h2 className="mr-2">{issue.title}</h2>
                   <h2 className="text-sm text-green-600">
                     Last Saved: {issue.lastUpdated}
@@ -339,11 +339,11 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                     !followUp.practice.includes('[plan]') && (
                       <div
                         key={followUpIndex}
-                        className="w-full mx-auto mt-2 mb-4 shadow-sm p-2 border border-gray-300 rounded-lg"
+                        className="mx-auto mb-4 mt-2 w-full rounded-lg border border-gray-300 p-2 shadow-sm"
                       >
                         {/* Follow-up title */}
                         <div>
-                          <h3 className="text-base mr-2 border-b mb-2">
+                          <h3 className="mb-2 mr-2 border-b text-base">
                             {formatPracticeText(
                               followUp.parsedPractice.practice
                             )}
@@ -352,16 +352,16 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
 
                         {/* Checking if done */}
                         <div className="flex flex-row">
-                          <div className="w-full mb-2">
+                          <div className="mb-2 w-full">
                             <h3 className="text-sm font-medium">
                               {generateDidDoPromptForType(
                                 followUp.parsedPractice.practice
                               )}
                             </h3>
                             <select
-                              className={`w-1/4 bg-gray-50 border border-gray-300 text-sm font-bold rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2 py-1 ${
+                              className={`block w-1/4 rounded-lg border border-gray-300 bg-gray-50 px-2 py-1 text-sm font-bold focus:border-blue-500 focus:ring-blue-500 ${
                                 followUp.outcome.didHappen === null
-                                  ? 'empty:border-red-600 text-yellow-400'
+                                  ? 'text-yellow-400 empty:border-red-600'
                                   : followUp.outcome.didHappen
                                     ? 'text-green-600'
                                     : 'text-red-600'
@@ -407,7 +407,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                         {followUp.outcome.didHappen !== null &&
                           followUp.outcome.didHappen &&
                           !followUp.practice.includes('[reflect]') && (
-                            <div className="w-full flex flex-col">
+                            <div className="flex w-full flex-col">
                               {/* Description of what deliverable to provide */}
                               <h3 className="text-sm font-medium">
                                 {generateDeliverablePrompt(
@@ -417,7 +417,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
 
                               {/* Text Area to add link */}
                               <textarea
-                                className="w-full text-xs leading-4 h-7 p-1 mb-2 border border-gray-400 rounded-lg empty:border-red-600"
+                                className="mb-2 h-7 w-full rounded-lg border border-gray-400 p-1 text-xs leading-4 empty:border-red-600"
                                 placeholder="Paste link here"
                                 value={followUp.outcome.deliverableLink}
                                 onChange={(e) => {
@@ -443,14 +443,14 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                               <h3 className="text-sm font-medium">
                                 Describe your deliverable
                               </h3>
-                              <h3 className="text-xs font-base italic">
+                              <h3 className="font-base text-xs italic">
                                 What should your mentor look at? What does this
                                 deliverable show?
                               </h3>
 
                               {/* Text Area to describe deliverable */}
                               <textarea
-                                className="w-full text-xs leading-4 h-16 p-1 mb-2 border border-gray-400 rounded-lg empty:border-red-600"
+                                className="mb-2 h-16 w-full rounded-lg border border-gray-400 p-1 text-xs leading-4 empty:border-red-600"
                                 placeholder="Enter a short description of your deliverable here"
                                 value={followUp.outcome.deliverableNotes}
                                 onChange={(e) => {
@@ -485,7 +485,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                                   {reflection.prompt}
                                 </h3>
                                 <textarea
-                                  className="w-full text-xs leading-4 h-24 p-1 mb-2 border border-gray-400 rounded-lg empty:border-red-600"
+                                  className="mb-2 h-24 w-full rounded-lg border border-gray-400 p-1 text-xs leading-4 empty:border-red-600"
                                   placeholder="Enter a short reflection here"
                                   value={reflection.response}
                                   onChange={(e) => {
@@ -523,7 +523,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                   return followUp.practice.includes('[plan]');
                 }) && (
                   <div>
-                    <h3 className="text-sm italic font-medium">
+                    <h3 className="text-sm font-medium italic">
                       No reflections needed for this issue.
                     </h3>
                   </div>

@@ -50,14 +50,14 @@ export default function CurrWeekIssuePane({
   return (
     <div className="mb-5">
       {currIssue && (
-        <div className="flex flex-wrap w-full overflow-auto">
+        <div className="flex w-full flex-wrap overflow-auto">
           <div className="w-full">
             {/* show if there is a current instance */}
             {capSections.map((section) => (
-              <div className="w-full mb-1" key={section.name}>
+              <div className="mb-1 w-full" key={section.name}>
                 <h1 className="text-base font-bold">{section.title}</h1>
                 {section.name === 'plan' && (
-                  <p className="text-xs italic color-grey">
+                  <p className="color-grey text-xs italic">
                     Type <span className="font-bold">[</span> to add practices
                     using the autocomplete options; add additional info with{' '}
                     <span className="font-bold">w[</span>,
@@ -621,9 +621,9 @@ export default function CurrWeekIssuePane({
                         <h1 className="text-sm font-semibold">
                           Tracked Self-Regulation Gaps
                         </h1>
-                        <ul className="flex flex-wrap text-xs font-medium text-center text-gray-500 dark:text-gray-400 ml-2">
+                        <ul className="ml-2 flex flex-wrap text-center text-xs font-medium text-gray-500 dark:text-gray-400">
                           <li
-                            className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                             onClick={() => {
                               setShowPracticeGaps('Hide Gaps');
                             }}
@@ -631,7 +631,7 @@ export default function CurrWeekIssuePane({
                             Hide Gaps
                           </li>
                           <li
-                            className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                             onClick={() => {
                               setShowPracticeGaps('Show Gaps');
                             }}
@@ -639,7 +639,7 @@ export default function CurrWeekIssuePane({
                             Show Gaps
                           </li>
                           <li
-                            className={`me-2 inline-block px-2 py-1 rounded-lg ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                             onClick={() => {
                               setShowPracticeGaps('Show Gaps with Details');
                             }}
@@ -649,7 +649,7 @@ export default function CurrWeekIssuePane({
                         </ul>
                       </div>
                       {showPracticeGaps !== 'Hide Gaps' ? (
-                        <p className="italic text-xs mb-1">
+                        <p className="mb-1 text-xs italic">
                           As you assess what is happening, consider if there are
                           general gaps in the student&apos;s self-regulation
                           skills, beyond the current issue. Drag a practice onto
@@ -657,13 +657,13 @@ export default function CurrWeekIssuePane({
                           practice gap by clicking on its title or description.
                         </p>
                       ) : (
-                        <p className="italic text-xs mb-1">
+                        <p className="mb-1 text-xs italic">
                           Click above to show self-regulation gaps.
                         </p>
                       )}
 
                       {/* Active Practices Gaps */}
-                      <div className="flex flex-row gap-2 flex-nowrap overflow-auto">
+                      <div className="flex flex-row flex-nowrap gap-2 overflow-auto">
                         {/* TODO: this is the same code as in the home page. abstract out */}
                         {practiceGapData
                           .filter((practiceGap) => {
@@ -704,7 +704,7 @@ export default function CurrWeekIssuePane({
                           setShowPracticeGaps={setShowPracticeGaps}
                           currentIssuesData={currentIssuesData}
                           setCurrentIssuesData={setCurrentIssuesData}
-                          className="flex-none w-1/6"
+                          className="w-1/6 flex-none"
                         />
                       </div>
                     </div>
@@ -714,9 +714,9 @@ export default function CurrWeekIssuePane({
                 {/* Add helper text on how to use the plan section */}
                 {section.name === 'plan' && (
                   <>
-                    <div className="text-xs text-gray-700 italic mt-2 flex flex-row">
+                    <div className="mt-2 flex flex-row text-xs italic text-gray-700">
                       {/* Kinds of practice agents */}
-                      <div className="mr-2 align-top basis-1/4">
+                      <div className="mr-2 basis-1/4 align-top">
                         <h2 className="font-bold">Issue follow-ups</h2>
                         <div>
                           <p>
@@ -731,7 +731,7 @@ export default function CurrWeekIssuePane({
                         </div>
                       </div>
 
-                      <div className="mr-6 align-top basis-1/4">
+                      <div className="mr-6 basis-1/4 align-top">
                         <h2 className="font-bold">&nbsp;</h2>
                         <div>
                           <p>
@@ -746,7 +746,7 @@ export default function CurrWeekIssuePane({
                       </div>
 
                       {/* Additional info to attach */}
-                      <div className="mr-2 align-top basis-1/4">
+                      <div className="mr-2 basis-1/4 align-top">
                         <h2 className="font-bold">
                           Include additional info with...
                         </h2>
@@ -770,7 +770,7 @@ export default function CurrWeekIssuePane({
                         </div>
                       </div>
 
-                      <div className="align-top basis-1/4">
+                      <div className="basis-1/4 align-top">
                         <h2 className="font-bold">&nbsp;</h2>
                         <div>
                           {/* what (practice), who, where / when, how */}

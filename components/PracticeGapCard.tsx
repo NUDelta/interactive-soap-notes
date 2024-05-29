@@ -169,11 +169,11 @@ export default function PracticeGapCard({
           ref={drag}
           className={`${className} p-1 ${opacity} ${isAddPractice ? 'border-2 border-dashed shadow-none' : 'border-4 shadow hover:border-4 hover:border-blue-300 hover:shadow-none'}`}
         >
-          <div className={`w-full h-full`}>
+          <div className={`h-full w-full`}>
             {isAddPractice ? (
               <>
                 {/* Add practice card */}
-                <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
+                <div className="mx-auto my-auto flex h-full w-full flex-col items-center justify-center p-2">
                   <ContentEditable
                     id={`title-${practiceGapId}`}
                     html={titleRef.current}
@@ -202,9 +202,9 @@ export default function PracticeGapCard({
                     onChange={(e) => {
                       titleRef.current = e.target.value;
                     }}
-                    className={`p-1 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Describe_the_recurring_gap_in_self\-regulation_skill...'] empty:before:italic empty:before:text-slate-500 border text-xs font-normal rounded-lg`}
+                    className={`mb-2 mr-2 min-h-16 w-full flex-none break-words rounded-lg border p-1 text-xs font-normal empty:before:italic empty:before:text-slate-500 empty:before:content-['Describe_the_recurring_gap_in_self\-regulation_skill...']`}
                   />
-                  <h2 className="text-xs font-bold italic items-center">
+                  <h2 className="items-center text-xs font-bold italic">
                     {newPractice.trim() === ''
                       ? 'or drag a note onto this block'
                       : "hit 'Enter' to add practice gap"}
@@ -214,7 +214,7 @@ export default function PracticeGapCard({
             ) : (
               <>
                 {/* Tracked Practice Gaps */}
-                <div className="p-1 w-full flex flex-col">
+                <div className="flex w-full flex-col p-1">
                   <div className="flex flex-row">
                     {/* Issue title */}
                     <ContentEditable
@@ -224,7 +224,7 @@ export default function PracticeGapCard({
                         titleRef.current = e.target.value;
                         onEdit('title', htmlToText(titleRef.current).trim());
                       }}
-                      className={`p-0.5 break-words w-11/12 empty:before:content-['Title_of_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-md text-xs font-normal`}
+                      className={`w-11/12 break-words rounded-md border p-0.5 text-xs font-normal empty:before:italic empty:before:text-slate-400 empty:before:content-['Title_of_practice_gap...']`}
                     />
 
                     {/* Resolve and archive buttons */}
@@ -250,7 +250,7 @@ export default function PracticeGapCard({
                           htmlToText(descriptionRef.current).trim()
                         );
                       }}
-                      className={`p-0.5 text-xs mt-2 flex-none w-full empty:before:content-['Describe_practice_gap...'] empty:before:italic empty:before:text-slate-400 border rounded-md`}
+                      className={`mt-2 w-full flex-none rounded-md border p-0.5 text-xs empty:before:italic empty:before:text-slate-400 empty:before:content-['Describe_practice_gap...']`}
                     />
                   )}
 
@@ -258,12 +258,12 @@ export default function PracticeGapCard({
                   {showPracticeGaps === 'Show Gaps with Details' &&
                     priorInstances && (
                       <div className="flex flex-col">
-                        <h3 className="mt-4 text-xs font-medium border-b border-black">
+                        <h3 className="mt-4 border-b border-black text-xs font-medium">
                           Past items of concern with practice gap
                         </h3>
 
                         {priorInstances.map((instance, idx) => (
-                          <div key={idx} className="flex flex-col mb-2">
+                          <div key={idx} className="mb-2 flex flex-col">
                             <h2 className="mt-1 text-xs font-semibold">
                               {shortenText(instance.title, 50)} |{' '}
                               <span className="mt-1 text-2xs font-semibold">

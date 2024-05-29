@@ -28,16 +28,16 @@ export default function Home({ sigs }): JSX.Element {
       <Head>
         <title>Home</title>
       </Head>
-      <div className="container m-auto w-11/12 h-dvh overflow-auto mt-3">
+      <div className="container m-auto mt-3 h-dvh w-11/12 overflow-auto">
         <div className="mb-5">
-          <h1 className="font-bold text-4xl">
+          <h1 className="text-4xl font-bold">
             Welcome to Interactive CAP Notes
           </h1>
         </div>
 
         {/* button to toggle all notes or just last note */}
         <button
-          className="bg-blue-500 hover:bg-blue-700 text-white text-xs font-bold px-4 py-1 h-10 rounded-full mb-4"
+          className="mb-4 h-10 rounded-full bg-blue-500 px-4 py-1 text-xs font-bold text-white hover:bg-blue-700"
           onClick={() => setShowAllNotes(!showAllNotes)}
         >
           {showAllNotes ? 'Show Most Recent Notes' : 'Show All Notes'}
@@ -46,12 +46,12 @@ export default function Home({ sigs }): JSX.Element {
         {/* Section for each SIG */}
         {/* TODO: make into a filterable table */}
 
-        <div className="w-full col-span-2">
+        <div className="col-span-2 w-full">
           {/* List of SIGs */}
           {sigsState.map((sig, i) => (
-            <div className="w-full mb-10" key={sig.abbreviation}>
+            <div className="mb-10 w-full" key={sig.abbreviation}>
               {/* Header Info for each SIG */}
-              <div className="grid grid-cols-5 gap-y-5 auto-rows-auto w-full border-b border-black mb-3 font-bold text-xl">
+              <div className="mb-3 grid w-full auto-rows-auto grid-cols-5 gap-y-5 border-b border-black text-xl font-bold">
                 <h2 className="col-span-2">
                   {sig.name} ({sig.abbreviation})
                 </h2>
@@ -67,7 +67,7 @@ export default function Home({ sigs }): JSX.Element {
                 })
                 .map((capNote) => (
                   <div
-                    className="grid grid-cols-5 gap-y-5 auto-rows-auto w-full"
+                    className="grid w-full auto-rows-auto grid-cols-5 gap-y-5"
                     key={`${capNote.project}-${capNote.date}`}
                   >
                     {/* Project Title and Link to CAP Note */}
@@ -77,7 +77,7 @@ export default function Home({ sigs }): JSX.Element {
                           capNote.project
                         )}_${new Date(capNote.date).toISOString().split('T')[0]}`}
                       >
-                        <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                        <h3 className="text-md text-blue-600 underline visited:text-purple-600 hover:text-blue-800">
                           {capNote.project}
                         </h3>
                       </Link>
@@ -90,7 +90,7 @@ export default function Home({ sigs }): JSX.Element {
                           capNote.project
                         )}_${new Date(capNote.date).toISOString().split('T')[0]}`}
                       >
-                        <h3 className="text-md underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                        <h3 className="text-md text-blue-600 underline visited:text-purple-600 hover:text-blue-800">
                           Reflection Page
                         </h3>
                       </Link>

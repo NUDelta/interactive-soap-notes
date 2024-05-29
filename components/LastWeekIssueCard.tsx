@@ -74,7 +74,7 @@ export default function LastWeekIssueCard({
   return (
     <div
       ref={drag}
-      className={`basis-1/3 shrink-0 p-1 border shadow ${selectedIssue === issueId && 'bg-blue-200'} border-4 shadow hover:border-4 hover:border-blue-300 hover:shadow-none ${opacity}`}
+      className={`shrink-0 basis-1/3 border p-1 shadow ${selectedIssue === issueId && 'bg-blue-200'} border-4 shadow hover:border-4 hover:border-blue-300 hover:shadow-none ${opacity}`}
       onClick={() => {
         setIsSelected(!isSelected);
         if (issueId === selectedIssue) {
@@ -85,15 +85,15 @@ export default function LastWeekIssueCard({
         }
       }}
     >
-      <div className={`w-full h-full`}>
+      <div className={`h-full w-full`}>
         <>
           {/* Issue title */}
-          <div className="p-1 w-full flex flex-col">
-            <h2 className="text-xs font-semibold mb-auto">{title}</h2>
+          <div className="flex w-full flex-col p-1">
+            <h2 className="mb-auto text-xs font-semibold">{title}</h2>
 
             {/* TODO: 05-07-24 maybe show that there are missing deliverables */}
-            <div className="flex flex-row items-center text-2xs font-medium mt-2 text-blue-600">
-              <CalendarIcon className="h-4 mr-1" />
+            <div className="mt-2 flex flex-row items-center text-2xs font-medium text-blue-600">
+              <CalendarIcon className="mr-1 h-4" />
               Tracked from last SIG meeting
             </div>
 

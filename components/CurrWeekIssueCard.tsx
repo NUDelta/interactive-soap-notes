@@ -170,7 +170,7 @@ export default function CurrWeekIssueCard({
   return (
     <div
       ref={ref}
-      className={`basis-1/3 shrink-0 p-1 ${backgroundColor !== 'bg-transparent' ? backgroundColor : selectedIssue === issueId ? 'bg-blue-200' : 'bg-transparent'} ${isAddIssue ? 'border-2 border-dashed shadow-none' : 'border-4 shadow hover:border-4 hover:border-blue-300 hover:shadow-none'} ${opacity}`}
+      className={`shrink-0 basis-1/3 p-1 ${backgroundColor !== 'bg-transparent' ? backgroundColor : selectedIssue === issueId ? 'bg-blue-200' : 'bg-transparent'} ${isAddIssue ? 'border-2 border-dashed shadow-none' : 'border-4 shadow hover:border-4 hover:border-blue-300 hover:shadow-none'} ${opacity}`}
       onClick={() => {
         if (!isAddIssue) {
           setIsSelected(!isSelected);
@@ -185,12 +185,12 @@ export default function CurrWeekIssueCard({
         }
       }}
     >
-      <div className={`w-full h-full`}>
+      <div className={`h-full w-full`}>
         {/* Navigation to scratch space */}
         {isAddIssue ? (
           <>
             {/* Large plus icon in center of square */}
-            <div className="p-2 flex flex-col w-full h-full mx-auto my-auto items-center justify-center">
+            <div className="mx-auto my-auto flex h-full w-full flex-col items-center justify-center p-2">
               <ContentEditable
                 id={`title-${issueId}`}
                 html={titleRef.current}
@@ -219,9 +219,9 @@ export default function CurrWeekIssueCard({
                 onChange={(e) => {
                   titleRef.current = e.target.value;
                 }}
-                className={`p-1 mr-2 w-full min-h-16 mb-2 break-words flex-none empty:before:content-['Describe_an_item_of_concern...'] empty:before:italic empty:before:text-slate-500 border text-xs font-normal rounded-lg`}
+                className={`mb-2 mr-2 min-h-16 w-full flex-none break-words rounded-lg border p-1 text-xs font-normal empty:before:italic empty:before:text-slate-500 empty:before:content-['Describe_an_item_of_concern...']`}
               />
-              <h2 className="text-xs font-bold italic text-center items-center">
+              <h2 className="items-center text-center text-xs font-bold italic">
                 {newIssue === ''
                   ? 'or drag onto this block'
                   : "hit 'Enter' to add new issue"}
@@ -231,7 +231,7 @@ export default function CurrWeekIssueCard({
         ) : (
           <>
             {/* Issue title */}
-            <div className="w-full flex flex-col">
+            <div className="flex w-full flex-col">
               <ContentEditable
                 id={`title-${issueId}`}
                 html={titleRef.current}
@@ -239,14 +239,14 @@ export default function CurrWeekIssueCard({
                   titleRef.current = e.target.value.trim();
                   onTitleEdit(htmlToText(e.target.value).trim());
                 }}
-                className={`p-0.5 mr-2 w-full min-h-16 mb-0.5 break-words flex-none empty:before:content-['Describe_concern_you_observed...'] empty:before:italic empty:before:text-slate-400 border text-xs font-normal rounded-lg`}
+                className={`mb-0.5 mr-2 min-h-16 w-full flex-none break-words rounded-lg border p-0.5 text-xs font-normal empty:before:italic empty:before:text-slate-400 empty:before:content-['Describe_concern_you_observed...']`}
               />
 
-              <div className="flex flex-col w-full">
+              <div className="flex w-full flex-col">
                 {/* Show concern is linked from a past issue  */}
                 {issue && issue.priorInstances.length > 0 && (
-                  <div className="flex flex-row items-center mb-0.5">
-                    <ArrowUturnLeftIcon className="h-4 mr-1 text-blue-600" />
+                  <div className="mb-0.5 flex flex-row items-center">
+                    <ArrowUturnLeftIcon className="mr-1 h-4 text-blue-600" />
                     <div className="text-2xs font-medium text-blue-600">
                       Created from, &quot;
                       <span className="italic">
@@ -270,7 +270,7 @@ export default function CurrWeekIssueCard({
                     );
                   }) && (
                     <div className="flex flex-row items-center ">
-                      <CheckBadgeIcon className="h-4 mr-1 text-green-600" />
+                      <CheckBadgeIcon className="mr-1 h-4 text-green-600" />
                       <div className="text-2xs font-medium text-green-600">
                         Tracking follow-up plans
                       </div>
@@ -280,7 +280,7 @@ export default function CurrWeekIssueCard({
                 {/* Trash to remove concern */}
                 {!isThisWeek && (
                   <TrashIcon
-                    className={`h-5 text-slate-600 ml-auto`}
+                    className={`ml-auto h-5 text-slate-600`}
                     onClick={() => {
                       onDeleteIssue();
                     }}

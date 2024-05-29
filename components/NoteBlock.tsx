@@ -180,7 +180,7 @@ export default function NoteBlock({
     <>
       <div
         ref={drag}
-        className="border shadow flex flex-col items-left align-middle mb-2 w-full"
+        className="items-left mb-2 flex w-full flex-col border align-middle shadow"
         key={`note-block-${noteId}`}
       >
         <div className="flex flex-row">
@@ -222,7 +222,7 @@ export default function NoteBlock({
             }}
             onKeyDown={onKeyDown}
             onKeyUp={onKeyUp}
-            className={`py-1 break-words flex-initial basis-full text-xs text-wrap empty:before:content-['Type_here...'] empty:before:italic empty:before:text-slate-400`}
+            className={`flex-initial basis-full text-wrap break-words py-1 text-xs empty:before:italic empty:before:text-slate-400 empty:before:content-['Type_here...']`}
           />
         </div>
       </div>
