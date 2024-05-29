@@ -120,6 +120,25 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
     }
   };
 
+  /**
+   * Determine if a string is a valid URL.
+   * From: https://stackoverflow.com/a/5717133
+   * @param str
+   * @returns
+   */
+  const isValidHttpUrl = (str) => {
+    var pattern = new RegExp(
+      '^(https?:\\/\\/)?' + // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+        '(\\#[-a-z\\d_]*)?$', // fragment locator
+      'i'
+    );
+    return !!pattern.test(str);
+  };
+
   // on first load, set the dates for noteInfo to be localized to the timezone
   useEffect(() => {
     setPastIssuesData((prevPastIssuesData) => {
@@ -414,6 +433,18 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                                   followUp.parsedPractice.practice
                                 )}
                               </h3>
+
+                              {followUp.outcome.deliverableLink === '' ||
+                                (!isValidHttpUrl(
+                                  followUp.outcome.deliverableLink
+                                ) && (
+                                  <h4 className={`text-xs italic text-red-600`}>
+                                    Please enter a single, valid link to your
+                                    deliverable. Add additional links to
+                                    deliverables in the description section
+                                    below.
+                                  </h4>
+                                ))}
 
                               {/* Text Area to add link */}
                               <textarea
