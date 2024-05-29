@@ -360,16 +360,17 @@ export default function LastWeekIssuePane({
 
               {/* Show practice gaps linked to issue */}
               <div className="w-2/3">
-                <div className="flex flex-row items-center">
+                <div className="mb-1 flex flex-row items-center">
                   <h1 className="text-base font-bold">
                     Self-Regulation Gaps for Issue
                   </h1>
                   {/* Toggle for details */}
+                  {/* TODO: this is duplicated from CurrWeekIssuePane */}
                   {relevantPracticeGaps !== null &&
                     relevantPracticeGaps.length !== 0 && (
                       <ul className="ml-2 flex flex-wrap text-center text-xs font-medium text-gray-500 dark:text-gray-400">
                         <li
-                          className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          className={`me-2 inline-block rounded-lg px-2 py-0.5 ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                           onClick={() => {
                             setShowPracticeGaps('Hide Gaps');
                           }}
@@ -377,7 +378,7 @@ export default function LastWeekIssuePane({
                           Hide Gaps
                         </li>
                         <li
-                          className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          className={`me-2 inline-block rounded-lg px-2 py-0.5 ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                           onClick={() => {
                             setShowPracticeGaps('Show Gaps');
                           }}
@@ -385,7 +386,7 @@ export default function LastWeekIssuePane({
                           Show Gaps
                         </li>
                         <li
-                          className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                          className={`me-2 inline-block rounded-lg px-2 py-0.5 ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                           onClick={() => {
                             setShowPracticeGaps('Show Gaps with Details');
                           }}

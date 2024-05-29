@@ -56,6 +56,7 @@ export default function CurrWeekIssuePane({
             {capSections.map((section) => (
               <div className="mb-1 w-full" key={section.name}>
                 <h1 className="text-base font-bold">{section.title}</h1>
+                {/* Helper text for plan */}
                 {section.name === 'plan' && (
                   <p className="color-grey text-xs italic">
                     Type <span className="font-bold">[</span> to add practices
@@ -67,6 +68,15 @@ export default function CurrWeekIssuePane({
                     practice opportunities. Students will be asked to share
                     practices deliverables and reflections before the next SIG
                     meeting.
+                  </p>
+                )}
+
+                {/* Helper text for assessment */}
+                {section.name === 'assessment' && (
+                  <p className="mb-1 text-xs italic">
+                    Drag a self-regulation gap from below onto the issue card on
+                    the top of the page to attach it.
+                    {/* Drag a note onto the empty card to track a new gap. */}
                   </p>
                 )}
 
@@ -617,13 +627,13 @@ export default function CurrWeekIssuePane({
                   <div className="w-full">
                     {/* Practice Cards */}
                     <div className="mb-3">
-                      <div className="flex flex-row items-center">
+                      <div className="mb-1 flex flex-row items-center">
                         <h1 className="text-sm font-semibold">
                           Tracked Self-Regulation Gaps
                         </h1>
                         <ul className="ml-2 flex flex-wrap text-center text-xs font-medium text-gray-500 dark:text-gray-400">
                           <li
-                            className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            className={`me-2 inline-block rounded-lg px-2 py-0.5 ${showPracticeGaps === 'Hide Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                             onClick={() => {
                               setShowPracticeGaps('Hide Gaps');
                             }}
@@ -631,7 +641,7 @@ export default function CurrWeekIssuePane({
                             Hide Gaps
                           </li>
                           <li
-                            className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            className={`me-2 inline-block rounded-lg px-2 py-0.5 ${showPracticeGaps === 'Show Gaps' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                             onClick={() => {
                               setShowPracticeGaps('Show Gaps');
                             }}
@@ -639,7 +649,7 @@ export default function CurrWeekIssuePane({
                             Show Gaps
                           </li>
                           <li
-                            className={`me-2 inline-block rounded-lg px-2 py-1 ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
+                            className={`me-2 inline-block rounded-lg px-2 py-0.5 ${showPracticeGaps === 'Show Gaps with Details' ? 'active bg-blue-600 text-white' : 'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-white'}`}
                             onClick={() => {
                               setShowPracticeGaps('Show Gaps with Details');
                             }}
@@ -648,19 +658,6 @@ export default function CurrWeekIssuePane({
                           </li>
                         </ul>
                       </div>
-                      {showPracticeGaps !== 'Hide Gaps' ? (
-                        <p className="mb-1 text-xs italic">
-                          As you assess what is happening, consider if there are
-                          general gaps in the student&apos;s self-regulation
-                          skills, beyond the current issue. Drag a practice onto
-                          the assessment to add it to the current issue. Edit a
-                          practice gap by clicking on its title or description.
-                        </p>
-                      ) : (
-                        <p className="mb-1 text-xs italic">
-                          Click above to show self-regulation gaps.
-                        </p>
-                      )}
 
                       {/* Active Practices Gaps */}
                       <div className="flex flex-row flex-nowrap gap-2 overflow-auto">
