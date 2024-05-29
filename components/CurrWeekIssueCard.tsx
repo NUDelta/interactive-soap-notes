@@ -223,7 +223,7 @@ export default function CurrWeekIssueCard({
               />
               <h2 className="items-center text-center text-xs font-bold italic">
                 {newIssue === ''
-                  ? 'or drag onto this block'
+                  ? 'or drag onto this card'
                   : "hit 'Enter' to add new issue"}
               </h2>
             </div>
