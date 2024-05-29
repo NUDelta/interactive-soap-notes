@@ -86,7 +86,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
       return (
         <>
           {parse(
-            `Share a <span className="font-bold">link</span> to the deliverable that shows what you worked on. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. <span className="font-bold">For images,</span> upload to <a href="https://drive.google.com/drive/u/1/folders/1f_soFX6v9fAL9s4Da8DkPFAVC3Px3czt" target="_blank" className="text-blue-600 underline">this</a> folder and copy the file link below (Right Click → Share → Copy Link). Make sure all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).`
+            `Share a <span className="font-bold">link</span> to the deliverable that shows what you worked on. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. <span className="font-bold">For images,</span> upload to <a href="https://drive.google.com/drive/u/1/folders/1f_soFX6v9fAL9s4Da8DkPFAVC3Px3czt" target="_blank" rel="noreferrer" className="text-blue-600 underline">this</a> folder and copy the file link below (Right Click → Share → Copy Link). Make sure all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).`
           )}
         </>
       );
@@ -95,7 +95,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
       return (
         <>
           {parse(
-            `Share a <span className="font-bold">link</span> to an image of what you worked on or discussed at <span className="font-bold">Mysore</span>. <span className="font-bold">For images,</span> upload to <a href="https://drive.google.com/drive/u/1/folders/1f_soFX6v9fAL9s4Da8DkPFAVC3Px3czt" target="_blank" className="text-blue-600 underline">this</a> folder and copy the file link below (Right Click → Share → Copy Link). Make sure all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).`
+            `Share a <span className="font-bold">link</span> to an image of what you worked on or discussed at <span className="font-bold">Mysore</span>. <span className="font-bold">For images,</span> upload to <a href="https://drive.google.com/drive/u/1/folders/1f_soFX6v9fAL9s4Da8DkPFAVC3Px3czt" target="_blank" rel="noreferrer" className="text-blue-600 underline">this</a> folder and copy the file link below (Right Click → Share → Copy Link). Make sure all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).`
           )}
         </>
       );
@@ -104,7 +104,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
       return (
         <>
           {parse(
-            `Share a <span className="font-bold">link</span> to the deliverable that shows what you worked on at <span className="font-bold">Pair Research</span>. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. <span className="font-bold">For images,</span> upload to <a href="https://drive.google.com/drive/u/1/folders/1f_soFX6v9fAL9s4Da8DkPFAVC3Px3czt" target="_blank" className="text-blue-600 underline">this</a> folder and copy the file link below (Right Click → Share → Copy Link). Make sure all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).`
+            `Share a <span className="font-bold">link</span> to the deliverable that shows what you worked on at <span className="font-bold">Pair Research</span>. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. <span className="font-bold">For images,</span> upload to <a href="https://drive.google.com/drive/u/1/folders/1f_soFX6v9fAL9s4Da8DkPFAVC3Px3czt" target="_blank" rel="noreferrer" className="text-blue-600 underline">this</a> folder and copy the file link below (Right Click → Share → Copy Link). Make sure all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).`
           )}
         </>
       );
@@ -113,7 +113,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
       return (
         <>
           {parse(
-            `Share a <span className="font-bold">link</span> to the deliverable that shows what you worked on at <span className="font-bold">with the people your mentor suggested.</span>. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. <span className="font-bold">For images,</span> upload to <a href="https://drive.google.com/drive/u/1/folders/1f_soFX6v9fAL9s4Da8DkPFAVC3Px3czt" target="_blank" className="text-blue-600 underline">this</a> folder and copy the file link below (Right Click → Share → Copy Link). Make sure all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).`
+            `Share a <span className="font-bold">link</span> to the deliverable that shows what you worked on at <span className="font-bold">with the people your mentor suggested.</span>. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. <span className="font-bold">For images,</span> upload to <a href="https://drive.google.com/drive/u/1/folders/1f_soFX6v9fAL9s4Da8DkPFAVC3Px3czt" target="_blank" rel="noreferrer" className="text-blue-600 underline">this</a> folder and copy the file link below (Right Click → Share → Copy Link). Make sure all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).`
           )}
         </>
       );

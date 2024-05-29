@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import LinkIcon from '@heroicons/react/24/outline/LinkIcon';
 import CheckBadgeIcon from '@heroicons/react/24/outline/CheckBadgeIcon';
 import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon';
+import parse from 'html-react-parser';
 
 export default function LastWeekIssuePane({
   issueId,
@@ -248,7 +249,9 @@ export default function LastWeekIssuePane({
           deliverable: followUp.practice.includes('[reflect]')
             ? null
             : followUp.outcome.deliverableLink,
-          deliverableNotes: followUp.outcome.deliverableNotes,
+          deliverableNotes: convertTextToHtml(
+            followUp.outcome.deliverableNotes
+          ),
           reflections: filteredReflections
         };
       })
@@ -257,6 +260,20 @@ export default function LastWeekIssuePane({
     // getYellKeysForAllDeliverables(practiceOutcome);
     getOrgObjects(practiceOutcome, noteInfo.project);
   }, [selectedLastWeekIssue, noteInfo]);
+
+  const convertTextToHtml = (textContent) => {
+    // chck if textContent is null
+    if (textContent === null) {
+      return <></>;
+    }
+    // replace links with anchor tags
+    const linkRegex = /((http|https):\/\/[^\s]+)/g;
+    textContent = textContent.replace(
+      linkRegex,
+      '<a href="$1" target="_blank" rel="noreferrer" className="text-blue-600 underline">Link</a>'
+    );
+    return <>{parse(textContent)}</>;
+  };
 
   return (
     <div className="mb-5">
@@ -672,14 +689,12 @@ export default function LastWeekIssuePane({
                             {/* Student's deliverable notes */}
                             {practice.didHappen !== null &&
                               practice.deliverableNotes !== null && (
-                                <div className="mt-0.5 text-xs">
+                                <div className="mt-0.5 w-full whitespace-pre-line text-xs">
                                   <div className="">
                                     Student notes on deliverable:{' '}
                                   </div>
-                                  <div className="">
-                                    <span className="text-green-600">
-                                      {practice.deliverableNotes}
-                                    </span>
+                                  <div className="text-green-600">
+                                    {practice.deliverableNotes}
                                   </div>
                                 </div>
                               )}
@@ -696,7 +711,7 @@ export default function LastWeekIssuePane({
                                     return (
                                       <div
                                         key={reflection.prompt}
-                                        className="mb-2 w-full text-xs"
+                                        className="mb-2 w-full whitespace-pre-line text-xs"
                                       >
                                         <h4 className="font-medium">
                                           {reflection.prompt}
