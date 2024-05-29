@@ -379,7 +379,7 @@ export const parsePracticeText = (practice) => {
         // TODO: this should be done before the rep[] tags are removed
         output.content = output.content.replace(
           `${rep.name}`,
-          `"${rep.name}" representation`
+          `representation, "${rep.name},"`
         );
       }
     }
