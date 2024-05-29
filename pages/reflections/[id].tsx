@@ -434,7 +434,8 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                                 )}
                               </h3>
 
-                              {followUp.outcome.deliverableLink === '' ||
+                              {(followUp.outcome.deliverableLink !== null &&
+                                followUp.outcome.deliverableLink === '') ||
                                 (!isValidHttpUrl(
                                   followUp.outcome.deliverableLink
                                 ) && (
