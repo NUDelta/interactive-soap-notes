@@ -212,7 +212,7 @@ export default async function handler(
               practiceAgents,
               orgObjs
             );
-            // console.log('postSigScript:', postSigScript);
+            // console.log('postSigScript:', JSON.stringify(postSigScript));
             // console.log(
             //   'strat function',
             //   postSigScript.strategyToEnact.strategy_function

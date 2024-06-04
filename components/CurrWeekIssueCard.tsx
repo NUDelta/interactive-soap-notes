@@ -269,7 +269,7 @@ export default function CurrWeekIssueCard({
                       (agent) => currPlan.value.trim().includes(agent)
                     );
                   }) && (
-                    <div className="flex flex-row items-center ">
+                    <div className="flex flex-row items-center">
                       <CheckBadgeIcon className="mr-1 h-4 text-green-600" />
                       <div className="text-2xs font-medium text-green-600">
                         Tracking follow-up plans

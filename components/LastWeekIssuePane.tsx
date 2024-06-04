@@ -603,7 +603,7 @@ export default function LastWeekIssuePane({
                           key={practice.practice}
                           className="w-full border p-2 shadow"
                         >
-                          <h2 className="border-b border-black text-xs ">
+                          <h2 className="border-b border-black text-xs">
                             <span className="font-semibold">
                               {practice.type}:
                             </span>{' '}
