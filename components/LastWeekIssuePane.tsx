@@ -691,24 +691,33 @@ export default function LastWeekIssuePane({
 
                             {/* Student's deliverable notes */}
                             {practice.didHappen !== null &&
-                              practice.deliverableNotes !== null && (
-                                <div className="mt-0.5 w-full whitespace-pre-line text-xs">
-                                  <div className="">
-                                    Student notes on deliverable:{' '}
-                                  </div>
-                                  {practice.deliverableNotes
-                                    .toString()
-                                    .trim() === '' ? (
-                                    <div className="text-rose-600">
-                                      No notes from student(s)
-                                    </div>
-                                  ) : (
-                                    <div className="text-blue-600">
-                                      {practice.deliverableNotes}
-                                    </div>
-                                  )}
+                            practice.didHappen &&
+                            practice.deliverableNotes !== null ? (
+                              <div className="mt-0.5 w-full whitespace-pre-line text-xs">
+                                <div className="">
+                                  Student notes on deliverable:{' '}
                                 </div>
-                              )}
+                                {practice.deliverableNotes.toString().trim() ===
+                                '' ? (
+                                  <div className="text-rose-600">
+                                    No notes from student(s)
+                                  </div>
+                                ) : (
+                                  <div className="text-blue-600">
+                                    {practice.deliverableNotes}
+                                  </div>
+                                )}
+                              </div>
+                            ) : practice.didHappen &&
+                              practice.deliverableNotes === null ? (
+                              <div className="mt-0.5 w-full whitespace-pre-line text-xs">
+                                <div className="text-rose-600">
+                                  No notes from student(s)
+                                </div>
+                              </div>
+                            ) : (
+                              <></>
+                            )}
 
                             {/* { Reflections } */}
                             <div className="mt-1 w-full">
