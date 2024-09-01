@@ -324,7 +324,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
               {noteInfo.students == null ? '' : noteInfo.students.join(' and ')}
               ! Please reflect on the practices your mentor suggested{' '}
               <span className="font-bold">
-                by the morning of your SIG meeting
+                by the morning of your coaching meeting with your mentor
               </span>
               . Enter your short (2-3 sentences, max) reflections in the text
               area after each question. For any questions that are not

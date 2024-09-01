@@ -94,7 +94,7 @@ export default function LastWeekIssueCard({
             {/* TODO: 05-07-24 maybe show that there are missing deliverables */}
             <div className="mt-2 flex flex-row items-center text-2xs font-medium text-blue-600">
               <CalendarIcon className="mr-1 h-4" />
-              Tracked from last SIG meeting
+              Tracked from last coaching meeting
             </div>
 
             {/* Show / hide issue */}

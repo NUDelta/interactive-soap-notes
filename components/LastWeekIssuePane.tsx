@@ -286,7 +286,7 @@ export default function LastWeekIssuePane({
             <div className="flex w-full flex-row">
               <div className="mr-6 flex w-1/3 flex-col">
                 <div className="mb-1 text-xs italic">
-                  Below are your notes from the last SIG meeting.
+                  Below are your notes from the last coaching meeting.
                 </div>
                 <h1 className="text-base font-bold">Context for Issue</h1>
                 {/* Context notes on Last Week's Issues */}
