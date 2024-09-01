@@ -449,8 +449,8 @@ export default function LastWeekIssuePane({
                 <h1 className="text-base font-bold">Follow-Up Outcomes</h1>
                 <h2 className="text-sm italic">
                   Text in{' '}
-                  <span className="font-semibold text-green-600">green</span>{' '}
-                  are responses from the students(s). Text in{' '}
+                  <span className="font-semibold text-blue-600">blue</span> are
+                  responses from the students(s). Text in{' '}
                   <span className="font-semibold text-rose-600">red</span>{' '}
                   indicates missing reflections or documents.
                 </h2>
@@ -619,13 +619,13 @@ export default function LastWeekIssuePane({
                               {practice.didHappen === null ? (
                                 <ExclamationCircleIcon className="mr-1 h-4 stroke-2 text-rose-600" />
                               ) : practice.didHappen ? (
-                                <CheckBadgeIcon className="mr-1 h-4 stroke-2 text-green-600" />
+                                <CheckBadgeIcon className="mr-1 h-4 stroke-2 text-blue-600" />
                               ) : (
                                 <ExclamationCircleIcon className="mr-1 h-4 stroke-2 text-rose-600" />
                               )}
 
                               <span
-                                className={`font-normal ${practice.didHappen === null ? 'text-rose-600' : practice.didHappen ? 'text-green-600' : 'text-rose-600'}`}
+                                className={`font-normal ${practice.didHappen === null ? 'text-rose-600' : practice.didHappen ? 'text-blue-600' : 'text-rose-600'}`}
                               >
                                 {practice.didHappen == null
                                   ? 'No response from student(s)'
@@ -643,7 +643,7 @@ export default function LastWeekIssuePane({
                                   <div className="mx-auto">
                                     {practice.deliverable !== '' ? (
                                       <div className="flex flex-row items-center text-xs font-normal">
-                                        <LinkIcon className="mr-1 h-4 stroke-2 text-green-600" />
+                                        <LinkIcon className="mr-1 h-4 stroke-2 text-blue-600" />
                                         <a
                                           href={practice.deliverable}
                                           target="_blank"
@@ -696,9 +696,17 @@ export default function LastWeekIssuePane({
                                   <div className="">
                                     Student notes on deliverable:{' '}
                                   </div>
-                                  <div className="text-green-600">
-                                    {practice.deliverableNotes}
-                                  </div>
+                                  {practice.deliverableNotes
+                                    .toString()
+                                    .trim() === '' ? (
+                                    <div className="text-rose-600">
+                                      No notes from student(s)
+                                    </div>
+                                  ) : (
+                                    <div className="text-blue-600">
+                                      {practice.deliverableNotes}
+                                    </div>
+                                  )}
                                 </div>
                               )}
 
@@ -724,7 +732,7 @@ export default function LastWeekIssuePane({
                                             No response from student(s)
                                           </p>
                                         ) : (
-                                          <p className="text-green-600">
+                                          <p className="text-blue-600">
                                             {reflection.response}
                                           </p>
                                         )}
