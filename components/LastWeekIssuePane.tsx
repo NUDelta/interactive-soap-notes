@@ -364,7 +364,7 @@ export default function LastWeekIssuePane({
               <div className="w-2/3">
                 <div className="mb-1 flex flex-row items-center">
                   <h1 className="text-base font-bold">
-                    Self-Regulation Gaps for Issue
+                    Tracked Practice Gaps for Issue
                   </h1>
                   {/* Toggle for details */}
                   {/* TODO: this is duplicated from CurrWeekIssuePane */}
@@ -429,14 +429,14 @@ export default function LastWeekIssuePane({
                   {relevantPracticeGaps.length > 0 &&
                     showPracticeGaps === 'Hide Gaps' && (
                       <div className="text-xs italic">
-                        Click above to show self-regulation gaps.
+                        Click above to show practice gaps.
                       </div>
                     )}
 
                   {/* No gaps to show */}
                   {relevantPracticeGaps.length === 0 && (
                     <div className="text-xs italic">
-                      No self-regulation gaps linked to this issue.
+                      No practice gaps linked to this issue.
                     </div>
                   )}
                 </div>

@@ -76,8 +76,8 @@ export default function CurrWeekIssuePane({
                 {/* Helper text for assessment */}
                 {section.name === 'assessment' && (
                   <p className="mb-1 text-xs italic">
-                    Drag a self-regulation gap from below onto the issue card on
-                    the top of the page to attach it.
+                    Drag a tracked practice gap from below onto the issue card
+                    on the top of the page to attach it.
                     {/* Drag a note onto the empty card to track a new gap. */}
                   </p>
                 )}
@@ -631,7 +631,7 @@ export default function CurrWeekIssuePane({
                     <div className="mb-3">
                       <div className="mb-1 flex flex-row items-center">
                         <h1 className="text-sm font-semibold">
-                          Tracked Self-Regulation Gaps
+                          Tracked Practice Gaps
                         </h1>
                         <ul className="ml-2 flex flex-wrap text-center text-xs font-medium text-gray-500 dark:text-gray-400">
                           <li

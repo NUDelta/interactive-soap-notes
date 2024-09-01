@@ -202,12 +202,12 @@ export default function PracticeGapCard({
                     onChange={(e) => {
                       titleRef.current = e.target.value;
                     }}
-                    className={`mb-2 mr-2 min-h-16 w-full flex-none break-words rounded-lg border p-1 text-xs font-normal empty:before:italic empty:before:text-slate-500 empty:before:content-['Describe_the_recurring_gap_in_self-regulation_skill...']`}
+                    className={`mb-2 mr-2 min-h-16 w-full flex-none break-words rounded-lg border p-1 text-xs font-normal empty:before:italic empty:before:text-slate-500 empty:before:content-['Describe_the_recurring_gap_in_practice...']`}
                   />
                   <h2 className="items-center text-center text-xs font-bold italic">
                     {newPractice.trim() === ''
                       ? '' // or drag a note onto this block (TODO: disabling this cuz it doesn't work right now)
-                      : "hit 'Enter' to track self-regulation practice gap"}
+                      : "hit 'Enter' to track practice gap"}
                   </h2>
                 </div>
               </>

@@ -499,9 +499,8 @@ export default function CAPNote({
             {selectedIssue === null && (
               <div>
                 <h1 className="top-0 mb-1 border-b border-black bg-white text-base font-bold italic">
-                  Select an issue from above to view or edit notes. Tracked gaps
-                  in students self-regulation skills are shown below, for
-                  reference.
+                  Select an issue from above to view or edit notes. Tracked
+                  practice gaps are shown below, for reference.
                 </h1>
 
                 <div className="w-full">
