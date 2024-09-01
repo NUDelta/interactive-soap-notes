@@ -424,6 +424,28 @@ export default function CAPNote({
                         />
                       ))}
 
+                      {/* Archived Issues */}
+                      {currentIssuesData
+                        .filter((currIssue) => {
+                          return currIssue.wasDeleted || currIssue.wasMerged;
+                        })
+                        .map((currIssue) => (
+                          <CurrWeekIssueCard
+                            key={`issue-card-${currIssue.id}`}
+                            project={noteInfo.project}
+                            sig={noteInfo.sigName}
+                            date={new Date(noteInfo.sigDate).toISOString()}
+                            issueId={currIssue.id}
+                            issue={currIssue}
+                            selectedIssue={selectedIssue}
+                            setSelectedIssue={setSelectedIssue}
+                            currentIssuesData={currentIssuesData}
+                            setCurrentIssuesData={setCurrentIssuesData}
+                            pastIssuesData={pastIssuesData}
+                            setPastIssuesData={setPastIssuesData}
+                          />
+                        ))}
+
                       {/* Current Issues */}
                       {currentIssuesData
                         .filter((currIssue) => {

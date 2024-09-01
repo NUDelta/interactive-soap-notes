@@ -16,6 +16,7 @@ import {
   serializeDates,
   shortenText
 } from '../lib/helperFns';
+import { ArchiveBoxIcon } from '@heroicons/react/24/outline';
 
 export default function CurrWeekIssueCard({
   project,
@@ -276,6 +277,16 @@ export default function CurrWeekIssueCard({
                       </div>
                     </div>
                   )}
+
+                {/* Show if issue was deleted or archived */}
+                {issue && (issue.wasDeleted || issue.wasMerged) && (
+                  <div className="flex flex-row items-center">
+                    <ArchiveBoxIcon className="mr-1 h-4 text-orange-500" />
+                    <div className="text-2xs font-medium text-orange-500">
+                      Issue archived during coaching session
+                    </div>
+                  </div>
+                )}
 
                 {/* Trash to remove concern */}
                 {!isThisWeek && (
