@@ -262,28 +262,40 @@ export default function PracticeGapCard({
                           Past items of concern with practice gap
                         </h3>
 
-                        {priorInstances.map((instance, idx) => (
-                          <div key={idx} className="mb-2 flex flex-col">
-                            <h2 className="mt-1 text-xs font-semibold">
-                              {shortenText(instance.title, 50)} |{' '}
-                              <span className="mt-1 text-2xs font-semibold">
-                                {shortDate(new Date(instance.date))}
-                              </span>
-                            </h2>
+                        {priorInstances
+                          .filter((instance) => {
+                            return (
+                              new Date(instance.date).getTime() !==
+                              new Date(date).getTime()
+                            );
+                          })
+                          .map((instance, idx) => (
+                            <div key={idx} className="mb-2 flex flex-col">
+                              <h2 className="mt-1 text-xs font-semibold">
+                                {shortenText(instance.title, 50)} |{' '}
+                                <span className="mt-1 text-2xs font-semibold">
+                                  {shortDate(new Date(instance.date))}
+                                </span>
+                              </h2>
 
-                            <div className="w-full">
-                              {instance.context.map((context, idx) => (
-                                <div key={idx} className="text-xs">
-                                  {context.value.trim() !== '' && (
-                                    <p>- {context.value}</p>
-                                  )}
-                                </div>
-                              ))}
+                              <div className="w-full">
+                                {instance.context.map((context, idx) => (
+                                  <div key={idx} className="text-xs">
+                                    {context.value.trim() !== '' && (
+                                      <p>- {context.value}</p>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
 
-                        {priorInstances.length === 0 && (
+                        {priorInstances.filter((instance) => {
+                          return (
+                            new Date(instance.date).getTime() !==
+                            new Date(date).getTime()
+                          );
+                        }).length === 0 && (
                           <div>
                             <h4 className="text-xs italic">
                               No issues have this practice gap attached
