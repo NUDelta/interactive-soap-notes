@@ -323,11 +323,11 @@ export default function CAPNote({
           {/* Back button */}
           <div className="mr-1">
             <Link href="/">
-              <Tooltip content="Back to all notes" placement="bottom">
-                <h3 className="text-base font-bold text-blue-400 visited:text-purple-600 hover:text-blue-500">
-                  &#8592;
-                </h3>
-              </Tooltip>
+              {/* <Tooltip content="Back to all notes" placement="bottom"> */}
+              <h3 className="text-base font-bold text-blue-400 visited:text-purple-600 hover:text-blue-500">
+                &#8592;
+              </h3>
+              {/* </Tooltip> */}
             </Link>
           </div>
 
@@ -368,9 +368,9 @@ export default function CAPNote({
             {/* Save attempted but error */}
             {!isSaving && saveError !== null ? (
               <>
-                <Tooltip content={saveError} placement="bottom">
+                {/* <Tooltip content={saveError} placement="bottom">
                   <ExclamationCircleIcon className="mr-0.5 h-5 w-5 text-red-600" />
-                </Tooltip>
+                </Tooltip> */}
                 <h2 className="text-base font-semibold text-red-600">
                   Error in saving notes (Last saved: {lastUpdated})
                 </h2>
@@ -385,7 +385,7 @@ export default function CAPNote({
         <DndProvider backend={HTML5Backend}>
           {/* Past issues and tracked practices fixed to top of page */}
           {/* TODO: 05-06-24: maybe add a hide and show button so mentor can recover vertical space when done browsing past issues */}
-          <div className="fixed w-full">
+          <div className="w-full">
             <div className="mr-6 flex flex-row">
               {/* All Issues */}
               <div className="mb-5 h-[25vh] w-full">
@@ -491,20 +491,20 @@ export default function CAPNote({
           </div>
 
           {/* Placeholder div to push down the non-fixed portion */}
-          <div className="h-[26vh]" />
+          {/* <div className="h-[26vh]" /> */}
 
           {/* Note Space */}
           <div>
             {/* if no issue is selected */}
             {selectedIssue === null && (
               <div>
-                <h1 className="sticky top-0 mb-1 border-b border-black bg-white text-base font-bold italic">
+                <h1 className="top-0 mb-1 border-b border-black bg-white text-base font-bold italic">
                   Select an issue from above to view or edit notes. Tracked gaps
                   in students self-regulation skills are shown below, for
                   reference.
                 </h1>
 
-                <div className="h-[66vh] w-full overflow-auto">
+                <div className="w-full">
                   {/* Practice Cards */}
                   <div className="mb-3">
                     {/* Active Practices */}
