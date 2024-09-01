@@ -18,7 +18,9 @@ export default function LastWeekIssuePane({
   setPracticeGapData
 }): JSX.Element {
   // state variable for showing practice gaps
-  const [showPracticeGaps, setShowPracticeGaps] = useState('Show Gaps');
+  const [showPracticeGaps, setShowPracticeGaps] = useState(
+    'Show Gaps with Details'
+  );
 
   // get the issue from soapData with the given issueId
   const issueIndex = pastIssuesData.findIndex((issue) => issue.id === issueId);
