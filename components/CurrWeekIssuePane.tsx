@@ -662,7 +662,7 @@ export default function CurrWeekIssuePane({
                       </div>
 
                       {/* Active Practices Gaps */}
-                      <div className="flex flex-row flex-nowrap gap-2 overflow-auto">
+                      <div className="flex flex-row flex-wrap">
                         {/* TODO: this is the same code as in the home page. abstract out */}
                         {practiceGapData
                           .filter((practiceGap) => {
@@ -685,7 +685,7 @@ export default function CurrWeekIssuePane({
                               setShowPracticeGaps={setShowPracticeGaps}
                               currentIssuesData={currentIssuesData}
                               setCurrentIssuesData={setCurrentIssuesData}
-                              className={`flex-none ${showPracticeGaps === 'Show Gaps with Details' ? 'w-1/4' : 'w-1/6'}`}
+                              className={`flex-none ${showPracticeGaps === 'Show Gaps with Details' ? 'w-1/3' : 'w-1/6'}`}
                             />
                           ))}
 
@@ -703,7 +703,7 @@ export default function CurrWeekIssuePane({
                           setShowPracticeGaps={setShowPracticeGaps}
                           currentIssuesData={currentIssuesData}
                           setCurrentIssuesData={setCurrentIssuesData}
-                          className="w-1/6 flex-none"
+                          className="w-1/4 flex-none"
                         />
                       </div>
                     </div>
