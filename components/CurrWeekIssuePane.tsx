@@ -66,10 +66,10 @@ export default function CurrWeekIssuePane({
                     <span className="font-bold">w[</span>,
                     <span className="font-bold">at[</span>, or{' '}
                     <span className="font-bold">rep[</span> (details below).
-                    Practices are sent to the students after SIG, and before
-                    practice opportunities. Students will be asked to share
-                    practices deliverables and reflections before the next SIG
-                    meeting.
+                    Practices are sent to the students after the coaching
+                    meeting, and before practice opportunities. Students will be
+                    asked to share practices deliverables and reflections before
+                    the next coaching meeting.
                   </p>
                 )}
 
@@ -662,7 +662,7 @@ export default function CurrWeekIssuePane({
                       </div>
 
                       {/* Active Practices Gaps */}
-                      <div className="flex flex-row flex-wrap">
+                      <div className="flex flex-row flex-wrap gap-2">
                         {/* TODO: this is the same code as in the home page. abstract out */}
                         {practiceGapData
                           .filter((practiceGap) => {
@@ -685,7 +685,7 @@ export default function CurrWeekIssuePane({
                               setShowPracticeGaps={setShowPracticeGaps}
                               currentIssuesData={currentIssuesData}
                               setCurrentIssuesData={setCurrentIssuesData}
-                              className={`flex-none ${showPracticeGaps === 'Show Gaps with Details' ? 'w-1/3' : 'w-1/6'}`}
+                              className={`flex-none ${showPracticeGaps === 'Show Gaps with Details' ? 'w-1/3' : 'w-1/3'}`}
                             />
                           ))}
 
@@ -703,7 +703,7 @@ export default function CurrWeekIssuePane({
                           setShowPracticeGaps={setShowPracticeGaps}
                           currentIssuesData={currentIssuesData}
                           setCurrentIssuesData={setCurrentIssuesData}
-                          className="w-1/4 flex-none"
+                          className="w-1/3 flex-none"
                         />
                       </div>
                     </div>

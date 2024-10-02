@@ -272,7 +272,7 @@ export default function PracticeGapCard({
                           .map((instance, idx) => (
                             <div key={idx} className="mb-2 flex flex-col">
                               <h2 className="mt-1 text-xs font-semibold">
-                                {shortenText(instance.title, 50)} |{' '}
+                                {shortenText(instance.title, 1000)} |{' '}
                                 <span className="mt-1 text-2xs font-semibold">
                                   {shortDate(new Date(instance.date))}
                                 </span>

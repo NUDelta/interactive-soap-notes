@@ -388,7 +388,7 @@ export default function CAPNote({
           <div className="w-full">
             <div className="mr-6 flex flex-row">
               {/* All Issues */}
-              <div className="mb-5 h-[25vh] w-full">
+              <div className="mb-5 h-[15vh] w-full">
                 {/* Section title and description */}
                 <div className="flex flex-col">
                   <h1 className="border-b border-black text-base font-bold">
@@ -396,12 +396,12 @@ export default function CAPNote({
                   </h1>
                   <div className="h-[20vh] overflow-y-auto">
                     <p className="mb-2 text-xs italic">
-                      Note any items of concern here (e.g., project issues,
+                      Note any items of observations here (e.g., project issues,
                       practice gaps, developing competencies). Click on items
-                      tracked from SIG to view follow-up outcomes. Click on
-                      current week items to edit it&apos;s CAP notes. Create new
-                      items by typing on the last card, or by dragging a prior
-                      week card on it.
+                      tracked from last coaching session to view follow-up
+                      outcomes. Click on current week items to edit it&apos;s
+                      CAP notes. Create new items by typing on the last card, or
+                      by dragging a prior week card on it.
                       {/* Cards from this week can be dragged on top of each other to merge them, or into the CAP notes for a selected issue. */}
                     </p>
 

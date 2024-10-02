@@ -179,7 +179,7 @@ export default function LastWeekIssuePane({
         if (practice.includes('mysore')) {
           return {
             practice: practice.replace('[help]', ''),
-            introText: 'At Mysore:',
+            introText: 'At Office Hours:',
             type: 'At Mysore'
           };
         } else if (practice.includes('pair research')) {
@@ -460,7 +460,7 @@ export default function LastWeekIssuePane({
               practiceOutcome !== null &&
               practiceOutcome.practices !== null &&
               practiceOutcome.practices.length > 0 ? (
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {/* show plan follow-ups as a single card */}
                   {practiceOutcome.practices.filter((practice) => {
                     return practice.type === 'plan';
@@ -483,7 +483,7 @@ export default function LastWeekIssuePane({
                               rel="noreferrer"
                               className="mr-1 text-blue-600 underline"
                             >
-                              Sprint Log
+                              Planning Log
                             </a>
                             <span className="italic">
                               (Last Updated:{' '}

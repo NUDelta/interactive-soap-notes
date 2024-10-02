@@ -68,7 +68,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
       return 'Did you do the work practice your mentor suggested?';
     }
     if (practice.includes('At Mysore')) {
-      return 'Did you attend Mysore to work on the practice your mentor suggested?';
+      return 'Did you attend Office Hours to work on the practice your mentor suggested?';
     }
     if (practice.includes('At Pair Research')) {
       return 'Did you use Pair Research to work on the practice your mentor suggested?';

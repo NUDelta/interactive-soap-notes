@@ -24,16 +24,27 @@ export const fetchCAPNote = async (
 ) => {
   await dbConnect();
 
+  console.log('sigName:', sigName);
+  console.log('project:', project);
+  console.log('date:', date);
+
   // get current CAP note
   const startDate = new Date(date);
   const endDate = new Date(date);
   endDate.setDate(endDate.getDate() + 1);
+  startDate.setHours(startDate.getHours() + 2);
+  endDate.setHours(endDate.getHours() + 2);
+
+  console.log('startDate:', startDate);
+  console.log('endDate:', endDate);
 
   let currentCAPNote = await CAPNoteModel.findOne({
     sigAbbreviation: sigName.toUpperCase(),
     project: project,
     date: { $gte: startDate, $lte: endDate }
   });
+
+  console.log('currentCAPNote:', currentCAPNote);
 
   return currentCAPNote;
 };

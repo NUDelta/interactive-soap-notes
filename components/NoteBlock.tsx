@@ -65,7 +65,7 @@ export default function NoteBlock({
       let scriptType = splitContent[0];
       if (scriptType === 'plan') {
         output = {
-          notificationsToStudents: `I'll link students to their sprint log and ask them to re-plan with your feedback. I'll also check tomorrow to see if they've done so, and if not ping their channel on Slack.`,
+          notificationsToStudents: `I'll link students to their planning log and ask them to re-plan with your feedback. I'll also check tomorrow to see if they've done so, and if not ping their channel on Slack.`,
           followUpAtNextMeeting: null
         };
       } else if (scriptType === 'reflect') {

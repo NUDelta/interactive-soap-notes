@@ -69,7 +69,7 @@ export const createPostSigMessage = (
   }
   strategy +=
     '---\\n' +
-    "Let your mentor know if you have any challenges in doing these practices. I'll remind you about opportunities to practice later in the week (e.g., mysore, pair research).";
+    "Let your mentor know if you have any challenges in doing these practices. I'll remind you about opportunities to practice later in the week (e.g., office hours, peer help session).";
   strategy = strategy.replace(/[\""]/g, '\\"');
 
   // create the function to actually deliver the message
@@ -179,11 +179,11 @@ export const computeReflectionQuestions = (parsedPractice) => {
         // },
         {
           prompt:
-            'How did Mysore help progress your understanding? What new risk(s) did it reveal?',
+            'How did Office Hours help progress your understanding? What new risk(s) did it reveal?',
           responseType: 'string'
         },
         {
-          prompt: 'What obstacles came up during Mysore, if any?',
+          prompt: 'What obstacles came up during Office Hours, if any?',
           responseType: 'string'
         }
       ];
@@ -191,12 +191,12 @@ export const computeReflectionQuestions = (parsedPractice) => {
       questionsIfNotDone = [
         {
           prompt:
-            'Did anything prevent you from attending Mysore this week? If so, why?',
+            'Did anything prevent you from attending Office Hours this week? If so, why?',
           responseType: 'string'
         },
         {
           prompt:
-            'Did anything prevent you from working on the suggested practice at Mysore? If so, why?',
+            'Did anything prevent you from working on the suggested practice at Office Hours? If so, why?',
           responseType: 'string'
         }
       ];

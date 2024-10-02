@@ -58,7 +58,7 @@ export default function NoteBlockForPlan({
       'risk assessment',
       'enter your own'
     ],
-    'at[': ['mysore', 'pair research']
+    'at[': ['office hours', 'peer help session']
   };
 
   function capitalizeFirstLetter(string) {
