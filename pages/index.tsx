@@ -72,7 +72,7 @@ export default function Home({ sigs }): JSX.Element {
                   >
                     {/* Project Title and Link to CAP Note */}
                     <div className="col-span-2">
-                      <Link href={`/soap-notes/${capNote.id}`}>
+                      <Link href={`/cap-notes/${capNote.id}`}>
                         <h3 className="text-md text-blue-600 underline visited:text-purple-600 hover:text-blue-800">
                           {capNote.project}
                         </h3>
