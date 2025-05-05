@@ -37,3 +37,13 @@ export const fetchCAPNote = async (
 
   return currentCAPNote;
 };
+
+/**
+ * Fetches a CAP note by ID.
+ * @param id ID of the CAP note
+ * @returns {Object} CAP note object or null
+ */
+export const fetchCAPNoteById = async (id: string) => {
+  await dbConnect();
+  return await CAPNoteModel.findById(id);
+};

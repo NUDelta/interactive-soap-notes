@@ -72,11 +72,7 @@ export default function Home({ sigs }): JSX.Element {
                   >
                     {/* Project Title and Link to CAP Note */}
                     <div className="col-span-2">
-                      <Link
-                        href={`/soap-notes/${sig.abbreviation.toLowerCase()}_${encodeURIComponent(
-                          capNote.project
-                        )}_${new Date(capNote.date).toISOString().split('T')[0]}`}
-                      >
+                      <Link href={`/soap-notes/${capNote.id}`}>
                         <h3 className="text-md text-blue-600 underline visited:text-purple-600 hover:text-blue-800">
                           {capNote.project}
                         </h3>
@@ -85,11 +81,7 @@ export default function Home({ sigs }): JSX.Element {
 
                     {/* Link to Reflection */}
                     <div className="col-span-1">
-                      <Link
-                        href={`/reflections/${sig.abbreviation.toLowerCase()}_${encodeURIComponent(
-                          capNote.project
-                        )}_${new Date(capNote.date).toISOString().split('T')[0]}`}
-                      >
+                      <Link href={`/reflections/${capNote.id}`}>
                         <h3 className="text-md text-blue-600 underline visited:text-purple-600 hover:text-blue-800">
                           Reflection Page
                         </h3>
@@ -132,6 +124,15 @@ export const getServerSideProps = async () => {
       isLatest = true;
     }
 
+    // create the cap note object to add to list
+    const capNoteObj = {
+      id: capNote._id.toString(),
+      project: capNote.project,
+      date: capNote.date.toISOString(),
+      lastUpdated: capNote.lastUpdated.toISOString(),
+      isLatest
+    };
+
     // check if the SIG is already in the list
     const sigIndex = acc.findIndex(
       (sig) => sig.abbreviation === capNote.sigAbbreviation
@@ -141,23 +142,11 @@ export const getServerSideProps = async () => {
       acc.push({
         name: capNote.sigName,
         abbreviation: capNote.sigAbbreviation,
-        capNotes: [
-          {
-            project: capNote.project,
-            date: capNote.date.toISOString(),
-            lastUpdated: capNote.lastUpdated.toISOString(),
-            isLatest
-          }
-        ]
+        capNotes: [capNoteObj]
       });
     } else {
       // add the CAP note to the SIG's list of CAP notes
-      acc[sigIndex].capNotes.push({
-        project: capNote.project,
-        date: capNote.date.toISOString(),
-        lastUpdated: capNote.lastUpdated.toISOString(),
-        isLatest
-      });
+      acc[sigIndex].capNotes.push(capNoteObj);
     }
 
     return acc;

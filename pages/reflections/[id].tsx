@@ -18,7 +18,7 @@ import {
 } from '../../lib/helperFns';
 
 // data models and controllers
-import { fetchCAPNote } from '../../controllers/capNotes/fetchCAPNotes';
+import { fetchCAPNoteById } from '../../controllers/capNotes/fetchCAPNotes';
 import { fetchIssueObjectsByIds } from '../../controllers/issueObjects/fetchIssueObject';
 
 // components
@@ -580,13 +580,13 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   };
 
   // get the sig name and date from the query
-  let [sigAbbrev, project, date] = (query.params?.id as string).split('_');
+  let capNoteId = query.params?.id as string;
 
   /**
    *
    * fetch CAP note for the given sig and date, and format for display
    */
-  let currentCAPNote = await fetchCAPNote(sigAbbrev, project, date);
+  let currentCAPNote = await fetchCAPNoteById(capNoteId);
   let currentCAPNoteFlattened = serializeDates(
     currentCAPNote.toJSON(mongoIdFlattener)
   );
