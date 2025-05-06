@@ -67,7 +67,7 @@ export default function Home({ sigs }): JSX.Element {
                 })
                 .map((capNote) => (
                   <div
-                    className="grid w-full auto-rows-auto grid-cols-5 gap-y-5"
+                    className="grid w-full auto-rows-auto grid-cols-5 gap-y-5 hover:bg-blue-200 hover:font-bold"
                     key={`${capNote.project}-${capNote.date}`}
                   >
                     {/* Project Title and Link to CAP Note */}

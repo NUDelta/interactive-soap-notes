@@ -591,10 +591,17 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
     currentCAPNote.toJSON(mongoIdFlattener)
   );
 
-  // get only the past issues issues for the note, as that's what the student will be reflecting on
+  // TODO: temp fix -- switches this to currentIsuses so each reflection page is for the NEW isuses that the mentor has observed.
+  // This should make it clearer that, for a given cap note, there's (1) the prior issues the student had; (2) the new diagnosed issues and practices; and (3) the reflections on those practices
   let pastIssues = await fetchIssueObjectsByIds(
-    currentCAPNote.pastIssues.map((issue) => issue._id)
+    currentCAPNote.currentIssues.map((issue) => issue._id)
   );
+
+  // remove issues where the mentor created them but didn't delete or merge them with another issue
+  pastIssues = pastIssues.filter(
+    (issue) => !issue.wasDeleted && !issue.wasMerged
+  );
+
   let pastIssuesFlattened = pastIssues.map((issue) => {
     let flattenedData = serializeDates(issue.toJSON(mongoIdFlattener));
     flattenedData.priorInstances = issue.priorInstances.map((instance) => {
