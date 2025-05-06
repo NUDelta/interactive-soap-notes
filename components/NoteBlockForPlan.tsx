@@ -3,7 +3,7 @@
  */
 
 import { useDrag } from 'react-dnd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import { htmlToText } from '../lib/helperFns';
 import TextBox from './TextBox';
@@ -23,25 +23,44 @@ export default function NoteBlockForPlan({
   const [blockContent, setBlockContent] = useState(noteContent.value);
 
   // autocomplete options
-  const studentNameSet = [
-    'Maalvika',
-    'Jason',
-    'Arya',
-    'Ella',
-    'Billy',
-    'Edward',
-    'Shirley',
-    'Jackie',
-    'Grace',
-    'Linh',
-    'Kapil'
-  ];
+  // state variable to store the student name set
+  const [studentNameSet, setStudentNameSet] = useState(new Set());
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let peopleReq = await fetch(
+        '/api/studio-api?' +
+          new URLSearchParams({
+            dataVal: 'people'
+          })
+      );
+      const data = await peopleReq.json();
+
+      // create a set of all the names
+      let studentNameSet = new Set(
+        data.data.map((person) => {
+          if (person.name) {
+            let name = person.name.split(' ')[0];
+            return name.toLowerCase();
+          }
+          return '';
+        })
+      );
+
+      // remove empty strings
+      studentNameSet.delete('');
+      // set the student name set
+      setStudentNameSet(studentNameSet);
+    };
+
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   let autoCompleteOptions = {
     // practice agent tags
     '[': ['plan', 'help', 'reflect', 'self-work'],
     // people
-    'w[': studentNameSet,
+    'w[': Array.from(studentNameSet),
     // working representations
     'rep[': [
       'problem statement',

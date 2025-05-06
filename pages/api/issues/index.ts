@@ -81,6 +81,7 @@ export default async function handler(
 
               // parse practice text
               let parsedPractice = parsePracticeText(plan.value);
+              console.log('parsedPractice:', parsedPractice);
 
               // get the reflection questions for the plan
               let reflectionQuestions =
@@ -201,9 +202,10 @@ export default async function handler(
             // console.log('updatedIssueObjects:', updatedIssueObjects);
 
             // // create each agent
-            // TODO: create pre studio message
-            // TODO: create any plan follow-up messages
-            // TODO: create a help-seeking agent
+            // TODO: create pre studio message for mysore
+            // TODO: create follow up for re-planning if replanning does not happen after 1 day
+            // TODO: create a help-seeking agent to create a group DM
+            // TODO: create a pre-sig reflection message
             console.log(noteInfo);
             let postSigScript = createPostSigMessage(
               noteInfo.id,

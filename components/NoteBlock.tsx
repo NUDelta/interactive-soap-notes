@@ -3,7 +3,7 @@
  */
 
 import { useDrag } from 'react-dnd';
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import ContentEditable from 'react-contenteditable';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import { htmlToText } from '../lib/helperFns';
@@ -22,24 +22,39 @@ export default function NoteBlock({
   // ref to the note block's content so state changes don't trigger a re-render
   const blockContent = useRef(noteContent.value);
 
-  const studentNameSet = new Set(
-    [
-      'Maalvika',
-      'Jason',
-      'Arya',
-      'Ella',
-      'Billy',
-      'Edward',
-      'Shirley',
-      'Jackie',
-      'Gustavo',
-      'Ryan',
-      'Grace',
-      'Linh',
-      'Kapil',
-      'Yinmiao'
-    ].map((name) => name.toLowerCase())
-  );
+  // state variable to store the student name set
+  const [studentNameSet, setStudentNameSet] = useState(new Set());
+
+  useEffect(() => {
+    const fetchData = async () => {
+      let peopleReq = await fetch(
+        '/api/studio-api?' +
+          new URLSearchParams({
+            dataVal: 'people'
+          })
+      );
+      const data = await peopleReq.json();
+
+      // create a set of all the names
+      let studentNameSet = new Set(
+        data.data.map((person) => {
+          if (person.name) {
+            let name = person.name.split(' ')[0];
+            return name.toLowerCase();
+          }
+          return '';
+        })
+      );
+
+      // remove empty strings
+      studentNameSet.delete('');
+
+      // set the student name set
+      setStudentNameSet(studentNameSet);
+    };
+
+    fetchData();
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
