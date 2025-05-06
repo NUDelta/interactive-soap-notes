@@ -144,9 +144,16 @@ export default function LastWeekIssuePane({
           newPracticeOutcome.projectData.sprint_log.sprints.find(
             (sprint) => sprint.name === newPracticeOutcome.sprintData.name
           );
-        newPracticeOutcome.currentSprint = currentSprint;
-        newPracticeOutcome.currentSprint.lastUpdated =
-          newPracticeOutcome.projectData.sprint_log.lastUpdated;
+        if (currentSprint === undefined) {
+          console.error(
+            'Current sprint not found',
+            newPracticeOutcome.sprintData
+          );
+        } else {
+          newPracticeOutcome.currentSprint = currentSprint;
+          newPracticeOutcome.currentSprint.lastUpdated =
+            newPracticeOutcome.projectData.sprint_log.lastUpdated;
+        }
       }
 
       setPracticeOutcome(newPracticeOutcome);
