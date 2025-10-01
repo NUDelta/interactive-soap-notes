@@ -377,38 +377,38 @@ export const parsePracticeText = (practice) => {
   return output;
 };
 
-const representationObjects = {
+export const representationObjects = {
   'problem statement': {
     type: 'canvas',
-    link: 'https://docs.google.com/presentation/d/1-l3I6hPhxh0vVGWEskGWoSZzlynukm0VcK454g3BBZE/edit?usp=sharing'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.gcbd9fbfbdf_0_8#slide=id.gcbd9fbfbdf_0_8'
   },
   'design argument': {
     type: 'canvas',
-    link: 'https://docs.google.com/presentation/d/1XBeg8wzUuJdyoH-3iTCCRAt6Ms-pA8Uo8fb5Ph3NQqs/edit?usp=sharing'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.gcbd9fbfbdf_0_14#slide=id.gcbd9fbfbdf_0_14'
   },
   'interface argument': {
     type: 'canvas',
-    link: 'https://docs.google.com/presentation/d/1W_k1U_6tFXQGNLQhZLjvPBSJvi39aWuPrxeFusfZmmE/edit#slide=id.g7a021c9e6b_0_0'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.gcbd9fbfbdf_0_26#slide=id.gcbd9fbfbdf_0_26'
   },
   'system argument': {
     type: 'canvas',
-    link: 'https://docs.google.com/presentation/d/1zO6aD9PF2UFd3bymJnKRze-ELU14PrYDWyB0dptt6bc/edit#slide=id.gabb324518a_1_0'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.gcbd9fbfbdf_0_32#slide=id.gcbd9fbfbdf_0_32'
   },
   'user testing plan': {
     type: 'canvas',
-    link: 'https://docs.google.com/presentation/d/16M8iUME45vkFdW0LEOaO3iF_8gTtMoxxn79NWdsm-jE/edit#slide=id.g1264dfdd478_0_0'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.gcbd9fbfbdf_0_71#slide=id.gcbd9fbfbdf_0_71'
   },
   'testing takeaways': {
     type: 'canvas',
-    link: 'https://docs.google.com/presentation/d/16PVwTLMvlMbiVl2rPc7JZqrvxMDqJGQJXc8BrSGZ7Vw/edit#slide=id.g1264dfdd61b_0_0'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.g10e508e5387_0_11#slide=id.g10e508e5387_0_11'
   },
   'approach tree': {
     type: 'canvas',
-    link: 'https://docs.google.com/presentation/d/1c2VRPFKJVD-kgr1SQXRSHB_HwW1inAZJrjzfNWj-b00/edit?usp=sharing'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.gcbd9fbfbdf_0_142#slide=id.gcbd9fbfbdf_0_142'
   },
   '8-pack': {
     type: 'canvas',
-    link: 'https://docs.google.com/presentation/d/1hWU6zffwzjkE5i2oUcQGUJJZSuQlNnKPO1w-MiAbZq0/edit#slide=id.g113e71d3621_0_56'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.gf296502525_0_7#slide=id.gf296502525_0_7'
   },
   'journey map': {
     type: 'design',
@@ -420,6 +420,6 @@ const representationObjects = {
   },
   'risk assessment': {
     type: 'planning',
-    link: 'https://docs.google.com/presentation/d/1yHOjsZEyrXhs4C_cBln7sdpLDEYdDzvhP_zlQ1-3ePE/edit#slide=id.g113e71d3621_0_56'
+    link: 'https://docs.google.com/presentation/d/12I7GImAqqgMN5UHzzgSUz_IWvLTSb4-OUqw24EHoCeI/edit?slide=id.gcbd9fbfbdf_0_117#slide=id.gcbd9fbfbdf_0_117'
   }
 };

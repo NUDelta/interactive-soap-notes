@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { DragTypes } from '../controllers/draggable/dragTypes';
 import { htmlToText } from '../lib/helperFns';
 import TextBox from './TextBox';
+import { representationObjects } from '../controllers/followUpObjects/createFollowUpStrategies';
 
 // TODO: add a note section and onDragToIssue function
 export default function NoteBlockForPlan({
@@ -62,21 +63,7 @@ export default function NoteBlockForPlan({
     // people
     'w[': Array.from(studentNameSet),
     // working representations
-    'rep[': [
-      'problem statement',
-      'design argument',
-      'interface argument',
-      'system argument',
-      'user testing plan',
-      'testing takeaways',
-      'approach tree',
-      '8-pack',
-      'journey map',
-      'storyboard',
-      // 'planning: slicing',
-      'risk assessment',
-      'enter your own'
-    ],
+    'rep[': [...Object.keys(representationObjects), 'enter your own'],
     'at[': ['mysore', 'pair research']
   };
 
