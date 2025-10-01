@@ -1,6 +1,12 @@
 import crypto from 'crypto';
 
-function convertTZ(date, tzString) {
+/**
+ * Converts a date to a different timezone.
+ * @param {Date | string} date - Date to convert, either as a Date object or a string in ISO format.
+ * @param {string} tzString - Timezone string, e.g., 'America/Chicago'.
+ * @returns {Date} Converted date, returned as a Date object.
+ */
+function convertTZ(date: Date | string, tzString: string) {
   return new Date(
     (typeof date === 'string' ? new Date(date) : date).toLocaleString('en-US', {
       timeZone: tzString
@@ -8,12 +14,21 @@ function convertTZ(date, tzString) {
   );
 }
 
+/**
+ * Generates a post-SIG message with all practice agents the mentor suggested for the current CAP Note.
+ * @param {string} noteId - ID of the CAP note
+ * @param {string} projName - Name of the project
+ * @param {string} noteDate - Date of the CAP note, in ISO string format
+ * @param {Object} practiceAgents - Practice agents for the CAP note
+ * @param {Object} orgObjs - Organizational objects for the CAP note
+ * @returns {Object} New active issue object to send to Orchestration Engine
+ */
 export const createPostSigMessage = (
-  noteId,
-  projName,
-  noteDate,
-  practiceAgents,
-  orgObjs
+  noteId: string,
+  projName: string,
+  noteDate: string,
+  practiceAgents: Object,
+  orgObjs: Object
 ) => {
   let noteDateJS = new Date(noteDate);
   let weekFromCurrDate = new Date(noteDateJS.getTime());
@@ -102,14 +117,12 @@ export const createPostSigMessage = (
 };
 
 /**
- * Creates reflection questions for student to do after a plan.
- * @param plan
- * @returns
+ * Creates reflection questions for the current practices for the following week.
+ * @param {Object} parsedPractice - Parsed practice object
+ * @returns {Array[Array[Object]]} Array of two arrays of reflection questions
  */
-// TODO: this should compute two sets of refection questions: for if you did and if you didn't do the reflection
 export const computeReflectionQuestions = (parsedPractice) => {
   // get reflection questions based on the plan entry
-  let reflectionQuestions = [];
   let questionsIfNotDone = [];
   let questionsIfDone = [];
 
@@ -130,16 +143,6 @@ export const computeReflectionQuestions = (parsedPractice) => {
     ];
   } else if (parsedPractice.practiceTag === 'self-work') {
     questionsIfDone = [
-      // {
-      //   prompt:
-      //     'Share a link to any deliverable that shows what you worked on. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. For images, upload to this folder and copy the file link below (Right Click → Share → Copy Link). Make all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).',
-      //   responseType: 'string'
-      // },
-      // {
-      //   prompt:
-      //     'Describe your deliverable: what does it show, and what should the mentor look like?',
-      //   responseType: 'string'
-      // },
       {
         prompt:
           'How did your understanding change? What new risk(s) do you see?',
@@ -167,16 +170,6 @@ export const computeReflectionQuestions = (parsedPractice) => {
     // check if at mysore
     if (parsedPractice.parsedPracticePrefix.includes('Mysore')) {
       questionsIfDone = [
-        // {
-        //   prompt:
-        //     'Share a link to an image of what you worked on or discussed at Mysore. For images, upload to this folder and copy the file link below (Right Click → Share → Copy Link). Make all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).',
-        //   responseType: 'string'
-        // },
-        // {
-        //   prompt:
-        //     'Describe your deliverable: what does it show, and what should the mentor look like?',
-        //   responseType: 'string'
-        // },
         {
           prompt:
             'How did Mysore help progress your understanding? What new risk(s) did it reveal?',
@@ -202,16 +195,6 @@ export const computeReflectionQuestions = (parsedPractice) => {
       ];
     } else if (parsedPractice.parsedPracticePrefix.includes('Pair Research')) {
       questionsIfDone = [
-        // {
-        //   prompt:
-        //     'Share a link to any deliverable that shows what you worked on during Pair Research. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. For images, upload to this folder and copy the file link below (Right Click → Share → Copy Link). Make all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).',
-        //   responseType: 'string'
-        // },
-        // {
-        //   prompt:
-        //     'Describe your deliverable: what does it show, and what should the mentor look like?',
-        //   responseType: 'string'
-        // },
         {
           prompt:
             'What did working with a peer help you accomplish? How did that help you progress your sprint?',
@@ -238,16 +221,6 @@ export const computeReflectionQuestions = (parsedPractice) => {
       ];
     } else if (parsedPractice.parsedPracticePrefix.includes('With')) {
       questionsIfDone = [
-        // {
-        //   prompt:
-        //     'Share a link to any deliverable that shows what you worked on with the people your mentor suggested. This can be a Google Doc, link to a prototype on Figma, code on Github, an image, etc. For images, upload to this folder and copy the file link below (Right Click → Share → Copy Link). Make all links you provide are accessible to anyone (e.g., use “anyone with link” permission on Google Drive).',
-        //   responseType: 'string'
-        // },
-        // {
-        //   prompt:
-        //     'Describe your deliverable: what does it show, and what should the mentor look like?',
-        //   responseType: 'string'
-        // },
         {
           prompt:
             'What did working with people your mentor suggested help you accomplish? How did that help you progress your sprint?',
@@ -273,6 +246,18 @@ export const computeReflectionQuestions = (parsedPractice) => {
   return [questionsIfNotDone, questionsIfDone];
 };
 
+/**
+ * Parses the practice text into a parsed practice object. Currently supports plan, reflect, self-work, and help practices. Each practice can include rep[] tags for representations and w[] tags for people.
+ *
+ * @param {string} practice - String of practice text
+ * * Example:
+ * "[plan] Update your Sprint Log"
+ * "[reflect] Reflect on your own"
+ * "[self-work] On your own, try to"
+ * "[help] Help seek"
+ * "[help] Help seek with [person1] and [person2]"
+ * @returns {Object} Object with practiceTag, parsedPracticePrefix, content, opportunity, and representations
+ */
 // TODO: include Plan text that doesn't have an agent tag associated with it BUT not messages that don't have anything OR have an agent tag without the agent info
 export const parsePracticeText = (practice) => {
   // split the practice text into [practice] and content
