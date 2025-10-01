@@ -89,9 +89,9 @@ export const createPostSigMessage = (
 
   // create the function to actually deliver the message
   let strategyFunction = async function () {
-    return await this.messagePeople({
+    return await this.messageChannel({
       message: strategyTextToReplace,
-      people: peopleToMessage,
+      projectName: projectNameForNote,
       opportunity: async function () {
         return await this.hoursAfter('currDate', 1);
       }.toString()
@@ -103,8 +103,8 @@ export const createPostSigMessage = (
     new Date().toISOString() // use the current timestamp so it's sent 1 hour after editing is complete
   );
   strategyFunction = strategyFunction.replace(
-    'peopleToMessage',
-    `[${orgObjs.project.students.map((student) => `"${student.name}"`).join(',')}]`
+    'projectNameForNote',
+    `'${orgObjs.project.name}'`
   );
   strategyFunction = strategyFunction.replace(
     'strategyTextToReplace',
