@@ -5,7 +5,8 @@ import { IssueObjectStruct } from '../../../models/IssueObjectModel';
 import {
   createPostSigMessage,
   computeReflectionQuestions,
-  parsePracticeText
+  parsePracticeText,
+  createPreSigReflectionMessage
 } from '../../../controllers/followUpObjects/createFollowUpStrategies';
 
 type Data = {
@@ -205,7 +206,9 @@ export default async function handler(
             // TODO: create pre studio message for mysore
             // TODO: create follow up for re-planning if replanning does not happen after 1 day
             // TODO: create a help-seeking agent to create a group DM
-            // TODO: create a pre-sig reflection message
+            // TODO: factor out OS saving code
+
+            // Create post-sig message agent
             console.log(noteInfo);
             let postSigScript = createPostSigMessage(
               noteInfo.id,
@@ -214,18 +217,7 @@ export default async function handler(
               practiceAgents,
               orgObjs
             );
-            // console.log('postSigScript:', JSON.stringify(postSigScript));
-            // console.log(
-            //   'strat function',
-            //   postSigScript.strategyToEnact.strategy_function
-            // );
-            // console.log(
-            //   'attempt eval',
-            //   eval(postSigScript.strategyToEnact.strategy_function)
-            // );
-
-            // attempt to create an active issue in OS
-            const osRes = await fetch(
+            const postSigOSRes = await fetch(
               `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
               {
                 method: 'POST',
@@ -236,15 +228,44 @@ export default async function handler(
               }
             );
             // if successful, update the activeIssueId in the practice
-            if (osRes.status === 200) {
+            if (postSigOSRes.status === 200) {
               console.log(
                 `Successfully created active issue for post-sig in OS for ${noteInfo.project} - ${noteInfo.sigDate}`,
-                await osRes.json()
+                await postSigOSRes.json()
               );
             } else {
               console.error(
                 `Error in creating active issue for ${noteInfo.project} - ${noteInfo.sigDate} in OS:`,
-                await osRes.json()
+                await postSigOSRes.json()
+              );
+            }
+
+            // Create pre-sig reflection agent
+            let preSigReflectionScript = createPreSigReflectionMessage(
+              noteInfo.id,
+              noteInfo.project,
+              new Date(noteInfo.sigDate).toISOString(),
+              orgObjs
+            );
+            const preSigReflectionOSRes = await fetch(
+              `${process.env.ORCH_ENGINE}/activeissues/createActiveIssue`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(preSigReflectionScript)
+              }
+            );
+            if (preSigReflectionOSRes.status === 200) {
+              console.log(
+                `Successfully created active issue for pre-sig reflection in OS for ${noteInfo.project} - ${noteInfo.sigDate}`,
+                await preSigReflectionOSRes.json()
+              );
+            } else {
+              console.error(
+                `Error in creating active issue for pre-sig reflection in OS for ${noteInfo.project} - ${noteInfo.sigDate}`,
+                await preSigReflectionOSRes.json()
               );
             }
           }

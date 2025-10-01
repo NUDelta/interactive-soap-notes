@@ -40,7 +40,7 @@ export const createPostSigMessage = (
       .update(`${noteId}-post-sig`)
       .digest('hex')
       .slice(0, 24),
-    scriptName: `plan follow-up after SIG for ${projName}`,
+    scriptName: `plan follow-up after SIG for ${projName} on ${noteDate}`,
     dateTriggered: noteDateJS,
     expiryTime: weekFromCurrDate,
     shouldRepeat: false,
@@ -49,7 +49,7 @@ export const createPostSigMessage = (
       name: projName
     },
     strategyToEnact: {
-      name: `plan follow-up after SIG for ${projName}`,
+      name: `plan follow-up after SIG for ${projName} on ${noteDate}`,
       description: '',
       strategy_function: ''
     },
@@ -102,6 +102,78 @@ export const createPostSigMessage = (
     'currDate',
     new Date().toISOString() // use the current timestamp so it's sent 1 hour after editing is complete
   );
+  strategyFunction = strategyFunction.replace(
+    'projectNameForNote',
+    `'${orgObjs.project.name}'`
+  );
+  strategyFunction = strategyFunction.replace(
+    'strategyTextToReplace',
+    '"' + strategy + '"'
+  );
+
+  // add to newActiveIssue and return
+  newActiveIssue.strategyToEnact.strategy_function = strategyFunction;
+  return newActiveIssue;
+};
+
+/**
+ * Creates a pre-SIG reflection message for the current CAP Note.
+ * @param {string} noteId - ID of the CAP note
+ * @param {string} projName - Name of the project
+ * @param {string} noteDate - Date of the CAP note, in ISO string format
+ * @param {Object} orgObjs - Organizational objects for the CAP note
+ * @returns {Object} New active issue object to send to Orchestration Engine
+ */
+export const createPreSigReflectionMessage = (
+  noteId: string,
+  projName: string,
+  noteDate: string,
+  orgObjs: Object
+) => {
+  let noteDateJS = new Date(noteDate);
+  let weekFromCurrDate = new Date(noteDateJS.getTime());
+  weekFromCurrDate.setDate(weekFromCurrDate.getDate() + 7);
+
+  let newActiveIssue = {
+    scriptId: crypto
+      .createHash('md5')
+      .update(`${noteId}-pre-sig-reflection`)
+      .digest('hex')
+      .slice(0, 24),
+    scriptName: `pre-sig reflection for ${projName} on previous ${noteDate} SIG`,
+    dateTriggered: noteDateJS,
+    expiryTime: weekFromCurrDate,
+    shouldRepeat: false,
+    issueTarget: {
+      targetType: 'project',
+      name: projName
+    },
+    strategyToEnact: {
+      name: `pre-sig reflection for ${projName} on previous ${noteDate} SIG`,
+      description: '',
+      strategy_function: ''
+    },
+    updateIfExists: true // used to update an already created active issue
+  };
+
+  // create the function to actually deliver the message
+  const reflectionUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reflections/${noteId}`;
+  let strategy = `You have SIG tomorrow! Please take some time to reflect on the practices your mentor suggested last week: <${reflectionUrl}|Reflection Page>.`;
+  strategy = strategy.replace(/[\""]/g, '\\"');
+
+  let strategyFunction = async function () {
+    return await this.messageChannel({
+      message: strategyTextToReplace,
+      projectName: projectNameForNote,
+      opportunity: async function () {
+        // send 1 day before the SIG meeting
+        return await this.daysBeforeVenue(
+          await this.venues.find(this.where('kind', 'SigMeeting')),
+          1
+        );
+      }.toString()
+    });
+  }.toString();
   strategyFunction = strategyFunction.replace(
     'projectNameForNote',
     `'${orgObjs.project.name}'`
