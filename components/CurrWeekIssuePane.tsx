@@ -183,42 +183,41 @@ export default function CurrWeekIssuePane({
                               // if (newLineId !== undefined) {
                               //   document.getElementById(newLineId).focus();
                               // }
-                            } else if (
+                            }
+                            // check for shift-backspace to remove a line
+                            else if (
                               (e.key === 'Backspace' || e.key === 'Delete') &&
                               e.shiftKey
                             ) {
                               // remove line
                               // add new line underneath the current line
-                              setCurrentIssuesData((prevCurrentIssuesData) => {
-                                let newCurrentIssuesData = [
-                                  ...prevCurrentIssuesData
-                                ];
-
-                                // find that line that was edited in the current instance of the practice
-                                let lineIndex = newCurrentIssuesData[
-                                  issueIndex
-                                ][section.name].findIndex(
-                                  (l) => l.id === line.id
-                                );
-
-                                // remove line
-                                newCurrentIssuesData[issueIndex][section.name] =
-                                  newCurrentIssuesData[issueIndex][
-                                    section.name
-                                  ].filter((l) => l.id !== line.id);
-
-                                // if the section is empty, add a new empty block
-                                if (
-                                  newCurrentIssuesData[issueIndex][section.name]
-                                    .length === 0
-                                ) {
-                                  newCurrentIssuesData[issueIndex][
-                                    section.name
-                                  ].push(newLine);
-                                }
-
-                                return newCurrentIssuesData;
-                              });
+                              // TODO: temporarily removing so notes don't get deleted accidentally
+                              // setCurrentIssuesData((prevCurrentIssuesData) => {
+                              //   let newCurrentIssuesData = [
+                              //     ...prevCurrentIssuesData
+                              //   ];
+                              //   // find that line that was edited in the current instance of the practice
+                              //   let lineIndex = newCurrentIssuesData[
+                              //     issueIndex
+                              //   ][section.name].findIndex(
+                              //     (l) => l.id === line.id
+                              //   );
+                              //   // remove line
+                              //   newCurrentIssuesData[issueIndex][section.name] =
+                              //     newCurrentIssuesData[issueIndex][
+                              //       section.name
+                              //     ].filter((l) => l.id !== line.id);
+                              //   // if the section is empty, add a new empty block
+                              //   if (
+                              //     newCurrentIssuesData[issueIndex][section.name]
+                              //       .length === 0
+                              //   ) {
+                              //     newCurrentIssuesData[issueIndex][
+                              //       section.name
+                              //     ].push(newLine);
+                              //   }
+                              //   return newCurrentIssuesData;
+                              // });
                             }
                           }}
                           onChange={(htmlEdits, rawEdits) => {
@@ -551,42 +550,40 @@ export default function CurrWeekIssuePane({
                               // if (newLineId !== undefined) {
                               //   document.getElementById(newLineId).focus();
                               // }
-                            } else if (
+                            } // check for shift-backspace to remove a line
+                            else if (
                               (e.key === 'Backspace' || e.key === 'Delete') &&
                               e.shiftKey
                             ) {
                               // remove line
                               // add new line underneath the current line
-                              setCurrentIssuesData((prevCurrentIssuesData) => {
-                                let newCurrentIssuesData = [
-                                  ...prevCurrentIssuesData
-                                ];
-
-                                // find that line that was edited in the current instance of the practice
-                                let lineIndex = newCurrentIssuesData[
-                                  issueIndex
-                                ][section.name].findIndex(
-                                  (l) => l.id === line.id
-                                );
-
-                                // remove line
-                                newCurrentIssuesData[issueIndex][section.name] =
-                                  newCurrentIssuesData[issueIndex][
-                                    section.name
-                                  ].filter((l) => l.id !== line.id);
-
-                                // if the section is empty, add a new empty block
-                                if (
-                                  newCurrentIssuesData[issueIndex][section.name]
-                                    .length === 0
-                                ) {
-                                  newCurrentIssuesData[issueIndex][
-                                    section.name
-                                  ].push(newLine);
-                                }
-
-                                return newCurrentIssuesData;
-                              });
+                              // TODO: temporarily removing so notes don't get deleted accidentally
+                              // setCurrentIssuesData((prevCurrentIssuesData) => {
+                              //   let newCurrentIssuesData = [
+                              //     ...prevCurrentIssuesData
+                              //   ];
+                              //   // find that line that was edited in the current instance of the practice
+                              //   let lineIndex = newCurrentIssuesData[
+                              //     issueIndex
+                              //   ][section.name].findIndex(
+                              //     (l) => l.id === line.id
+                              //   );
+                              //   // remove line
+                              //   newCurrentIssuesData[issueIndex][section.name] =
+                              //     newCurrentIssuesData[issueIndex][
+                              //       section.name
+                              //     ].filter((l) => l.id !== line.id);
+                              //   // if the section is empty, add a new empty block
+                              //   if (
+                              //     newCurrentIssuesData[issueIndex][section.name]
+                              //       .length === 0
+                              //   ) {
+                              //     newCurrentIssuesData[issueIndex][
+                              //       section.name
+                              //     ].push(newLine);
+                              //   }
+                              //   return newCurrentIssuesData;
+                              // });
                             }
                           }}
                           onChange={(htmlEdits, rawEdits) => {
