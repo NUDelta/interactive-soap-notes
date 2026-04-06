@@ -8,6 +8,26 @@ export default function Home({ sigs }): JSX.Element {
   // store state for each SIG on whether to show latest or all CAP notes
   const [showAllNotes, setShowAllNotes] = useState(false);
 
+  // state for the "create new CAP note" form
+  const [showNewNoteForm, setShowNewNoteForm] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  // default date to today (YYYY-MM-DD format) for convenience
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const [newNoteDate, setNewNoteDate] = useState(todayStr);
+  const [creating, setCreating] = useState(false);
+
+  // hardcoded project names from fixtures
+  const projects = [
+    'Experiential Travel',
+    'Experiential Computing Platform',
+    'World Learning',
+    'PATH',
+    'Dialectical Technologies',
+    'LLMs for Personal Transformation',
+    'LLMs for Transforming Researchers',
+    'CAP Notes and Practice Agents'
+  ];
+
   // use a state variable for sigs so dates can be updated to locale time
   const [sigsState, setSigsState] = useState(sigs);
   useEffect(() => {
@@ -42,6 +62,81 @@ export default function Home({ sigs }): JSX.Element {
         >
           {showAllNotes ? 'Show Most Recent Notes' : 'Show All Notes'}
         </button>
+
+        {/* new button/form for creating a CAP note (SIG meeting) */}
+        <div className="mb-4">
+          <button
+            className="mr-2 h-10 rounded-full bg-green-500 px-4 py-1 text-xs font-bold text-white hover:bg-green-700"
+            onClick={() => setShowNewNoteForm(!showNewNoteForm)}
+          >
+            {showNewNoteForm ? 'Hide New Note Form' : 'Add New SIG Meeting'}
+          </button>
+        </div>
+
+        {showNewNoteForm && (
+          <div className="mb-6 rounded border p-4">
+            <h3 className="mb-2 font-bold">Create CAP Note</h3>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm">
+                Project Name:
+                <select
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                  className="ml-2 rounded border px-2 py-1"
+                >
+                  <option value="">Select a Project</option>
+                  {projects.map(project => (
+                    <option key={project} value={project}>{project}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="text-sm">
+                SIG Date:
+                <input
+                  type="date"
+                  value={newNoteDate}
+                  onChange={(e) => setNewNoteDate(e.target.value)}
+                  className="ml-2 rounded border px-2 py-1"
+                />
+              </label>
+              <button
+                disabled={creating || !newProjectName || !newNoteDate}
+                className="mt-2 w-32 rounded-full bg-blue-500 px-4 py-1 text-xs font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+                onClick={async () => {
+                  setCreating(true);
+                  try {
+                    const iso = new Date(newNoteDate).toISOString();
+                    const res = await fetch('/api/soap', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        projectName: newProjectName,
+                        noteDate: iso
+                      })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                      // reload to show new note
+                      window.location.reload();
+                    } else {
+                      console.error('Error creating note', data);
+                      alert('Failed to create note');
+                    }
+                  } catch (e) {
+                    console.error(e);
+                    alert('Failed to create note');
+                  } finally {
+                    setCreating(false);
+                    setNewProjectName('');
+                    setNewNoteDate(todayStr);
+                  }
+                }}
+              >
+                {creating ? 'Creating...' : 'Create'}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Section for each SIG */}
         {/* TODO: make into a filterable table */}
