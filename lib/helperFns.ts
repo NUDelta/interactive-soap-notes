@@ -36,6 +36,50 @@ export const shortDate = (date: Date, timezone: string = 'America/Chicago') => {
 };
 
 /**
+ * Formats an ISO date string to short form without timezone conversion.
+ * Extracts the date portion directly to avoid UTC-to-local timezone shifts.
+ * @param isoString ISO date string (e.g., "2026-04-07T00:00:00.000Z")
+ * @returns string formatted date (e.g., "Mon, Apr 7, 2026")
+ */
+export const shortDateFromISO = (isoString: string): string => {
+  // Extract YYYY-MM-DD from ISO string
+  const [year, month, day] = isoString.split('T')[0].split('-').map(Number);
+  const date = new Date(year, month - 1, day); // Use local timezone
+  return date.toLocaleDateString('en-us', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+
+/**
+ * Formats an ISO date string to long form without timezone conversion.
+ * Extracts the date portion directly to avoid UTC-to-local timezone shifts.
+ * @param isoString ISO date string (e.g., "2026-04-07T10:30:00.000Z")
+ * @param includeSeconds whether to include seconds
+ * @returns string formatted date
+ */
+export const longDateFromISO = (isoString: string, includeSeconds: boolean = false): string => {
+  // Extract date and time from ISO string
+  const [datePart, timePart] = isoString.split('T');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hours, minutes, secondsStr] = timePart.split(':');
+  const seconds = parseInt(secondsStr);
+  
+  const date = new Date(year, month - 1, day, parseInt(hours), parseInt(minutes), seconds);
+  return date.toLocaleDateString('en-us', {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: includeSeconds ? 'numeric' : undefined
+  });
+};
+
+/**
  * Helper function to serialize dates in an object.
  * @param object object that has date fields to serialize.
  * @returns

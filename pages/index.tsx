@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { fetchAllCAPNotes } from '../controllers/capNotes/fetchCAPNotes';
 import Head from 'next/head';
-import { longDate, shortDate } from '../lib/helperFns';
+import { longDate, shortDate, longDateFromISO, shortDateFromISO } from '../lib/helperFns';
 import { useEffect, useState } from 'react';
 
 export default function Home({ sigs }): JSX.Element {
@@ -34,11 +34,13 @@ export default function Home({ sigs }): JSX.Element {
     setSigsState(
       sigs.map((sig) => ({
         ...sig,
-        capNotes: sig.capNotes.map((capNote) => ({
-          ...capNote,
-          date: shortDate(new Date(capNote.date)),
-          lastUpdated: longDate(new Date(capNote.lastUpdated))
-        }))
+        capNotes: sig.capNotes
+          .map((capNote) => ({
+            ...capNote,
+            dateDisplay: shortDateFromISO(capNote.date),
+            lastUpdatedDisplay: longDateFromISO(capNote.lastUpdated)
+          }))
+          .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort newest first by ISO date
       }))
     );
   }, []);
@@ -105,7 +107,9 @@ export default function Home({ sigs }): JSX.Element {
                 onClick={async () => {
                   setCreating(true);
                   try {
-                    const iso = new Date(newNoteDate).toISOString();
+                    const [year, month, day] = newNoteDate.split('-').map(Number);
+                    const date = new Date(Date.UTC(year, month - 1, day));
+                    const iso = date.toISOString();
                     const res = await fetch('/api/soap', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
@@ -184,10 +188,10 @@ export default function Home({ sigs }): JSX.Element {
                     </div>
 
                     {/* Date of CAP Note */}
-                    <div className="col-span-1">{capNote.date}</div>
+                    <div className="col-span-1">{capNote.dateDisplay}</div>
 
                     {/* Last Updated for CAP Note*/}
-                    <div className="col-span-1">{capNote.lastUpdated}</div>
+                    <div className="col-span-1">{capNote.lastUpdatedDisplay}</div>
                   </div>
                 ))}
             </div>
