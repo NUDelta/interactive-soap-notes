@@ -54,29 +54,20 @@ export const shortDateFromISO = (isoString: string): string => {
 };
 
 /**
- * Formats an ISO date string to long form without timezone conversion.
- * Extracts the date portion directly to avoid UTC-to-local timezone shifts.
- * @param isoString ISO date string (e.g., "2026-04-07T10:30:00.000Z")
- * @param includeSeconds whether to include seconds
- * @returns string formatted date
+ * Converts a date-only display string back to a stable ISO date at UTC midnight.
+ * This avoids shifting the stored SIG day when users in different timezones save edits.
+ * @param dateString human-readable date string (e.g. "Wed, Apr 22, 2026")
+ * @returns ISO string at UTC midnight for that calendar day
  */
-export const longDateFromISO = (isoString: string, includeSeconds: boolean = false): string => {
-  // Extract date and time from ISO string
-  const [datePart, timePart] = isoString.split('T');
-  const [year, month, day] = datePart.split('-').map(Number);
-  const [hours, minutes, secondsStr] = timePart.split(':');
-  const seconds = parseInt(secondsStr);
-  
-  const date = new Date(year, month - 1, day, parseInt(hours), parseInt(minutes), seconds);
-  return date.toLocaleDateString('en-us', {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: includeSeconds ? 'numeric' : undefined
-  });
+export const serializeDateOnlyToISO = (dateString: string): string => {
+  const parsedDate = new Date(dateString);
+  return new Date(
+    Date.UTC(
+      parsedDate.getFullYear(),
+      parsedDate.getMonth(),
+      parsedDate.getDate()
+    )
+  ).toISOString();
 };
 
 /**

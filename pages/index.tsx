@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { fetchAllCAPNotes } from '../controllers/capNotes/fetchCAPNotes';
 import Head from 'next/head';
-import { longDate, shortDate, longDateFromISO, shortDateFromISO } from '../lib/helperFns';
+import { longDate, shortDate, shortDateFromISO } from '../lib/helperFns';
 import { useEffect, useState } from 'react';
 
 export default function Home({ sigs }): JSX.Element {
@@ -38,7 +38,7 @@ export default function Home({ sigs }): JSX.Element {
           .map((capNote) => ({
             ...capNote,
             dateDisplay: shortDateFromISO(capNote.date),
-            lastUpdatedDisplay: longDateFromISO(capNote.lastUpdated)
+            lastUpdatedDisplay: longDate(new Date(capNote.lastUpdated))
           }))
           .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort newest first by ISO date
       }))
@@ -204,6 +204,11 @@ export default function Home({ sigs }): JSX.Element {
 
 // use serverside rendering to generate this page
 export const getServerSideProps = async () => {
+  const { ensureWeeklyCAPNotesExist } = await import(
+    '../lib/server/sigAutopopulate'
+  );
+  await ensureWeeklyCAPNotesExist();
+
   // fetch all CAP notes
   const capNotes = await fetchAllCAPNotes();
 
