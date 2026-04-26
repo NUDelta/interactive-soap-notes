@@ -13,7 +13,9 @@ import { Tooltip } from 'flowbite-react';
 import {
   longDate,
   serializeDates,
+  serializeDateOnlyToISO,
   shortDate,
+  shortDateFromISO,
   shortenText
 } from '../../lib/helperFns';
 
@@ -154,7 +156,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
 
     setNoteInfo((prevNoteInfo) => ({
       ...prevNoteInfo,
-      sigDate: shortDate(new Date(prevNoteInfo.sigDate)),
+      sigDate: shortDateFromISO(prevNoteInfo.sigDate),
       lastUpdated: longDate(new Date(prevNoteInfo.lastUpdated))
     }));
 
@@ -196,7 +198,7 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
       // make request to save the data to the database
       let noteInfoWithUtc = {
         ...noteInfo,
-        sigDate: new Date(noteInfo.sigDate).toISOString(),
+        sigDate: serializeDateOnlyToISO(noteInfo.sigDate),
         lastUpdated: new Date(noteInfo.lastUpdated).toISOString()
       };
       try {

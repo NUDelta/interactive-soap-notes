@@ -14,8 +14,9 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 // utilities
 import {
   longDate,
+  serializeDateOnlyToISO,
   serializeDates,
-  shortDate,
+  shortDateFromISO,
   shortenText
 } from '../../lib/helperFns';
 
@@ -43,9 +44,20 @@ export default function CAPNote({
   currentWeekIssues,
   practiceGaps
 }): JSX.Element {
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+
   // have state for cap note data
   const [noteInfo, setNoteInfo] = useState(capNoteInfo);
   const [lastUpdated, setLastUpdated] = useState(capNoteInfo.lastUpdated);
+  const [meetingTranscript, setMeetingTranscript] = useState(
+    capNoteInfo.meetingTranscript ?? null
+  );
+  const [isRecording, setIsRecording] = useState(false);
+  const [isUploadingRecording, setIsUploadingRecording] = useState(false);
+  const [transcriptError, setTranscriptError] = useState<string | null>(null);
+  const [expectedSpeakers, setExpectedSpeakers] = useState(2);
 
   // hold data state for issues and practices
   // see here for updating arrays in state variables: https://react.dev/learn/updating-arrays-in-state#updating-objects-inside-arrays
@@ -70,12 +82,161 @@ export default function CAPNote({
   useEffect(() => {
     setNoteInfo((prevNoteInfo) => ({
       ...prevNoteInfo,
-      sigDate: shortDate(new Date(prevNoteInfo.sigDate)),
+      sigDate: shortDateFromISO(prevNoteInfo.sigDate),
       lastUpdated: longDate(new Date(prevNoteInfo.lastUpdated))
     }));
 
     setLastUpdated(longDate(new Date(noteInfo.lastUpdated)));
   }, []);
+
+  useEffect(() => {
+    if (meetingTranscript?.status !== 'processing') {
+      return;
+    }
+
+    const intervalId = setInterval(async () => {
+      try {
+        const transcriptRes = await fetch(`/api/transcripts/${noteInfo.id}`);
+        const transcriptData = await transcriptRes.json();
+
+        if (!transcriptRes.ok) {
+          throw new Error(
+            transcriptData.error ?? 'Unable to refresh transcript status'
+          );
+        }
+
+        setMeetingTranscript(transcriptData.data);
+        if (transcriptData.data?.status === 'error') {
+          setTranscriptError(
+            transcriptData.data.error ?? 'Transcription processing failed'
+          );
+        }
+      } catch (error) {
+        console.error(error);
+        setTranscriptError(
+          error instanceof Error
+            ? error.message
+            : 'Unable to refresh transcript status'
+        );
+      }
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [meetingTranscript?.status, noteInfo.id]);
+
+  useEffect(() => {
+    return () => {
+      mediaRecorderRef.current?.stream
+        ?.getTracks()
+        .forEach((track) => track.stop());
+      mediaStreamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  const startRecording = async () => {
+    try {
+      setTranscriptError(null);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      audioChunksRef.current = [];
+
+      const preferredMimeType = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4'
+      ].find((mimeType) => MediaRecorder.isTypeSupported(mimeType));
+
+      const recorder = new MediaRecorder(stream, {
+        mimeType: preferredMimeType,
+        audioBitsPerSecond: 128000
+      });
+      mediaRecorderRef.current = recorder;
+
+      recorder.addEventListener('dataavailable', (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      });
+
+      recorder.addEventListener('stop', async () => {
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: recorder.mimeType || 'audio/webm'
+        });
+        stream.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+        setIsUploadingRecording(true);
+
+        try {
+          const transcriptRes = await fetch(`/api/transcripts/${noteInfo.id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': audioBlob.type,
+              'x-expected-speakers': expectedSpeakers.toString()
+            },
+            body: audioBlob
+          });
+          const transcriptData = await transcriptRes.json();
+
+          if (!transcriptRes.ok) {
+            throw new Error(
+              transcriptData.error ?? 'Unable to start transcription'
+            );
+          }
+
+          setMeetingTranscript(transcriptData.data);
+        } catch (error) {
+          console.error(error);
+          setTranscriptError(
+            error instanceof Error
+              ? error.message
+              : 'Unable to upload meeting recording'
+          );
+        } finally {
+          setIsUploadingRecording(false);
+          mediaRecorderRef.current = null;
+        }
+      });
+
+      recorder.start(1000);
+      setIsRecording(true);
+    } catch (error) {
+      console.error(error);
+      setTranscriptError(
+        error instanceof Error
+          ? error.message
+          : 'Unable to access microphone for recording'
+      );
+    }
+  };
+
+  const stopRecording = () => {
+    if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') {
+      return;
+    }
+
+    mediaRecorderRef.current.requestData();
+    mediaRecorderRef.current.stop();
+    setIsRecording(false);
+  };
+
+  const refreshTranscript = async () => {
+    try {
+      setTranscriptError(null);
+      const transcriptRes = await fetch(`/api/transcripts/${noteInfo.id}`);
+      const transcriptData = await transcriptRes.json();
+
+      if (!transcriptRes.ok) {
+        throw new Error(transcriptData.error ?? 'Unable to fetch transcript');
+      }
+
+      setMeetingTranscript(transcriptData.data);
+    } catch (error) {
+      console.error(error);
+      setTranscriptError(
+        error instanceof Error ? error.message : 'Unable to fetch transcript'
+      );
+    }
+  };
 
   // listen for changes in pastIssue, currentIssue, or practiceGaps states and do debounced saves to database
   useEffect(() => {
@@ -132,7 +293,7 @@ export default function CAPNote({
       // make request to save the data to the database
       let noteInfoWithUtc = {
         ...noteInfo,
-        sigDate: new Date(noteInfo.sigDate).toISOString(),
+        sigDate: serializeDateOnlyToISO(noteInfo.sigDate),
         lastUpdated: new Date(noteInfo.lastUpdated).toISOString()
       };
       try {
@@ -239,7 +400,7 @@ export default function CAPNote({
         // create a clone of the data to save
         let dataToSave = structuredClone({
           project: noteInfo.project,
-          date: new Date(noteInfo.sigDate).toISOString(),
+          date: serializeDateOnlyToISO(noteInfo.sigDate),
           lastUpdated: lastUpdated,
           sigName: noteInfo.sigName,
           sigAbbreviation: noteInfo.sigAbbreviation,
@@ -312,7 +473,7 @@ export default function CAPNote({
           {`${shortenText(
             noteInfo.project,
             15
-          )} | ${new Date(noteInfo.sigDate).toLocaleString().split(',')[0]}`}
+          )} | ${noteInfo.sigDate}`}
         </title>
       </Head>
 
@@ -382,6 +543,95 @@ export default function CAPNote({
           <div></div>
         </div>
 
+        <div className="mb-4 mt-3 rounded border border-slate-300 bg-slate-50 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-base font-bold">Meeting Recording</h2>
+              <p className="text-sm text-slate-600">
+                Record the project team meeting, then process a speaker-labeled
+                transcript for coach review and future LLM use.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <label className="flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
+                <span>Expected Speakers</span>
+                <select
+                  value={expectedSpeakers}
+                  onChange={(e) => setExpectedSpeakers(Number(e.target.value))}
+                  className="bg-transparent outline-none"
+                  disabled={isRecording || isUploadingRecording}
+                >
+                  {[2, 3, 4, 5, 6].map((count) => (
+                    <option key={count} value={count}>
+                      {count}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {!isRecording ? (
+                <button
+                  className="rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+                  onClick={startRecording}
+                  disabled={isUploadingRecording}
+                >
+                  Start Recording
+                </button>
+              ) : (
+                <button
+                  className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+                  onClick={stopRecording}
+                >
+                  Stop & Process
+                </button>
+              )}
+              <button
+                className="rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+                onClick={refreshTranscript}
+              >
+                Refresh Transcript
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-3 text-sm text-slate-700">
+            {isRecording && <p>Recording in progress. Click stop when the meeting ends.</p>}
+            {isUploadingRecording && (
+              <p>Uploading audio and starting transcription...</p>
+            )}
+            {!isUploadingRecording && meetingTranscript?.status === 'processing' && (
+              <p>
+                Transcript is processing with {meetingTranscript.provider}. This
+                panel refreshes automatically every few seconds.
+              </p>
+            )}
+            {meetingTranscript?.status === 'completed' && (
+              <p>
+                Transcript ready
+                {meetingTranscript.completedAt
+                  ? ` • Completed ${meetingTranscript.completedAt}`
+                  : ''}
+              </p>
+            )}
+            {transcriptError && (
+              <p className="font-semibold text-red-600">{transcriptError}</p>
+            )}
+          </div>
+
+          {meetingTranscript?.formattedText && (
+            <div className="mt-4 rounded border border-slate-200 bg-white p-3">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <h3 className="text-sm font-bold">Transcript</h3>
+                <div className="text-xs text-slate-500">
+                  {meetingTranscript.utterances?.length ?? 0} speaker turns
+                </div>
+              </div>
+              <pre className="max-h-72 overflow-auto whitespace-pre-wrap text-sm leading-6 text-slate-800">
+                {meetingTranscript.formattedText}
+              </pre>
+            </div>
+          )}
+        </div>
+
         <DndProvider backend={HTML5Backend}>
           {/* Past issues and tracked practices fixed to top of page */}
           {/* TODO: 05-06-24: maybe add a hide and show button so mentor can recover vertical space when done browsing past issues */}
@@ -414,7 +664,7 @@ export default function CAPNote({
                           issueId={lastWeekIssue.id}
                           title={lastWeekIssue.title}
                           date={new Date(lastWeekIssue.date).toISOString()}
-                          noteDate={new Date(noteInfo.sigDate).toISOString()}
+                          noteDate={serializeDateOnlyToISO(noteInfo.sigDate)}
                           selectedIssue={selectedIssue}
                           setSelectedIssue={setSelectedIssue}
                           pastIssuesData={pastIssuesData}
@@ -434,7 +684,7 @@ export default function CAPNote({
                             key={`issue-card-${currIssue.id}`}
                             project={noteInfo.project}
                             sig={noteInfo.sigName}
-                            date={new Date(noteInfo.sigDate).toISOString()}
+                            date={serializeDateOnlyToISO(noteInfo.sigDate)}
                             issueId={currIssue.id}
                             issue={currIssue}
                             selectedIssue={selectedIssue}
@@ -451,7 +701,7 @@ export default function CAPNote({
                         key="issue-card-add-issue"
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={new Date(noteInfo.sigDate).toISOString()}
+                        date={serializeDateOnlyToISO(noteInfo.sigDate)}
                         issueId="add-issue"
                         issue={null}
                         selectedIssue={selectedIssue}
@@ -499,7 +749,7 @@ export default function CAPNote({
                             key={`issue-card-${practiceGap.id}`}
                             project={noteInfo.project}
                             sig={noteInfo.sigName}
-                            date={new Date(noteInfo.sigDate).toISOString()}
+                            date={serializeDateOnlyToISO(noteInfo.sigDate)}
                             practiceGapId={practiceGap.id}
                             practiceGap={practiceGap}
                             practiceGapsData={practiceGapData}
@@ -516,7 +766,7 @@ export default function CAPNote({
                         key="issue-card-add-practice"
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={new Date(noteInfo.sigDate).toISOString()}
+                        date={serializeDateOnlyToISO(noteInfo.sigDate)}
                         practiceGapId="add-practice"
                         practiceGap={null}
                         practiceGapsData={practiceGapData}
@@ -570,7 +820,7 @@ export default function CAPNote({
                         issueId={selectedIssue}
                         project={noteInfo.project}
                         sig={noteInfo.sigName}
-                        date={new Date(noteInfo.sigDate).toISOString()}
+                        date={serializeDateOnlyToISO(noteInfo.sigDate)}
                         currentIssuesData={currentIssuesData}
                         setCurrentIssuesData={setCurrentIssuesData}
                         practiceGapData={practiceGapData}
@@ -624,8 +874,10 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
   // helper function to convert mongo ids to strings
   const mongoIdFlattener = {
     transform: function (doc, ret) {
-      ret.id = ret._id.toString();
-      delete ret._id;
+      if (ret?._id !== undefined && ret?._id !== null) {
+        ret.id = ret._id.toString();
+        delete ret._id;
+      }
     }
   };
 
@@ -727,7 +979,8 @@ export const getServerSideProps: GetServerSideProps = async (query) => {
       (practice) => {
         return practice.toString();
       }
-    )
+    ),
+    meetingTranscript: currentCAPNoteFlattened.meetingTranscript ?? null
   };
 
   /**

@@ -11,6 +11,25 @@ import { createNewTextEntryBlock } from '../textEntryBlock/createNewTextEntryBlo
  */
 export const createCAPNote = async (projectName: string, noteDate: Date) => {
   try {
+    await dbConnect();
+
+    const normalizedDate = new Date(
+      Date.UTC(
+        noteDate.getUTCFullYear(),
+        noteDate.getUTCMonth(),
+        noteDate.getUTCDate()
+      )
+    );
+
+    const existingCAPNote = await CAPNoteModel.findOne({
+      project: projectName,
+      date: normalizedDate
+    });
+
+    if (existingCAPNote) {
+      return existingCAPNote;
+    }
+
     // get proj and sig info
     const projInfoRes = await fetch(
       `${process.env.STUDIO_API}/projects/byName?${new URLSearchParams({
@@ -34,7 +53,6 @@ export const createCAPNote = async (projectName: string, noteDate: Date) => {
     ).abbreviation;
 
     // get the previous CAP note for the project
-    await dbConnect();
     const previousCAPNotes = await CAPNoteModel.find({
       project: projectName,
       sigName: sigName
@@ -59,11 +77,10 @@ export const createCAPNote = async (projectName: string, noteDate: Date) => {
     }
 
     // save the new SOAP note to the database
-    await dbConnect();
     return await CAPNoteModel.create({
       project: projectName,
-      date: noteDate,
-      lastUpdated: noteDate,
+      date: normalizedDate,
+      lastUpdated: normalizedDate,
       sigName: sigName,
       sigAbbreviation: sigAbbreviation,
       context: [createNewTextEntryBlock()],
