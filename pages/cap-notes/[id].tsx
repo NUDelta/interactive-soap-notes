@@ -98,6 +98,11 @@ export default function CAPNote({
   const [followUpInput, setFollowUpInput] = useState('');
   const [showEvidence, setShowEvidence] = useState<Record<number, boolean>>({});
 
+  // Practice support state
+  const [showPracticeSupport, setShowPracticeSupport] = useState(false);
+  const [isGeneratingPracticeSupport, setIsGeneratingPracticeSupport] = useState(false);
+  const [practiceSupportError, setPracticeSupportError] = useState<string | null>(null);
+
   // let user know that we are saving and if there were any errors
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
@@ -1076,6 +1081,136 @@ export default function CAPNote({
                   </div>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* Practice Support — collapsible */}
+        <div className="mt-2 rounded border border-blue-300 bg-blue-50">
+          <button
+            className="flex w-full items-center justify-between px-4 py-2 text-left"
+            onClick={() => setShowPracticeSupport(!showPracticeSupport)}
+          >
+            <div className="flex items-center gap-2">
+              <h2 className="text-base font-bold text-blue-800">Practice Support</h2>
+              {isGeneratingPracticeSupport && (
+                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700">
+                  Generating...
+                </span>
+              )}
+            </div>
+            <span className="text-slate-400">{showPracticeSupport ? '▲' : '▼'}</span>
+          </button>
+
+          {showPracticeSupport && (
+            <div className="border-t border-blue-200 p-4">
+              <p className="mb-3 text-sm text-slate-600">
+                Generate a value statement (why each practice matters for this student) and low-stakes
+                starting points for each assigned practice. Review and edit before the post-SIG message goes out.
+              </p>
+
+              <button
+                className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                disabled={isGeneratingPracticeSupport}
+                onClick={async () => {
+                  setIsGeneratingPracticeSupport(true);
+                  setPracticeSupportError(null);
+                  try {
+                    const res = await fetch('/api/ai-draft/practice-support', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ noteId: noteInfo.id })
+                    });
+                    const data = await res.json();
+                    if (!res.ok || !data.success) {
+                      throw new Error(data.error ?? 'Failed to generate practice support');
+                    }
+                    // Update currentIssuesData state so edits persist via debounced save
+                    setCurrentIssuesData((prev) => {
+                      const updated = structuredClone(prev);
+                      for (const p of data.data) {
+                        const issue = updated.find((i) => i.id === p.issueId);
+                        if (issue && issue.followUps[p.followUpIndex]) {
+                          issue.followUps[p.followUpIndex].valueStatement = p.valueStatement;
+                          issue.followUps[p.followUpIndex].interventions = p.interventions;
+                        }
+                      }
+                      return updated;
+                    });
+                  } catch (err) {
+                    setPracticeSupportError(err instanceof Error ? err.message : 'Unknown error');
+                  } finally {
+                    setIsGeneratingPracticeSupport(false);
+                  }
+                }}
+              >
+                {isGeneratingPracticeSupport ? 'Generating...' : 'Generate Practice Support'}
+              </button>
+
+              {practiceSupportError && (
+                <p className="mt-2 text-sm font-semibold text-red-600">{practiceSupportError}</p>
+              )}
+
+              {/* Per-issue follow-up review */}
+              {currentIssuesData
+                .filter((issue) => !issue.wasDeleted && !issue.wasMerged)
+                .map((issue) => {
+                  const reviewableFollowUps = (issue.followUps ?? []).filter(
+                    (fu) => !fu.practice.includes('[plan]')
+                  );
+                  if (!reviewableFollowUps.length) return null;
+                  return (
+                    <div key={issue.id} className="mt-4">
+                      <h3 className="mb-2 border-b border-blue-200 text-sm font-bold text-blue-800">
+                        {issue.title}
+                      </h3>
+                      {reviewableFollowUps.map((followUp, fuIdx) => {
+                        const realIdx = (issue.followUps ?? []).indexOf(followUp);
+                        return (
+                          <div key={fuIdx} className="mb-3 rounded border border-blue-100 bg-white p-3 text-sm">
+                            <p className="mb-2 font-medium text-slate-700">{followUp.parsedPractice?.practice ?? followUp.practice}</p>
+
+                            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              Why this matters
+                            </label>
+                            <textarea
+                              className="mb-2 w-full rounded border border-slate-200 px-2 py-1 text-sm text-slate-800 placeholder-slate-400 focus:border-blue-400 focus:outline-none"
+                              rows={3}
+                              placeholder="Value statement will appear here after generating..."
+                              value={followUp.valueStatement ?? ''}
+                              onChange={(e) => {
+                                setCurrentIssuesData((prev) => {
+                                  const updated = structuredClone(prev);
+                                  const iss = updated.find((i) => i.id === issue.id);
+                                  if (iss) iss.followUps[realIdx].valueStatement = e.target.value;
+                                  return updated;
+                                });
+                              }}
+                            />
+
+                            <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-400">
+                              Ways to get started (one per line)
+                            </label>
+                            <textarea
+                              className="w-full rounded border border-slate-200 px-2 py-1 text-sm text-slate-800 placeholder-slate-400 focus:border-blue-400 focus:outline-none"
+                              rows={3}
+                              placeholder="Interventions will appear here after generating..."
+                              value={(followUp.interventions ?? []).join('\n')}
+                              onChange={(e) => {
+                                setCurrentIssuesData((prev) => {
+                                  const updated = structuredClone(prev);
+                                  const iss = updated.find((i) => i.id === issue.id);
+                                  if (iss) iss.followUps[realIdx].interventions = e.target.value.split('\n');
+                                  return updated;
+                                });
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
             </div>
           )}
         </div>

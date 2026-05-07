@@ -15,6 +15,8 @@ export interface FollowUpObjectStruct {
     deliverableNotes: string | null;
     reflection: [FollowUpReflection[], FollowUpReflection[]]; // false for didHappen corresponds to questions in to 0, true to 1
   };
+  valueStatement?: string;
+  interventions?: string[];
 }
 
 interface ReflectionQuestion {
@@ -114,5 +116,15 @@ export const FollowUpObjectSchema = new mongoose.Schema({
   outcome: {
     type: PracticeOutcomeSchema,
     required: true
+  },
+  valueStatement: {
+    type: String,
+    required: false,
+    default: null
+  },
+  interventions: {
+    type: [String],
+    required: false,
+    default: []
   }
 });

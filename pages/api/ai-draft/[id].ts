@@ -1,9 +1,16 @@
+import fs from 'fs';
+import path from 'path';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import OpenAI from 'openai';
 import dbConnect from '../../../lib/dbConnect';
 import CAPNoteModel from '../../../models/CAPNoteModel';
 import IssueObjectModel from '../../../models/IssueObjectModel';
 import PracticeGapObjectModel from '../../../models/PracticeGapObjectModel';
+
+const PAPER_CONTEXT = fs.readFileSync(
+  path.join(process.cwd(), 'pages/api/ai-draft/papercontext.txt'),
+  'utf-8'
+);
 
 export interface AIDraftIssue {
   title: string;
@@ -95,6 +102,10 @@ Cognitive: goal-setting, task analysis, planning, monitoring, reflection
 Metacognitive: knowledge of cognition, regulation of cognition
 Emotional/Motivational: emotional regulation, motivation
 
+## Research Framework
+
+${PAPER_CONTEXT}
+
 ## Plan Tags
 
 Each plan item begins with one primary tag:
@@ -162,6 +173,7 @@ const buildUserMessage = (
   coachReflections: string,
   priorNotesText: string,
   practiceGapsText: string,
+  followUpOutcomesText: string,
   allPeople: { name: string; slack_id: string }[]
 ): string => {
   let msg = `Generate CAP notes for the following meeting. Write in the same style as the examples — direct, specific, coach-voice.\n\n`;
@@ -179,6 +191,10 @@ const buildUserMessage = (
 
   if (priorNotesText) {
     msg += `## Prior CAP Notes for This Team\n\n${priorNotesText}\n\n`;
+  }
+
+  if (followUpOutcomesText) {
+    msg += `## Follow-Up Outcomes From Last Meeting\n\n${followUpOutcomesText}\n\n`;
   }
 
   msg += `## Meeting Transcript\n\n${transcript}\n\n`;
@@ -233,6 +249,41 @@ const formatPracticeGaps = (gaps: any[]): string => {
     .join('\n');
 };
 
+const formatFollowUpOutcomes = (note: any): string => {
+  if (!note) return '';
+  const issues: any[] = note.currentIssues ?? [];
+  const lines: string[] = [];
+
+  for (const issue of issues) {
+    if (issue.wasDeleted || issue.wasMerged) continue;
+    for (const fu of issue.followUps ?? []) {
+      const didHappen: boolean | null = fu.outcome?.didHappen ?? null;
+      const deliverableNotes: string | null = fu.outcome?.deliverableNotes ?? null;
+      const reflectionIndex = didHappen === true ? 1 : 0;
+      const reflections: { prompt: string; response: string }[] = (
+        fu.outcome?.reflections?.[reflectionIndex] ?? []
+      ).filter((r: any) => r.response?.trim());
+
+      if (didHappen === null && !reflections.length && !deliverableNotes) continue;
+
+      const person = fu.parsedPractice?.person || 'Unknown';
+      const practice = fu.parsedPractice?.practice || fu.practice || '(no practice text)';
+
+      lines.push(`**${issue.title}** — ${person}`);
+      lines.push(`Practice: ${practice}`);
+      lines.push(`Did it happen: ${didHappen === null ? 'not reported' : didHappen ? 'yes' : 'no'}`);
+      if (deliverableNotes) lines.push(`Notes: ${deliverableNotes}`);
+      for (const r of reflections) {
+        lines.push(`Q: ${r.prompt}`);
+        lines.push(`A: ${r.response}`);
+      }
+      lines.push('');
+    }
+  }
+
+  return lines.join('\n').trim();
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<AIDraftResponse>
@@ -285,7 +336,7 @@ export default async function handler(
       _id: { $ne: capNote._id }
     })
       .sort({ date: -1 })
-      .limit(3)
+      .limit(6)
       .populate({ path: 'currentIssues', model: IssueObjectModel });
 
     if (priorNotes.length < 2) {
@@ -306,6 +357,7 @@ export default async function handler(
 
     const priorNotesText = formatPriorNotes(priorNotes);
     const practiceGapsText = formatPracticeGaps(activeGaps);
+    const followUpOutcomesText = formatFollowUpOutcomes(priorNotes[0] ?? null);
 
     const initialUserMessage = buildUserMessage(
       capNote.project,
@@ -314,6 +366,7 @@ export default async function handler(
       coachReflections,
       priorNotesText,
       practiceGapsText,
+      followUpOutcomesText,
       allPeople
     );
 
