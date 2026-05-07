@@ -363,6 +363,14 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                         key={followUpIndex}
                         className="mx-auto mb-4 mt-2 w-full rounded-lg border border-gray-300 p-2 shadow-sm"
                       >
+                        {/* Value statement — why this practice matters for this student */}
+                        {followUp.valueStatement && (
+                          <div className="mb-2 rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-800">
+                            <span className="mr-1 font-semibold">Why this matters:</span>
+                            {followUp.valueStatement}
+                          </div>
+                        )}
+
                         {/* Follow-up title */}
                         <div>
                           <h3 className="mb-2 mr-2 border-b text-base">
@@ -371,6 +379,22 @@ export default function CAPNote({ capNoteInfo, pastIssues }): JSX.Element {
                             )}
                           </h3>
                         </div>
+
+                        {/* Interventions — low-stakes ways in if stuck */}
+                        {followUp.interventions?.length > 0 && (
+                          <details className="mb-2">
+                            <summary className="cursor-pointer text-sm font-medium text-gray-500 hover:text-gray-700">
+                              Not sure how to start? Try one of these ▸
+                            </summary>
+                            <ul className="mt-1 list-disc space-y-1 pl-5">
+                              {followUp.interventions.map((intervention, idx) => (
+                                <li key={idx} className="text-sm text-gray-700">
+                                  {intervention}
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
 
                         {/* Checking if done */}
                         <div className="flex flex-row">

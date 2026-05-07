@@ -155,7 +155,16 @@ export default async function handler(
               let issue = updatedIssueObjects[issueIndex];
               if (issue.title in practiceAgents) {
                 let allFollowups = practiceAgents[issue.title].map((agent) => {
-                  return agent.followUpObject;
+                  // Carry over valueStatement and interventions from existing followUp
+                  // with the same practice text, so they survive re-saves
+                  const existing = (issue.followUps ?? []).find(
+                    (fu: any) => fu.practice?.trim() === agent.followUpObject.practice?.trim()
+                  );
+                  return {
+                    ...agent.followUpObject,
+                    valueStatement: existing?.valueStatement ?? null,
+                    interventions: existing?.interventions ?? []
+                  };
                 });
 
                 // check if the issue already has follow-ups that have the same practice

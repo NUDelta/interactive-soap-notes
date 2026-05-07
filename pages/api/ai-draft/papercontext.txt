@@ -1,0 +1,2519 @@
+================================================================================
+FILE 1: clean-cscw26a-sub6187-i80.pdf
+TITLE: Situated Practice Systems: A Computational System for Supporting the Coaching
+and Practice of Regulation Skills for Innovation Work
+ANONYMOUS AUTHOR(S)
+================================================================================
+
+--- FIGURE 1 DESCRIPTION ---
+A Situated Practice System diagram showing three phases:
+1. "Understand Practices and Issues" (left): A practice trace panel shows a student named
+   Stella with a "lit review - missing synthesis" issue. The trace includes a deliverable
+   (link) and a reflection ("I think I..."). Issues of Concern are listed: "missing synthesis"
+   and "no good structure to synthesize."
+2. "Model Regulation-Informed Practice" (center): A CAP Notes interface showing:
+   - Issue: lit review missing synthesis
+   - Context: Stella brought a list of papers; Did not do synthesis
+   - Assessment: No good representation; fear of not knowing
+   - [practice gap] fear of not knowing
+   - Tracked Practices: [self work] try a slice of synthesis on your own with rep[synthesis tree]
+   - [help] let's discuss your slice at [Office Hours]
+   - Plan listed under issue
+   Also shown: a Practice Bot Slack message (Monday 1:00 PM) to @Stella: "Hey @Stella!
+   You have an Office Hours Coaching practice opportunity later today. Here's some practices
+   from the Coaching Meeting that might be helpful to work on: lit review missing synthesis;
+   let's discuss your slice at Office Hours"
+3. "Facilitate & Develop Practice" (right): Pre-Coaching Reflection form showing:
+   - Lit review missing synthesis
+   - On your own: try a slice of synthesis on your own with synthesis tree
+   - Deliverable: ________ / Reflection: ________
+   - At Office Hours: let's discuss your slice
+   - Deliverable: ________ / Reflection: ________
+   Below: Pre-Coaching Session Reflection with deliverables and reflections fields.
+--- END FIGURE 1 ---
+
+ABSTRACT:
+Workers must increasingly engage in open-ended innovation work, which requires well-developed
+cognitive, metacognitive, emotional, and strategic self-regulation skills for effective practice.
+However, college students often lack awareness of their practices and how to improve. While
+coaching can help, identifying and addressing self-regulation gaps that underpin work issues is
+challenging and time-consuming, especially given the limited existing technological support. We
+introduce Situated Practice Systems (SPS), a tool designed to computationally support coaches
+and students in understanding, modeling, and facilitating regulation-informed work practices. SPS
+provides coaches with a structured Interactive Context-Assessment-Plan (CAP) Notetaking tool
+that helps them understand and model students' practices, and provides students with Practice
+Agents that facilitate coach-suggested practices and solicit reflection on them. We implement
+these using a Practice Object computational abstraction that tracks practices and self-regulation
+behaviors over time, and Practice Scripts that surface practices in relevant situations. During a
+formative 3-week field study, SPS helped coaches understand students' work issues and
+regulatory behaviors, and model new practices. Further, they guided students in enacting those
+practices and reflecting on them. We demonstrate how CSCW systems can evolve beyond task
+management systems to provide meaningful computational support for practice development,
+which is crucial for becoming effective, self-regulating practitioners.
+
+CCS Concepts: Human-centered computing → Interactive systems and tools.
+
+Additional Key Words and Phrases: complex work, innovation work, self-regulation, coaching
+practice, situated practice system, practice objects, practice agents
+
+ACM Reference Format:
+Anonymous Author(s). 2026. Situated Practice Systems: A Computational System for Supporting
+the Coaching and Practice of Regulation Skills for Innovation Work. 1, 1 (January 2026), 37
+pages. https://doi.org/10.1145/nnnnnnn.nnnnnnn
+
+---
+
+1. INTRODUCTION
+
+There is an urgent need to train college students who can tackle complex, open-ended innovation
+work in design, research, STEM, and entrepreneurship [49]. Innovation work requires contending
+with vaguely structured goals and constraints, and often multiple solutions, if solutions exist at
+all [49, 81]. Workers must gradually uncover details about the problem space as they work,
+continually adapting their work strategies as their work situations change. To be able to
+self-direct complex work, workers must develop self-regulation skills [94]—cognitive,
+metacognitive, emotional, and strategic behaviors—that allow them to assess their current
+knowledge, choose where to focus efforts, determine effective strategies, carry out plans on
+their own or with help from others, and reflect on their progress [45, 93].
+
+Despite this need, traditional classrooms rarely provide the practice of learning to innovate that
+is crucial for preparing students to design and implement innovative solutions to social and
+technical problems upon graduation [35]. Project-based learning (PBL) environments in
+universities provide students with authentic practice on real-world problems [21, 24, 31,
+67]—such as for research training [91], design [68, 73], and engineering [21]—help, but remain
+insufficient for developing self-regulation skills since students are often unaware of their work
+practices and struggle to develop effective ones. Consequently, while the learning environment
+provides opportunities to practice innovation, students are unlikely to develop effective
+self-regulation skills without support.
+
+Experienced coaches can help students develop their self-regulation skills, but providing such
+coaching requires them to uncover students' self-regulation gaps, which is challenging and
+time-consuming [42]. Coaches already face the challenge of providing task-level feedback on
+complex problems (e.g., research; designing products). Teaching regulation skills on top of this
+requires them to diagnose why issues in the work outcome are happening, such as when
+regulation challenges impede the adoption of an effective strategy (e.g., fear of asking for
+help), and tailor a practice to that work situation and regulation gap. Furthermore, seemingly
+disparate work issues that arise each week may actually share an underlying self-regulation
+challenge, requiring coaches to track and make non-trivial connections between these regulation
+gaps and new work issues. These difficulties ultimately result in coaches falling back on
+troubleshooting task progress instead of addressing recurring gaps.
+
+These problems are exacerbated by coaches needing to support more students, each of whom
+requires feedback tailored to their project, work-related issues, and regulatory skill needs [73].
+For a student in a given week, multiple regulation gaps may surface across work issues, with
+different ones in other weeks. These must be tracked across students in increasingly larger
+classes, over prolonged periods of time. Consequently, even experienced coaches often overlook
+critical, underdeveloped skills that students possess, slowing progress and learning. Moreover,
+students may struggle to enact the coach's suggested practices due to misunderstandings or
+forgetting them altogether [32, 42, 75].
+
+These challenges underscore an urgent need for intelligent tools to support the development of
+self-regulation skills, which we currently lack. A key limitation is the lack of computational
+support for understanding, modeling, and facilitating practices. While many coaches and students
+take notes during coaching meetings, their plain-text form remains "static", in that they cannot
+be followed up to specific work situations that arise for each student, rather than only tracking
+tasks and their outcomes. Across coaching sessions, a student's Practice Object is extended to
+include new work issues, regulation gaps, and tailored practice suggestions. To enable Practice
+Agents to act on a coach's suggested practices, we introduce a technique for interpreting and
+compiling them into Practice Scripts that facilitate both the practice and subsequent reflection.
+Furthermore, these scripts automatically generate practice traces that capture the practice
+outcomes and student reflections, storing them in the Practice Object for later review.
+
+From a 3-week formative study in a research learning community, we demonstrate that CAP
+Notes supported coaches in understanding the ineffective practices that led to work-related
+issues, their underlying self-regulation gaps, and in modeling new practices that embed
+self-regulation strategies. Practice Agents supported students in executing the suggested
+practices with relevant resources and guidance from relevant people between coaching sessions,
+and prompted reflections that helped students understand their self-regulation challenges and
+adopt new practices to overcome them. These findings demonstrate how Practice Systems
+explicitly support practicing more effective ways of working and developing the self-regulation
+skills necessary for innovative work.
+
+---
+
+2. BACKGROUND
+
+Our work aims to provide computational support for helping mentors coach and students enact
+regulation-informed practices in innovation work. We review the literature on innovation work
+and the key self-regulation skills that contribute to students' success, the challenges of
+developing these skills, and the limitations of technology in supporting their development.
+
+2.1 Self-Regulation Skills and Innovation Work
+
+Learning to innovate requires students to become capable of self-directing complex work [11,
+32, 71, 72, 74, 75, 80, 91]. Ill-structured innovation problems [10, 49] require students to
+self-regulate their learning and work process by assessing the current state of their knowledge,
+choosing where to focus effort, determining strategies for making progress, carrying out plans,
+reflecting on progress, and effectively engaging in help-seeking and collaboration as needed
+[45, 93].
+
+Students engaging in authentic innovation work must develop a wide range of self-regulation
+skills, including:
+
+• Cognitive skills for approaching problems with an unknown answer, or even knowing what
+  the problem is. This includes: representing problem and solution spaces [12, 80]; assessing
+  risks [11]; critical thinking and argumentation; and core domain-specific methods for advancing
+  problems and solutions (e.g., in design, prototyping, and user testing).
+
+• Metacognitive skills and dispositions [38, 59] in the areas of planning, help-seeking, and
+  collaboration, and reflection [4, 22, 37]. This includes: forming feasible plans [14, 74, 77,
+  91]; planning effective iterations [72, 75]; leveraging resources and seeking help [50, 63, 64,
+  76]; communicating and working with teammates, peers, and mentors [45]; and awareness of
+  one's own skills, abilities, and metacognitive blockers [4, 9, 22, 37, 78].
+
+• Emotional regulation and dispositions toward self and learning that affect one's motivation,
+  cognition, and metacognition. These include understanding one's fears and anxieties and how
+  one deals with failure [13, 46, 55, 58], embracing challenges and learning from them [23, 26],
+  and embracing one's own independence when leading work [4, 54].
+
+College students who effectively regulate their learning are more likely to succeed in innovation
+work by: exploring problem and solution spaces effectively [12, 80]; engaging in design
+iterations that quickly advance understanding [72, 75]; and better planning for and responding
+to challenges and unknowns [74, 91]. However, students are often unaware of their own work
+practices and the value of regulating learning across cognitive, metacognitive, and emotional
+dimensions. Moreover, students cannot easily develop an effective practice for self-directing
+innovation work on their own [17, 19, 28, 48]. For example, consider a student in a design
+capstone who overworks each week to create high-fidelity (hi-fi) software prototypes instead
+of low-fidelity (lo-fi) ones to test new designs. Here, the student lacks strategies for slicing
+work to address a project risk, prioritizing the development of software over new understanding
+about the design space. To become effective innovators, students need experienced coaches to
+guide product, process, and, most critically, to diagnose and address underlying self-regulation
+gaps that underpin their work practices.
+
+NOTE: "Slicing" throughout this paper refers to implementing a minimal, complete chunk of
+work that provides end-to-end understanding; the idea comes from Agile software methodologies
+that prioritize flexible, incremental development versus rigid, waterfall approaches [16, 57]. In
+design, this involves understanding user needs, developing a low-fidelity prototype, and testing
+it with a select group of users; in research, it entails selecting one hypothesis, designing a
+formative experiment, and analyzing the results.
+
+2.2 Challenges for Developing Regulation Skills
+
+Coaches can support students in developing regulation skills [18, 39, 40], but doing so requires
+uncovering students' self-regulation gaps, which is often challenging and time-intensive [42].
+Consider the same design student who brings in an incomplete prototype to a coaching session.
+A product-focused coach might help the student identify a missing key feature and keep them on
+track toward building a complete prototype. A process-focused coach may investigate why the
+student struggled to complete the prototype, helping the student recognize that they did not need
+to build out fully functioning software at this time. This can help the student learn a better
+approach to their current work situation (e.g., lo-fi prototyping) that the product-focused coach
+overlooked. A regulation-focused coach delves even deeper, uncovering underlying
+metacognition and emotional regulation gaps that impede the student from including a key
+feature that they know is important. For example, this coach may find that: (a) the student
+associates delivering value with producing functioning software; and (b) the student tends to
+lose sight of what is actually important when overwhelmed, and defaults to simply cranking out
+work (building software). In other words, the underlying issue is not that the student did not
+build a lo-fi prototype, but rather that (a) the student lacked a framework for planning design
+iterations that focuses on delivering learning over product, and that (b) their "just-get-it-done"
+mentality when overwhelmed impedes their consideration of more effective strategies for
+reaching their learning and work goals. Understanding and addressing these regulation gaps
+helps the student resolve their current work issue, and to develop new strategies, mental models,
+and attitudes (i.e., regulation skills) that help them to innovate more effectively and efficiently
+across new work situations [5, 85].
+
+While uncovering self-regulation gaps is crucial to helping students become more effective
+innovators, it remains challenging and time-consuming, even for experienced mentors. Prior
+study of university engineering design coaches [73, 75], research mentors [32], and
+entrepreneurship coaches [42] revealed that coaches struggle to: (a) elicit gaps in students'
+practice from work artifacts and conversation alone; (b) build a model of a student's practice to
+identify and address those gaps; and (c) track students' practice across coaching sessions. Our
+needfinding extends these findings, revealing challenges in how coaches uncover practice gaps
+from work products and conversations, link work issues to regulation gaps, and struggle to
+facilitate practices. These difficulties significantly limit coaching effectiveness, and are often
+exacerbated by the number of students and teams coaches manage [73].
+
+Moreover, students often struggle to enact the practices their coaches suggest [32, 42, 75].
+Students can misunderstand how to apply a self-regulation strategy in a suggested practice or
+forget altogether, leading to deliverables that differ greatly from their coach's expectation. In
+our needfinding, we observed that students often needed structured scaffolds (e.g., use a design
+argument template) and co-regulation from a peer or coach outside of coaching meetings. While
+coaches often suggest such scaffolds, students can overlook or fail to apply them in ways that
+address their specific regulation gaps. Consequently, while students may make some progress on
+their projects, they often fail to address key project risks stemming from unresolved gaps in
+self-regulation.
+
+2.3 Our Approach: Situated Practice Systems for Self-Regulation Skill Development
+
+In summary, advancing students' capability for innovation work requires advancing the coaching
+of regulation skills, which remains difficult without technological support. Despite advances in
+multimodal learning analytics [44] and AI tools for coaching ill-structured problems [30, 53],
+we currently cannot automate the process of understanding students' innovation work practices,
+diagnosing regulation gaps, and providing tailored practice opportunities. At the same time,
+intelligent mentoring tools to support such coaching remain scarce. Coaches develop models of
+how each student practices and identify self-regulation gaps, but may not document these in a
+structured way that allows computational affordances to be integrated for tracking and
+facilitating practices outside of coaching sessions, or helping identify recurring gaps across work
+issues.
+
+Our work introduces Situated Practice Systems that provide computational support for developing
+self-regulation skills. Conceptually, Practice Systems work by providing an Interactive CAP
+Notes interface to coaches for understanding students' regulation behaviors within and across
+coaching sessions and modeling of new practices students can adopt to resolve those gaps; and
+Practice Agents to students to facilitate their practices between coaching sessions.
+
+Realizing Practice Systems has two technical challenges. First, existing tools offer no
+computational means for representing work practices and self-regulation behaviors so that they
+can be tracked, facilitated, and reflected upon across work situations, coaching sessions, and
+practice activities. Existing tools for project-based learning track students' work plans [74],
+work artifacts, and reflections [82], but not the details of how students practice and how that
+may impact their work outputs. Similarly, workplace tools from CSCW support for task tracking
+[6, 47, 83], agenda building [70, 79, 86], synthesizing in-meeting conversations [15, 29, 69],
+and following up after meetings [88]. However, these systems focus on task management and
+conversations around tasks (e.g., what was done, what needs to be done, and what to prioritize),
+but not on self-regulation skills necessary to complete tasks (e.g., the representation used to
+structure thinking and challenges in regulating emotions amid failure) or how disparate tasks a
+person is struggling with all share the same underlying regulation gap. We address this by
+creating Practice Objects abstractions that tie specific regulation behaviors to specific work
+issues that arise, making practices computationally representable and trackable. As a coach
+captures notes on a student, that student's Practice Object is extended to include their work
+issues, regulation gaps, and tailored practice suggestions. These structured records can be
+continually tracked, facilitated, reflected upon, and updated across coaching and learning
+activities by students, coaches, and software agents.
+
+Second, existing tools do not encode practice activities, such as working with a peer,
+computationally. Practices typically exist as plain text in notes, limiting the ability of software
+agents to facilitate them. While collaboration scripts for learning [20, 27, 51, 62, 89] and
+workflow builders for productivity [33, 34, 61, 84, 90] can encode and facilitate activities, they
+are designed for recurring, general activities (e.g., generally reflecting; sharing deliverables).
+While work strategies can be common across various work situations (e.g., strategies for
+planning a low-fi prototype), practices are tailored to the specific work situation, requiring an
+assessment of the student's work issue and regulation gap. This makes writing custom scripts
+tailored to each student on different projects cumbersome and intractable. To resolve this
+challenge, we introduce techniques to generate on-demand Practice Scripts that convert
+text-based representations of activities a coach wants a student to do into programs that run at
+opportune times to promote those practices, and to invite subsequent reflections on how practices
+went. These scripts also store practice outcomes into the Practice Object to support ongoing
+coaching and learning.
+
+---
+
+3. METHOD AND SETTING
+
+To develop our Practice System, we followed a design-based research process [25] over six
+months. We aimed to develop our design arguments for how tools can provide computational
+support for developing novice's self-regulation skills for innovation work. The first month
+focused on needfinding, involving observation of coaching sessions (see Section 4). Months 2–5
+introduced prototypes as design probes, which we iterated on weekly; we describe our final
+prototype in Section 5. In the final month, we conducted a 3-week formative study to understand
+how this prototype addresses the obstacles identified during needfinding (see Section 7).
+
+We situated our design-based research study in an academic research learning community at a
+mid-sized U.S. university. This learning community uses the Agile Research Studios (ARS)
+model, which supports student researchers in developing the work practices necessary to
+self-direct research projects [91]. We chose this setting because research work is highly complex,
+enabling students to develop sophisticated work strategies and self-regulation skills to deal with
+the uncertainty and open-endedness of research work; such skills are also valuable for innovation
+work [56]. Moreover, ARS provides a rich learning ecosystem that resembles the networked,
+collaborative workplaces many students will join after graduation. During our study, two faculty
+members coached 13 to 16 students (undergraduate, master's, and Ph.D. students), organized
+into 7 to 9 project teams of no more than two members each. Faculty members held five 1-hour
+coaching sessions each week, with each session accommodating up to two teams. Two of the
+paper's authors are members of this community.
+
+---
+
+4. NEEDFINDING: HOW EXPERT COACHES COACH REGULATION-INFORMED PRACTICE
+
+While significant work has studied coaches' challenges in coaching self-regulation skills and
+students' struggles to practice them (see Section 2.2), we sought to understand how coaching
+conversations occur so that tools can provide support. The lead author conducted 1-3 coaching
+session observations weekly, selecting different sessions each week to cover a range of projects
+and students. During each observation, the researcher noted how coaches discussed research
+progress with students, including any shared deliverables; the questions asked to identify work
+issues and self-regulation gaps; the discussions that occurred when suggesting new practices;
+and the practice outcomes in subsequent weeks. The researcher also met with one coach each
+week to discuss the observations and solicit feedback on prototypes.
+
+As summarized in Figure 3, we identified three challenges for coaches: (1) the difficulty in
+trying to understand work practices and potential issues; (2) modeling a new regulation-informed
+practice; and (3) facilitating the suggested practices between coaching sessions.
+
+--- FIGURE 3 DESCRIPTION ---
+Three-panel diagram depicting coaching challenges:
+
+Panel A — "Understand Practices and Issues" (During coaching session):
+- Coach sees work artifact: a "draft of writing" with issue "missing key arguments"
+- Coach asks "what structures?" and "how come?"
+- Student reveals: "had diagram but didn't use to write"
+- Identified: process issue → "afraid to start" (regulation gap)
+- Diagnosis fragments: "couldn't put words to diagram"
+- Result: "forgotten fragments of conversation"
+
+Panel B — "Model Regulation-Informed Practice":
+- Work issues: "missing key arguments," "had diagram but didn't use to write," "afraid to start"
+- Student's recurring self-regulation gaps shown: "overwhelmed by big tasks," "may not help-seek"
+- Observations lead to new practice: "Try dictating diagram"
+- Identified: "Afraid to start writing because it seems overwhelming" (regulation gap)
+- Regulation skill needed: "When overwhelmed by a big task, make the task smaller"
+- Two failure modes shown:
+  * "suggest practice w/o assessing regulation gap"
+  * "suggest practice w/o articulating regulation skill" (e.g., "To get over fear of starting...")
+
+Panel C — "Facilitate Practice" (After coaching session → Next coaching session):
+- Suggested Practice: (1) On your own: Try dictating diagram to get over your fear of starting;
+  (2) At Office Hours: let's discuss your writing
+- Self-Work result: "did not try dictation"
+- Office Hours result: "did not attend"
+- Next coaching session: work outcome not what mentor expected (shown as "???")
+--- END FIGURE 3 ---
+
+4.1 Understanding Practices and Issues
+
+Coaches could readily identify issues in work artifacts students produced, but struggled to
+uncover what ineffective practices led to those issues (Figure 3a). For example, a coach
+reviewing a student's draft quickly noticed it was missing a key argument they had previously
+discussed. To uncover what went wrong, the coach asked the student about their work process
+(e.g., did they remember to include the argument? did they have a structure to describe it?) and
+any obstacles (e.g., if they did, why did they not try to write it?). While this discussion
+eventually surfaced a self-regulation gap, it consumed over 20 minutes of the 30 minutes
+available for the student during the coaching session, leaving little time to model and coach a
+new practice [42, 73].
+
+Additionally, coaches often found signals of potential practice issues before pinpointing the
+actual practice issue, amid a conversation. These were often fragments of ideas that might be
+issues, such as a strategy the student avoided or a self-regulation skill they seemed not to have
+employed. While they offer important clues about the true practice gaps, they are not easy to
+track, as coaches also ask additional questions and discuss with the student.
+
+These challenges suggest that Situated Practice Systems must help coaches understand how
+prior practices went by: (1) capturing practice traces that connect the work artifact to students'
+practices that produced it; and (2) providing loose structures for tracking signals of ineffective
+work practices that may arise in conversation, which a coach can follow up on as practice issues
+become clearer [65].
+
+4.2 Modeling New Regulation-Informed Practices
+
+Beyond eliciting information about prior work, coaches faced challenges in modeling the
+student's underlying self-regulation gap (Figure 3b). Continuing with the earlier example, the
+coach noticed the student had a good diagram of what they should write, but did not convert it
+to words. To understand why, the coach drew connections between the current work issue and
+the student's past work issues and self-regulation gaps, such as their fears of starting something
+unknown. Making these non-trivial connections led the coach to recognize the student was
+afraid to start writing because it felt overwhelming, and may benefit from using their (already
+effective) diagram to support their writing by adopting an alternative method of writing, such
+as dictating their diagram and transcribing the recording to help overcome the initial fears of
+writing something new. However, coaches sometimes bypassed understanding the regulation gap
+and suggested practices to address the work issue directly. Even if they considered regulation
+gaps, we observed that coaches missed articulating the regulation skill as part of the practice.
+In both cases, the coaches gave students a practice that might remain ineffective because the
+student did not understand why that practice is helping resolve the regulation gap that resulted
+in their work issues in the first place.
+
+To address these challenges, Situated Practice Systems should provide structured representations
+for modeling the links among a work issue, (recurring) self-regulation gaps in the practice, and
+proposed practices that address practice gaps in the context of the specific work issue. These
+structures help externalize a coach's diagnosis and practice model, not just the observed work
+issues, and develop over time as students' practices evolve or recur.
+
+4.3 Facilitating New Practices
+
+Even when coaches proposed practices, students often struggled to enact them (Figure 3c).
+Sometimes, a student misunderstood the nuances of how to apply a practice. For example,
+coaches would suggest particular scaffolds to the student that they did not use when working,
+such as the prior structure of the diagram to write about the key points of a project in a draft.
+In other cases, students would forget to do a suggested practice, such as meeting with a
+particular peer during a peer help session. In observations, we noticed that coaches would
+suggest many practices across various work and self-regulation needs, suggesting that students
+had not internalized or incorporated all the suggestions in their plans, given the deluge of
+feedback. Moreover, coaches lacked the bandwidth to remind students how to practice in the
+moment, such as by reminding them to seek help from a specific peer.
+
+To address this challenge, Situated Practice Systems should provide in-situ support for enacting
+a practice through light-weight computational representations that coaches can use to express
+practices during coaching sessions. By having a computational representation of the practice, a
+system can surface relevant practices at opportune times, such as when they are re-planning
+what to work on after coaching sessions or the morning prior to peer help sessions, along with
+helpful practice scaffolds, including representations to structure thinking. Moreover, it can
+follow up with students on the practice by conducting reflection activities and sharing those,
+along with any work artifacts, with the coach for discussion at the next coaching session.
+
+---
+
+5. SITUATED PRACTICE SYSTEMS TO SUPPORT SELF-REGULATION SKILL DEVELOPMENT
+
+Based on our needfinding, we developed Situated Practice Systems, a system for
+computationally supporting understanding, modeling, and facilitating regulation-informed
+practices. We first outline the interactional model of the system—specifically, Interactive
+Context-Assessment-Plan (CAP) Notes for the coach and Practice Agents for students—and
+then describe its technical implementation through Practice Object abstractions and Practice
+Scripts.
+
+5.1 Interactive CAP Notes: A Structured Notetaking Tool for Coaches
+
+5.1.1 Understanding Practices and Issues. When a coach opens CAP Notes, they see a practice
+trace that includes what practices they suggested and the student's report on the practice outcome;
+see Figure 4. Practice traces show the Context and Assessments the coach wrote to help them
+recall the intended practices (A). Before a coaching session, students complete a reflection tool,
+which asks them to share deliverables and reflect on how the practice went (Figure 7). Coaches
+see deliverables and reflections below their suggested practices; the coach can also easily see if
+practices were not done (as self-reported by the student) or if the student did not provide
+deliverables or reflections for some practices (B). In relevant cases, CAP Notes shows the coach
+data from the workplace tools, such as a student's planning log, if they suggested a re-planning
+practice. These traces help the coach begin to see the practices that led to the work outcomes a
+student produced.
+
+While reviewing practices and later during coaching, CAP Notes provides loose structures
+called Issues of Concern for coaches to capture observations (C). Here, they can note signals
+to discuss (i.e., project needs, ways of working, and regulation skills) without requiring them
+to explicate what they are yet (D). Loose structures help the coach track their discussions with
+students about work practices and provide coaches enough structure to refine their understanding
+of practice issues.
+
+--- FIGURE 4 DESCRIPTION ---
+CAP Notes interface screenshot with four labeled areas (A, B, C, D):
+A — Practice trace panel showing previously suggested practices (resurfaced from prior session)
+B — Student deliverables and reflections attached below each practice; shows if practices were
+    not completed or if deliverables/reflections are missing
+C — Issues of Concern section for loose observations during review and coaching
+D — Example issues noted: "got stuck on a bug that prevented them from finishing a prototype";
+    "didn't get help (but knows to, so why not?)"
+Annotation note: "reflection scaffolds are much more specific"; "input from coach during coaching session"
+--- END FIGURE 4 ---
+
+5.1.2 Modeling New Regulation-Informed Practices. During and after the meeting, CAP Notes
+provides the coach a Context-Assessment-Plan structure to model the link between work issues,
+(recurring) gaps in the practice, and proposed practices that help; see Figure 5. The structure
+helps the coach see how practice issues and regulation skill gaps led to the current work issues,
+on a per-issue basis. For example, in a design context, the coach wanted the student to prototype
+and test a new system, but the student got stuck on a bug (Context; A). As the coach models
+the current work situation, they can consider if the issue is related to a recurring Tracked
+Practice Gaps that the student is still developing (e.g., not creating feasible plans). In this
+example, the student shared that they did not seek help in reflections, but in further discussion
+with the coach, they revealed they fear being seen as "not smart", which the coach notes
+(Assessment; B). Coaches can also convert Assessments they realize are recurring issues as a
+new Tracked Practice Gap that resurfaces in the Assessment section—along with Context from
+the specific work issues in which the gap came up—in future coaching sessions (C). Finally,
+the coach suggests practices the student can attempt to address practice gaps and progress work
+(Plan; D). By having Plans as part of the structure that models a specific issue, the coach can
+see if the practices they suggest are adequate to address the practice gaps identified in the
+Assessments and to resolve the work issues the practice aims to support.
+
+--- FIGURE 5 DESCRIPTION ---
+CAP Notes interface showing the Context-Assessment-Plan structure with four labeled sections:
+A — Context: "Stella got stuck on a programming bug, which prevented her from testing a prototype"
+B — Assessment: "Didn't seek help — seemed to know that seeking help is good, but something
+    still stopped her"; "Not doing what will help her make progress faster — fixing issues on
+    one's own is good, but not most effective for progress";
+    "[practice gap] has a big fear of being seeing as 'not smart' when needing help on
+    something that seems very easy"
+C — Tracked Practice Gap indicator (recurring gap attached to Assessment)
+D — Plan: "[plan] get a full slice of the interaction — add prototyping (including the bug fixing),
+    testing, and user test with at least 2 teams"
+Top annotation: "Good example and scaffold for help-seeking reflection — it's much more specific now"
+Bottom annotation: "input from coach during coaching session"
+--- END FIGURE 5 ---
+
+5.2 Practice Agents: Facilitating Practices for Students
+
+When the coach suggests a practice in the Plan, they use a domain-specific language that CAP
+Notes provides to describe Practice Agents, which supports the student's practice outside of
+coaching sessions; see Figure 6. These practices correspond to core self-regulation activities
+that help the student progress in their work:
+
+(1) [plan] suggests deliverables or tasks for the student to add to their planning log.
+(2) [self-work] captures a work activity for the student to attempt themselves.
+(3) [help] suggests an opportunity to work with a coach or peer for a work task.
+(4) [reflect] prompts for reflections on a situation the coach observed. Students are asked to
+    complete reflection prompts prior to the next meeting with their coach.
+
+Coaches can optionally specify details about the practice (A), such as a representation or
+resource to use (e.g., "rep[design argument]" for a design representation [74]), specific people
+(e.g., "@[Jack] @[Jill]") to ask for help, or a specific venue (e.g., "at[office hours]") to
+practice in.
+
+Following the coaching session, the student receives all of the coach's suggested practices—with
+references to specific tools or resources like planning logs or linked working structures—via Slack (A).
+
+--- FIGURE 6 DESCRIPTION ---
+Two Slack message panels side by side, labeled A (After coaching session) and B (Between
+coaching sessions):
+
+Panel A — "Summary of practices" (Practice Bot, Monday 1:00 PM, to @Stella):
+"Hey @Stella! Here's some practices for you to work on from the coaching meeting.
+get a full slice (prototype, user test, analysis) on the help-seeking situated reflection example
+- Update your planning log: get a full slice of the interaction -- add prototyping (including the
+  bug fixing), testing, and user test with at least 2 teams
+- With @Chester: try to do a pair programming session since he just fixed the same bug
+- On your own, try to: after you complete a study do takeaways from testing to synthesize what
+  you learn
+- At Office Hours: come to office hours with your synthesis and we can chat about the
+  implications for your design
+- Reflect on your own: spend some time thinking about how you can use help interactions to
+  progress faster. what's around this fear of feeling 'not smart' when help-seeking? how did it
+  feel to get help on the bug this week?"
+
+Panel B — Two separate messages:
+  "Practice Agent for peer help" (Practice Bot, Monday 1:00 PM, to @Stella @Chester):
+  "Hey @Stella @Chester! Your mentor suggested working together on the following help-request:
+  get a full slice (prototype, user test, analysis) on the help-seeking situated reflection example
+  - try to do a pair programming session since he just fixed the same bug"
+
+  "Practice Agent before Office Hours" (Practice Bot, Wednesday 9:00 AM, to @Stella):
+  "Hey @Stella! You have an Office Hours Coaching practice opportunity later today. Here's some
+  practices from the Coaching Meeting that might be helpful to work on:
+  get a full slice (prototype, user test, analysis) on the help-seeking situated reflection example
+  - come to office hours with your synthesis and we can chat about the implications for your design"
+--- END FIGURE 6 ---
+
+Then, between coaching sessions, Practice Agents follow up on relevant practices to attempt.
+For instance, in Figure 6b, a [help] agent initiates a group chat between Stella and Chester to
+resolve a programming bug. As another example, a separate [help] agent reminds the student
+the morning of their coach's Office Hours on practices they could attempt the coach's help.
+Finally, before the next coaching session, the student is prompted with practice-specific
+reflection scaffolds in a reflection tool. For instance, in Figure 7a, Stella is asked to reflect
+on her help-seeking interaction with Chester, including sharing a deliverable and how it helped
+progress their work; separately in Figure 7b, she's asked to respond to her mentor's reflection
+prompt about why help-seeking is difficult for her.
+
+--- FIGURE 7 DESCRIPTION ---
+Two reflection panels from the student (Stella):
+
+Panel A — "Reflection on help-seeking practice" (input from student after attempting practice):
+Deliverable: "https://github.com/ [link]"
+Text: "We were able to fix the programming bug. Code is in the last commit, and there is a link
+to the demo in the README. Chester was super nice when I asked him to help. He explained to
+me how React states work, and helped me fix the bug that I got caught up with last week. I
+really enjoyed working with him."
+Reflection: "Yes, I completed it without issues. I'm glad I was forced seek help, though, because
+I still felt a bit hesitant to ask for Chester's help after the coaching meeting last week."
+
+Panel B — "Reflection on coach's reflection prompt" (input from student's self-reflection):
+"I've always been able to do stuff on my own, and so has everyone around me. I think that's
+conditioned me into never wanting to ask for help and just power through things that I'm stuck on.
+The reflection helped me see why I don't seek help. I think doing it, especially from someone who's
+an expert, like Chester, made me realize that it's fine to help-seek, and people can be pretty
+generous and non-judgmental. I still worry that not everyone will be as kind as Chester was…still
+scares me a bit to ask others on my own."
+--- END FIGURE 7 ---
+
+5.3 Tracking Regulation with Practice Objects and Creating Practice Scripts
+
+5.3.1 Practice Objects for linking work issues, self-regulation gaps, and new practices. To
+computationally represent students' work practice, we introduce Practice Objects, a
+computational abstraction for maintaining and linking information about a student's evolving
+work issues, regulation gaps, practice suggestions, and practice traces across coaching sessions
+and practice activities; see Figure 8. The Practice Object is updated through CAP Notes during
+a coaching session. As practices unfold, traces of students' practice (activities, outputs, and
+reflections) are automatically added to the Practice Object to facilitate subsequent coaching
+sessions. Over time, a student's Practice Object effectively contains an interconnected history
+of the work issues the student encountered, their coach's assessments of their regulation gaps,
+and their regulation behaviors aimed at addressing those issues and gaps.
+
+--- FIGURE 8 DESCRIPTION ---
+Practice Object diagram showing a timeline from coaching meeting → CAP Notes → student
+practices and reflects → next coaching meeting.
+
+The Practice Object contains four columns:
+1. Work Issues: "Prototype missing key feature"; "didn't seek help on prototyping"
+2. Tracked Regulation Gaps (left sidebar): "slicing work to risk"; "cranking out work"
+3. Regulation Gaps (per issue): "need strategies for slicing work to risk";
+   "tends to crank than use better strategies"
+4. Suggested Practices: "plan: prototype slice w/risk ..."; "work: build prototype slice";
+   "reflect: what are signs that you're cranking?"
+5. Practice Traces: "prototyping plan"; "new prototype"; "slicing reflection";
+   "signs of cranking"; "work reflection"
+
+Arrows show CAP Notes updating the Practice Object during coaching, and practice traces being
+added as the student works and reflects, then resurfaced at the next coaching session.
+--- END FIGURE 8 ---
+
+5.3.2 Practice Scripts for in-situ practice support. To make Practice Agents executable, we
+develop a Practice Compiler that generates Practice Scripts that software can track and surface
+at opportune times; see Figure 9. For example, when a coach suggests a practice in CAP Notes
+that suggests the student develop a synthesis tree to understand related work and bring it to
+Office Hours for review (A), it is handed off to a Practice Agent and interpreted through our
+Practice Compiler (B). This compiler extends Garg et al.'s prior work on Orchestration Scripts
+[33]—which provide Organizational Objects computational abstractions that model the ways of
+working in an organization (e.g., processes; meeting venues; tools; times) so that work practices
+can be computationally facilitated—to create a suite of Practice Scripts on-the-fly (C) that
+(1) summarizes the practice and shares relevant scaffolds with students; (2) remind students of
+relevant practice and co-regulation opportunities; and (3) sends practice-specific reflection
+scaffolds to students before the next coaching session. Specifically, the Practice Compiler is a
+regular expression-based parser that maps each Practice Agent to a script template and relevant
+Organizational Objects from Orchestration Scripts. For example, in Figure 9, the [help] plan
+specifies a venue with "@OfficeHours", which the parser interprets as the morning of the next
+Office Hours venue. Similarly, the parser injects links to matched representations specified with
+"rep[]", such as the synthesis tree. Finally, the execution engine tracks generated practice
+scripts that engage students in practice, co-regulation, and reflection activities at opportune
+moments (D) [33]. As a student's practice progresses, Practice Agents will automatically collect
+their work and reflection and incorporate them into the student's Practice Object for review at
+the next coaching session.
+
+--- FIGURE 9 DESCRIPTION ---
+Four-stage pipeline diagram:
+
+A — "Coach Suggests Practice":
+[help] come to @OfficeHours with your rep[synthesis tree] and we can chat about the
+implications for your design.
+
+B — "Practice Agent Interprets Practice":
+Help Practice Agent → Practice Compiler
+
+C — "Practice Scripts are Generated to Facilitate Practice and Reflection":
+1. Summarize Practice:
+   message @Stella practice.summary and library.synthesis_tree
+   → Representation & Scaffold Library
+2. Promote practice and co-regulation:
+   message @Stella the morningOf(next(venue.OfficeHours))
+   → Execution Engine
+3. Support Reflection:
+   message @Stella the dayBefore(next(venue.CoachingSession)) with help.reflection
+   → Studio API
+
+D — "Execution Engine Engages Students in Activities at Opportune Moments":
+Three resulting messages/screens:
+- Pre-Office Hours Preparation (Slack message with practice summary)
+- Pre-Coaching Reflection form: "Lit review missing synthesis / At Office Hours: let's discuss
+  your slice / Deliverable: ________ / Reflection: ________"
+- Pre-Coaching Meeting Reflection form
+--- END FIGURE 9 ---
+
+5.4 Design Iterations
+
+We made the following iterations to our design arguments, alongside addressing usability issues.
+
+5.4.1 Useful data for assessing practices. Early versions of CAP Notes did not include practice
+traces. CAP Notes initially displayed data from workplace tools (e.g., hours spent and main
+stories from a planning log) and a summary of prior practices at the top of the tool, but not
+linked to specific work issues, practices, or students' reflections and deliverables. Consequently,
+coaches had few signals to evaluate how well the practices they suggested went. We resolved
+this by having Practice Agents scaffold practice-specific reflections before a coaching session
+and include relevant tool data (e.g., updates to planning tools), which composed the practice
+trace shown to coaches, providing clearer signals of what practices students were doing.
+
+5.4.2 Loose structure before rigid structure. CAP Notes' structure was initially too rigid,
+requiring coaches to fill out the Context-Assessment-Plan for each issue. We thought this would
+encourage coaches to consider practice gaps, but saw they needed to capture signals of issues
+first before modeling the practice. We introduced loose-structures called Issues of Concern in
+which coaches could note their observations without a formal structure. When needed, they
+could instantly transform into a complete Context-Assessment-Plan note by clicking on the
+issue, which promotes formal modeling of the practice. This way, CAP Notes became more
+aligned with the coach's needs at different stages of their sensemaking process.
+
+5.4.3 Tracking within and across weeks. CAP Notes did not initially help coaches identify
+connections between current and past practices. Previously, the CAP Notes lacked Tracked
+Practice Gaps, making it harder to determine if a work issue was due to a persistent practice
+gap. We added these in the CAP Notes Assessment section, allowing coaches to draw
+connections between historical issues and the current work situation. Moreover, the Practice
+Object stores the context of the current issue if an Assessment was tracked as a new gap or
+attached to an existing work issue, building a model of the student's practice over time.
+
+5.4.4 Practice-focused versus task-focused follow-ups. Our early interactional model encouraged
+coaches to suggest task-oriented follow-ups, but not to consider self-regulation skills. For
+example, a coach could write, "bring a bug to get help on to @PeerHelp", but this makes the
+practice implicit—a peer can help address code issues. We revised the Practice Agent's
+interaction to describe the practice activity a student could engage in, rather than tasks to do.
+For example, the coach would instead write, "[help] get help from a peer on the bug," with the
+ability to optionally specify, "@PeerHelp", if the student needed more practice scaffolding.
+This change enables coaches to explicitly outline the types of practices they want students to
+attempt, while providing sufficient scaffolding to support their efforts.
+
+5.5 Technical Implementation
+
+We built Situated Practice Systems using Next.js, a React framework for building full-stack web
+applications, along with Typescript, Tailwind CSS, and MongoDB. CAP Notes creates a new
+note interface each week for each project, automatically fetching prior practices, students'
+reflections on those practices, and the tracked practice gaps. We optimized the notetaking space
+of CAP Notes for laptop use, allowing coaches to take notes while coaching. The system
+automatically saves edited notes to the MongoDB database. Practice Agents use the Slack API
+to send practice suggestions to students (Practice Bot in Figure 6). Situated Practice Systems
+extends a prior implementation of Orchestration Engine [33] to enable to compilation of
+Practice Agents from their domain-specific language into Practice Scripts. The Orchestration
+Engine handles the tracking and surfacing of practices in relevant opportunities, and prompting
+for practice reflections.
+
+---
+
+6. FORMATIVE FIELD STUDY METHODS
+
+To understand how the latest iteration of Situated Practice Systems supports regulation-informed
+practice where earlier versions could not, we conducted a 3-week field study. We asked:
+
+RQ1: How does CAP Notes help coaches observe and understand how students currently practice?
+RQ2: How does CAP Notes help coaches assess practice issues and model new practices?
+RQ3: How do Practice Agents help students facilitate regulation-informed practices?
+
+6.1 Participants
+
+Our study occurred in the same research learning community described in Section 3. Participants
+included seven student researchers (five undergraduates, one master's student, and one Ph.D.
+student) and two expert faculty members. For privacy, we use pseudonyms when reporting
+participant data. Corey and Danielle are the coaches, while all others are student researchers.
+Student researchers were community members for 1 to 3 academic terms (Mean = 2 terms).
+Students were distributed across five project teams, with two projects having two members and
+three projects having one member. Each faculty coach had several years of coaching experience.
+
+Because coaches used CAP Notes during the needfinding study, they had already begun tracking
+practice gaps in the system. The lead author introduced students to Practice Agents—including
+its Slack interface, Practice Bot—and briefed them on how it would send practice suggestions
+and reflection reminders. Corey had provided feedback on CAP Notes during development;
+however, Danielle did not use CAP Notes until the field study began. Therefore, the lead author
+provided her with an instructional session to learn its functionality. Corey worked on all
+projects, while Danielle served as a co-advisor on one project. Corey was out of town for the
+first two weeks of the study and provided practice feedback asynchronously, without a meeting,
+using CAP Notes; Danielle led the coaching session of the project she and Corey co-mentored
+during the 3-week study. Two of the paper's authors are a faculty member and a Ph.D. student
+in the community; the Ph.D. student did not participate in the study.
+
+6.2 Procedure
+
+We deployed Interactive CAP Notes for 3 weeks. We instructed coaches to review students'
+deliverables and reflections collected by CAP Notes before the coaching session and use CAP
+Notes during coaching sessions to note issues for which they wanted to provide their students
+with practice. Students received these practices one hour after their coach completed their notes.
+Practice Bot also sent practice suggestions throughout the week, when relevant (e.g., before
+specific help-seeking opportunities). We instructed students to work as usual, using the practice
+suggestions when helpful. Students received a reflection tool one day before their coaching
+session, and were asked to complete it by the following morning.
+
+Students completed a 10-minute survey each week, which we sent after the week's coaching
+session, so they would have completed reflections on the prior practices before taking the survey.
+The survey included 5-point Likert scale questions (1: Strongly Disagree; 3: Neither Agree nor
+Disagree; 5: Strongly Agree) and open-ended questions about: (1) the practice the coach
+suggested; (2) the prompting of those practices at relevant opportunities; and (3) the process of
+reflecting on research progress and their practice. Meanwhile, coaches participated in weekly
+20-30 minute semi-structured interviews. During interviews, coaches walked through how they
+used CAP Notes to coach their students that week.
+
+Following the deployment, we conducted semi-structured interviews with all participants to
+understand the impact of Situated Practice Systems on students' research and practice processes,
+and their coaches' coaching processes. We asked students how receiving their coach's practice
+suggestions after coaching sessions and throughout the week shaped their work, how
+practice-specific reflections influenced their understanding of their work, and how their
+practices changed due to the tool. We asked coaches how CAP Notes helped them understand
+students' evolving practice issues across weeks, how they reasoned about the practice they
+modeled and shared, and changes in their students' work processes and self-regulation during
+the study. We asked all participants to reflect on their concerns about using the tool. To aid in
+recall, we showed students summaries of their coach's practice suggestions, and showed coaches
+their notes for each student at each coaching session. Post-study interviews lasted between 25
+and 40 minutes.
+
+Before the study, all participants provided informed consent and agreed to have their data used
+anonymously for research purposes. Before interviews, participants consented to audio, video,
+and screen recordings; we transcribed audio recordings for analysis. The lead author conducted
+all interviews in person or over Zoom video calls. Student researchers were compensated $20
+for completing the weekly surveys and final interview (about 1 hour, total), but not for weekly
+reflections or following practice suggestions from CAP Notes, which was considered part of
+their normal research work.
+
+Note: Kiran's notes had a software bug during Week 2 that prevented his coach, Corey, from
+taking notes, resulting in Kiran not receiving any practices and not completing the survey for
+that week. Will did not complete the Week 3 survey or post-study interview. Because Corey was
+out of town during the first two weeks of the study, we conducted only one interview during
+that period. Will was provided partial compensation for his time in the study, namely $10 for
+completing the first two weekly surveys.
+
+6.3 Measures and Analysis
+
+Our analysis is grounded in two sources of data. First, we used system log data of CAP notes
+taken, practice traces, and student reflections on their work practices to understand: (a) the
+quantity and types of regulation gaps that coaches assessed to be associated with the work issues
+identified; (b) the quantity and types of practice suggestions offered; (c) the frequency by which
+Practice Agents followed up with students after coaching meetings; (d) the types of practice
+agents engaged; and (e) how often students attempted suggested practices. To understand the
+types of self-regulation gaps coaches identified, we qualitatively coded the work issues coaches
+created for cognitive, metacognitive, and emotional regulation gaps. We similarly coded the
+content of the practice suggestions that coaches created in response to the regulation skill the
+practice was intended to help develop. The lead author and two undergraduate research
+assistants performed the qualitative coding, which the research team reviewed.
+
+Second, we analyzed interview and survey responses from coaches and students. We analyzed
+open-ended responses using thematic analysis [8]. We focused our analysis on three dimensions:
+
+RQ1: Observing existing practices and potential practice gaps. We coded coaches' interviews
+to understand how they used CAP Notes to understand how practices went. We also coded
+students' survey responses and interviews to understand how their reflections helped them share
+how the suggested practices went and their self-perceptions of how they practiced.
+
+RQ2: Assessing practice gaps and modeling new regulation-informed practices. We coded
+coaches' interviews for how CAP Notes supports coaches in understanding regulation issues
+underpinning the observed work issues, including noticing recurring practice gaps, and modeling
+a new practice that suggests regulation practices to help. We coded students' survey responses
+and interviews for how they felt the suggested practices gave them ways to self-regulate their
+work process in the following week.
+
+RQ3: Facilitating new, regulation-informed practices. We coded students' survey responses
+and interviews to understand how Practice Agents supported their research practice throughout
+the week, and their reflections on the self-regulation challenges hindering their progress. We
+also coded for how coaches felt their students were practicing on their research, following the
+introduction of Situated Practice Systems.
+
+Across all research questions, we also coded for any challenges or concerns. The lead author
+conducted the qualitative coding of the survey and interviews. Following data coding, we
+reviewed the sub-themes generated from the analysis. We examined cases where the data
+supported or contradicted the themes, refining them by splitting and combining until they were
+distinct. The lead author generated and reviewed the initial themes; all authors collectively
+refined and finalized them. Lastly, we include quantitative data from students' responses to
+Likert scale questions in weekly surveys.
+
+---
+
+7. FORMATIVE FIELD STUDY RESULTS
+
+During our 3-week study, coaches identified and tracked 21 work issues among students. Coaches
+identified 22 self-regulation gaps in these issues (see Figure 10), with 5 of these issues including
+previously identified Tracked Practice Gaps (see Table 1). While the majority of these gaps were
+cognitive (16), coaches also identified metacognitive (4) and emotional regulation gaps (2) that
+were preventing students from engaging with the practice. Coaches did not add new Tracked
+Practice Gaps during the study. We hypothesize that because coaches were using the tool for
+almost four months, they had already captured their students' recurring practice gaps when the
+study began.
+
+To resolve work issues and self-regulation gaps, coaches suggested a total of 46 practice
+suggestions across the four available Practice Agents ([plan]: 8, [help]: 5, [self-work]: 29,
+[reflect]: 4). CAP Note's Practice Agents shared practice suggestions with students 14 times
+following coaching sessions. In addition, Practice Agents followed up three times for the 8
+[plan] agents, had 2 [help] agents prompt students the morning of a coach's office hours, and
+had 2 [help] agents start a group message on Slack with students to help-seek from each other.
+
+--- FIGURE 10 DESCRIPTION ---
+Timeline chart showing 5 project groups (Addison and Skyler; Will; Mason and Harley; Kiran;
+Brooke) across 3 weeks. Each cell shows work issues with self-regulation gap codes:
+
+Color coding:
+- Cognitive gaps (dark fill)
+- Metacognitive gaps (medium fill)
+- Emotional gaps (light fill)
+- Issue without code (white)
+
+Self-regulation gap counts:
+- Fears and anxieties: 7
+- Embracing challenges and learning: 4
+- Leveraging resources and seeking help: 5
+- Planning effective iterations: 2
+- Forming feasible plans: 2
+- Representing problem and solution spaces: 0 (implied from totals)
+- Assessing risks: 1
+- Critical thinking and argumentation: 1
+Total gaps shown: 6 (other count not fully legible)
+Total work issues: 21; Total regulation gaps identified: 22
+--- END FIGURE 10 ---
+
+7.1 RQ1: CAP Notes helps coaches more easily observe and track practice-related aspects
+of students' work
+
+7.1.1 Understanding emerging practice issues from Practice Traces. By making work practices
+and self-regulation behaviors computationally representable, CAP Notes was able to surface
+practice traces that helped make students' practices more apparent to coaches, giving them a
+head start in understanding students' underlying regulation gaps. From interviews, both coaches
+felt this helped their coaching. For example, Corey's students, Mason and Harley, were jumping
+from problem to problem instead of sticking with trying to solve their current problem. In their
+reflections, they mentioned that a direction for solving their problem was infeasible, which gave
+Corey a clue that there might be an underlying self-regulation gap that prevented them from
+approaching their problem. Corey said: "In my mind, that direction is possible. So I know
+already [from the deliverables and reflections] that they have certain fixations or mental blocks
+that suggest they are worried about or unwilling [to think about that direction] or don't have
+good strategies [to work on it]." This allowed Corey to focus the coaching session on
+understanding the underlying regulation gap, rather than simply providing solutions for the
+students' work issues while leaving their regulation gap unaddressed.
+
+Students also found structured reflections valuable for helping them to understand and
+communicate how their research progressed with their coach (Mean = 4.32; Agree to Strongly
+Agree), which may have also promoted dialogue around practice issues. For example, Brooke
+shared how she was unclear about her takeaways from a recent user test: "It was really helpful
+to go into that coaching meeting and be like, 'all stuff was good, but here's this thing that I was
+weirded out by,' and be able to talk about that specifically." Harley shared a similar experience,
+comparing to what she would have reflected on her progress before using CAP Notes: "earlier,
+we were like, 'oh, we hit this blocker,' but we did not tend to say, 'what exactly is the
+blocker?'... With the reflection of ['what prevents you from doing something?'], we are more
+likely to take time and think through the list of obstacles. And that's something in addition to
+the original deliverable we would bring into the coaching meeting." In this way, structured
+reflections helped students enter coaching meetings with a deeper awareness of the obstacles
+they encountered and what may have caused them, and better prepared them to answer questions
+from their coaches about work issues and how their ways of working contributed to them.
+
+7.1.2 Loose structures help coaches track fragments of potential issues to discuss. CAP Notes
+provided coaches with loose structures to track signals of work and self-regulation issues that
+surfaced during review of practice traces and in conversation. As an illustrative example, in
+Week 1, Danielle shared how she, "wouldn't have known that [Brooke] hadn't planned in
+advance [of the coaching meeting], and I wouldn't have thought to follow up with her," if the
+practice trace did not alert her to Brooke's empty planning log and did not note it as an Issue
+of Concern to address with a Plan later on. In Week 3, Danielle chose not to suggest some
+literature that came up in conversation because she, "didn't think that Brooke should go down
+a rabbit hole [right now]. So I wrote it down for myself, but I decided not to put that in the
+student-facing notes." In this way, loose structures can help coaches capture seemingly important
+observations, allowing them to decide how to address them when or if they see fit.
+
+--- FIGURE 11 DESCRIPTION ---
+Two-panel illustration (Week 3, Brooke's coaching session):
+
+Panel A — "Before coaching session, from Practice Traces":
+Danielle notes two signals from practice trace review:
+- "from seeing no plan updates (but not followed up on)"
+- "from prototyping and test results"
+These appear as Issues of Concern in the interface
+
+Panel B — "During coaching session":
+- A new work issue is noted ("noted during meeting, but not followed-up on"): a relevant paper
+  mentioned in conversation
+- The issue Danielle ultimately focused on: helping Brooke develop and execute a good evaluation
+  plan (not the related-work rabbit hole)
+Arrow shows issues from Panel A informed the coaching session direction in Panel B
+--- END FIGURE 11 ---
+
+7.2 RQ2: CAP Notes helped coaches assess regulation gaps and suggest regulation-informed
+practices
+
+TABLE 1: Tracked Practice Gaps observed across weeks
+(Coaches Danielle and Corey noticed students exhibiting one of their tracked practice gaps
+for different work issues across weeks.)
+
+Student(s)          | Tracked Gap                                    | Week 1              | Week 2                              | Week 3
+--------------------|------------------------------------------------|---------------------|-------------------------------------|-----------------------------------
+Will                | has maybe a fear of imperfection and may shy   | Asking for          | —                                   | —
+                    | away from really doing the work where it's     | references on       |                                     |
+                    | important but uncomfortable                    | digitization        |                                     |
+                    |                                                | instead of trying   |                                     |
+                    |                                                | it themselves       |                                     |
+Mason and Harley    | Plowing ahead / Not following through on a way | lacking insight on  | (continued from                     | —
+                    | of thought                                     | conceptual          | Week 1 pattern)                     |
+                    |                                                | differences (and    |                                     |
+                    |                                                | not writing that in |                                     |
+                    |                                                | the hypothesis) and |                                     |
+                    |                                                | not following       |                                     |
+                    |                                                | through             |                                     |
+Brooke              | Using good representations to guide thinking   | Diagram of your     | Full slice (design,                 | riskiest risk is evaluation plan
+                    | and writing                                    | understanding of    | test, reflect) on the               | and getting concrete on the
+                    |                                                | the relationship    | belief elicitation                  | outcomes and arguments
+                    |                                                | between beliefs,    | stage                               |
+                    |                                                | emotions, and       |                                     |
+                    |                                                | actions             |                                     |
+
+7.2.1 CAP Notes' notetaking structure encouraged coaches to be explicit about regulation gaps.
+In 14 of the 15 coaching sessions, prompting coaches to consider regulation gaps while capturing
+CAP notes resulted in each project team having at least one work issue with a regulation gap
+and suggested practices every week; see Figure 10. Overall, we see that 71% of the work issues
+coaches noted (15 of 21) had at least one identified regulation gap.
+
+CAP Notes encouraged coaches to focus on the regulation gaps underlying the work issues they
+observed, not just the surface-level issues. While both coaches who use CAP Notes are aware of
+and motivated to draw connections between work issues and self-regulation gaps, they sometimes
+skip making these connections, instead suggesting practices based solely on the observed work
+outcomes. With CAP Notes, coaches are encouraged to explicitly articulate these connections as
+they take notes. For instance, Brooke struggled with planning effective research iterations and
+using good working representations that helped her analysis. In the Week 2 meeting, Danielle
+mentioned that she was focused on capturing how Brooke's revised prototype should function
+when taking notes, but not on these self-regulation gaps. Upon reviewing her notes, she noticed
+a missing Assessment for the work issue: "[CAP Notes] was really encouraging me to think in
+a different way about the student's work process". As a result, she noted that Brooke, "wasn't
+taking time to step back and think about her big takeaways and next steps based on what she
+learned," as an Assessment. Subsequently, she edited her Plans to suggest a practice, saying:
+"I explicitly asked her to synthesize and told her a little bit of what I would want to see. I think
+she's struggling with this, and I reflected on that [in Assessment], which I might not have done
+if I were just writing free-form notes...I realized, 'oh, yeah, I need to help scaffold [the
+synthesis] after the [user] test.'"
+
+Computationally tracking practice issues across weeks in the Practice Object enabled CAP Notes
+to help coaches identify recurring patterns of students' self-regulation gaps in different work
+issues. By observing Tracked Practice gaps shown in the Assessment portion of CAP Notes,
+coaches noted five new work issues that shared the same self-regulation issue as a prior practice
+gap; see Table 1. For example, Danielle shared how Brooke was, "lacking good representation
+in her work and thinking", saying, "she comes in, and she's just spewing information that is not
+organized well." This recognition led Danielle to repeatedly suggest practices with
+representations that would help Brooke structure her thinking during the study. In this way, we
+see how coaches can maintain and develop a model of students' practice across weeks, rather
+than simply tracking their task progress.
+
+Lastly, CAP Notes helped coaches identify easier-to-diagnose gaps in cognitive regulation (e.g.,
+using effective representations for thinking) and also less apparent gaps in metacognitive and
+emotional regulation (six of the 22 identified gaps). When a student struggles to progress, we
+found that a coach's first reaction is often to suggest a cognitive scaffold they can try (e.g., a
+diagram for writing in our needfinding study). When students fail to use these scaffolds, there
+are often underlying issues unrelated to cognitive regulation preventing progress. We found this
+was the case for all students except Brooke. For instance, Mason and Harley would quickly jump
+to new problems instead of sticking with one when it became difficult. Initially, Corey suggested
+cognitive scaffolds to help them think more deeply about their problem (see Figure 10, Week 1
+and 2), but later realized this issue was happening because they were running away from the
+problem when it became less clear and not applying the scaffolds (see Figure 10, Week 3). Will
+had a similar experience when writing a finding draft, where Corey realized from his past
+patterns that Will was afraid to write about things he did not completely understand and confront
+the feeling of not knowing something, instead of "speculating" on the unclear parts, which may
+reveal new issues to address.
+
+7.2.2 Coaches' practice suggestions embedded self-regulation strategies. We saw that 33 of the
+46 suggested practices (71%) included suggestions corresponding to at least one self-regulation
+skill, suggesting that CAP Note helps coaches provide feedback that helps students reach work
+outcomes by addressing regulation issues preventing their progress. With CAP Notes, the links
+between work outcomes, practice issues, and new practices are explicit, as Corey explained:
+"Plans were synthesized and structured: here's the [work] issue, here's some of the underlying
+[practice] reasons why it's happening, here's what we could do to address those underlying
+reasons. So that we address this issue, and we'll bring in this kind of deliverable." For instance,
+Addison and Skyler were struggling to plan effective milestones for study analysis, in particular,
+how to represent their analysis. Corey could have suggested, "plan out some milestones for
+analysis," but because he noticed that their existing representation was too high-level, he
+included: "Can you think of a set of questions/goals you might have for understanding the
+example? Can you break it down more (your representation is still pretty high level – and not
+very detailed)?"
+
+Students found that the practices their coaches provided suggested clear ways to self-regulate
+as they worked (Mean = 4.06, Agree to Strongly Agree). Before CAP Notes, students struggled
+to capture the specific aspects of the practice that their coaches wanted them to do. For example,
+a coach may have suggested a working representation (e.g., a study design template) to help the
+student overcome a practice obstacle from the prior week, but the student may not have
+remembered to apply it. Having the feedback written down helped students prioritize what their
+coach thought was important and how they should work on it. Mason said, "Sometimes we went
+over many different problems in the research we are facing, and just remembering from the
+coaching meeting, sometimes we can miss some important points. And the practice [we get sent]
+is very directly pointed to what we should be focusing on this sprint....there was a suggestion
+about how to think about the distinctive difference and the features. That quote from our coach
+is especially helpful to give us some guidance towards solving the problem a bit more by
+ourselves."
+
+7.3 RQ3: Practice Agents facilitates students' practice through in-situ reminders and
+post-practice reflections
+
+7.3.1 Students were able to do the practices their coaches suggested. Practically, Practice Agents
+were effective at helping students do the practices their coaches suggested. Based on students'
+reflections, 36 of the 46 suggested practices were attempted (78%), including 5 of 8 [plan],
+23 of 29 [self-work], 4 of 5 [help], and 4 of 4 [reflect] practices attempted. Students found
+that reminders from Practice Agents helped them decide how to focus practice throughout the
+week (Mean = 4.06, Agree), and that the reminders were timely for practice opportunities
+(Mean = 4.25, Agree to Strongly Agree).
+
+Before Practice Agents, students and coaches were often misaligned about how to practice.
+Danielle, a coach, shared: "[Before SPS], there were often miscommunications about what work
+should be done, where the student did stuff that wasn't in line with what we're looking for. That
+definitely didn't happen [during the study]." At the simplest level, Practice Agents would share
+coaches' detailed notes on practices the student should attempt following the coaching meeting,
+which helped clarify what issues should be the focus and what self-regulation strategies to apply
+as they work. Skyler shared how, "there's a lot of information being thrown back and forth
+[during coaching], that makes it hard to have that, 'Okay, here's, exactly the next thing to do
+or what to keep in mind,' and I think it helps to receive that from the coach in a distilled version."
+
+Practice Agents not only helped students to practice on their own, but to co-regulate learning
+with their peers and coaches outside of coaching sessions by: (a) initiating group conversations
+with potential helpers on Slack; and (b) prompting students to prepare for recurring help venues.
+We found that initiating conversations made it easier for students to reach out to peers. For
+example, Mason, Harley, and Kiran—who work on similar projects within the same research
+sub-group—all described how they missed an opportunity to work with each other on a similar
+problem until a [help] agent written by Corey reminded them to. Reflecting on this, Harley
+shared, "sometimes you forget to follow up, especially with your group-mates...it broadens your
+thinking that way...[The reminder to set up a meeting] was needed...we had been pushing it off."
+
+Beyond initiating conversations, Practice Agents helped students to prepare for upcoming help
+venues (e.g., Office Hours) instead of simply showing up, as they had often done before. Harley
+shared: "[it was helpful] having that reminder if Corey suggests you come to Office Hours, then
+probably he thinks something is risky, and you should either talk about it ahead of time or
+prepare something to talk about." Skyler shared a similar experience: "it was easy to not
+adequately prepare for Office Hours when sometimes things slip our mind as we go throughout
+the week."
+
+By having automated Practice Agents facilitating students' coach-suggested practice, coaches
+became more confident that students were practicing the regulation-informed strategies they
+suggested. Corey said: "I have not had to worry about what students practice during the week,
+nearly as much as I used to. I used to check in on people mid-week, like, 'Hey, what did you
+take out of the coaching meeting? What are you practicing right now? Did you do this or that?',
+to keep tabs on all the students, and I don't have to anymore." Moreover, coaches felt that
+students were progressing in line with their expectations. Danielle shared: "[previously] things
+got lost in translation, and what ends up on their planning log, or what they end up doing, is
+not in line with what you thought they were gonna do. [With CAP Notes], it was like: here's
+the three things I want you to do, and [Brooke] did those three things."
+
+Note: Will was suggested 2 [self-work] practices in Week 3 of the study. However, he did not
+complete the final survey, interview, or reflection tool. As such, we include him as not attempting
+the suggested practice. In survey responses, students shared they did not attempt 3 cases of
+[self-work] due to limited time in the final week of the study, and one case due to running out
+of time for the practice that week. For the single [help] practice, the students met with their
+coaches elsewhere and did not need to schedule a separate meeting.
+
+7.3.2 Students began to understand how their self-regulation skills were developing. Every
+student shared how they attempted to address the self-regulation gaps, which prevented them
+from being effective researchers, as Practice Agents promoted reflection on those practice
+patterns (Mean = 4.11, Agree to Strongly Agree). For example, in the final interview, Addison
+and Skyler shared how they were becoming more comfortable working on research when their
+understanding was unclear and imperfect, which was affecting their ability to practice on Corey's
+suggested strategies. Addison shared, "I've been trying to better understand that it's okay to
+produce something that's not good...I feel like I have, previously, and still am, been too focused
+on doing the best possible job to the point where it prevents me from working." Kiran shared
+that he was unable to think deeply about problems because he would jump from topic to topic
+when something was difficult. In contrast, now he tries: "to approach my risks more head-on,
+and stop avoiding my risks, and also be more patient and then think problems more thoroughly,
+give a little more time to process." Finally, Brooke shared how she was learning to use better
+representations for thinking and sharing her research (an issue her coach Danielle raised
+earlier): "[Before] I was fantastic at making things that [my coach] did not understand...Now,
+I see representations as a way to tell a story about what I've learned (and share details through
+discussion)." Corey, a coach, felt their students advanced both their work and ability to
+self-regulate, sharing: "It seems to me that they receive [the practical advice on the project and
+the link to some regulatory gap]–like they actually got it and are practicing on regulatory issues
+while they're working, or at least very aware of them now."
+
+7.4 Potential Challenges with Practice Systems
+
+While we demonstrate early promise in how Situated Practice Systems can support the coaching
+and the enactment of self-regulation skills, two notable challenges remain.
+
+7.4.1 Practice Trace Quality and Understanding Practices. Practice traces were critical for
+coaches to understand how students practiced between coaching sessions; however, the quality
+of the trace, specifically students' deliverables and reflections, varied. Unclear deliverables or
+poorer reflections provide weaker signals of potential self-regulation issues, requiring more
+diagnostic work during coaching meetings. Corey shared: "you don't really get everything that
+students are thinking by just looking at the deliverables and a really brief reflection. When the
+reflections are better, you get a glimpse into how the students are thinking about [their work and
+practice]." Students shared how making good deliverables and reflecting on practices could be
+challenging. For example, Harley said: "we struggle with representing our deliverables in a way
+that makes sense even without you describing it." Mason found some reflections challenging,
+saying: "I always struggled to answer, 'How did your understanding change?' Sometimes, it's
+hard to identify the change in understanding we have." Since high-quality practice traces were
+critical for initiating the coaching process, students may require additional scaffolding to produce
+well-structured deliverables and more specific reflections on their work practices.
+
+7.4.2 Level of Scaffolding Provided to Facilitate Practices. Sharing practices with students
+requires balancing how much scaffolding they provide. On the one hand, practices must be
+well-scaffolded so that students can effectively enact them. While students generally found
+practices helpful, sometimes they did not feel actionable (Mean = 3.89, between Neither Agree
+nor Disagree and Agree), or it was unclear what successfully practicing looked like (Mean = 3.79).
+Sometimes, practices would include high-level deliverables but not explicit details. For example,
+Addison shared: "one of the practices was 'complete a full slice' [of needfinding, prototyping,
+and user testing] which was difficult given that we weren't completely sure what a full slice
+should look like." On the other hand, practices can be too scaffolded, taking away
+planning-related practices from the student. Early in the study, both coaches felt that their
+guidance was too explicit and offset the planning work. Later, their practice suggestions became
+more open-ended, with specific goals to target but room to plan details. Coach Danielle shared:
+"I'm leaning away from giving [Brooke] explicit direction on things that I want her to adapt
+based on how things are changing over time, versus the things that I put, which are all definite
+intermediate deliverables [to do]." Harley, a student, described these as scaffolds for
+prioritizing: "Especially with the suggestions of, 'Come to Office Hours,' 'work on this before
+the Lab Meeting,' even having a suggestion with that [opportunity], helps you think about
+planning your work during the week and what you should have done by when." Put another way,
+allowing students to fully self-direct their work risks missed opportunities to practice specific
+regulation skills. Conversely, when coaches provide structured opportunities to practice missing
+regulation skills, they may bypass self-regulation skills related to planning. Understanding this
+balance and when different skills need development will be critical for the student's long-term
+growth.
+
+---
+
+8. DISCUSSION AND FUTURE WORK
+
+There is a pressing need for coaches to help students develop self-regulation skills to lead
+innovation work, but it remains difficult for expert coaches to provide this without computational
+support. We introduce Situated Practice Systems, a system that imbues computation into the
+process of understanding, modeling, and facilitating regulation-informed practices to advance
+students' ability for innovative work. Through our user study, we demonstrate how the system
+enables mentors to understand practice-related aspects of students' work, model new
+regulation-informed practices for students' specific work tasks, and assist students in facilitating
+those practices outside of coaching sessions.
+
+8.1 Design Principles of Situated Practice Systems
+
+8.1.1 Focus on Practice and Regulation, Not Tasks. Authentic learning environments must
+increasingly be designed to support the development of practice and self-regulation; however,
+this has been challenging historically due to the difficulty of providing coaching on self-regulation
+skills without technological support. The key innovation provided by Situated Practice Systems
+is to make project coaching tools that focus on understanding and supporting students' practices
+underlying work tasks, instead of task status. In our study, students reflected on each week's
+practices and how they contributed to self-regulation, which they discussed with their mentor
+during the subsequent coaching session. In doing so, the tool allowed coaching discussions to
+be more practice-centric, supporting coaches to develop an explicit practice model of how the
+student is practicing, understand why practices are failing, and target the skills that help the
+student grow, not only address work issues. Put another way, Practice Systems help transform
+the role of coaches from troubleshooting work progress to developing the skills that enable work
+progress and make the student independent.
+
+8.1.2 Making Work Practices and Self-Regulation Strategies Computational. While exposing
+self-regulation gaps and introducing new practices are helpful, students often need further support
+in implementing these practices. Practice Systems help by making the work practices and
+self-regulation strategies computational, by providing software agents to model and track the
+coach-suggested practices for enactment, reflection, and subsequent review. This allows the
+coach to provide tailored guidance on how the student should practice during practice
+opportunities when the coach is unavailable. In our study, we observed that mentors suggested
+a total of 46 practices that provided concrete guidance and resources to help students practice
+outside of coaching sessions. In this way, making work practices computation allows coaches
+to extend their support to students by recruiting support from the broader socio-technical
+community rather than relying solely on what they can provide.
+
+8.1.3 Supporting Understanding and Working with Patterns of Practice Across Situations. Gaps
+in self-regulation skills are often persistent patterns for students, recurring across various work
+situations and tasks until they are addressed. Coaches can struggle to realize that the same
+pattern is affecting a new work issue, especially when tracking multiple self-regulation skills
+for many students. Practice Systems help by foregrounding patterns of self-regulation gaps in
+the interface and encouraging explicit thinking about them in connection to work issues, enabled
+by the computational Practice Object that stores practice information across work situations.
+Part of this tracking involves not only monitoring disparate tasks but also identifying how
+different work issues may be connected to the same underlying regulatory gaps, for which
+tailored practice strategies are needed to address the same gap in the current work situation. In
+our study, mentors observed that historic patterns of regulatory gaps resurfaced in various work
+issues for four students (see Table 1), enabling them to suggest new strategies for continued
+practice. Ultimately, this allows coaches to view the student less as discrete work issues that
+need to be resolved on a week-to-week basis, and rather as recurring patterns or self-beliefs
+that they can help the student address, enabling them to become more effective in their tasks
+now and more independent in the future.
+
+8.1.4 Integrating Human and Machine Computation for Regulation Coaching. Lastly, Situated
+Practice Systems are designed to complementarily involve human and machine computation for
+the development of self-regulation skills. While better interfaces help coaches identify
+self-regulation gaps (as demonstrated by CAP Notes' structure), effective interaction designs
+alone are insufficient, given the challenges coaches face in tracking practices and their
+development. On the other hand, AI systems that fully automate coaching (e.g., ITS in closed
+domains [3, 52]; LLM-based coaches [41, 42]) are neither capable of regulation-informed
+coaching, nor desirable to use, given the importance of relationship building that allows students
+to be open about regulation challenges (see next section). Practice Systems resolve this by
+providing computational affordances to the coach to support tracking, facilitating, and
+resurfacing of practice information, but leave them in control of the diagnosis process. Once
+the coach can diagnose the new practice gaps, they can hand off the challenging work of tracking
+and enacting them to a machine. In this way, we benefit from computation to support the coach
+during sensemaking, without relying exclusively on it when it is unlikely to be able to diagnose
+issues on its own.
+
+8.2 Towards Practice-Oriented Learning Environments
+
+8.2.1 Developing a Culture of Self-Regulated Learning. Practice Systems require communities
+to have a culture where students want to understand themselves more clearly and adopt new
+self-regulation behaviors to become independent practitioners. In the learning community we
+studied, the introspection and practice of regulatory skills are core learning objectives supported
+at every level of the community, from goal setting at the start of the term to weekly coaching
+sessions and final evaluations (in contrast to performative, project-based evaluations). Moreover,
+the community makes space to discuss the challenges of self-direction, spending 30 minutes to
+an hour each week to discuss how the research work is progressing, specifically at the level of
+self-regulation. Such activities help normalize the challenging process of learning regulation
+skills, while also celebrating wins when a student shares how they are overcoming a long-standing
+regulatory gap. In addition, addressing practice patterns and developing new self-beliefs can
+take time, as ineffective ones are often persistent. While tempting coaches and students to
+scaffold beyond their current development to achieve faster project progress, we argue that
+communities that focus on self-regulated learning should also value and prioritize developing
+self-regulation skills to become independent, rather than prioritizing short-term productivity.
+
+8.2.2 Shifts in Responsibilities for Coaches and Students. Having a culture of practice also
+shifts the roles coaches and students have in the community. In many PBL settings, students
+focus on developing domain-specific skills through an applied project, with the coach providing
+project-specific feedback. In a regulation-focused setting, the student's primary goal is to
+understand their practices and adopt effective behaviors, and the coach's responsibility shifts to
+helping students grow in this way. For example, in the community we studied, coaching sessions
+primarily focused on students reflecting on their work and exploring new strategies to apply in
+their practice, with specific project feedback reserved for the end of the meeting. While we
+expect other communities will need to make similar shifts, they are likely to be uncomfortable
+to make. Students are having to introspect on themselves, forgoing (potentially long-standing)
+ineffective behaviors they may have internalized in order to build better behaviors. Coaches, who
+are accustomed to understanding project issues, may feel uncomfortable questioning a student
+about why certain beliefs are deeply held—especially for emotional dispositions like fears or
+anxieties—which may require additional training and preparation. Acknowledging these
+discomforts and the value of coaching or practicing in this way will be crucial for adopting a
+practice-focused orientation in learning communities.
+
+8.2.3 Changes to the Coaching Practice Enabled by Computation. While such shifts are necessary
+for coaching self-regulation skills at scale, they have historically remained challenging without
+computational support. Although task-tracking tools are commonplace, communities will
+increasingly need to consider adopting Practice Systems or adapting their current tools to be
+practice-oriented. For example, software-focused communities could modify tools like GitHub
+to have practice-oriented discussions between experienced and novice developers throughout
+the feature planning and development process. By increasing their prevalence, Practice Systems
+allows us to ask more of coaches: to look across work issues and skills, seeing how the student
+is progressing at the practice level and what gaps to prioritize, rather than only how to progress
+a project they are working on. In other words, Practice Systems helps transform the practice of
+coaching from being project-focused to self-regulation-focused by involving computation into
+the coaching process at a level previously not explored in coaching or productivity tools.
+
+8.2.4 Psychological Safety and Ethical Considerations. Lastly, all students will need to feel
+psychologically safe if they are to be open and transparent about development. Students may
+not feel comfortable sharing their struggles with self-regulation, especially as it relates to
+emotional regulation, fearing judgment from peers or their coaches. In the worst case, these
+struggles could have consequential outcomes for the students, with coaches in learning settings
+giving students lower-than-deserved grades. To foster trust among students, their coaches, and
+peers, we recommend the following. First, any regulation gaps shared by a student remain private
+to them and their coach unless they choose to share broadly, both in conversation and in Practice
+Systems. Second, while being open is important, students should be able to choose if they do
+not want to discuss a particular issue without repercussion. Finally, any outcomes of the learning
+environment, such as grades, should measure the shift in the student's regulation skills and their
+attempts at a better practice, not whether students resolved them. By fostering greater
+compassion for students' self-regulation challenges in learning environments, we can develop
+communities where learning how to improve oneself is the primary learning objective, leading
+to students becoming more independent and able to participate in innovative work.
+
+8.3 Future Directions for Building Situated Practice Systems
+
+8.3.1 Practice Agents and an Ecosystem of Support. Practice Agents open a rich interactional
+space for how software agents can support practice development. Our current implementation
+focused on a small set of actions for the core regulation skills (i.e., planning, self-work,
+help-seeking, and reflection) and simple scaffolds for practicing (e.g., timing; static scaffolds)
+to support research work, which already helped students practice in-line with how their mentors
+suggested during coaching meetings, and allowed mentors to offload the need to track and
+check-in with students. In the future, these agents could enlist other systems that provide
+practice and task support, such as planning tools [80], reflections on self-regulation skills [66],
+and help-finding tools [2, 60]. Even further, Practice Agents could incorporate advances in
+large-language models (LLMs) for scaffolding the student, such as by tailoring practice
+suggestions or reflection scaffolds following practices [41].
+
+8.3.2 Practice Objects and Long-Term Development. Practice Objects store a student's
+practice-related data over prolonged periods, which can help coaches prioritize what practices
+to work on. Students focused on innovation work need to develop many self-regulation skills,
+which can be challenging to do simultaneously. This requires mentors to select which to
+prioritize, such as forgoing planning skills (metacognition) in favor of teaching good working
+structures (cognitive). Moreover, seemingly "resolved" regulation gaps can resurface in new
+work issues, such as a student who no longer fears writing but now fears system building, which
+they have not previously encountered. Future iterations of Situated Practice Systems could help
+mentors consider how practiced students are across these skills and reason about which skills
+to emphasize in practice suggestions.
+
+8.3.3 Difficulties in Diagnosing Self-Regulation Gaps. Identifying self-regulation gaps can
+still be challenging, as they often become clear over time and across different work issues. In
+our study, we observed that it took Corey 2 to 3 coaching sessions to realize why Will, Mason,
+and Harley could not fully apply the suggested cognitive scaffolds. To further help the coach
+with diagnosis, future work could design diagnostic environments within the Assessment portion
+of CAP Notes that can surface common practice challenges when working on different tasks
+(e.g., scoping a complex prototype; managing emotional reactions when working on something
+new). Practice Objects that build up models of students can further help. For instance, if the
+student is attempting something new (e.g., running a large study), the system could suggest to
+the coach that support for regulating the student's emotions might be necessary since this
+practice issue had previously arisen. This way, a Situated Practice System can use computation
+more proactively during diagnosis to help the coach.
+
+8.3.4 Managing the increased work from Practice Systems. While Situated Practice Systems
+are beneficial for students' practice development, our study revealed that they increased the time
+spent on work for both students and mentors. On the student side, we argue that much of the
+additional work they do—reflecting on how they practiced and constructing clear deliverables—
+should be part of their practice already, as it helps them share their progress with mentors,
+understand what they need to do next and what help they need, and identify ways they can
+improve how they work. Mentors, however, must do additional work beyond the coaching they
+already provide, which will quickly become intractable if they want to use our system for larger
+groups of mentees. Such additional work can create an imbalance between those who put in the
+work and those who benefit (a historic CSCW challenge [36]), affecting the long-term viability
+of using the Practice System. In their final interviews, both mentors shared that long-term use
+would likely require small adaptations to the coaching meeting structure, allowing them to model
+practices within the meeting's time constraints (e.g., 25 minutes for mentoring, 5 minutes for
+modeling). Future work can also consider tools that help disperse some of the responsibility for
+modeling practices to peers in a learning community [32] so mentors do not have to provide all
+coaching.
+
+8.4 Study Limitations
+
+While we focused on developing self-regulation skills, we did not assess whether students could
+independently apply these skills to new situations. Although some evidence suggests that students
+self-monitor for practice opportunities, our study's structure and length prevent us from claiming
+that students can apply practices effectively and independently, especially given the challenges
+of applying abstract practices to new work situations. Future studies could examine how well
+students learn practices and how a Situated Practice System supports them.
+
+Another concern is potential bias from the research team being part of the community. We chose
+this community because of the need for self-regulation skills to participate in the work
+(research), and the emphasis that mentors put on teaching those skills and students' desires to
+learn those skills. Moreover, this community already had rich tooling (e.g., planning,
+help-seeking, and communication tools with APIs) available that our system could build upon,
+as well as numerous collaboration structures where students can co-regulate practices with peers
+and mentors outside of coaching sessions. Future work can investigate these tools in other
+learning environments, including how our approach is applicable elsewhere and what necessary
+adaptations are required.
+
+Finally, another concern is about the size and setup of our evaluation. While our formative study
+already shows promise of how technology can support the coaching and enactment of
+self-regulation skills, future work can conduct larger, longer-term summative controlled studies
+to test our approach further, which could include comparisons to groups who use basic notetaking
+tools (i.e., without CAP Notes' structured notetaking affordances) and Practice Agents that only
+share summaries but not in-situ practice suggestions. These studies could also measure the
+difficulty of the regulation coaching task, including increased cognitive overhead. Such studies
+would help reaffirm our formative results and provide further insights on how Situated Practice
+Systems support regulation-informed practice (e.g., whether practices are transferable).
+
+---
+
+9. CONCLUSION
+
+Despite the critical need for workers to develop cognitive, metacognitive, and emotional
+self-regulation skills for innovation work, technology to support college students in developing
+these skills has been largely absent. We introduce Situated Practice Systems that provide
+computational support to coaches and students in understanding, modeling, and facilitating
+regulation-informed work practices. Specifically, we provide coaches with a structured
+Interactive Context-Assessment-Plan (CAP) Notetaking tool that helps them understand and
+model students' practices, and provide students with Practice Agents that facilitate
+coach-suggested practices and solicit reflection on them. We implement these using a Practice
+Object computational abstraction that tracks practices and self-regulation behaviors over time,
+and Practice Scripts that surface practices to students both independently and in co-regulated
+settings, tracking progress and prompting reflection upon completion. Our 3-week formative
+field study in a research learning community demonstrates how Situated Practice Systems
+enabled mentors to more easily observe and track practice-related aspects of work, assess
+self-regulation gaps, and model regulation-informed practices, ultimately facilitating students'
+practices in relevant situations. Most critically, all students began to identify their self-regulation
+gaps and actively practice in ways that advance their work and learning. These findings hold
+promise for how Situated Practice Systems can help train the next generation of college students
+to become effective practitioners in innovation work.
+
+---
+
+APPENDIX A: EXAMPLE DESIGN ARGUMENT TEMPLATE FROM ARS
+
+--- FIGURE 12 DESCRIPTION ---
+A four-column table template called "Design Argument Template":
+
+Column 1 — "Desired User Outcome":
+  What should users do? What should happen when they do it?
+  Checklist: Is this a real example of what the user wants to be able to do? Is your outcome
+  written in a way that will be measurable when you test?
+
+Column 2 — "Obstacles to user outcome":
+  Where do existing solutions go wrong? Why can the users currently not meet their goal?
+  Checklist: Does this obstacle encompass a core user struggle? Does it clearly describe how
+  it prevents the desired outcome? Does it present an argument behind why existing designs
+  are not reaching the outcome? Is the statement concrete enough to be measurable?
+
+Column 3 — "Design Characteristic":
+  What is the core characteristic of your design?
+  Checklist: Is your characteristic sufficiently detailed? Does it clearly distinguish your
+  design from other possible designs?
+
+Column 4 — "Argument for your design":
+  Why would your design work? Why would your characteristic overcome the obstacle to reach
+  the outcome?
+  Checklist: Does your argument explain how the characteristic overcomes the obstacle? Does
+  it explain why the characteristic overcomes the obstacle?
+--- END FIGURE 12 ---
+
+APPENDIX B: CODEBOOK FOR QUALITATIVELY CODING SELF-REGULATION GAPS IN MENTOR'S CAP NOTES
+
+Table 2. Qualitative codes for self-regulation gaps and sub-gaps used to analyze mentor's CAP Notes
+during the field study.
+
+COGNITIVE:
+Description: The student lacks skills for approaching problems with an unknown answer, or
+knowing what the problem is exactly.
+
+  Code: Representing problem and solution spaces
+  Description: The way the student structures or presents the information does not effectively
+  support reasoning, analysis, or communication.
+  Example: Jacob struggles to create a representation that would help him show a working
+  example and an example where the system breaks.
+
+  Code: Assessing risks
+  Description: The student struggles with identifying the riskiest risks and/or prioritizing them.
+  They may skip ahead, do unnecessary and unimportant tasks, or have impractical plans due to
+  not properly addressing and prioritizing the risk.
+  Example: John wasted time jumping ahead (he created multiple very detailed mockups) when he
+  should've been focusing on addressing the riskiest risk at hand, which was identifying his target
+  audience.
+
+  Code: Critical thinking and argumentation
+  Description: The student struggles to construct well-reasoned arguments supported by evidence
+  or lacks a conceptual understanding of the task at hand. They might find it difficult to identify
+  conceptual differences (they are treating concepts as too similar when they actually have
+  meaningful differences).
+  Example: Eloise isn't fully understanding what a regulation gap is and how to distinguish between
+  the different types, and keeps taking the wrong changes to her prototypes because of that.
+
+METACOGNITIVE:
+Description: The student struggles in areas of planning, help-seeking and collaboration, and
+reflection.
+
+  Code: Forming feasible plans
+  Description: The student struggles to develop structured, realistic, and actionable plans. This
+  could include what their outcome should be and how to measure their outcome.
+  Example: Penelope overloaded herself with tasks this sprint, and while she got a lot of it done,
+  it wasn't good work.
+
+  Code: Planning effective iterations
+  Description: The student struggles to create a deliverable that addresses the sprint's riskiest
+  risk. The student may struggle due to problems with slicing (breaking larger problems down),
+  prioritization, or understanding the problem.
+  Example: David didn't incorporate the feedback the coach gave him last week, so his work this
+  week was not effective.
+
+  Code: Leveraging resources and seeking help
+  Description: The skill of identifying and utilizing available materials, expertise from others,
+  and information to enhance their learning and problem-solving.
+  Example: Peter was struggling with a programming bug, but decided to keep working on the bug
+  himself instead of asking his peers for resources or help.
+
+EMOTIONAL:
+Description: The student has dispositions toward self and learning that affect their motivation,
+cognition, and metacognition.
+
+  Code: Fears and anxieties
+  Description: The student may have a fear of imperfection, which causes them to shy away from
+  the work, and/or doesn't want to try things themselves.
+  Example: Jennifer had a well-planned sprint to carry out, but got too caught up trying to
+  perfectly design the solution rather than creating a first prototype.
+
+  Code: Embracing challenges and learning
+  Description: The student tries to brute force their way through a solution or runs away from it,
+  rather than thinking about the strategy and approach.
+  Example: Riley's system was not producing her optimal output, so she tried to overfit on one
+  example rather than take a step back and observe what patterns were causing the system to fail.
+
+APPENDIX C: REFLECTION QUESTIONS BY PRACTICE AGENT
+
+C.1 [plan]
+No reflection questions were asked for planning-only practices.
+
+C.2 [reflect]
+If the practice was completed:
+• Enter your reflections on the prompt your mentor suggested above.
+• How did this reflection help you understand how you currently practice and why that happens,
+  and how your practices could change? What was helpful? What obstacles or concerns do you
+  still have?
+
+C.3 [self-work]
+If the practice was completed:
+• Share a link to the deliverable that shows what you worked on (e.g., a Google Doc, Figma
+  prototype, GitHub repository, or image). For images, add the image to a Google Doc and provide
+  a file link. Ensure the link is accessible to anyone with the link.
+• How did your understanding change? What new risk(s) do you see?
+• What obstacles came up in trying to do it, if any?
+
+If the practice was not completed:
+• What prevented you from doing this work practice? Why did this prevent you from doing it
+  (e.g., lack of time, no longer important after addressing another risk)?
+• Are there other strategies that you could have tried? For example, could your mentor or your
+  peers have helped you? Why or why not?
+
+C.4 [help]
+Help-seeking practices varied based on the specific context.
+
+C.4.1 Office Hours. If the practice was completed:
+• Share a link to an image of what you worked on or discussed at Office Hours. For images, add
+  the image to a Google Doc and provide a file link. Ensure the link is accessible to anyone with
+  the link.
+• How did Office Hours help progress your understanding? What new risk(s) did it reveal?
+• What obstacles came up during Office Hours, if any?
+
+If the practice was not completed:
+• Did anything prevent you from attending Office Hours this week? If so, why?
+• Did anything prevent you from working on the suggested practice at Office Hours? If so, why?
+
+C.4.2 Peer Help. If the practice was completed:
+• Share a link to the deliverable that shows what you worked on at Peer Help (e.g., a Google Doc,
+  Figma prototype, GitHub repository, or image). Ensure the link is accessible to anyone with
+  the link.
+• What did working with a peer help you accomplish? How did that help you progress your sprint?
+• Were you able to complete your help request? If not, what obstacles came up?
+
+If the practice was not completed:
+• Did anything prevent you from attending Peer Help this week? If so, why?
+• Did anything prevent you from working on the suggested practice at Peer Help?
+
+C.4.3 Working With Suggested Others. If the practice was completed:
+• Share a link to the deliverable that shows what you worked on with the people your mentor
+  suggested. Ensure the link is accessible to anyone with the link.
+• What did working with the people your mentor suggested help you accomplish? How did that
+  help you progress your sprint?
+• Were you able to complete your help request? If not, what obstacles came up?
+
+If the practice was not completed:
+• Did anything prevent you from asking the people your mentor suggested for help? If so, why?
+
+Received 13 May 2025; revised 16 September 2025; revised 13 January 2026
+
+---
+
+REFERENCES:
+[1] Ackerman & Malone (1990). Answer Garden. ACM SIGOIS.
+[2] Ackerman & McDonald (1996). Answer Garden 2. CSCW '96.
+[3] Alkhatlan & Kalita (2018). Intelligent Tutoring Systems. arXiv:1812.09628.
+[4] Ambrose et al. (2010). How Learning Works. John Wiley & Sons.
+[5] Argyris & Schon (1978). Organizational learning. Addison-Wesley.
+[6] Asana (2023). https://asana.com/product.
+[7] Baumeister & Heatherton (1996). Self-Regulation Failure. Psychological Inquiry 7(1).
+[8] Braun & Clarke (2006). Thematic Analysis. Qualitative Research in Psychology 3(2).
+[9] Brown & Campione (1996). Psychological Theory and Innovative Learning Environments.
+[10] Buchanan (1992). Wicked Problems in Design Thinking. Design Issues 8(2).
+[11] Carlson et al. (2018). Risk Analysis. ICLS.
+[12] Carlson et al. (2020). Design risks framework. Design Studies 70.
+[13] Caruso & Wolfe (2004). Emotional intelligence and leadership development.
+[14] Chi et al. (1989). Self-Explanations. Cognitive Science 13(2).
+[15] Chiu et al. (2001). LiteMinutes. WWW '01.
+[16] Cockburn (2002). Agile Software Development. Addison-Wesley.
+[17] Collins, Brown & Holum (1991). Cognitive Apprenticeship. American Educator 6.
+[18] Collins, Brown & Newman (1989). Cognitive Apprenticeship.
+[19] Davidson, Deuser & Sternberg (1994). Metacognition in Problem Solving.
+[20] Dillenbourg & Tchounikine (2007). CSCL Macro-Scripts. JCAL 23(1).
+[21] Dunlap (2005). Problem-Based Learning. ETRD 53(1).
+[22] Dunning (2012). Self-insight. Psychology Press.
+[23] Dweck (2006). Mindset. Random House.
+[24] Dym et al. (2005). Engineering Design. JEE 94(1).
+[25] Easterday, Lewis & Gerber (2018). Design-Based Research. Learning: Research and Practice 4(2).
+[26] Edmondson (2012). Teaming. John Wiley & Sons.
+[27] Fischer et al. (2007). Scripting CSCL. Springer US.
+[28] Flavell (1979). Metacognition. American Psychologist 34(10).
+[29] Foster & Stefik (1986). Cognoter. CSCW '86.
+[30] Fournier-Viger et al. (2010). ITS for Ill-Defined Domains. Springer.
+[31] Frank & Barzilai (2004). Alternative Assessment in PBL. Assessment & Evaluation 29(1).
+[32] Garg, Gergle & Zhang (2022). Networked Orchestration. PACMHCI 6(CSCW).
+[33] Garg, Gergle & Zhang (2023). Orchestration Scripts. CHI 2023.
+[34] Georgakopoulos, Hornick & Sheth (1995). Workflow Management. DPD 3(2).
+[35] Gerber, Olson & Komarek (2012). Design-Based Learning. IJEE 28(2).
+[36] Grudin (1988). Why CSCW Applications Fail. CSCW '88.
+[37] Hacker et al. (2000). Test prediction. JEP 92(1).
+[38] Hacker, Dunlosky & Graesser (1998). Metacognition. Routledge.
+[39] Hmelo-Silver (2004). Problem-Based Learning. EPR 16(3).
+[40] Hmelo-Silver & Barrows (2006). PBL Facilitator. IJPBL 1(1).
+[41] Huang, Easterday & Gerber (2025). AI for Mentor-Novice Collaboration. PACMHCI 9(7).
+[42] Huang et al. (2023). Intelligent Coaching Systems. PACMHCI 7(CSCW1).
+[43] Hui, Gergle & Gerber (2018). IntroAssist. CHI 2018.
+[44] Järvelä & Hadwin (2024). Triggers for SRL. Learning and Individual Differences 115.
+[45] Järvelä & Hadwin (2013). Regulating Learning in CSCL. Educational Psychologist 48(1).
+[46] Järvenoja et al. (2018). Motivation and emotion regulation. Frontline Learning Research 6(3).
+[47] Jira (2023). https://www.atlassian.com/software/jira.
+[48] Jonassen & Hung (2008). All Problems Are Not Equal. IJPBL 2.
+[49] Jonassen (1997). Instructional Design Models. ETRD 45(1).
+[50] Jonassen (2000). Design Theory of Problem Solving. ETRD 48(4).
+[51] Kobbe et al. (2007). Computer-Supported Collaboration Scripts. IJCSCL 2(2).
+[52] Koedinger & Corbett (2006). Cognitive Tutors. Cambridge Handbook of Learning Sciences.
+[53] Lamnina, Connolly & Aleven (2018). The Invention Coach.
+[54] Lepper et al. (2013). Motivational Techniques. Routledge.
+[55] Li et al. (2024). Metacognition, Affect, and Behaviors. ICER '24.
+[56] Margaryan, Littlejohn & Milligan (2013). Self-Regulated Learning in the Workplace. IJTD 17(4).
+[57] Martin (2003). Agile software development. Prentice Hall PTR.
+[58] Mayer et al. (2001). Emotional intelligence. Emotion 1(3).
+[59] McCormick (2003). Metacognition and learning. Handbook of Psychology.
+[60] McDonald & Ackerman (2000). Expertise Recommender. CSCW 2000.
+[61] Medina-Mora et al. (1992). Action Workflow. CSCW '92.
+[62] Miller & Hadwin (2015). Scripting and Awareness Tools. Computers in Human Behavior 52.
+[63] Nelson-Le Gall (1981). Help-seeking. Developmental Review 1(3).
+[64] Pintrich (2004). Self-Regulated Learning in College Students. EPR 16(4).
+[65] Piolat, Olive & Kellogg (2005). Note Taking. Applied Cognitive Psychology 19(3).
+[66] Pribble et al. (2022). MindYoga. CHI EA '22.
+[67] Prince & Felder (2006). Inductive Teaching. JEE 95(2).
+[68] Puntambekar & Kolodner (2005). Distributed Scaffolding. JRST 42(2).
+[69] Rahman, Siangliulue & Marcus (2020). MixTAPE. PACMHCI 4(CSCW2).
+[70] Raikundalia (1998). Web Tool for Meeting Agendas. APCHI.
+[71] Rees Lewis et al. (2020). Logic of Effective Iteration. ICLS.
+[72] Rees Lewis, Easterday & Riesbeck (2024). Research Slices. EDeR 8(1).
+[73] Rees Lewis et al. (2019). PBL Educational Innovations. ETRD.
+[74] Rees Lewis et al. (2018). Planning to iterate. ICLS.
+[75] Rees Lewis et al. (2023). Engineering Design Teams. JEE 112(4).
+[76] Ryan, Pintrich & Midgley (2001). Avoiding Seeking Help. EPR 13(2).
+[77] Schoenfeld (1987). Metacognition. Cognitive science and mathematics education.
+[78] Schön (1987). Educating the reflective practitioner. Jossey-Bass.
+[79] Schümmer, Tellioglu & Haake (2009). Living Agendas. ECSCW.
+[80] Shah (2023). Agile Research Studios. PhD Dissertation, Northwestern University.
+[81] Simon (1973). Ill Structured Problems. Artificial Intelligence 4(3).
+[82] Sterman et al. (2023). Kaleidoscope. CHI '23.
+[83] Trello (2023). https://trello.com/.
+[84] Van der Aalst (2013). Business Process Management. ISRN.
+[85] Van Merriënboer & Kirschner (2017). Ten steps to complex learning. Routledge.
+[86] Vivacqua, Ferreira & de Souza (2010). AgendaBuilder. CSCWD.
+[87] Vohs & Baumeister (2016). Handbook of Self-Regulation. Guilford Publications.
+[88] Wang et al. (2024). Meeting Bridges. PACMHCI 8(CSCW1).
+[89] Weinberger et al. (2009). Computer-Supported Collaboration Scripts. Springer.
+[90] Winograd (1987). Language/Action Perspective. HCI 3(1).
+[91] Zhang et al. (2017). Agile Research Studios. CSCW '17.
+[92] Zimmerman (1989). Self-Regulated Learning and Academic Achievement. Springer.
+[93] Zimmerman (2002). Becoming a Self-Regulated Learner. Theory Into Practice 41(2).
+[94] Zimmerman (2008). Investigating Self-Regulation. AERJ 45(1).
+
+
+================================================================================
+FILE 2: SPS.pdf
+TITLE: Collaborative Research: Situated Practice Systems: Supporting Coaches and Students
+to Develop Regulation Skills for Design, Research, and STEM Innovation
+(NSF Grant Proposal)
+================================================================================
+
+1. VISION AND GOALS
+
+There is an urgent need to train more college students who can tackle complex, open-ended
+innovation work in design, research, STEM, and entrepreneurship. Classrooms rarely provide
+the practice of learning to innovate that is crucial for preparing students to design and implement
+innovative solutions to social and technical problems upon graduation [39]. Project-based
+learning environments that provide authentic practice offer a necessary [27, 30, 35, 70], but
+insufficient step toward helping students develop regulation skills, or cognitive, metacognitive,
+motivational, emotional, and strategic behaviors for reaching desired goals and outcomes [47,
+97]. While coaches already face the challenge of providing task-level feedback on complex
+problems (such as conducting a research study, designing a new product) for multiple students
+on multiple projects, it is far more challenging for coaches to teach the regulation skills necessary
+for innovation.
+
+This proposal aims to improve student learning to self-direct innovation work by advancing
+computational tools and techniques that support coaches and students in developing regulation
+skills.
+
+Students face many challenges learning the wide range of practices and regulation skills
+necessary for innovation problem solving (we refer to these collectively as regulation gaps).
+Students must learn to identify and articulate the regulation gaps underlying their problem
+solving, and coaches must elicit, model, and facilitate effective practices [76, 23, 7, 6, 74].
+Coaches must also track students' development of their regulation skills across weeks, teams,
+and projects [37], or risk leaving recurring issues unaddressed or under-addressed to slow
+progress and learning [77]. These problems are often magnified by the increasing number of
+teams a coach supports [45], each of whom requires feedback and practice suggestions that are
+tailored to their specific innovation project, work situation, and skill development needs.
+
+The proposed research will explore a new genre of intelligent mentoring tools, Situated Practice
+Systems (SPS), that support coaches and learners to better understand and create tailored
+opportunities to improve regulation skills. Specifically, this research will create and evaluate
+Situated Practice Systems for learning to innovate that: (a) computationally encode learners'
+regulation behavior to support coaches in and across coaching sessions; (b) use intelligent
+practice agents to provide learners with tailored reminders and feedback on regulation skills
+between coaching sessions; and (c) use LLMs, machine learning, and case libraries to provide
+tailored practice scaffolds. Our research team from Northwestern Computer Science, the Segal
+Design Institute, and the School of Education & Social Policy, and from the College of Business
+and Technology at Northeastern Illinois University, have expertise in learning technologies,
+project-based learning, self-directed learning, regulation skills and metacognition, human-AI
+systems, and advancing educational initiatives at scale.
+
+Intellectual Merit: This project will produce principles, methods, and computational tools for
+scaffolding the process of developing regulation skills needed for self-directing innovation work
+in design, research, and STEM. A core technical contribution is computationally representing
+learners' regulation practices to improve coaching and provide tailored practice and feedback
+between coaching sessions. Using this representation, we will advance how AI agents can
+facilitate learner practice and how AI models can improve and scale coaching. This work will
+contribute to a number of RITEL research areas including mentoring, self-regulation,
+project-based learning, scaffolding, metacognition, and self-directed learning. To broadly inform
+learning to innovate, we will evaluate SPS in three authentic project-based learning environments
+across five sites, including at a university entrepreneurship incubator and at a minority-serving
+institution. Beyond learning to innovate, our work will broadly inform the design and study of
+scaffolds and coaching for learning regulation skills by understanding behaviors and practices
+in context, understanding regulation gaps, and developing more effective strategies with coaches,
+peers, and intelligent agents.
+
+---
+
+2. BACKGROUND AND OUR APPROACH
+
+Learning to innovate requires students to become capable of self-directing complex work [13,
+85, 75, 77, 73, 72, 95]. When working on complex, ill-structured, innovation problems [50,
+11], students must employ a variety of strategies to assess the current state of their knowledge,
+choose where to focus effort, determine strategies for making progress, carry out plans, reflect
+on progress, and effectively engaging in help-seeking and collaboration as needed [47, 97].
+Students engaging in authentic innovation work must develop a wide range of regulation skills,
+including:
+
+• Cognitive skills for approaching problems with an unknown answer, or even, knowing what
+  the problem is exactly. This includes: representing problem and solution spaces [85, 14];
+  assessing risks [13]; critical thinking and argumentation; and core design, research, and STEM
+  methods such as prototyping; experiment design; and modeling, to advance their understanding
+  of problems and solutions.
+
+• Metacognitive skills and dispositions [41, 64], particularly in the areas of planning, help-seeking
+  and collaboration, and reflection [3, 28, 40]. This includes: forming feasible plans [75, 95, 18,
+  82]; planning effective iterations [77, 73]; leveraging resources and seeking help [51, 36, 68,
+  80]; communicating and working with teammates, peers, and mentors [47]; and awareness of
+  one's own skills, abilities, and metacognitive blockers [83, 10, 3, 28, 40].
+
+• Emotional regulation and dispositions toward self and learning that affect one's motivation,
+  cognition, and metacognition. Understanding one's fears and anxieties, and how one deals with
+  failure, is critical for effectively self-directing work [48, 59, 63, 15]. As is embracing
+  challenges and learning [32, 29], and embracing one's own independence, responsibility, and
+  self-direction [3, 58].
+
+College students who effectively regulate their learning are more likely to succeed in innovation
+work by: exploring problem and solution spaces effectively [14, 85]; engaging in design
+iterations that quickly advance understanding [77, 73]; and better planning for and responding
+to challenges and unknowns [75, 95]. However, students are often unaware of their own work
+practices and the value of regulating learning across cognitive, metacognitive, emotional, and
+strategic dimensions. Developing an effective practice for self-directing innovation work is
+challenging, and students cannot easily develop an effective practice on their own [21, 52, 24,
+34]. To become effective innovators, students need more experienced coaches who help resolve
+issues with products and processes, and more importantly, diagnose and address underlying
+regulation gaps that underpin behavior.
+
+[Illustrative example — same design capstone student narrative as in File 1, describing
+product-focused vs. process-focused vs. regulation-focused coaching perspectives]
+
+In summary, focusing on understanding and addressing regulation gaps can help students learn
+to innovate more effectively in ways that focusing on product or process alone cannot. However,
+uncovering regulation gaps is difficult, and addressing them typically involves a great deal of
+practice. Innovation coaches find it difficult to track and diagnose a student's persistent
+regulation gaps when their project work issues change from week to week. Coaches also have
+the difficult task of understanding and tracking the myriad of regulation behaviors across work
+issues and situations that arise in innovation work, across students and teams, and across
+projects. Coaches can struggle to recall a student's regulation gaps, and infer how they may be
+connected to a work situation the student is currently facing. As effective behaviors are difficult
+to build, students can often struggle to follow through on practices that coaches suggest over
+their default behaviors. As a consequence, even experienced coaches find it challenging to teach
+effective regulation skills. Yet we cannot advance learning to innovate without advancing the
+coaching of regulation skills.
+
+2.1 Research Overview
+
+Core Research Question: How might we develop technologies that scaffold the process of
+coaching and learning the regulation skills needed to effectively self-direct innovation work?
+
+Our prior research shows that regulation skills are absolutely essential for learning to innovate
+effectively [95, 14, 37, 75, 77, 85]. Coaches can help students develop these skills [22, 44,
+43], but coaching regulation skills requires uncovering students' regulation gaps, which is often
+challenging and time-intensive [45]. Regulation challenges cannot be immediately assessed
+simply by observing work products, but require delving into students' underlying practices and
+regulation behaviors in a particular situation [37]. Moreover, even when coaches introduce new
+problem solving and regulation strategies, it may be difficult for students to apply these
+strategies when the coach is not present, because to do so requires additional regulation skills.
+In practice, students often struggle to complete suggested practices without further scaffolding
+and support [77].
+
+To overcome these challenges, our core design innovation is Situated Practice Systems (SPS).
+SPS provides a suite of coaching and learning tools that help students develop the regulation
+skills needed to self-direct innovation work. Situated Practice Systems: (a) scaffold coaches
+understanding and modeling students' regulation behaviors in and across coaching sessions; (2)
+facilitate students' practice, co-regulation, and reflection between coaching sessions; and (3)
+leverage a practice case library collected across work issues and students/teams to provide
+tailored practice scaffolds.
+
+--- FIGURE 1 DESCRIPTION (SPS System Diagram) ---
+A workflow diagram showing three phases and their components:
+
+Phase 1 — "Understand & Model Practice":
+  Flow: Learner presents issue → Coach diagnoses → Coach writes up CAP notes
+  Supporting tools: CAP NOTES (show practice traces; retrieve & update); PRACTICE OBJECTS
+
+Phase 2 — "Facilitate and Develop Practice":
+  Flow: Learner practices w/ scaffolds → Learner works with peers and coaches → Learner
+  reflects on practice
+  Supporting tools: PRACTICE AGENTS (facilitate practice; facilitate co-regulation; facilitate
+  reflection); REPRESENTATION & SCAFFOLD LIBRARY (retrieve resources)
+  Handoff arrow from Practice Objects → Practice Agents
+
+Phase 3 — "Improve and Scale Coaching":
+  Flow: Learner finds helpful cases and peers → Coach reflects on difficult cases →
+  Coach reuses practice suggestions
+  Supporting tools: PEER CONNECTIONS; COACHING REFLECTIONS; PRACTICE SUGGESTIONS;
+  PRACTICE CASE LIBRARY (create case library; find similar cases; cluster cases; adapt cases
+  to new case); LLMs
+  Update arrow: Practice Objects → Practice Case Library (update with practice traces)
+--- END FIGURE 1 ---
+
+The core technical challenge is to overcome the current limitations of software to support the
+development of regulation skills. Despite advances in multimodal learning analytics [46] and
+AI, we cannot automate the process of understanding students' innovation work practices,
+diagnosing regulation gaps, and providing tailored practice opportunities. At the same time,
+there is a lack of intelligent mentoring tools to support coaching. Existing project-based learning
+and project management tools largely captures work tasks and artifacts [75, 87, 5, 49, 88] but
+do not encode one's way of working and regulation gaps. Even if a coach writes down a detailed
+model of a student's practice, there is no current way to represent it computationally so that
+software systems can continue to track and facilitate a student's practice, help with understanding
+recurring regulation gaps across work situations, or facilitate learning across weeks and across
+students. As a result, technology's role in improving the efficacy and scale of coaching and
+developing regulation skills has remained extremely limited.
+
+To overcome these challenges, our core technical contribution is making practices and regulation
+behaviors computational by providing computational abstractions, tools, and techniques for
+understanding, modeling, tracking, and facilitating students' practices and regulation over time.
+Having a computational representation of the student's practice and regulation helps coaches
+capture and track a model of a student's continually evolving regulation skills, and allows us to
+create software agents embedded into the learning ecosystem that can facilitate students' adoption
+and practice of the regulation-informed strategies that coaches suggest. Moreover, tracking
+practices across work issues and teams over time allows us to create a rich case library of
+student practices, which we will use to further improve and scale coaching and learning.
+
+Phase 1: Understand and Model Practice
+
+RQ1: How can we help coaches understand and model students' practices and regulation across
+innovation work contexts?
+
+Our research team's study of university engineering design coaches [74, 77], STEM research
+mentors [37], and entrepreneurship coaches [45] revealed that coaches struggle to: (a) elicit
+gaps in students' practice from work artifacts and conversation alone; (b) build a model of a
+student's practice to identify and address regulation gaps; and (c) track students' practice across
+coaching sessions. These practical challenges can significantly limit the effectiveness of
+coaching, and are often exacerbated by the number of students and teams experienced coaches
+manage [74]. Moreover, there remain few technological supports for helping coaches understand,
+model, and track student practices.
+
+To overcome these challenges, we will introduce Context-Assessment-Plan (CAP) Notes, a
+structured note-taking system for coaches to elicit, model, and suggest practices to students.
+Inspired by structures for clinician notes for documenting a patient's continuum of care in the
+medical context [91, 12], CAP Notes provides coaches structures that help them to capture the
+context of work issues, make assessments about regulation gaps, and form plans for building a
+more effective practice. Our solution seeks to (a) capture practice traces that connect work
+artifacts to the practices and regulation behaviors that students used to produce them; (b) provide
+loose structures for tracking signals of ineffective work practices; and (c) provide structured
+representations for modeling the links among work issues, (recurring) regulation gaps, and
+proposed practices.
+
+--- CAP NOTES INTERFACE (within SPS Section 3.1 figure) ---
+Shown for: Stella, Coaching Session, End of Sprint 2
+
+Issues of concern (B):
+- "prototype is missing a key feature"
+- "did not seek help on prototyping in pair research"
+
+Practice Trace (A):
+- latest prototype
+- design argument
+- practice reflections
+
+Stella's tracked regulation gaps (E):
+- not slicing work to risk to more quickly advance learning
+- has a tendency to "crank" than to apply better strategies when overwhelmed
+- not seeking help on key practice risks
+
+Context (C): what are you seeing and hearing?
+- Stella: "I am worried about getting the prototype working in time for testing"
+- Not prototyping to the design hypothesis
+- Spent a lot of time building backend features
+
+Assessment (D): what is happening?
+- Didn't use lo-fi prototyping techniques to deliver value more quickly
+- [gap] need strategies for slicing work to risk
+- [gap] has a tendency to crank than to consider better strategies when overwhelmed
+
+Plan (F): what do we do about it?
+- [work] build a lo-fi prototype that includes missing feature and test that this week
+- [plan] use planning-to-iterate to slice prototype to risk this week.
+- [reflect] what are some signs that you may be overwhelmed, and reacting to it by cranking?
+--- END CAP NOTES INTERFACE ---
+
+Technical Challenge and Proposed Solution: There are currently no solutions for computationally
+representing work practices and regulation behaviors so that they can be tracked, facilitated,
+and reflected upon across work situations, coaching sessions, and practice activities. Coaches
+sometimes keep written notes from coaching sessions, but tracking students' regulation skills
+development from unstructured notes is infeasible. To make practices computationally
+representable and trackable, we will create a Practice Objects abstraction that ties specific
+regulation behaviors to specific work issues that arise. As a coach captures a CAP note on a
+student, that student's practice object is extended to include their work issues, regulation gaps,
+and tailored practice suggestions, which can then be continually tracked, facilitated, reflected
+upon, and updated across coaching and learning activities, by students, coaches, and software
+agents.
+
+--- FIGURE 2 DESCRIPTION (Practice Objects) ---
+[Same structure as Figure 8 in File 1 — see that description above]
+Practice Object timeline: coaching meeting → CAP Notes → student practices and reflects →
+next coaching meeting.
+Columns: Work Issues | Regulation Gaps | Suggested Practices | Practice Traces
+Tracked Regulation Gaps sidebar: "slicing work to risk"; "cranking out work"
+--- END FIGURE 2 ---
+
+Phase 2: Facilitate and Develop Practice
+
+RQ2: How can we facilitate student practice of effective strategies to develop regulation skills
+across innovation work contexts?
+
+Our prior research [77, 37, 45] found that students often struggled to enact the strategies and
+practices that their coaches suggest. Students can misunderstand the nuances of a suggested
+practice or forget altogether, resulting in deliverables that differ greatly from their coach's
+expectation. We observed that students often need structured scaffolds or helpful co-regulation
+from a peer or coach to support their practice. While coaches often suggest such scaffolds (e.g.,
+use the design argument template) and co-regulation opportunities (e.g., a peer help session)
+in conversation, students often forgot about them or failed to use them in ways that targeted
+their particular regulation gaps. As a consequence, students often make some progress on their
+project but still fail to address key project risks that are tied to their particular regulation gaps
+that remain unaddressed.
+
+To address these challenges, we will: (a) create a representation and scaffold library that provide
+students with practice supports for working on common innovation work issues (e.g., refining
+design arguments [85]; conducting a risk assessment [14]; forming an effective iteration plan
+[77]); and (b) create practice agents that can facilitate a student's practice by taking a coach's
+practice suggestions to then automatically create practice summaries, promote practice and
+co-regulation, and support reflection at opportune moments throughout a student's practice. We
+will create a simple domain-specific language for coaches to share scaffolds and suggest
+co-regulation opportunities that can be automatically tracked and facilitated by practice agents.
+
+The representation and scaffold library will provide interactive scaffolds that support a student's
+regulation skills development. We will include a variety of scaffolds and template representations
+based on the latest research on learning to innovate, including but not limited to: (a) the design
+risk framework [13]; (b) design and research canvases for guiding thinking [85, 14]; (c) planning
+and design iteration scaffolds [75, 77, 73]; and (d) help-seeking scaffolds for scoping help tasks
+and identifying helpers [66]. During a coaching session, a coach can use CAP notes to attach a
+scaffold to a practice suggestion (such as a template for forming a design argument or study
+design; for devising help-seeking strategies; for replanning), and provide additional guidance
+on how the student should use the scaffold to target their particular regulation gaps. In addition
+to scaffolds for practicing new strategies, we will also create reflection scaffolds for students
+to reflect on how their practices went.
+
+--- FIGURE 3 DESCRIPTION (Practice Scripts — same as Figure 9 in File 1) ---
+Four-stage pipeline:
+A: Coach suggests [help] come to @OfficeHours with rep[synthesis tree]
+B: Practice Agent → Practice Compiler
+C: Practice Scripts generated (Summarize Practice; Promote co-regulation; Support Reflection)
+D: Execution Engine sends messages at appropriate times; Studio API integration
+--- END FIGURE 3 ---
+
+Practice agents will retrieve a coach's suggested practices from practice objects and automatically
+facilitate students practicing on their own, with helpful peers, and with additional support from
+coaches. For example, when a coach recommends in a CAP note that a student develop a
+synthesis tree and bring it to office hours for review, a practice agent will automatically send
+Slack messages at appropriate times to: (a) remind the student to practice with links to guides
+and examples for how to construct a synthesis tree; (b) remind the student to prepare for office
+hours; and (c) remind the student to upload their synthesis tree and reflect on their practice. To
+enable this, we will provide a simple domain-specific language for writing practice suggestions
+in CAP Notes so that they can be handled by a practice agent. Extending the PI's prior work
+on orchestration scripts [38]—which can encode learning situations and strategies
+computationally—we will create a practice compiler that interprets a coach's practice suggestions
+to generate practice scripts on-the-fly that (a) summarizes the practice and shares relevant
+scaffolds with students; (b) remind students of relevant practice and co-regulation opportunities;
+and (c) sends practice-specific reflection scaffolds to students before the next coaching session.
+Generated practice scripts will be tracked by an execution engine that engages students in
+practice, co-regulation, and reflection activities at opportune moments. To monitor for such
+moments and to facilitate co-regulation, the execution engine will have access to a Studio API
+[38] that contains a learning community's meeting schedule (e.g., a schedule of office hours,
+coaching meetings, and peer help sessions) and social relationships (e.g., project groups and
+leads). As a student's practice progresses, practice agents will automatically collect a student's
+work and reflection and incorporate them into the student's practice object for review at the
+next coaching session.
+
+Phase 3: Improve and Scale Coaching
+
+RQ3: How can we improve and scale coaching of regulation skills across innovation work
+contexts by leveraging a practice case library?
+
+To improve coaching, coaches need to have an awareness of their own effectiveness (or lack
+thereof). In practice, tracking the effectiveness of coaching for even a single team and a single
+regulation gap is challenging, let alone across student teams and gaps. The context of student
+work changes from week-to-week, and coaches can fail to recognize alternative practice
+strategies or regulation gaps that have been neglected. In addition, coaches quickly become
+overwhelmed as the number of student teams increases [74, 45]. Writing good practice
+suggestions takes time, and while there are often similarities in regulation gaps and suggested
+practices across work issues and student teams over time, coaching effort largely scales linearly
+with the number of student teams. Having students learn from peers could potentially scale
+coaching, but students often overly focus on surface differences across projects and fail to learn
+from other teams that are facing similar working issues and regulation gaps [45].
+
+We will address these challenges by leveraging a practice case library to enable new applications
+that improve and scale coaching. The practice case library will be made readily available through
+the practice objects that SPS tracks, and consists of work issues, regulation gaps, suggested
+practices, practice traces, and practice reflections, across student teams and time. Specifically,
+we will use this practice case library to advance three applications:
+
+(a) Peer Connections — connects students to peers who recently overcame similar work issues
+and regulation gaps.
+
+--- PEER CONNECTIONS DIAGRAM ---
+Shows two issues: "Issue: Not testing with actual users" and "Issue: Prototype test postponed"
+Student can "Review similar case" showing: Work Issue → Regulation Gaps → Suggested Practice
+→ Practice Traces → Practice Reflections
+Student can "Connect with peer" via message: "Hi Amy! I was inspired to see your reflections
+on how you overcame your fear of recruiting users to effectively test your prototype. Would you
+be willing to meet with me and share some tips?"
+--- END DIAGRAM ---
+
+Students will be able to review cases of other students who had worked through a similar work
+issue, by examining their regulation gaps, coach suggested practices, practice traces, and
+post-practice reflections. They will also be able to connect to such students directly to help
+further co-regulate their own practice. We hypothesize that peer connections can help to
+orchestrate learning of regulation skills across peers in a learning community, which we expect
+to be particularly helpful in learning environments in which the number of student teams makes
+weekly coaching difficult to orchestrate.
+
+To identify similar cases, we propose to use state-of-the art embedding-based approaches (e.g.,
+[60, 26]) and to use retrieval-based in-context learning to provide few-shot demonstrations
+to further improve performance [86].
+
+(b) Coaching Reflections — helps coaches analyze recurring work issues and regulation gaps
+that persist.
+
+--- COACHING REFLECTIONS DIAGRAM ---
+Shows an "unresolved work issue: not testing with actual users" connected to three regulation
+gaps:
+1. "regulation gap: not slicing to risk to deliver value quickly" (shown to coach)
+2. "regulation gap: fear of reaching out to actual users" (highlighted as alternative)
+3. "regulation gap: fear of failure (design not working)" (highlighted as alternative)
+The system surfaces alternative regulation gaps 2 and 3 that the coach had not yet considered.
+--- END DIAGRAM ---
+
+To support coaches understanding why a student or team continues to struggle with a work
+issue or regulation gap, we propose to identify cases of other students who have overcome a
+similar work issue (or regulation gap) so as to surface other regulation gaps (or practice
+strategies) that the coach considered in other cases but may have neglected to consider in this
+case. We will surface alternative regulation gaps and practice strategies by generating clusters
+of the different kinds of regulation gaps and types of coach-suggested practice strategies, using
+a hybrid approach: providing an LLM with a codebook [94, 96] of common regulation gaps
+and practice strategies in innovation domains; and applying a concept induction approach that
+uses LLMs to automatically identify interpretable, high-level concepts [57] across regulation
+gaps and practice strategies.
+
+(c) Practice Suggestions — helps coaches adapt practices from similar cases to a new case.
+
+--- PRACTICE SUGGESTIONS DIAGRAM ---
+Shows: "Similar existing cases" (each with Work Issue → Regulation Gap → Provided Practices)
+feeding into: "New case" (Work Issue → Regulation Gap → Tailored Practices)
+Arrow shows LLM-adapted practice suggestions flowing into the new case.
+--- END DIAGRAM ---
+
+Our pilot work surfaced two challenges when writing practice suggestions via CAP Notes: (a)
+writing detailed practice suggestions from scratch is labor-intensive; (b) coaches often missed
+some good practices that they had suggested to other students in a similar situation. Practice
+Suggestions will take a coach's diagnosis of a work issue and perceived regulation gap and
+automatically generate a set of practice suggestions based on similar past cases for the coach
+to reuse and adapt. To improve model performance, we will: (a) use a multi-level feedback
+framework [17] to critique model responses; (b) use a conditional delegation approach [56] to
+generate practice suggestions only in defined domains; and (c) provide a model of social
+relationships and people's expertise to the LLM.
+
+---
+
+3. SITUATED PRACTICE SYSTEMS (summary of design)
+
+Our initial design hypothesis argues for SPS to support developing regulation skills for
+innovation work across three phases: (a) understand and model practice (support coaching);
+(b) facilitate and develop practice (support students); and (c) improve and scale coaching (build
+a practice case library for peer connections, coaching reflections, and practice suggestions).
+
+[Sections 3.1 and 3.2 contain detailed descriptions of CAP Notes and Practice Agents covered
+in the preceding sections above.]
+
+---
+
+4. RESEARCH PLAN
+
+4.1 Research and Development Approach
+
+We will take a design-based research (DBR) approach to produce empirically- and
+theoretically-grounded design principles for coaching and learning technologies that support the
+development of regulation skills for innovation work. DBR [9, 20, 69, 31] requires iterative
+cycles of defining design arguments (hypotheses), implementing the design argument, collecting
+data, evaluating the design, and refining designs. As part of our DBR research process, we will
+conduct formative studies that focus on rapid evaluations to provide early evidence about
+potential design failures, and conduct summative studies focused on understanding SPS's
+longitudinal impacts on regulation skills development across learning to innovate contexts.
+
+We will use agile research methodologies [95] to rapidly iterate on our system design by
+identifying high priority research stories, constructing design arguments, implementing and
+releasing software, and user testing on fixed intervals.
+
+4.2 Populations and Settings
+
+We will study how SPS impacts students and coaches in authentic learning environments for
+learning to innovate at the university level that emphasize developing students' regulation skills;
+and involve more students than would be typical of the setting, thus presenting additional
+challenges for scaling coaching and facilitating practice. We have chosen three learning contexts
+across five sites:
+
+1. Design Innovation Studios with 50+ students: HCI Studio at Northwestern (PI Zhang is
+   the course coordinator) and at Northeastern Illinois University (NEIU; senior personnel
+   Shah is the instructor). A new model scaling a design studio from 20 to 50+ students.
+
+2. Long-running Agile Research Studios with 20-50 students: DTR program at Northwestern
+   (up to 20 mostly undergraduate students, 10-12 projects) and HCI Lab at Santa Clara
+   (led by Professor Kai Lukoff; 42 students across 5 teams).
+
+3. A university entrepreneurship incubator with 35+ teams: The Garage at Northwestern
+   (summer Jumpstart program: 12 teams, 12 volunteer mentors + 2 staff; year-round Residency:
+   38 teams, 35 volunteer mentors + 2 staff).
+
+4.3 Formative Evaluation
+
+Formative evaluation activities include:
+
+• Coaching studies: Analyze CAP notes and interview coaches to evaluate whether affordances
+  and practice traces are helping coaches diagnose regulation gaps and provide regulation-informed
+  practice suggestions. Areas of regulation gap assessment: risk assessment [13]; effective iteration
+  planning [77]; co-regulation and help-seeking [36]; emotion regulation [48]; embracing
+  self-directed learning [3].
+
+• Practice studies: Assess how practice agents help students to practice effectively with scaffolds,
+  peers, and coaches. Analyze practice traces and interview students for: (a) practices
+  attempted/completed; (b) use of scaffolds and representations; (c) use of co-regulation
+  opportunities.
+
+• Improve and scale coaching studies: Measure effectiveness of LLM-based techniques for
+  finding/clustering/adapting cases. Measure degree to which LLM outputs match coaches'
+  assessments. Formal user studies using log data, video recordings, and interviews to assess
+  Peer Connections, Coaching Reflections, and Practice Suggestions.
+
+4.4 Summative Evaluation
+
+Yearly summative evaluations measuring longitudinal impacts on student regulation skill
+development. Recruit students and coaches across sites for a quarter (10 weeks). Pre- and
+post-assessments including: risk assessment [13]; effective iteration planning [77]; co-regulation
+and help-seeking [36]; emotion regulation [48]; embracing self-directed learning [3]. Interviews
+before, during, and after the learning and coaching experience.
+
+4.5 Iterative Data Analysis
+
+• Synthesis of data from observations, interviews, and analytics
+• Refinement of synthesized models (SPS learning ecology; software scaffolds)
+• Theming (grounded theory) to extrapolate learning and design themes
+• Refinement of design arguments at quarterly intervals
+
+4.6 Pilot Work
+
+• Pilot 1: Learning communities established (HCI Studios reach 200+ students yearly; ARS
+  spread to 70+ faculty worldwide; The Garage served 3,000+ students since 2015).
+
+• Pilot 2: Needs analysis — (a) 47 PBL instructor interviews [74]; (b) 8 field observations
+  and 23 in-depth interviews over 20 weeks in ARS [37]; (c) interaction analysis on 24 coaching
+  sessions in a university incubator [45].
+
+• Pilot 3: Design curricula and scaffolds — risk assessment framework [13]; planning-to-iterate
+  framework [75, 77, 73]; project canvases [85, 14]; agile methodologies [72, 95].
+
+• Pilot 4: Early needfinding for CAP Notes — observation of coaching sessions to identify
+  challenges in eliciting, modeling, and facilitating practice.
+
+• Pilot 5: CAP Notes Prototype 1 — working prototype with practice traces, issues of concern,
+  tracked regulation gaps, work reflections. Formative test with 7 student researchers and 2
+  faculty mentors showed early evidence that CAP Notes helped coaches understand regulation
+  gaps, suggest practices to students, and helped students enact suggested practices (manuscript
+  under review).
+
+---
+
+5. BROADER IMPACTS
+
+This project will create intelligent mentoring tools that help coaches and students develop more
+effective practices, skills, and mindsets for leading innovation work. Foreseeable impacts include
+increased numbers and diversity of students who have the regulation skills needed to succeed
+in design, research, STEM, and entrepreneurship. Technologies will be deployed in a variety
+of learning contexts, including at NEIU, a minority-serving institution.
+
+Dissemination efforts:
+1. Conferences (CHI, CSCL, ISLS) and journals (Learning Science, Human Computer Interaction)
+2. Agile Research University (70+ faculty research mentors); HCI Researchers Slack (700+
+   instructors); Segal Design Institute (100+ design educators); Garage alumni (3000+ innovators,
+   500+ coaches)
+3. Hybrid workshop with innovation coaches in Year 2
+4. Interactive website with practice traces, reflections, coaching, and activities from studies
+5. Online platform making entire SPS platform available for others to adopt and extend
+
+---
+
+6. PRIOR NSF SUPPORT
+
+Haoqi Zhang: EXP: Agile Research Studios (IIS-1623635, $549,944, 09/1/2016-8/31/2021).
+Outcomes: Model description and evaluations at ACM CSCW [95]; documentary film [81]; papers
+on networked orchestration at ACM CHI and CSCW [37, 38]. Broader Impacts: DTR program
+trained 160+ students; ARS disseminated to 70+ faculty; online platform for Pair Research.
+Trained 13 students (2 PhD, 1 masters, 10 undergrad), including 9 female and 3 URM.
+
+Matt Easterday: CHS: Small: Computer-Supported Collective Deliberation for the Future of Work
+(IIS-2008450, $499,891, 11/14/2019-9/30/2025). Outcomes: 3 published papers, 2 submitted,
+7 in progress; deployed digital assembly. Broader impacts: DeliberationWorks platform used
+for city-level participatory budgeting in US with 8.6% voting rate; used by Northwestern for
+interdisciplinary educational initiatives.
+
+---
+
+REFERENCES: [97 references listed; key ones include Zimmerman (2002) on self-regulated
+learning; Järvelä & Hadwin (2013) on CSCL regulation; Zhang et al. (2017) on Agile Research
+Studios; Rees Lewis et al. on design coaching; Huang et al. (2023) on intelligent coaching
+systems; Garg et al. (2022, 2023) on networked orchestration and orchestration scripts]
+
+
+================================================================================
+FILE 3: URG_-_Supporting_CAP_Notes_with_Large_Language_Models.pdf
+TITLE: Supporting CAP Note-Writing with Large Language Models
+(Undergraduate Research Grant Proposal)
+Principal Investigator: Dr. Haoqi Zhang
+Student Researcher: Diego Perez-Aguilar
+IRB ID: STU00224277
+================================================================================
+
+INTRODUCTION:
+
+Students tackling complex, open-ended innovation work upon graduation need to develop a wide
+range of self-regulation skills—cognitive, metacognitive, emotional and strategic behavior—to
+develop effective problem-solving but lack awareness of their work practices and gaps in such
+self-regulation [1]-[5]. Coaches assist students in developing effective work practices by
+targeting self-regulation gaps which lead to ineffective work practices [2]. Situated Practice
+Systems (SPS) computationally support coaches and students in understanding, modeling and
+facilitating such regulation-informed practice. Despite the help of SPS, coaches still face
+cognitive challenges and time constraints in connecting a student's current work issues to
+recurring work patterns, and ensuring coverage of those patterns in formulating useful plans for
+students. These practical struggles make it difficult to scale SPS across contexts.
+
+BACKGROUND:
+
+Current implementations of SPS provide an Interactive CAP (Context-Assessment-Plan) Notes
+interface to help coaches gather context on a student's work progress, assess work patterns,
+diagnose self-regulation gaps and personalize project-aligned practice scaffolds to foster
+self-regulation skills and effective project progress [6]. Despite these successes, practical
+challenges remain. Producing quality CAP notes requires intense cognitive-effort and are
+time-consuming to write, especially for coaches who support multiple teams [7]. CAP notes
+burdens coaches with the challenge of linking students' previously tracked regulation gaps and
+work issues to new or emerging issues and require detailed personalization of plans to help
+students gain awareness over their patterns of ineffective work practices so they can self-direct
+regulation-informed practice. As a result, CAP notes lose consistency in quality, connections
+are missed between current issues and previous ones, plans fail to account for recurring
+assessments, and are impractical to write in cases where coaches support multiple student teams.
+
+To address these issues, this study proposes to support coaches in writing CAP notes by
+exploring the capacity Large Language Models (LLMs) have in automating components of
+CAP's framework that are cognitively-taxing and time-consuming.
+
+Research Question: How can large language models help coaches draft CAP notes more
+efficiently without weakening the quality of the feedback given to students?
+
+METHODOLOGY:
+
+Setting: The Design, Technology & Research (DTR) program led by PI Zhang, enrolling
+approximately 20 mostly undergraduate students across 10 project teams during Winter and
+Spring 2026. Students participate in weekly 50-minute meetings with groups of projects in the
+same area of research and a coach who directs the meeting trajectory.
+
+Approach: Design-based research process with iterative refinement of hypotheses about how
+LLMs can optimize the CAP note-taking process.
+
+Initial Hypothesis: LLMs will successfully automate the Context and Assessment components
+of CAP notes, but will fail to meet standards of diagnostic reasoning required for initiating
+Plans and for connecting students' current inefficient work practices to past patterns of
+inefficiency and underlying regulation gaps.
+
+Data Collection:
+- With consent from PI Zhang and students, an observatory role will be taken with audio-recorded
+  selected meetings
+- Recordings will be anonymized and transcribed using Otter.ai
+- Transcripts will be manually annotated to identify specific instances of CAP components,
+  coaching techniques, regulation gaps and patterns of ineffective work practices
+
+Codebook Development:
+Using annotated transcripts, archived CAP notes written by the coach, and documentation of
+common regulation gaps within DTR, an analytical codebook will be developed defining:
+- Structural components of CAP notes and coaching process
+- Recurring regulation gaps
+- Patterns of ineffective work practices
+- Characteristics of high quality regulation-focused notes
+
+Conditions:
+- Condition A: Coach writes CAP notes independently
+- Condition B: Coach receives an LLM-generated draft and edits it into a final version
+
+Measures:
+- Time to completion
+- Perceived cognitive effort (Likert scale + feedback form after note writing)
+- Context coverage: whether the note captures major contextual elements discussed during meeting
+- Accuracy of regulation-gap identification: alignment between transcript-supported gaps and
+  those reflected in the note
+- Plan alignment: whether proposed plans directly address identified gaps and connect to recurring
+  patterns when relevant
+
+Evaluation of LLM Drafts:
+LLM drafts, coach-written notes, and coach-edited drafts will be compared to determine whether
+the LLM preserves structural completeness and diagnostic integrity. If LLM drafts consistently
+omit key contextual elements, misidentify regulation gaps, or require substantial rewriting to
+produce actionable plans, this will indicate limitations in its ability to support those CAP
+components.
+
+Iterative Refinement:
+The LLM will be introduced early so coaches can provide formative feedback on draft usefulness,
+structural alignment, and diagnostic weaknesses. After each round:
+1. Analyze structural and diagnostic gaps in the drafts
+2. Incorporate coach feedback into revised prompt instructions
+3. Compare subsequent drafts to assess improvements
+
+Success Criteria:
+The LLM will be considered effective if it reduces time and cognitive effort while maintaining
+comparable context coverage and diagnostic accuracy relative to independently written notes.
+
+Design Principle:
+The system will be designed to augment, not replace, human diagnostic judgement.
+
+---
+
+REFERENCES:
+[1] Järvelä & Hadwin (2013). New frontiers: Regulating learning in CSCL. Educational
+    Psychologist, 48(1), 25–39.
+[2] Zimmerman (2002). Becoming a self-regulated learner. Theory Into Practice, 41(2), 64–70.
+[3] Zimmerman (2008). Investigating self-regulation and motivation. AERJ, 45(1), 166–183.
+[4] Davidson, Deuser & Sternberg (1994). The role of metacognition in problem solving. MIT Press.
+[5] Flavell (1979). Metacognition and cognitive monitoring. American Psychologist, 34(10), 906–911.
+[6] Garg, Gergle & Zhang. Situated practice systems. Manuscript under review.
+[7] Huang, Lewis, Gaudani, Easterday & Gerber (2023). Intelligent coaching systems. PACMHCI,
+    7(CSCW1), 138:1–138:24.
+[8] Dunlap (2005). Problem-based learning and self-efficacy. ETRD, 53(1), 65–83.
+[9] Dym, Agogino, Eris, Frey & Leifer (2005). Engineering design thinking. JEE, 94(1), 103–120.
+
+---
+
+APPENDIX A: PARTICIPANT CONSENT FORM
+
+Study Title: Supporting CAP Note-Writing with Large Language Models
+Principal Investigator: Dr. Haoqi Zhang
+Student Researcher: Diego Perez-Aguilar
+IRB ID: STU00224277
+
+Purpose of the Study:
+You are invited to participate in a research study examining how coaching practices are
+documented and how Large Language Models (LLMs) may support coaches in drafting CAP
+(Context–Assessment–Plan) notes in project-based learning environments.
+
+What Participation Involves:
+- Your SIG meetings may be audio-recorded.
+- Recordings may be transcribed and analyzed for research purposes.
+- Anonymized excerpts may be used to evaluate LLM-generated draft CAP notes.
+Participation does not change normal course activities or evaluation.
+
+Risks and Benefits:
+This study involves minimal risk. There may be no direct benefit to you, but the research may
+contribute to improved coaching tools and practices in educational settings.
+
+Confidentiality:
+All data will be anonymized. Your name and identifying information will not appear in
+publications or shared materials. Data will be securely stored and accessed only by the research
+team.
+
+Voluntary Participation:
+Your participation is voluntary. You may withdraw at any time without penalty or impact on
+your academic standing.
+
+Consent:
+By signing below, you indicate that you understand the study and agree to participate.
+
+Participant Name: _______________________
+Signature: _____________________________
+Date: _________________________________
+
+---
+
+APPENDIX B: IRB EXEMPTION STATUS AND DATA USE OVERVIEW
+
+This study operates under an existing Northwestern University Institutional Review Board (IRB)
+Exempt determination (IRB ID: STU00224277, Determination Date: June 13, 2025). The
+approved study falls under Exempt Category (1) (research conducted in established educational
+settings) and Exempt Category (2)(ii) (tests, surveys, interviews, or observation of behavior
+involving minimal risk).
+
+The present research activities align with the scope of the approved protocol titled "Situated
+Practice Systems: Supporting Coaches and Students to Develop Regulation Skills for Design,
+Research, and STEM Innovation" and do not introduce additional procedures, risks, or
+participant populations beyond those covered by the exemption.
+
+With instructor and student consent, selected Special Interest Group (SIG) meetings will be
+audio-recorded for research purposes. Recordings will be transcribed and anonymized, with all
+personally identifiable information removed prior to analysis or use in any LLM prompting.
+Data will be used solely to study coaching practices and to evaluate LLM-generated draft CAP
+notes as research artifacts.
+
+LLM-generated CAP notes will not replace coach-authored notes and will not be shared with
+students without coach review and approval. All data will be stored securely and accessed only
+by the research team.
+
+---
+
+APPENDIX C: CAP NOTE EVALUATION CODEBOOK
+
+This codebook is used to evaluate the quality of CAP notes written by coaches and generated
+by LLMs.
+
+Context Coverage:
+The extent to which the CAP note captures major contextual elements discussed during the
+meeting (e.g., project status, constraints, deliverables, risks, decisions).
+
+Assessment Accuracy:
+The degree to which identified regulation gaps or ineffective work patterns align with evidence
+from the meeting transcript and the coach's intended diagnosis.
+
+Plan Alignment:
+Whether proposed plans directly address identified regulation gaps and reflect recurring patterns
+when applicable, rather than offering generic or disconnected advice.
+
+Structural Completeness:
+Whether all CAP components (Context, Assessment, Plan) are present and meaningfully
+populated.
+
+---
+
+APPENDIX D: COACH FEEDBACK FORM
+
+Meeting Session with: [Project Name]
+Condition: A (Coach-written) / B (LLM-assisted)
+
+1. Time spent writing/editing CAP notes (minutes): ___
+2. Mental effort required (1 = very low, 5 = very high): 1  2  3  4  5
+3. Context coverage felt: Low / Medium / High
+4. Accuracy of regulation-gap identification: Low / Medium / High
+5. Alignment between assessment and plan: Low / Medium / High
+6. What did the note miss or misrepresent?
+7. What was most helpful about the note or draft?
+
+---
+
+APPENDIX E: BUDGET JUSTIFICATION (Total: $1,000)
+
+1. Large Language Model (LLM) API Usage — $600
+   Funds will support usage of commercial LLM APIs to generate draft CAP notes, run iterative
+   prompt refinements, and evaluate multiple versions of LLM-generated outputs across study
+   conditions. Costs account for token usage during transcript processing, draft generation, and
+   iterative testing throughout the study period.
+
+2. Transcription Services (Otter.ai Subscription) — $180
+   Funds will support an Otter.ai subscription to transcribe audio recordings of SIG meetings.
+   Transcriptions are required for manual annotation, codebook development, and as structured
+   input for LLM prompting.
+
+3. Secure Data Storage and Processing Tools — $120
+   Funds will support cloud-based storage and basic data processing tools to securely store
+   anonymized transcripts, CAP notes, and evaluation artifacts.
+
+4. Software and Research Tools — $100
+   Funds will support miscellaneous research tools, including document annotation software,
+   qualitative analysis tools, or version control utilities required for iterative analysis and
+   prompt refinement.
+
+Total Requested: $1,000
+
+================================================================================
+END OF COMBINED DOCUMENT
+================================================================================
