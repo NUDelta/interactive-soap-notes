@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Head from 'next/head';
 import mongoose, { set } from 'mongoose';
 import { mutate } from 'swr';
-import type { AIDraftIssue, AIDraftOutput } from '../api/ai-draft/[id]';
+import type { AIDraftIssue, AIDraftOutput, GapSuggestion } from '../api/ai-draft/[id]';
 
 // helper components
 import { Tooltip } from 'flowbite-react';
@@ -26,6 +26,7 @@ import { fetchCAPNoteById } from '../../controllers/capNotes/fetchCAPNotes';
 import { fetchIssueObjectsByIds } from '../../controllers/issueObjects/fetchIssueObject';
 import { fetchProjectGapObjectsByIds } from '../../controllers/practiceGapObjects/fetchPracticeGapObject';
 import { createNewTextEntryBlock } from '../../controllers/textEntryBlock/createNewTextEntryBlock';
+import { createNewIssueObject } from '../../controllers/issueObjects/createIssueObject';
 
 // components
 import LastWeekIssueCard from '../../components/LastWeekIssueCard';
@@ -102,12 +103,13 @@ export default function CAPNote({
   const [audioPlaybackUrl, setAudioPlaybackUrl] = useState<string | null>(null);
 
   // AI draft assistant state
-  const [showAIDraft, setShowAIDraft] = useState(false);
+  const [showAIDraft, setShowAIDraft] = useState(true);
   const [coachReflections, setCoachReflections] = useState('');
   const [aiDraft, setAiDraft] = useState<AIDraftOutput | null>(null);
   const [aiDraftVersion, setAiDraftVersion] = useState<number | null>(null);
   const [aiDraftTotalVersions, setAiDraftTotalVersions] = useState(0);
   const [aiDraftVersions, setAiDraftVersions] = useState<any[]>([]);
+  const [pendingGapSuggestions, setPendingGapSuggestions] = useState<GapSuggestion[]>([]);
   const [expandedDraftIds, setExpandedDraftIds] = useState<Set<string>>(new Set());
   const [isGeneratingDraft, setIsGeneratingDraft] = useState(false);
   const [draftError, setDraftError] = useState<string | null>(null);
@@ -210,7 +212,7 @@ export default function CAPNote({
       .then((data) => {
         if (data.success && data.data?.length > 0) {
           const latest = data.data[0];
-          setAiDraft({ issues: latest.issues });
+          setAiDraft({ issues: latest.issues, gapSuggestions: latest.gapSuggestions ?? [] });
           setAiDraftVersion(latest.version);
           setAiDraftTotalVersions(data.data.length);
           setAiDraftVersions(data.data);
@@ -221,7 +223,7 @@ export default function CAPNote({
           );
           if (hasCompletedTranscript && !autoGenTriggered.current) {
             autoGenTriggered.current = true;
-            generateDraft(true);
+            generateDraft();
           }
         }
       })
@@ -231,7 +233,37 @@ export default function CAPNote({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [noteInfo.id]);
 
-  const generateDraft = async (isAutoTriggered = false) => {
+  const applyDraftToNotes = (draft: AIDraftOutput, aiGeneratedTitles: Set<string>) => {
+    const toBlocks = (lines: string[]) =>
+      lines.map((v) => ({ id: new mongoose.Types.ObjectId().toString(), ...createNewTextEntryBlock('note', [], v, v) }));
+
+    setCurrentIssuesData((prevIssues) => {
+      // Drop all previously AI-generated issues — replaced entirely by the current draft.
+      // Keep only coach-written issues (titles that never appeared in any AI draft version).
+      const coachOnlyIssues = prevIssues.filter(
+        (issue: any) => !aiGeneratedTitles.has(issue.title?.trim().toLowerCase())
+      );
+
+      const draftIssues = draft.issues.map((aiIssue) => {
+        const newIssue = createNewIssueObject(
+          aiIssue.title,
+          noteInfo.project,
+          noteInfo.sigName,
+          new Date(noteInfo.sigDate).toISOString(),
+          [],
+          true
+        );
+        if (aiIssue.context.length) newIssue.context = toBlocks(aiIssue.context);
+        if (aiIssue.assessment.length) newIssue.assessment = toBlocks(aiIssue.assessment);
+        if (aiIssue.plan.length) newIssue.plan = toBlocks(aiIssue.plan);
+        return newIssue;
+      });
+
+      return [...draftIssues, ...coachOnlyIssues];
+    });
+  };
+
+  const generateDraft = async () => {
     setIsGeneratingDraft(true);
     setDraftError(null);
     setShowEvidence({});
@@ -239,11 +271,10 @@ export default function CAPNote({
       const res = await fetch(`/api/ai-draft/${noteInfo.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ allPeople, autoTriggered: isAutoTriggered })
+        body: JSON.stringify({ allPeople })
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
-        if (data.error === 'REFLECTIONS_REQUIRED' || data.error === 'REFLECTIONS_SETTLING') return;
         throw new Error(data.error ?? 'Failed to generate draft');
       }
       setAiDraft(data.data);
@@ -254,6 +285,7 @@ export default function CAPNote({
         ...prev
       ]);
       setFollowUpInput('');
+      setPendingGapSuggestions(data.data.gapSuggestions ?? []);
     } catch (err) {
       setDraftError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -272,7 +304,7 @@ export default function CAPNote({
       !autoGenTriggered.current
     ) {
       autoGenTriggered.current = true;
-      generateDraft(true);
+      generateDraft();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meetingTranscripts, aiDraftVersions.length, isGeneratingDraft]);
@@ -710,35 +742,31 @@ export default function CAPNote({
               <></>
             )}
           </div>
-          <button
-            onClick={() => setShowRightPanel((v) => !v)}
-            className="ml-auto flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
-            title={showRightPanel ? 'Hide AI panel' : 'Show AI panel'}
-          >
-            {showRightPanel ? 'Hide Panel ›' : '‹ Show Panel'}
-          </button>
+          <div className="ml-auto flex items-center gap-1 rounded border border-slate-200 bg-white p-0.5">
+            <button
+              onClick={() => setShowRightPanel(true)}
+              className={`rounded px-3 py-1 text-xs font-medium transition-colors ${showRightPanel ? 'bg-violet-600 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              AI Draft
+              {aiDraft && !isGeneratingDraft && <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-green-400" />}
+              {isGeneratingDraft && <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-yellow-400 animate-pulse" />}
+            </button>
+            <button
+              onClick={() => setShowRightPanel(false)}
+              className={`rounded px-3 py-1 text-xs font-medium transition-colors ${!showRightPanel ? 'bg-slate-700 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+            >
+              Edit Notes
+            </button>
+          </div>
         </div>
 
         {/* Body — main content left, AI side panel right */}
         <div className="mt-2 flex flex-row-reverse flex-1 min-h-0 overflow-hidden gap-2">
 
-        {/* Right side panel — collapsible, VSCode-style */}
+        {/* AI Draft tab — full width */}
         {showRightPanel && (
-        <div
-          className="relative flex flex-shrink-0 flex-col border-l border-slate-200"
-          style={{ width: panelWidth }}
-        >
-          {/* drag handle */}
-          <div
-            className="absolute bottom-0 left-0 top-0 z-10 w-1 cursor-col-resize hover:bg-blue-400 transition-colors"
-            onMouseDown={(e) => {
-              isDraggingPanel.current = true;
-              dragStartX.current = e.clientX;
-              dragStartWidth.current = panelWidth;
-              e.preventDefault();
-            }}
-          />
-          <div className="flex flex-1 flex-col overflow-y-auto pl-3">
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <div className="flex flex-1 flex-col overflow-y-auto">
 
         {/* Meeting Recording — collapsible */}
         <div className="rounded border border-slate-300 bg-slate-50">
@@ -1041,7 +1069,7 @@ export default function CAPNote({
               <button
                 className="rounded-full bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-50"
                 disabled={isGeneratingDraft || !meetingTranscripts.some((t: any) => t.status === 'completed' && t.formattedText)}
-                onClick={() => generateDraft(false)}
+                onClick={() => generateDraft()}
               >
                 {isGeneratingDraft ? 'Generating...' : aiDraft ? 'Regenerate Draft' : 'Generate Draft'}
               </button>
@@ -1062,20 +1090,58 @@ export default function CAPNote({
                         </span>
                       )}
                     </h3>
-                    <button
-                      className="text-xs text-slate-400 underline hover:text-slate-600"
-                      onClick={() => {
-                        const text = aiDraft.issues.map((issue, i) => {
-                          const ctx = issue.context.map(c => `- ${c}`).join('\n');
-                          const asmnt = issue.assessment.map(a => `- ${a}`).join('\n');
-                          const plan = issue.plan.join('\n');
-                          return `Issue ${i + 1}: ${issue.title}\n\nContext:\n${ctx}\n\nAssessment:\n${asmnt}\n\nPlan:\n${plan}`;
-                        }).join('\n\n---\n\n');
-                        navigator.clipboard.writeText(text);
-                      }}
-                    >
-                      Copy all
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        className="text-xs text-slate-400 underline hover:text-slate-600"
+                        onClick={() => {
+                          const text = aiDraft.issues.map((issue, i) => {
+                            const ctx = issue.context.map(c => `- ${c}`).join('\n');
+                            const asmnt = issue.assessment.map(a => `- ${a}`).join('\n');
+                            const plan = issue.plan.join('\n');
+                            return `Issue ${i + 1}: ${issue.title}\n\nContext:\n${ctx}\n\nAssessment:\n${asmnt}\n\nPlan:\n${plan}`;
+                          }).join('\n\n---\n\n');
+                          navigator.clipboard.writeText(text);
+                        }}
+                      >
+                        Copy all
+                      </button>
+                      <button
+                        className="rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white hover:bg-green-700"
+                        onClick={async () => {
+                          if (!confirm('Finalize these notes? This draft will be transferred into the note fields under the "Edit Notes" tab. Students will receive prescribed plans an hour after the last save.')) return;
+
+                          // Every title ever generated by AI across all draft versions
+                          const aiGeneratedTitles = new Set<string>(
+                            aiDraftVersions.flatMap((v: any) =>
+                              (v.issues ?? []).map((i: any) => i.title?.trim().toLowerCase())
+                            )
+                          );
+
+                          // Delete all existing AI-generated issues from the DB
+                          const toDelete = currentIssuesData
+                            .filter((issue: any) =>
+                              aiGeneratedTitles.has(issue.title?.trim().toLowerCase()) && issue.id
+                            )
+                            .map((issue: any) => issue.id);
+
+                          if (toDelete.length > 0) {
+                            await fetch('/api/issues', {
+                              method: 'DELETE',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ ids: toDelete })
+                            });
+                          }
+
+                          applyDraftToNotes(aiDraft, aiGeneratedTitles);
+
+                          // Update Slack message to Closed (fire-and-forget)
+                          fetch(`/api/ai-draft/${noteInfo.id}`, { method: 'PATCH' })
+                            .catch((err) => console.error('Failed to mark draft finalized:', err));
+                        }}
+                      >
+                        Finalize
+                      </button>
+                    </div>
                   </div>
 
                   {aiDraft.issues.map((issue: AIDraftIssue, i: number) => (
@@ -1378,8 +1444,8 @@ export default function CAPNote({
         </div>
         )}
 
-        {/* Left main content */}
-        <div className="flex flex-1 flex-col overflow-hidden min-h-0">
+        {/* Edit Notes tab — full width */}
+        <div className={`flex flex-1 flex-col overflow-hidden min-h-0 ${showRightPanel ? 'hidden' : ''}`}>
         <DndProvider backend={HTML5Backend}>
           {/* Past issues and tracked practices pinned above note space */}
           <div className="w-full flex-shrink-0">
